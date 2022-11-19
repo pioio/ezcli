@@ -15,7 +15,7 @@ tasks:
     aliases:
       - pc
     cmds:
-      - black ezcli/*.py setup.py
+      - black src/taskcli/*.py setup.py
 
   build:
     desc: build package
