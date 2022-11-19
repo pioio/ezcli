@@ -1,2 +1,2 @@
 # ezcli
-Easy to use CLI library for python
+Easy to use CLI library for Python.

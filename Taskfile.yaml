@@ -1,0 +1,17 @@
+version: 3
+
+tasks:
+  default: task --list
+  init-venv:
+    desc: Initialize virtual environment
+    cmds:
+      - python3.11 -m venv venv
+      - source venv/bin/activate && pip install -r requirements.txt
+
+
+  pre-commit:
+    desc: Run pre-commit
+    aliases:
+      - pc
+    cmds:
+      - black ezcli/*.py
