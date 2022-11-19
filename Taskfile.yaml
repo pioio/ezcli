@@ -22,7 +22,12 @@ tasks:
     cmds:
       - source venv/bin/activate && python -m build
 
-  upload-test:
+  upload-prod:
     desc: Upload to PyPI
     cmds:
-      - source venv/bin/activate && python -m twine upload --repository testpypi dist/ezcli-*
+      - source venv/bin/activate && python -m twine upload dist/taskcli-*
+
+  upload-test:
+    desc: Upload to Test PyPI
+    cmds:
+      - source venv/bin/activate && python -m twine upload --repository testpypi dist/taskcli-*
