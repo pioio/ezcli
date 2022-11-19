@@ -6,7 +6,7 @@ tasks:
     desc: Initialize virtual environment
     cmds:
       - python3.11 -m venv venv
-      - source venv/bin/activate && pip install --upgrade setuptools wheel
+      - source venv/bin/activate && pip install --upgrade setuptools wheel build twine
       - source venv/bin/activate && pip install -r requirements.txt
 
 
@@ -16,3 +16,13 @@ tasks:
       - pc
     cmds:
       - black ezcli/*.py setup.py
+
+  build:
+    desc: build package
+    cmds:
+      - source venv/bin/activate && python -m build
+
+  upload-test:
+    desc: Upload to PyPI
+    cmds:
+      - source venv/bin/activate && python -m twine upload --repository testpypi dist/ezcli-*
