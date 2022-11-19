@@ -1,2 +1,2 @@
-# ezcli
-Easy to use CLI library for Python.
+# Taskcli
+A CLI library for creating comprehensive command line interfaces from function signatures.
