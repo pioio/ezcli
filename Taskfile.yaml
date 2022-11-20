@@ -1,6 +1,9 @@
 # Taskfile
 version: 3
 
+
+vars:
+  ARGS_FOR_EXAMPLES: "-v"
 tasks:
   default: task --list
   init-venv:
@@ -15,7 +18,7 @@ tasks:
     aliases:
       - pc
     cmds:
-      - black src/taskcli/*.py test/*.py
+      - black src/taskcli/*.py test/*.py examples/*.py
       - task: test
 
   build:
@@ -29,6 +32,10 @@ tasks:
     cmds:
       - source venv/bin/activate && python -m unittest discover
 
+  example1:
+    aliases: [e]
+    cmds:
+      - ./examples/example1.py {{.ARGS_FOR_EXAMPLES}}
 
   upload-prod:
     desc: Upload to PyPI

@@ -1,11 +1,17 @@
+import logging
+
+
+log = logging.getLogger(__name__)
+
+
 def task(func):
     def wrapper():
-        print("Before decorator")
+        log.debug("Before task decorator")
         func()
-        print("After decorator")
+        log.debug("After decorator")
 
     return wrapper
 
 
 def somefunction():
-    print("This is some function")
+    log.info("core - some function")
