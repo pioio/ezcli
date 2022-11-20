@@ -15,6 +15,11 @@ The library is aimed for small to medium projects.
 It will never compete with flexibility of argparse or click.
 It is, however, extremely easy to get started with.
 
+## Installation
+
+```
+pip install taskcli
+```
 
 ## Example usage:
 ### Code
@@ -42,6 +47,11 @@ def add_numbers(a: int=2, b: int=2):
 
 cli()
 ```
+### Run it
+    ./example.py -h
+    or
+    ./example.py -hh  # for more detailed help
+
 ### Resulting CLI interface
 ```
 print-message        Print a simple message "-n|--num" number of times.
@@ -59,6 +69,9 @@ add-numbers          Adds two numbers
     a: first number
     b: second number
 ```
+
+### Run the task
+```./example.py add-numbers -a 2 -b 3``
 
 ## Core features:
 - Minimal dependencies.
