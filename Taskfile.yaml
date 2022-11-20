@@ -10,18 +10,25 @@ tasks:
       - source venv/bin/activate && pip install --upgrade setuptools wheel build twine
       - source venv/bin/activate && pip install -r requirements.txt
 
-
   pre-commit:
     desc: Run pre-commit
     aliases:
       - pc
     cmds:
-      - black src/taskcli/*.py setup.py
+      - black src/taskcli/*.py test/*.py
+      - task: test
 
   build:
     desc: build package
     cmds:
       - source venv/bin/activate && python -m build
+
+  test:
+    desc: Run tests
+    aliases: [t]
+    cmds:
+      - source venv/bin/activate && python -m unittest discover
+
 
   upload-prod:
     desc: Upload to PyPI

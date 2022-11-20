@@ -1,7 +1,9 @@
 #!/usr/bin/env python
-import ezcli
+from taskcli import task, cli
 
+@task
 def simple_function():
     print("This is a simple function")
 
-ezcli.cli()
+simple_function()
+cli()
