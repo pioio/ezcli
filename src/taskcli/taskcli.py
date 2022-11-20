@@ -154,7 +154,7 @@ def format_argument_line(flavor):
 
         single_arg_val += f"{arg.get_as_cli_flag()}"
         if arg.default:
-            single_arg_val += f"={arg.default}"
+            single_arg_val += f" {arg.default}"
 
 
         arg_value_strings.append(single_arg_val)
