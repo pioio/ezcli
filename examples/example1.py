@@ -31,4 +31,6 @@ def My_task(foobar):
 #   pip install taskcli
 #   ./examples/example1.py hello_world -n 3
 
-cli()
+if __name__ == "__main__":
+    cli()
+

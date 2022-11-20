@@ -25,5 +25,5 @@ def foobar(arg1: int, arg2: bool, arg3: str, arg4: list[int]):
     print("arg3: ", arg3)
     print("arg4: ", arg4)
 
-
-tc.cli()
+if __name__ == "__main__":
+    tc.cli()

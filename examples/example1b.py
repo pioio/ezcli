@@ -21,5 +21,5 @@ def add_numbers(a: int = 2, b: int = 2):
     """
     print(a + b)
 
-
-cli()
+if __name__ == "__main__":
+    cli()
