@@ -23,7 +23,7 @@ def get_function_defaults(fspecs) -> list:
 
 
 decorated_functions = []
-#tasks = []
+# tasks = []
 
 # def task(func):
 #     tasks.append(func)
@@ -34,12 +34,12 @@ decorated_functions = []
 
 #     return wrapper
 extra_flavors = {}
+extra_aliases = {}
 
 # multi level decorator
 def flavor(*args, **kwargs):
     def inner(func):
         extra_flavors[func.__name__] = (args, kwargs)
-        log.debug(f"Flavor decorator: {(args,kwargs)}")
 
         def wrapper():
             # log.debug("Before flavor decorator")
@@ -51,15 +51,13 @@ def flavor(*args, **kwargs):
 
 
 def task(*args, **kwargs):
-    log.debug("Task decorator1")
-
     def inner(func):
         global decorated_functions
         decorated_functions.append(func)
-        log.debug(f"Task decorator2: {(args,kwargs)}")
         if "flavors" in kwargs:
             extra_flavors[func.__name__] = kwargs["flavors"]
-        log.debug("")
+        if "aliases" in kwargs:
+            extra_aliases[func.__name__] = kwargs["aliases"]
 
         def wrapper():
             # log.debug("Before task decorator")
@@ -78,6 +76,7 @@ class Argument:
     def __init__(self, name, type, default=None, is_default=True):
         self.name = name
         self.type = type
+        self.value = None
         self.default = default
         self.is_default = is_default
 
@@ -92,7 +91,8 @@ class Argument:
 class Flavor:
     def __init__(self, name, arguments):
         self.name = name
-        self.arguments:list[Argument] = arguments
+        self.arguments: list[Argument] = arguments
+
 
 def get_argument_list(fspec):
     default_argument_values: list = get_function_defaults(fspec)
@@ -116,6 +116,7 @@ def get_argument_list(fspec):
         argument = Argument(name=name, type=type, default=default, is_default=True)
         out.append(argument)
     return out
+
 
 class Task:
     def __init__(self, func):
@@ -143,20 +144,26 @@ class Task:
 
         # Overlay extra flavors on top of default args
         # TODO: highlight differences in arguments with color
-        print(extra_flavors)
+        # print(extra_flavors)
         for fun_name, eflav in extra_flavors.items():
             if fun_name != self.name:
                 continue
-            name, custom_arguments  = eflav
+            name, custom_arguments = eflav
 
             arguments_for_flav = get_argument_list(fspec)
             for arg in arguments_for_flav:
                 if arg.name in custom_arguments:
                     arg.default = custom_arguments[arg.name]
-                    #assert arg.type == type(arg.default), f"Type mismatch for argument {arg.name} in flavor {name}"
+                    # assert arg.type == type(arg.default), f"Type mismatch for argument {arg.name} in flavor {name}"
                     arg.is_default = False  # mark as customized
 
             flavor = Flavor(name, arguments_for_flav)
             self.flavors[name] = flavor
 
+    def get_kwargs(self, flavor_name):
+        assert flavor_name in self.flavors, f"Flavor {flavor_name} not found"
 
+        out = {}
+        for arg in self.flavors[flavor_name].arguments:
+            out[arg.name] = arg.default
+        return out
