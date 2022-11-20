@@ -85,11 +85,19 @@ def format_argument_line(flavor, flavors):
 
         single_arg_val += f"{arg.get_as_cli_flag()}"
         if arg.default:
-            single_arg_val += f" {arg.default}"
+            default_value = f" {arg.default}"
             if arg.type == str: # escape it double quotes
                 # TODO: escaping should be done better
-                single_arg_val = arg.default.replace('"', "\\\"")
-                single_arg_val = f'"{single_arg_val}"'
+                default_value = arg.default.replace('"', "\\\"")
+
+            single_arg_val += f' "{default_value}"'
+        else:
+            if arg.type == int:
+                single_arg_val += " INT"
+            elif arg.type == str:
+                single_arg_val += " STR"
+            elif arg.type == float:
+                single_arg_val += " FLOAT"
 
         arg_value_strings.append(single_arg_val)
         all_args += color + format.format(text=single_arg_val) + bcolors.ENDC

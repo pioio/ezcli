@@ -1,16 +1,6 @@
 #!/usr/bin/env python
 
-# This is the most basic example.
-# setting up logging is optional.
-import logging
-
-log = logging.getLogger(__name__)
-import common
-
-common.setup_logging()
-
-# Example starts here
-from taskcli import task, cli, flavor
+from taskcli import task, cli
 
 @task()
 def hello_world(num: int, message="Hello, World!"):
