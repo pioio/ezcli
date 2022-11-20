@@ -43,7 +43,22 @@ def add_numbers(a: int=2, b: int=2):
 cli()
 ```
 ### Resulting CLI interface
+```
+print-message        Print a simple message "-n|--num" number of times.
+         -n|--num
+        [-m|--message]       Default: Hello, World!
 
+
+    num: the number of times to print the messsage, mandatory (can also use '-n).
+    message: The message to print, optional, can also be redifined with '-m'.
+
+add-numbers          Adds two numbers
+        [-a]                 Default: 2
+        [-b]                 Default: 2
+
+    a: first number
+    b: second number
+```
 
 ## Core features:
 - Minimal dependencies.
