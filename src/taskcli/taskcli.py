@@ -39,76 +39,6 @@ def get_function_defaults(fspecs) -> list:
 import inspect
 
 
-def format_argument_line(col1, col2):
-    col1 = col1 + ":"
-    return f"    {col1:<16}    {col2}"
-
-
-def describe_task(func, full_docstring=False) -> list[str]:
-    name = func.__name__
-    """ decorator for describing tasks """
-    # func = getattr(userconfig, name.replace("-", "_"))
-    # log.debug("describe_task: ", func)
-    fspec = inspect.getfullargspec(func)
-
-    line1 = "* " + bcolors.OKGREEN + name.replace("_", "-") + bcolors.ENDC + " \t"
-    docstring = inspect.getdoc(func)
-    if docstring:
-        first_doc_line = docstring.splitlines()[0]
-        line1 += bcolors.UNDERLINE + first_doc_line + bcolors.ENDC
-
-    config = func.__dict__.get("config", {})
-    if "aliases" in config:
-        line1 += f" (aliases: {', '.join(config['aliases'])})"
-
-    line2 = ""
-    all_arg_lines = []
-    defaults = get_function_defaults(fspec)
-    arg_string = ""
-
-    column_width = 20
-
-    if fspec.args:
-        arg_string = ""
-
-    default_arguments_str = []
-    for i, arg in enumerate(fspec.args):
-        if len(arg) == 1:
-            arg_string += f"-{arg}"
-        else:
-            arg_string += f"--{arg.replace('_', '-')}"
-
-        if defaults[i] is not None:
-            arg_string += f"=" + str(defaults[i]) + ""
-    if arg_string:
-        arg_string = format_argument_line("defaults", arg_string)
-        all_arg_lines.append(arg_string)
-    # flavors
-    flavor_lines = []
-    for task_name, flavor in flavors.items():
-        print(task_name, flavor)
-        if task_name == name:
-            name, args = flavor
-            flavor_lines.append(format_argument_line(name, args))
-    all_arg_lines.extend(flavor_lines)
-
-    lines_of_args = []
-    if all_arg_lines:
-        # line2 += " ".join(args)
-        for arg_line in all_arg_lines:
-            lines_of_args.append(arg_line)
-
-    out = [line1]
-    out.extend(lines_of_args)
-
-    # arg_lines =
-    # if line2:
-    #     out.append(line2)
-    if docstring and full_docstring:
-        docstring_lines = docstring.splitlines()
-        docstring_lines = ["    " + line for line in docstring_lines]
-        out.extend(docstring_lines)
-    return out
 
 
 def get_usage_line1(task):
@@ -121,15 +51,15 @@ def get_usage_line1(task):
 
 
     out = out.format(
-        color_task_name=bcolors.OKGREEN,
+        color_task_name=bcolors.OKGREEN ,
         task_name=task.name,
-        color_description=bcolors.UNDERLINE,
+        color_description=bcolors.OKGREEN,
         task_description=task.description_short,
     )
     return out
 
 
-def format_argument_line(flavor):
+def format_argument_line(flavor, flavors):
     # TODO: dynamically determine column width for each argument (will require considering all rows)
     args_str = "{value:<20}"
 
@@ -162,19 +92,19 @@ def format_argument_line(flavor):
 
 
     name = flavor.name
-    if name == "default":
-        name = "(default)"
 
-    out = "    {name:<20} {args}".format(name=name, args=all_args)
+    longest_flavor_name = max(len(x.name) for x in flavors)
+    size = str(longest_flavor_name)
+    out = ("    {name:<" + size + "} {args}").format(name=name, args=all_args)
     return out
 
 def get_usage_argument_lines(task):
     if not task.arguments:
-        return ["TASK HAS NO ARGUMENTS"]
+        return []
     out = []
 
     for flavor_name, flavor in task.flavors.items():
-        out.append(format_argument_line(flavor))
+        out.append("    " + task.name + " " + format_argument_line(flavor, task.flavors.values()))
     return out
 
 
