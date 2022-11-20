@@ -122,6 +122,7 @@ class Task:
     def __init__(self, func):
         self.func = func
         self.name = func.__name__
+        self.name_hyphenated = self.name.replace("_", "-")
         self.aliases = []
 
         self.description_short = ""
@@ -165,5 +166,5 @@ class Task:
 
         out = {}
         for arg in self.flavors[flavor_name].arguments:
-            out[arg.name] = arg.default
+            out[arg.name] = arg.value
         return out

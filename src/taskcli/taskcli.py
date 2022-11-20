@@ -52,7 +52,7 @@ def get_usage_line1(task):
 
     out = out.format(
         color_task_name=bcolors.OKGREEN,
-        task_name=task.name,
+        task_name=task.name_hyphenated,
         color_description=bcolors.OKGREEN,
         task_description=task.description_short,
     )
@@ -61,9 +61,10 @@ def get_usage_line1(task):
 
 offset_for_help = 20
 
+
 def format_argument_line(flavor, flavors):
     # TODO: dynamically determine column width for each argument (will require considering all rows)
-    args_str = "{value:<" + str(offset_for_help) +"}"
+    args_str = "{value:<" + str(offset_for_help) + "}"
 
     arg_value_strings = []
     all_args = ""
@@ -85,6 +86,10 @@ def format_argument_line(flavor, flavors):
         single_arg_val += f"{arg.get_as_cli_flag()}"
         if arg.default:
             single_arg_val += f" {arg.default}"
+            if arg.type == str: # escape it double quotes
+                # TODO: escaping should be done better
+                single_arg_val = arg.default.replace('"', "\\\"")
+                single_arg_val = f'"{single_arg_val}"'
 
         arg_value_strings.append(single_arg_val)
         all_args += color + format.format(text=single_arg_val) + bcolors.ENDC
@@ -111,6 +116,7 @@ def get_usage_argument_lines(task):
         )
     return out
 
+
 def get_usage_docstring(task):
     docstring = inspect.getdoc(task.func)
     if not docstring:
@@ -126,6 +132,7 @@ def print_usage(tasks, help_level):
     for line in lines:
         print(line)
     pass
+
 
 def get_usage(tasks, help_level):
 
@@ -161,8 +168,7 @@ def cli():
 
     task_to_run = None
     try:
-
-        p = argparse.ArgumentParser(add_help=False, usage="\n"+get_usage(tasks, 0))
+        p = argparse.ArgumentParser(add_help=False, usage="\n" + get_usage(tasks, 0))
 
         remaining_args = sys.argv[1:]
         if len(remaining_args) == 0:
@@ -170,15 +176,19 @@ def cli():
             return
 
         # First, parse the default arguments
-        p.add_argument("-v", "--verbose", action='count', default=0)
-        p.add_argument("-h", "--help", action='count', default=0)
-        p.add_argument("task_name", help="Task to run",)
-        p.add_argument("flavor_name", help="Flavor to run", nargs="?", default="default")
+        p.add_argument("-v", "--verbose", action="count", default=0)
+        p.add_argument("-h", "--help", action="count", default=0)
+        p.add_argument(
+            "task_name",
+            help="Task to run",
+        )
+        p.add_argument(
+            "flavor_name", help="Flavor to run", nargs="?", default="default"
+        )
         conf, _ = p.parse_known_args(remaining_args)
 
-
         if conf.help:
-            #p.print_help()
+            # p.print_help()
             print_usage(tasks, conf.help)
             if conf.help == 1:
                 print("(for more detailed help use -hh)")
@@ -188,34 +198,31 @@ def cli():
 
         conf, _ = p.parse_known_args(remaining_args)
         log.debug(f"parsed task_name: {conf.task_name}")
-        #conf, remaining_arg = parse_arguments(p, remaining_args)
+        # conf, remaining_arg = parse_arguments(p, remaining_args)
         task_name = conf.task_name
-        task_names = [x.name for x in tasks]
+        task_names = [x.name_hyphenated for x in tasks]
 
         # Validate task exists
         if task_name not in task_names:
             p.print_help()
             print(f"Error: Task '{task_name}' not found.")
-            print("Available tasks: " + ", ".join(task_names) )
+            print("Available tasks: " + ", ".join(task_names))
             sys.exit(1)
 
         # find task to run
         task_to_run = None
         for task in tasks:
-            if task.name == conf.task_name:
+            if task.name_hyphenated == conf.task_name:
                 task_to_run = task
                 break
         assert task_to_run is not None, "task_to_run should not be None"
-
         # validate flavor
         flavor_names = task_to_run.flavors.keys()
         if conf.flavor_name and conf.flavor_name not in flavor_names:
             p.print_help()
             print(f"Error: Task flavor '{conf.flavor_name}' not found.")
-            print("Available flavors: " + ", ".join(flavor_names) )
+            print("Available flavors: " + ", ".join(flavor_names))
             sys.exit(1)
-
-
 
         assert task_to_run
 
@@ -225,7 +232,9 @@ def cli():
         for arg in task_to_run.arguments:
             short_flag = None
             long_flag = arg.get_as_cli_flag()
-            if len(long_flag) >= 3: # is indeed long (a one-letter argument would return )
+            if (
+                len(long_flag) >= 3
+            ):  # is indeed long (a one-letter argument would return )
                 first_letter = long_flag[2]
                 first_letter_upper = first_letter.upper()
                 if first_letter not in short_flags_used:
@@ -241,20 +250,22 @@ def cli():
                 p.add_argument(
                     arg.get_as_cli_flag(),
                     default=arg.default,
-                    required=arg.default is None)
+                    required=arg.default is None,
+                )
             else:
                 p.add_argument(
                     arg.get_as_cli_flag(),
                     short_flag,
                     default=arg.default,
-                    required=arg.default is None)
+                    required=arg.default is None,
+                )
 
         # Parse again, this time for the task-specific arguments
         log.debug("last parse")
         try:
             conf = p.parse_args(sys.argv[1:])
         except SystemExit as e:
-            #print_usage(tasks, conf.help)
+            # print_usage(tasks, conf.help)
             sys.exit(0)
         log.debug("Done last parse")
 
@@ -265,6 +276,13 @@ def cli():
             for arg2 in task_to_run.arguments:
                 if arg2.name == arg:
                     arg2.value = value
+
+                    # casting to type
+                    if arg2.type == int:
+                        arg2.value = int(value)
+                    if arg2.type == bool:
+                        arg2.value = bool(value)
+
                     break
 
     except argparse.ArgumentError as e:
@@ -278,20 +296,16 @@ def cli():
 
     log.debug(f"Tasks: {tasks}")
 
-    task = None
-    for task in tasks:
-        if task.name == task_name:
-            task = task
-            break
-
-    run_task(task, conf)
+    run_task(task_to_run, conf)
 
 
 def run_task(task, conf):
-    log.debug("-------------- Running task -----------------")
+    log.debug(f"-------------- Running task {task.name_hyphenated}  -----------------")
     kwargs = task.get_kwargs(conf.flavor_name)
     log.debug("args:" + str(kwargs))
     task.func(**kwargs)
+    log.debug("Finished running task")
+
 
 def parse_arguments(parser, remaining_args):
     log.debug("Parsing arguments")
