@@ -24,20 +24,21 @@ from taskcli import task, cli
 
 @task()
 def print_message(num: int, message="Hello, World!"):
-    """This is my description
-    num: number of times to print a messsage, mandatory
-    message: message to print, optional
+    """Print a simple message "-n|--num" number of times.
+
+    num: the number of times to print the messsage, mandatory (can also use '-n).
+    message: The message to print, optional, can also be redifined with '-m'.
     """
     for x in range(num):
         print(message)
 
 @task()
-def add_numbers(number_a: int, number_b: int):
-    """This task adds two numbers.
-    number_a: first number
-    number_b: second number
+def add_numbers(a: int=2, b: int=2):
+    """Adds two numbers
+    a: first number
+    b: second number
     """
-    print(number_a + number_b)
+    print(a + b)
 
 cli()
 ```

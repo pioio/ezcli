@@ -25,6 +25,7 @@ def get_usage(tasks, help_level) -> str:
     for task in tasks:
         docstring = help_level > 1
         lines.extend(get_usage_for_task(task, docstring))
+        lines.append("")
     return "\n".join(lines)
 
 

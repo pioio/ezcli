@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 from taskcli import task, cli
 
+
 @task()
 def print_message(num: int, message="Hello, World!"):
     """Print a simple message "-n|--num" number of times.
@@ -11,12 +12,14 @@ def print_message(num: int, message="Hello, World!"):
     for x in range(num):
         print(message)
 
+
 @task()
-def add_numbers(a: int=2, b: int=2):
+def add_numbers(a: int = 2, b: int = 2):
     """Adds two numbers
     a: first number
     b: second number
     """
-    print(number_a + number_b)
+    print(a + b)
+
 
 cli()
