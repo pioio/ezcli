@@ -11,5 +11,5 @@ def setup_logging():
 
     logging.basicConfig(
         level=level,
-        format="%(asctime)s %(levelname)7s: %(message)s  [%(funcName)s, %(filename)s:%(lineno)d]",
+        format="%(asctime)s %(levelname)7s: %(message)-50s     [%(filename)s:%(lineno)d]",
     )

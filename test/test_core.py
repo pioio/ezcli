@@ -3,12 +3,14 @@ import taskcli.core
 import unittest
 from unittest import TestCase
 
-#from taskcli.core import Task
+# from taskcli.core import Task
 from taskcli import Task
+
+
 class TestTaskcli(TestCase):
     def test_construction_simple(self):
-
-        def fun():pass
+        def fun():
+            pass
 
         task = Task(fun)
         self.assertEqual(task.name, "fun")
@@ -16,7 +18,8 @@ class TestTaskcli(TestCase):
         self.assertEqual(task.arguments, [])
 
     def test_construction_simple_with_args(self):
-        def fun(arg1, arg2 = "foobar", arg3:int = 42, arg4=False):pass
+        def fun(arg1, arg2="foobar", arg3: int = 42, arg4=False):
+            pass
 
         task = Task(fun)
         self.assertEqual(task.name, "fun")
@@ -47,4 +50,3 @@ class TestTaskcli(TestCase):
 class TestCore(TestCase):
     def test_basic_case(self):
         self.assertEqual(1, 1)
-
