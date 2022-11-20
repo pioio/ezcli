@@ -71,7 +71,7 @@ add-numbers          Adds two numbers
 ```
 
 ### Run the task
-```./example.py add-numbers -a 2 -b 3``
+```./example.py add-numbers -a 2 -b 3```
 
 ## Core features:
 - Minimal dependencies.
