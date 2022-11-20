@@ -82,7 +82,6 @@ class Argument:
         self.short_cli_flag = short_cli_flag
         self.long_cli_flag = None
 
-
         if len(name) > 1:
             self.long_cli_flag = "--" + self.name.replace("_", "-")
         else:
@@ -192,7 +191,9 @@ class Task:
                 else:
                     # Try to use first lowecase letter,
                     # if that's taken, try uppercase version of it
-                    first_letter = arg.name[0].lower()  # lower here should not be needed (params should be lowercase anyway), but just in case
+                    first_letter = arg.name[
+                        0
+                    ].lower()  # lower here should not be needed (params should be lowercase anyway), but just in case
                     first_letter_upper = first_letter.upper()
                     if first_letter not in short_flags_used:
                         short_flags_used.append(first_letter)
@@ -201,4 +202,3 @@ class Task:
                         short_flags_used.append(first_letter_upper)
                         short_flag = "-" + first_letter_upper
                 arg.short_cli_flag = short_flag
-

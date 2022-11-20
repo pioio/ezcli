@@ -11,8 +11,9 @@ import common
 
 common.setup_logging()
 
+
 @tc.task()
-def foobar(arg1:int, arg2:bool, arg3:str, arg4:list[int]):
+def foobar(arg1: int, arg2: bool, arg3: str, arg4: list[int]):
     """An example task
     arg1: this is an integer argument
     arg2: this is a boolean argument
@@ -23,5 +24,6 @@ def foobar(arg1:int, arg2:bool, arg3:str, arg4:list[int]):
     print("arg2: ", arg2)
     print("arg3: ", arg3)
     print("arg4: ", arg4)
+
 
 tc.cli()

@@ -7,10 +7,11 @@ from taskcli.usage import (
     get_line_for_argument,
     get_flags_for_argument,
     get_usage_for_task,
-    get_line_task_name
-    )
+    get_line_task_name,
+)
 
-from taskcli.core import (Argument, Task)
+from taskcli.core import Argument, Task
+
 
 class TestTaskcli(TestCase):
     def test_arg_line(self):
@@ -40,11 +41,11 @@ class TestTaskcli(TestCase):
         self.assertEqual(flags, "-x|--foobar")
 
     def test_get_line_task_name(self):
-
-        def foobar(x:int):
-            """ My docstring
+        def foobar(x: int):
+            """My docstring
             Line 2 of docstring"""
             pass
+
         task = Task(foobar)
         line = get_line_task_name(task)
         self.assertEqual(line, "foobar               My docstring")
@@ -52,9 +53,8 @@ class TestTaskcli(TestCase):
 
 class TestUsageTask(TestCase):
     def test_basic_case(self):
-
         def foobar():
-            """ My docstring """
+            """My docstring"""
             pass
 
         task = Task(foobar)

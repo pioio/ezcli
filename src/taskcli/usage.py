@@ -1,7 +1,8 @@
 # Funtions for printing usage information
 
 
-from .core import (Task, Flavor, Argument)
+from .core import Task, Flavor, Argument
+
 
 class bcolors:
     HEADER = "\033[95m"
@@ -13,6 +14,8 @@ class bcolors:
     ENDC = "\033[0m"
     BOLD = "\033[1m"
     UNDERLINE = "\033[4m"
+
+
 # TODO: remove colors from taskcli
 # TODO: add color support
 
@@ -20,15 +23,15 @@ indent_level_1 = 4
 indent_level_2 = 8
 
 
-
 def get_usage_for_tasks(tasks: list[Task], **kwargs) -> list[str]:
-    lines:list[str] = []
+    lines: list[str] = []
     for task in tasks:
         lines.extend(get_usage_for_task(task, **kwargs))
     return lines
 
+
 def get_usage_arguments(task: Task) -> list[str]:
-    lines:list[str] = []
+    lines: list[str] = []
     for arg in task.arguments:
         line = f"{arg.name}"
         if arg.default is not None:
@@ -37,6 +40,7 @@ def get_usage_arguments(task: Task) -> list[str]:
             line += f":{arg.type}"
         lines.append(line)
     return lines
+
 
 def get_flags_for_argument(arg) -> str:
     long = arg.long_cli_flag
@@ -50,7 +54,9 @@ def get_flags_for_argument(arg) -> str:
     elif short:
         return short
     else:
-        raise Exception("Argument has neither long nor short flag, this should never happen")
+        raise Exception(
+            "Argument has neither long nor short flag, this should never happen"
+        )
 
 
 def get_line_for_argument(arg) -> str:
@@ -63,7 +69,9 @@ def get_line_for_argument(arg) -> str:
         rbracket = " "
 
     flags = get_flags_for_argument(arg)
-    arg_flags = arg_flags_format.format(lbracket=lbracket, flags=flags, rbracket=rbracket)
+    arg_flags = arg_flags_format.format(
+        lbracket=lbracket, flags=flags, rbracket=rbracket
+    )
 
     arg_line_format = "{arg_flags:<20} {text}"
 
@@ -75,11 +83,16 @@ def get_line_for_argument(arg) -> str:
 
     return arg_line
 
-def get_line_for_flavor(flavor:Flavor) -> str:
+
+def get_line_for_flavor(flavor: Flavor) -> str:
     return flavor.name
 
+
 def get_line_task_name(task: Task) -> str:
-    return "{name:<20} {desc}".format(name=task.name_hyphenated, desc=task.description_short)
+    return "{name:<20} {desc}".format(
+        name=task.name_hyphenated, desc=task.description_short
+    )
+
 
 def get_usage_for_task(task: Task, print_doctring=False) -> list[str]:
     """Return a string containing usage information for the given task"""
@@ -103,6 +116,5 @@ def get_usage_for_task(task: Task, print_doctring=False) -> list[str]:
 
         if print_doctring:
             lines.extend(task.description_long.splitlines())
-
 
     return lines

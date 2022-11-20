@@ -2,6 +2,7 @@
 
 from taskcli import task, cli
 
+
 @task()
 def hello_world(num: int, message="Hello, World!"):
     """This task prints "Hello, World!" message -n/--num times.
@@ -19,10 +20,12 @@ def hello_world(num: int, message="Hello, World!"):
     for x in range(num):
         print(message)
 
+
 @task()
 def other_task():
     """This task does nothing."""
     pass
+
 
 # to run the example:
 #   pip install taskcli

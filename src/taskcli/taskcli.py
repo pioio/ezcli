@@ -5,6 +5,7 @@ from typing import Required
 from .core import decorated_functions
 from .core import extra_flavors
 from .usage import get_usage_for_task
+
 # from .core import tasks
 from .core import Task
 import logging
@@ -30,9 +31,7 @@ def get_function_defaults(fspecs) -> list:
 import inspect
 
 
-
 offset_for_help = 20
-
 
 
 def print_usage(tasks, help_level):
