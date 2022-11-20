@@ -114,7 +114,10 @@ def get_usage_for_task(task: Task, print_doctring=False) -> list[str]:
 
         lines.append("")
 
+
         if print_doctring:
-            lines.extend(task.description_long.splitlines())
+            docstring_lines = task.description_long
+            docstring_lines = [ " " * indent_level_1 + line for line in docstring_lines ]
+            lines.extend(docstring_lines)
 
     return lines

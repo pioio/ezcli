@@ -22,7 +22,7 @@ def hello_world(num: int, message="Hello, World!"):
 
 
 @task()
-def other_task():
+def My_task(foobar):
     """This task does nothing."""
     pass
 

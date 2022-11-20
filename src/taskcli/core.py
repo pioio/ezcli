@@ -135,8 +135,10 @@ class Task:
         self.description_long = ""
         docstring = inspect.getdoc(func)
         if docstring:
-            self.description_short = docstring.splitlines()[0]
-            self.description_long = docstring
+            docstring_lines = docstring.splitlines()
+            self.description_short = docstring_lines[0]
+            if len(docstring_lines) > 1:
+                self.description_long = docstring_lines[1:]
 
         fspec = inspect.getfullargspec(func)
         log.debug(f"fspec: {fspec}")

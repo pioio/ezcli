@@ -1,39 +1,60 @@
-# Taskcli
-A CLI library for creating comprehensive command line interfaces
-from function signatures.
+# taskcli
 
-Right now, this project is still in very early development.
+`taskcli` is a minimalistic Python 3 CLI library for automatically
+creating command line interfaces from function signatures which simply work.
+
+Each function annotated with `@task()` is exposed as a command line "task".
+Running your script with no arguments will list all available tasks.
+
+It was inspired with `invoke` and `click`.
+
+## Summary
+Note: right now, this project is still in early development.
+
+The library is aimed for small to medium projects.
+It will never compete with flexibility of argparse or click.
+It is, however, extremely easy to get started with.
 
 
-# example usage output
+## Example usage:
+### Code
+```
+#!/usr/bin/env python
+from taskcli import task, cli
 
-## For simple
-task-name            A short description of the task
-        [--option-name]       default: 42
-        --another-option      (madatory)
+@task()
+def print_message(num: int, message="Hello, World!"):
+    """This is my description
+    num: number of times to print a messsage, mandatory
+    message: message to print, optional
+    """
+    for x in range(num):
+        print(message)
 
-    Long description of the task from docstring.
+@task()
+def add_numbers(number_a: int, number_b: int):
+    """This task adds two numbers.
+    number_a: first number
+    number_b: second number
+    """
+    print(number_a + number_b)
 
-## For complex examples
-task-name            A short description of the task
-    (default)         (the "default" string does not have to be specified). If there's no flavor, don't print the default
-        [--option-name]         default: 42
-        [--another-option]      default: /some/path
+cli()
+```
+### Resulting CLI interface
 
-    flavor-name      A short description of the flavor
-        [--option-name|-o]       default: 1
-        [--another-option|-a]    default: /some/path
 
-    other-flavor
-        --option-name|-o         (mandatory)
-        [--another-option|-a]    default: /some/yet/other/path
+## Core features:
+- Minimal dependencies.
+- Miminal boilerplate, just add a decorator to your function to trun it into a "task".
+- Each task is exposed on the CLI.
+- Running the script with no arguments prints the list of available tasks.
+- Each function with a simple `@task()` decorator will be added exposed from the cli.
+- Parameters are automatically converted to command line flags.
+- Docstring are converted to help text.
+- Changing function signature does not require changing the attached the CLI code.
 
-    Long description of the task from docstring
 
-    Examples:
-        task-name --option-name 1 --another-option /some/path
-        task-name flavor-name --option-name 1 --another-option /some/path
-        task-name other-flavor --option-name 1 --another-option /some/path
 
 # TODOs:
 - show arg types by default in help
