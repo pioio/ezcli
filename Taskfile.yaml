@@ -18,8 +18,13 @@ tasks:
     aliases:
       - pc
     cmds:
-      - black src/taskcli/*.py test/*.py examples/*.py
+      - task: black
       - task: test
+
+  black:
+    desc: Run black
+    cmds:
+      - black src/taskcli/*.py test/*.py examples/*.py
 
   build:
     desc: build package
