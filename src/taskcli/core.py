@@ -84,8 +84,15 @@ class Argument:
 
 
         if len(name) > 1:
-            self.long_cli_flag = self.name.replace("_", "-")
+            self.long_cli_flag = "--" + self.name.replace("_", "-")
+        else:
+            self.short_cli_flag = "-" + self.name
 
+    def get_main_cli_flag(self):
+        if self.long_cli_flag:
+            return self.long_cli_flag
+        else:
+            return self.short_cli_flag
 
 
 class Flavor:

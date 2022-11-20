@@ -4,24 +4,12 @@ from typing import Required
 
 from .core import decorated_functions
 from .core import extra_flavors
-
+from .usage import get_usage_for_task
 # from .core import tasks
 from .core import Task
 import logging
 
 log = logging.getLogger(__name__)
-
-
-class bcolors:
-    HEADER = "\033[95m"
-    OKBLUE = "\033[94m"
-    OKCYAN = "\033[96m"
-    OKGREEN = "\033[92m"
-    WARNING = "\033[93m"
-    FAIL = "\033[91m"
-    ENDC = "\033[0m"
-    BOLD = "\033[1m"
-    UNDERLINE = "\033[4m"
 
 
 def get_function_defaults(fspecs) -> list:
@@ -42,97 +30,9 @@ def get_function_defaults(fspecs) -> list:
 import inspect
 
 
-def get_usage_line1(task):
-    out = (
-        "{color_task_name}{task_name:<20}"
-        + bcolors.ENDC
-        + "{color_description}{task_description}"
-        + bcolors.ENDC
-    )
-
-    out = out.format(
-        color_task_name=bcolors.OKGREEN,
-        task_name=task.name_hyphenated,
-        color_description=bcolors.OKGREEN,
-        task_description=task.description_short,
-    )
-    return out
-
 
 offset_for_help = 20
 
-
-def format_argument_line(flavor, flavors):
-    # TODO: dynamically determine column width for each argument (will require considering all rows)
-    args_str = "{value:<" + str(offset_for_help) + "}"
-
-    arg_value_strings = []
-    all_args = ""
-
-    for arg in flavor.arguments:
-        # align columns of arguments
-        size = len(arg.name) + 5
-        if arg.type == str:
-            size = len(arg.name) + 15
-        format = "{text:<" + str(size) + "} "
-
-        single_arg_val = ""
-        color = ""
-        if not arg.is_default:
-            color = bcolors.OKBLUE
-        if arg.default is None:
-            color = bcolors.FAIL
-
-        single_arg_val += f"{arg.get_as_cli_flag()}"
-        if arg.default:
-            default_value = f" {arg.default}"
-            if arg.type == str: # escape it double quotes
-                # TODO: escaping should be done better
-                default_value = arg.default.replace('"', "\\\"")
-
-            single_arg_val += f' "{default_value}"'
-        else:
-            if arg.type == int:
-                single_arg_val += " INT"
-            elif arg.type == str:
-                single_arg_val += " STR"
-            elif arg.type == float:
-                single_arg_val += " FLOAT"
-
-        arg_value_strings.append(single_arg_val)
-        all_args += color + format.format(text=single_arg_val) + bcolors.ENDC
-
-    name = flavor.name
-
-    longest_flavor_name = max(len(x.name) for x in flavors)
-    size = str(longest_flavor_name)
-    out = ("    {name:<" + size + "} {args}").format(name=name, args=all_args)
-    return out
-
-
-def get_usage_argument_lines(task):
-    if not task.arguments:
-        return []
-    out = []
-
-    for flavor_name, flavor in task.flavors.items():
-        out.append(
-            "    "
-            + task.name
-            + " "
-            + format_argument_line(flavor, task.flavors.values())
-        )
-    return out
-
-
-def get_usage_docstring(task):
-    docstring = inspect.getdoc(task.func)
-    if not docstring:
-        return []
-    docstring = docstring.splitlines()[1:]
-    out = docstring
-    out = [" " * offset_for_help + bcolors.OKGREEN + x + bcolors.ENDC for x in out]
-    return out
 
 
 def print_usage(tasks, help_level):
@@ -142,15 +42,12 @@ def print_usage(tasks, help_level):
     pass
 
 
-def get_usage(tasks, help_level):
+def get_usage(tasks, help_level) -> str:
 
     lines = []
-
     for task in tasks:
-        lines.append(get_usage_line1(task))
-        if help_level > 1:
-            lines.extend(get_usage_docstring(task))
-        lines.extend(get_usage_argument_lines(task))  # if any arguments present
+        docstring = help_level > 1
+        lines.extend(get_usage_for_task(task, docstring))
 
     return "\n".join(lines)
 
@@ -233,40 +130,22 @@ def cli():
             sys.exit(1)
 
         assert task_to_run
+        arg_names = [x.name for x in task_to_run.arguments]
 
-        # # auto-determine short flags
-        # short_flags_used = ["v", "h"]
-        # arg_names = [x.name for x in task_to_run.arguments]
-        # for arg in task_to_run.arguments:
-        #     short_flag = None
-        #     long_flag = arg.get_as_cli_flag()
-        #     if (
-        #         len(long_flag) >= 3
-        #     ):  # is indeed long (a one-letter argument would return )
-        #         first_letter = long_flag[2]
-        #         first_letter_upper = first_letter.upper()
-        #         if first_letter not in short_flags_used:
-        #             short_flags_used.append(first_letter)
-        #             short_flag = "-" + first_letter
-        #         elif first_letter_upper not in short_flags_used:
-        #             short_flags_used.append(first_letter_upper)
-        #             short_flag = "-" + first_letter_upper
-        #     else:
-        #         short_flags_used += long_flag[1]
-
-        #     if not short_flag:
-        #         p.add_argument(
-        #             arg.get_as_cli_flag(),
-        #             default=arg.default,
-        #             required=arg.default is None,
-        #         )
-        #     else:
-        #         p.add_argument(
-        #             arg.get_as_cli_flag(),
-        #             short_flag,
-        #             default=arg.default,
-        #             required=arg.default is None,
-        #         )
+        for arg in task_to_run.arguments:
+            if not arg.short_cli_flag:
+                p.add_argument(
+                    arg.get_main_cli_flag(),
+                    default=arg.default,
+                    required=arg.default is None,
+                )
+            else:
+                p.add_argument(
+                    arg.get_main_cli_flag(),
+                    arg.short_cli_flag,
+                    default=arg.default,
+                    required=arg.default is None,
+                )
 
         # Parse again, this time for the task-specific arguments
         log.debug("last parse")
