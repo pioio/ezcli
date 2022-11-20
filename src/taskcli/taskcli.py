@@ -13,27 +13,6 @@ import logging
 log = logging.getLogger(__name__)
 
 
-def get_function_defaults(fspecs) -> list:
-    args = fspecs
-    defaults = []
-    if args.defaults:
-        num_missing_args = len(args.args) - len(args.defaults)
-        for x in range(num_missing_args):
-            defaults.append(None)
-        defaults.extend(args.defaults)
-    else:
-        for x in range(len(args.args)):
-            defaults.append(None)
-
-    return defaults
-
-
-import inspect
-
-
-offset_for_help = 20
-
-
 def print_usage(tasks, help_level):
     lines = get_usage(tasks, help_level).splitlines()
     for line in lines:
@@ -42,12 +21,10 @@ def print_usage(tasks, help_level):
 
 
 def get_usage(tasks, help_level) -> str:
-
     lines = []
     for task in tasks:
         docstring = help_level > 1
         lines.extend(get_usage_for_task(task, docstring))
-
     return "\n".join(lines)
 
 
