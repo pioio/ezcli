@@ -234,39 +234,39 @@ def cli():
 
         assert task_to_run
 
-        # auto-determine short flags
-        short_flags_used = ["v", "h"]
-        arg_names = [x.name for x in task_to_run.arguments]
-        for arg in task_to_run.arguments:
-            short_flag = None
-            long_flag = arg.get_as_cli_flag()
-            if (
-                len(long_flag) >= 3
-            ):  # is indeed long (a one-letter argument would return )
-                first_letter = long_flag[2]
-                first_letter_upper = first_letter.upper()
-                if first_letter not in short_flags_used:
-                    short_flags_used.append(first_letter)
-                    short_flag = "-" + first_letter
-                elif first_letter_upper not in short_flags_used:
-                    short_flags_used.append(first_letter_upper)
-                    short_flag = "-" + first_letter_upper
-            else:
-                short_flags_used += long_flag[1]
+        # # auto-determine short flags
+        # short_flags_used = ["v", "h"]
+        # arg_names = [x.name for x in task_to_run.arguments]
+        # for arg in task_to_run.arguments:
+        #     short_flag = None
+        #     long_flag = arg.get_as_cli_flag()
+        #     if (
+        #         len(long_flag) >= 3
+        #     ):  # is indeed long (a one-letter argument would return )
+        #         first_letter = long_flag[2]
+        #         first_letter_upper = first_letter.upper()
+        #         if first_letter not in short_flags_used:
+        #             short_flags_used.append(first_letter)
+        #             short_flag = "-" + first_letter
+        #         elif first_letter_upper not in short_flags_used:
+        #             short_flags_used.append(first_letter_upper)
+        #             short_flag = "-" + first_letter_upper
+        #     else:
+        #         short_flags_used += long_flag[1]
 
-            if not short_flag:
-                p.add_argument(
-                    arg.get_as_cli_flag(),
-                    default=arg.default,
-                    required=arg.default is None,
-                )
-            else:
-                p.add_argument(
-                    arg.get_as_cli_flag(),
-                    short_flag,
-                    default=arg.default,
-                    required=arg.default is None,
-                )
+        #     if not short_flag:
+        #         p.add_argument(
+        #             arg.get_as_cli_flag(),
+        #             default=arg.default,
+        #             required=arg.default is None,
+        #         )
+        #     else:
+        #         p.add_argument(
+        #             arg.get_as_cli_flag(),
+        #             short_flag,
+        #             default=arg.default,
+        #             required=arg.default is None,
+        #         )
 
         # Parse again, this time for the task-specific arguments
         log.debug("last parse")

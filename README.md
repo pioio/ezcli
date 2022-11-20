@@ -24,12 +24,16 @@ task-name            A short description of the task
         [--option-name|-o]       default: 1
         [--another-option|-a]    default: /some/path
 
-    other-flavor:
+    other-flavor
         --option-name|-o         (mandatory)
         [--another-option|-a]    default: /some/yet/other/path
 
     Long description of the task from docstring
 
+    Examples:
+        task-name --option-name 1 --another-option /some/path
+        task-name flavor-name --option-name 1 --another-option /some/path
+        task-name other-flavor --option-name 1 --another-option /some/path
 
 # TODOs:
 - show arg types by default in help

@@ -73,19 +73,19 @@ def somefunction():
 
 
 class Argument:
-    def __init__(self, name, type, default=None, is_default=True):
+    def __init__(self, name, type, default=None, is_default=True, short_cli_flag=None):
         self.name = name
         self.type = type
         self.value = None
         self.default = default
         self.is_default = is_default
+        self.short_cli_flag = short_cli_flag
+        self.long_cli_flag = None
 
-    def get_as_cli_flag(self):
-        name = self.name.replace("_", "-")
-        if len(name) == 1:
-            return "-" + name
-        else:
-            return "--" + name
+
+        if len(name) > 1:
+            self.long_cli_flag = self.name.replace("_", "-")
+
 
 
 class Flavor:
@@ -161,6 +161,8 @@ class Task:
             flavor = Flavor(name, arguments_for_flav)
             self.flavors[name] = flavor
 
+        self._determine_short_cli_flags()
+
     def get_kwargs(self, flavor_name):
         assert flavor_name in self.flavors, f"Flavor {flavor_name} not found"
 
@@ -168,3 +170,28 @@ class Task:
         for arg in self.flavors[flavor_name].arguments:
             out[arg.name] = arg.value
         return out
+
+    def _determine_short_cli_flags(self):
+        # auto-determine short flags
+        short_flags_used = ["v", "h"]
+
+        for flavor in self.flavors.values():
+            # all arguments in a flavor share the same short flags
+            for arg in flavor.arguments:
+                short_flag = None
+
+                if arg.name == 1:
+                    short_flags = arg.name
+                else:
+                    # Try to use first lowecase letter,
+                    # if that's taken, try uppercase version of it
+                    first_letter = arg.name[0].lower()  # lower here should not be needed (params should be lowercase anyway), but just in case
+                    first_letter_upper = first_letter.upper()
+                    if first_letter not in short_flags_used:
+                        short_flags_used.append(first_letter)
+                        short_flag = "-" + first_letter
+                    elif first_letter_upper not in short_flags_used:
+                        short_flags_used.append(first_letter_upper)
+                        short_flag = "-" + first_letter_upper
+                arg.short_cli_flag = short_flag
+
