@@ -7,13 +7,14 @@ from .core import extra_flavors
 from .usage import get_usage_for_task
 
 # from .core import tasks
-from .core import Task
+from .core import (Task, Argument)
 import logging
 
 log = logging.getLogger(__name__)
 
 
 def print_usage(tasks, help_level):
+    print ("Usage:")
     lines = get_usage(tasks, help_level).splitlines()
     for line in lines:
         print(line)
@@ -42,125 +43,226 @@ def construct_tasks():
     return tasks
 
 
-def cli():
-    """Testing"""
 
-    log.debug(" ------------ cli - starting")
-    tasks = construct_tasks()
+cli_config = {
+    "setup_logging": False,
+}
 
-    task_to_run = None
-    try:
-        p = argparse.ArgumentParser(add_help=False, usage="\n" + get_usage(tasks, 0))
+def setup_logging(conf, logging_format):
+    cli_config["setup_logging"] = True
 
-        remaining_args = sys.argv[1:]
-        if len(remaining_args) == 0:
-            print_usage(tasks, 0)
-            return
+def do_setup_logging(verbosity):
+    global cli_config
+    if not cli_config["setup_logging"]:
+        return
 
-        # First, parse the default arguments
-        p.add_argument("-v", "--verbose", action="count", default=0)
-        p.add_argument("-h", "--help", action="count", default=0)
-        p.add_argument(
-            "task_name",
-            help="Task to run",
-        )
-        p.add_argument(
-            "flavor_name", help="Flavor to run", nargs="?", default="default"
-        )
-        conf, _ = p.parse_known_args(remaining_args)
+    level = logging.INFO
+    if "-v" in sys.argv[1:]:
+        level = logging.DEBUG
 
-        if conf.help:
-            # p.print_help()
-            print_usage(tasks, conf.help)
-            if conf.help == 1:
-                print("(for more detailed help use -hh)")
-            return
+    logging.basicConfig(
+        level=level,
+        format="%(asctime)s %(levelname)7s: %(message)-50s     [%(filename)s:%(lineno)d]",
+    )
 
-        log.debug("parsing task and flavor name")
+from box import Box
+class ArgumentError(Exception):
+    pass
 
-        conf, _ = p.parse_known_args(remaining_args)
-        log.debug(f"parsed task_name: {conf.task_name}")
-        # conf, remaining_arg = parse_arguments(p, remaining_args)
-        task_name = conf.task_name
-        task_names = [x.name_hyphenated for x in tasks]
 
-        # Validate task exists
-        if task_name not in task_names:
-            p.print_help()
-            print(f"Error: Task '{task_name}' not found.")
-            print("Available tasks: " + ", ".join(task_names))
-            sys.exit(1)
+def is_flag(arg):
+    return arg.startswith("-")
 
-        # find task to run
-        task_to_run = None
-        for task in tasks:
-            if task.name_hyphenated == conf.task_name:
-                task_to_run = task
-                break
-        assert task_to_run is not None, "task_to_run should not be None"
-        # validate flavor
-        flavor_names = task_to_run.flavors.keys()
-        if conf.flavor_name and conf.flavor_name not in flavor_names:
-            p.print_help()
-            print(f"Error: Task flavor '{conf.flavor_name}' not found.")
-            print("Available flavors: " + ", ".join(flavor_names))
-            sys.exit(1)
 
-        assert task_to_run
-        arg_names = [x.name for x in task_to_run.arguments]
+def print_arg_error(args, number):
+    """ Number of "0" means first argument """
+    count_chars_to_arg = 0
 
-        for arg in task_to_run.arguments:
-            if not arg.short_cli_flag:
-                p.add_argument(
-                    arg.get_main_cli_flag(),
-                    default=arg.default,
-                    required=arg.default is None,
-                )
+    for arg in args[:number]:
+        count_chars_to_arg += len(arg) + 1
+    print("------------------------------------------------------------------ ")
+
+    arg0 = sys.argv[0]
+    print("ERROR: " + arg0 + " " + " ".join(args))
+    print("ERROR: " + ((len(arg0)+1)* "-") + "-" * count_chars_to_arg + "^" + "^" * (len(args[number]) - 1))
+
+class ParsingContext:
+    def __init__(self, tasks:list[Task]):
+        self.arg_number = 0 # which argument are we parsing
+        self.config = Box({})
+        self.expect_value_for_arg:Argument|None = None
+        self.active_task:Task|None = None
+        self.active_task_cli_index = 0 # where on the CLi it was specified
+        self.builtin_flags = {
+            "-v": lambda x: self.config.update({"verbose": True}),
+            "--verbose": lambda x: self.config.update({"verbose": True}),
+            "-h": lambda x: self.config.update({"help": True}),
+            "--help": lambda x: self.config.update({"help": True}),
+        }
+        self.tasks = tasks
+
+        self.expect_next = ["builtin_flag", "task"]
+
+        self._all_args = []
+
+        self.parsed_tasks = []
+
+    def expects(self, what):
+        return what in self.expect_next
+
+    def parse_args(self, args):
+        self._all_args = args
+        self.arg_number = 0 # so that we start with 1
+
+        # Main parsing loop
+        for arg in args:
+            self.parse_arg(arg)
+
+        if self.expect_value_for_arg:
+            print_usage([self.active_task], 1)
+            raise ArgumentError(f"Expected value for argument {self.expect_value_for_arg.name}, got nothing (ran out of arguments)")
+
+        if self.active_task:
+            self.finalize_parsing_of_task()
+
+            self.parsed_tasks += [self.active_task]
+            self.active_task = None
+
+    def parse_arg(self, arg):
+        self.arg_number += 1
+        if is_flag(arg):
+            self._parse_arg_flag(arg)
+        else:
+            self._parse_arg_not_flag(arg) # a task name, or
+
+    def _parse_arg_flag(self, arg):
+        assert is_flag(arg)
+        if self.expect_value_for_arg:
+            print_usage([self.active_task], 2)
+            print_arg_error(self._all_args, self.arg_number - 1)
+            raise ArgumentError(f"Expected value for {self.expect_value_for_arg.name}, got flag as argument {arg} number {self.arg_number}")
+
+        if not self.active_task:
+            if arg not in self.builtin_flags:
+                print_usage([self.active_task], 2)
+                print_arg_error(self._all_args, self.arg_number - 1)
+                raise ArgumentError(f"Expected task, got flag as argument {arg} number {self.arg_number}")
             else:
-                p.add_argument(
-                    arg.get_main_cli_flag(),
-                    arg.short_cli_flag,
-                    default=arg.default,
-                    required=arg.default is None,
-                )
+                self.builtin_flags[arg](arg)
+                return
 
-        # Parse again, this time for the task-specific arguments
-        log.debug("last parse")
-        try:
-            conf = p.parse_args(sys.argv[1:])
-        except SystemExit as e:
-            # print_usage(tasks, conf.help)
-            sys.exit(0)
-        log.debug("Done last parse")
-
-        for arg in arg_names:
-            value = getattr(conf, arg)
-            if not value:
-                continue
-            for arg2 in task_to_run.arguments:
-                if arg2.name == arg:
-                    arg2.value = value
-
-                    # casting to type
-                    if arg2.type == int:
-                        arg2.value = int(value)
-                    if arg2.type == bool:
-                        arg2.value = bool(value)
-
+        elif self.active_task:
+            task_args = self.active_task.arguments
+            found = False
+            for targ in task_args:
+                if arg == targ.short_cli_flag or arg == targ.long_cli_flag:
+                    log.debug(f"Found flag {arg} ")
+                    found = True
+                    if targ.type == bool:
+                        targ.value = True
+                    else:
+                        log.debug(f"Will expect value for {targ.name}")
+                        self.expect_value_for_arg = targ
                     break
+            if not found:
+                print_usage([self.active_task], 2)
+                print_arg_error(self._all_args, self.arg_number - 1)
+                raise ArgumentError(f"Argument {arg} is not known for task {self.active_task.name_hyphenated}")
 
-    except argparse.ArgumentError as e:
-        print("-------------------------------------------")
-        print_usage(tasks, help_level=1)
-        print("-------------------------------------------")
-        print("Error: " + str(e))
+    def _parse_arg_not_flag(self, arg:str):
+        assert not is_flag(arg)
+        if self.expect_value_for_arg:
+            log.debug(f"Found value for {self.expect_value_for_arg.name}: {arg}")
+            assert_argument_type_matches(self.expect_value_for_arg, arg)
 
-        print("For correct usage see above.")
-        sys.exit(1)
+            self.expect_value_for_arg.value = arg
+            self.expect_value_for_arg = None
+            # TODO: add support for multiple value
+            return
+        else:
+            task_names = [task.name for task in self.tasks]
+            if arg not in task_names:
+                print_usage([self.active_task], 1)
+                print_arg_error(self._all_args, self.arg_number - 1)
+                raise ArgumentError(f"Expected task name (one of {task_names}), but got '{arg}' as argument number {self.arg_number}")
 
-    log.debug(f"Tasks: {tasks}")
+            import copy
+            if self.active_task:
+                self.finalize_parsing_of_task()
 
-    run_task(task_to_run, conf)
+            self.active_task = copy.deepcopy(self.tasks[task_names.index(arg)])
+            self.active_task_cli_index = self.arg_number
+            log.debug ("Active task: " + self.active_task.name)
+
+    def finalize_parsing_of_task(self):
+        assert self.active_task
+        # if argument was not specified, but has default value, set it
+        for arg in self.active_task.arguments:
+            if arg.value is None and arg.default is not None:
+                arg.value = arg.default
+
+        # check if arguments are all set
+        if missing_args  := self.active_task.get_missing_arguments():
+
+            print_usage([self.active_task], 2)
+            print_arg_error(self._all_args, self.active_task_cli_index - 1)
+            raise ArgumentError(f"The following mandatory arguments were not specified for task {self.active_task.name_hyphenated}: {[x.name for x in missing_args]}")
+
+        # finally, store the task for later execution
+        self.parsed_tasks += [self.active_task]
+
+def assert_argument_type_matches(arg:Argument, value):
+    if arg.type == bool:
+        if value not in ["True", "False"]:
+            raise ArgumentError(f"Expected boolean value for {arg.name}, got '{value}'")
+    if arg.type == int:
+        if not value.isnumeric():
+            raise ArgumentError(f"Expected integer value for {arg.name}, got '{value}'")
+    if arg.type == str:
+        if not isinstance(value, str):
+            raise ArgumentError(f"Expected string value for {arg.name}, got '{value}'")
+    if arg.type == float:
+        try:
+            float(value)
+        except ValueError:
+            raise ArgumentError(f"Expected float value for {arg.name}, got '{value}'")
+
+log =  logging.getLogger(__name__)
+def cli():
+    """ Entry point for the CLI """
+
+    logging.basicConfig(
+        level=logging.DEBUG,
+        format="%(asctime)s %(levelname)7s: %(message)-50s     [%(filename)s:%(lineno)d]",
+    )
+
+
+    args = sys.argv[1:]
+
+    tasks = construct_tasks()
+    if len(args) == 0:
+        print_usage(tasks, 0)
+        return
+
+    expect_value = False
+    expect_value_for = None
+
+    ctx = ParsingContext(tasks)
+
+    try:
+        ctx.parse_args(args)
+    except ArgumentError as e:
+        print("ERROR: Argument error: " + str(e))
+        print("ERROR: see above for details.")
+
+    for task in ctx.parsed_tasks:
+        conf = Box()
+        conf.flavor_name = "default" # fixme
+        run_task(task, conf)
+
+    if expect_value:
+        raise ArgumentError(f"Expected a value for argument {expect_value_for.name}, but arguments ended")
+
 
 
 def run_task(task, conf):

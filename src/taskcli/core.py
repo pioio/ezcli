@@ -76,7 +76,7 @@ class Argument:
     def __init__(self, name, type, default=None, is_default=True, short_cli_flag=None):
         self.name = name
         self.type = type
-        self.value = None
+        self.value:bool|str|int|float|None = None
         self.default = default
         self.is_default = is_default
         self.short_cli_flag = short_cli_flag
@@ -170,6 +170,13 @@ class Task:
             self.flavors[name] = flavor
 
         self._determine_short_cli_flags()
+
+    def get_missing_arguments(self):
+        out = []
+        for arg in self.arguments:
+            if arg.value is None:
+                out += [arg]
+        return out
 
     def get_kwargs(self, flavor_name):
         assert flavor_name in self.flavors, f"Flavor {flavor_name} not found"

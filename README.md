@@ -90,6 +90,9 @@ add-numbers          Adds two numbers
 
 
 # TODOs:
+- Calling the task from within the code doesn't work.
+- Add aliases.
+- BUG: decorator should check if the function has already been registered (happens with mutliple imports)
 - show arg types by default in help
 - aliases for tasks and flavors
 - consider auto-generating aliases from the first letter of task names and flavors
