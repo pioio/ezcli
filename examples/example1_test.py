@@ -4,7 +4,7 @@ import unittest
 from unittest import TestCase
 from click.testing import CliRunner
 
-import example
+import example1 as example
 
 class TestExample(TestCase):
 
