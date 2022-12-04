@@ -18,7 +18,7 @@ In other words, it's targetting scripts which have many possible execution entry
 Example:
 ```./myscript.py```
 ![](docs/example-usage.jpg)
-```./myscript.py file create content myfile 'my content'```
+```./myscript.py file update content myfile 'my content'```
 
 # Core features
 - Aliases:
