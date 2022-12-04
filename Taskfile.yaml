@@ -35,7 +35,7 @@ tasks:
     desc: Run tests
     aliases: [t]
     cmds:
-      - source venv/bin/activate && python -m unittest discover
+      - source venv/bin/activate && python -m unittest discover -s examples -p "*_test.py"
 
   all-examples:
     desc: Run all examples
