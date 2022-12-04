@@ -1,13 +1,11 @@
-
-
 import unittest
 from unittest import TestCase
 from click.testing import CliRunner
 
 import example1 as example
 
-class TestExample(TestCase):
 
+class TestExample(TestCase):
     def setUp(self):
         self.maxDiff = 3000
 
@@ -47,7 +45,6 @@ class TestExample(TestCase):
         self.assertIn("Creating a file foobar", result.output)
         self.assertEqual(result.exit_code, 0)
 
-
         # via command alias, argument required, and provided
         result = runner.invoke(example.cli, "file c foobar")
         self.assertIn("Creating a file foobar", result.output)
@@ -60,7 +57,6 @@ class TestExample(TestCase):
 
 
 class TestGreet(TestCase):
-
     def setUp(self):
         self.maxDiff = 3000
 
@@ -86,7 +82,6 @@ class TestGreet(TestCase):
         self.assertIn("Hello, unknown user!", result.output)
         self.assertEqual(result.exit_code, 0)
 
-
     def test_providing_optional_option(self):
         runner = CliRunner()
 
@@ -97,7 +92,6 @@ class TestGreet(TestCase):
         result = runner.invoke(example.cli, "g sh --message=Hi")
         self.assertEqual("Hi!\n", result.output)
         self.assertEqual(result.exit_code, 0)
-
 
     def test_not_providing_optional_option(self):
         runner = CliRunner()

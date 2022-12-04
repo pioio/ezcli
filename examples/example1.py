@@ -19,10 +19,11 @@ import functools
 
 # Option shared between multiple commands
 def option_dry_run(func):
-    @option('--dry-run','-d', is_flag=True, help='Dry run', required=False)
+    @option("--dry-run", "-d", is_flag=True, help="Dry run", required=False)
     @functools.wraps(func)
     def wrapper(*args, **kwargs):
         return func(*args, **kwargs)
+
     return wrapper
 
 
@@ -35,55 +36,62 @@ def cli():
 ################################################################################
 # Other commands
 
+
 @cli.command("add")
-@argument('number_a', type=int)
-@argument('number_b', type=int)
-def add (a, b):
+@argument("number_a", type=int)
+@argument("number_b", type=int)
+def add(a, b):
     """Add two numbers."""
-    print(a+b)
+    print(a + b)
 
 
 @cli.command("temperature", aliases="temp")
-@argument('city', required=True, metavar="CITY_NAME")
+@argument("city", required=True, metavar="CITY_NAME")
 def check_temperature_in_city_with_curl(city):
-    """ Check temperature in a city."""
+    """Check temperature in a city."""
     import subprocess
     import json
-    weather = subprocess.check_output(["curl", "-s", f"https://wttr.in/{city}?format=j1"])
+
+    weather = subprocess.check_output(
+        ["curl", "-s", f"https://wttr.in/{city}?format=j1"]
+    )
     temperature = json.loads(weather)["current_condition"][0]["temp_C"]
-    print (temperature)
+    print(temperature)
 
 
 ################################################################################
 # File commands
 
+
 @group("file", aliases=["f", "fi"])  # multiple aliases (an iterable)
 def cli_file():
     """Operate on files."""
     pass
+
+
 cli.add_command(cli_file)
 
 
-@cli_file.command('create', aliases="c")  # single alias (a string)
-@argument('filename', required=True)
+@cli_file.command("create", aliases="c")  # single alias (a string)
+@argument("filename", required=True)
 @option_dry_run
 def create_file(filename, dry_run):
     """Create a new file."""
     print(f"Creating a file {filename}")
 
 
-@cli_file.command('remove', aliases=["r", "rm"])
-@argument('filenames', nargs=-1, required=True)
-@option('--force', '-f', is_flag=True, default=False)
+@cli_file.command("remove", aliases=["r", "rm"])
+@argument("filenames", nargs=-1, required=True)
+@option("--force", "-f", is_flag=True, default=False)
 @option_dry_run
 def remove_files(filenames, force, dry_run):
     """Remove one or more files."""
     print(f"Removing {filenames} with force={force}, dry_run={dry_run}")
 
 
-@cli_file.command('move')
-@argument('filename_src', required=True)
-@argument('filename_dst', required=True)
+@cli_file.command("move")
+@argument("filename_src", required=True)
+@argument("filename_dst", required=True)
 @option_dry_run
 def move_file(filename_src, filename_dst, dry_run):
     """Move a single file."""
@@ -94,52 +102,59 @@ def move_file(filename_src, filename_dst, dry_run):
 def update_file():
     """Different ways to update a file."""
     pass
+
+
 cli_file.add_command(update_file)
 
-@update_file.command('content', aliases=["c"])
-@argument('filename', required=True)
-@argument('content', required=True)
+
+@update_file.command("content", aliases=["c"])
+@argument("filename", required=True)
+@argument("content", required=True)
 @option_dry_run
 def file_update_content(filename, content, dry_run):
     """Update the content."""
-    print (f"Updating content of {filename} to {content}")
+    print(f"Updating content of {filename} to {content}")
 
 
-@update_file.command('mtime', aliases=["m"])
-@argument('filename', required=True)
-@option('--timestamp', 'mtime', required=True)
+@update_file.command("mtime", aliases=["m"])
+@argument("filename", required=True)
+@option("--timestamp", "mtime", required=True)
 @option_dry_run
 def file_update_mtime(filename, mtime, dry_run):
     """Update the modification time."""
-    print (f"Updating mtime of {filename} to {mtime}")
+    print(f"Updating mtime of {filename} to {mtime}")
 
 
 ################################################################################
 # Greet commands
 
+
 @group("greet", aliases="g")
 def cli_greet():
     """Commands that print a greeting."""
     pass
+
+
 cli.add_command(cli_greet)
 
+
 @cli_greet.command(aliases=["u"])
-@argument('username', default="unknown user", required=False)
+@argument("username", default="unknown user", required=False)
 def user(username):
     """Greet the user"""
     print(f"Hello, {username}!")
 
 
 @cli_greet.command(aliases=["sh"])
-@option('--message', default="Hello", required=False)
+@option("--message", default="Hello", required=False)
 def say_hello(message):
     """Print a greeting message."""
     print(f"{message}!")
 
 
 @cli_greet.command("multiple-times")
-@option('--message', default="Hello", required=False)
-@option('--count', '-c', required=True, type=int)
+@option("--message", default="Hello", required=False)
+@option("--count", "-c", required=True, type=int)
 def greet_multiple_times(message, count):
     """Print a message multiple times."""
 
@@ -147,7 +162,5 @@ def greet_multiple_times(message, count):
         print(f"{message}!")
 
 
-
-
-if __name__ == '__main__':
+if __name__ == "__main__":
     cli()
