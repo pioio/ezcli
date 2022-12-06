@@ -1,8 +1,6 @@
 #!/usr/bin/env python
 
-
-from curses import meta
-from email.policy import default
+from click import pass_context
 from taskcli import SETTINGS
 
 from taskcli import group, option, argument, SETTINGS
@@ -37,12 +35,24 @@ def cli():
 # Other commands
 
 
+
+
 @cli.command("add")
 @argument("number_a", type=int)
 @argument("number_b", type=int)
-def add(a, b):
+@pass_context
+def add(ctx, number_a, number_b):
     """Add two numbers."""
-    print(a + b)
+    print(number_a + number_b)
+
+
+@cli.command()
+@pass_context
+def many_adds(ctx):
+    ctx.invoke(add, number_a=2, number_b=2)
+    ctx.invoke(add, number_a=4, number_b=4)
+    ctx.invoke(add, number_a=6, number_b=6)
+
 
 
 @cli.command("temperature", aliases="temp")
