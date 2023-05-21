@@ -24,42 +24,18 @@ def add_typed_int(a:int,b:int):
     log.info (a + b)
     return a + b
 
-
-@task()
-@mock_decorator()
-def add_typed_int_with_decorator(a:int,b:float):
-    assert isinstance(a, int)
-    assert isinstance(b, float)
-    log.info (a + b)
-    return a + b
+@task
+def abool(a:bool=False):
+    assert isinstance(a, bool)
+    log.info(a)
+    return a
 
 
-
-
-# @task()
-# def add_floats(a: float, b:float):
-#     # no type, defaults to str
-#     assert isinstance(a, float)
-#     assert isinstance(b, float)
-#     #print(type(a))
-#     log.info (a + b)
-#     return a + b
-
-
-# @task
-# def abool(a:bool):
-#     assert isinstance(a, bool)
-#     log.info(a)
-#     return a
-
-# @task
-# def call_abool():
-#     assert abool("False") == False
-#     assert abool("0") == False
-#     assert abool("foo") == True
-#     assert abool("True") == True
-
-
+@task
+def alist(a:list[int]):
+    assert isinstance(a, list)
+    log.info(a)
+    return a
 
 
 cli()

@@ -114,7 +114,7 @@ def param_info_to_argparse_kwargs(param_data):
             if param_type == list[list_type]:
                 if param_default is not inspect._empty:
                     raise Exception(f"Function params ({param_name}) of type 'list' must not have a default value. Use an @arg decorator instead.")
-                ap_kwargs['nargs'] = '*'
+                ap_kwargs['nargs'] = '+'
                 ap_kwargs['type'] = list_type
 
     if param_default is not inspect._empty:

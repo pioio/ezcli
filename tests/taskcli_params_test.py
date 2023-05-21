@@ -13,8 +13,6 @@ class TaskCLITestCase(TestCase):
         taskcli.taskcli.cleanup_for_tests()
 
 
-
-
 class TestTaskCliParamOptions(TaskCLITestCase):
     def test_simplest_no_params(self):
         @task
@@ -154,9 +152,12 @@ class TestTaskCliParamsLists(TaskCLITestCase):
         ret = taskcli.cli(argv=argv, force=True)
         self.assertListEqual(ret, [1,2,3,4])
 
-        argv = ["foo", "fun"]
-        ret = taskcli.cli(argv=argv, force=True)
-        self.assertListEqual(ret, [])
+        # argv = ["foo", "fun"]
+        # ret = taskcli.cli(argv=argv, force=True)
+
+        with self.assertRaisesRegex(Exception, "the following arguments are required: a"):
+            argv = ["foo", "fun"]
+            ret = taskcli.cli(argv=argv, force=True)
 
 
     def test_simple_list_with_defaults_fails(self):
