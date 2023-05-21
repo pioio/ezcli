@@ -8,34 +8,30 @@ from taskcli.taskcli import mock_decorator
 log = logging.getLogger(__name__)
 logging = logging.basicConfig(level=logging.DEBUG)
 
-# @task()
-# def add_no_type(a,b):
-#     # no type, defaults to str
-#     assert isinstance(a, str)
-#     assert isinstance(b, str)
-#     log.info (a + b)   # this will concatanate the strings
-#     return a + b
+@task()
+def add_no_type(a,b):
+    assert isinstance(a, str)
+    assert isinstance(b, str)
+    log.info (a + b)
+    return a + b
 
 
 @task()
-#@arg("a", type=str)
-#@arg("b", type=str, help="bbb")
 def add_typed_int(a:int,b:int):
     # no type, defaults to str
     assert isinstance(a, int)
     assert isinstance(b, int)
     log.info (a + b)
+    return a + b
 
 
-# @task()
-# @mock_decorator()
-# def add_typed_int_with_decorator(a:int,b:int):
-#     # no type, defaults to str
-#     assert isinstance(a, int)
-#     assert isinstance(b, int)
-#     #print(type(a))
-#     log.info (a + b)
-#     return a + b
+@task()
+@mock_decorator()
+def add_typed_int_with_decorator(a:int,b:float):
+    assert isinstance(a, int)
+    assert isinstance(b, float)
+    log.info (a + b)
+    return a + b
 
 
 

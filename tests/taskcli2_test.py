@@ -1,0 +1,58 @@
+from unittest import TestCase
+import unittest
+
+import taskcli
+import inspect
+
+from taskcli import cli, task, arg
+from taskcli.taskcli import mock_decorator
+
+class TaskCLITestCase(TestCase):
+    def setUp(self) -> None:
+        taskcli.taskcli.cleanup_for_tests()
+
+
+class TestLongerCLI(TaskCLITestCase):
+
+    def test_many_params(self):
+        @task
+        def fun(a,b,_int:int,_str:str):
+            assert isinstance(a, str)
+            assert isinstance(b, str)
+            assert isinstance(_int, int)
+            assert isinstance(_str, str)
+
+        argv = ["./foo", "fun", "aaa", "bbb", "123", "foobar"]
+        cli(argv=argv, force=True)
+
+    def test_many_mixed_args_and_params(self):
+        @task
+        @arg("a", type=float)
+        @arg("b", type=str, nargs=2)
+        def fun(a,b,_int:int,_str:str):
+            assert isinstance(a, float)
+            assert isinstance(b, list)
+            assert isinstance(_int, int)
+            assert isinstance(_str, str)
+
+        argv = ["./foo", "fun", "1.1", "bbb1", "bbb2", "123", "foobar"]
+        cli(argv=argv, force=True)
+
+
+
+    @unittest.skip("broken")
+    def test_many_mixed_args_and_params_and_options(self):
+        @task
+        @arg("pos-a", type=int)
+        @arg("--option-a", type=int, nargs=2)
+        def fun(option_a,pos_a, option_p:str="foobar"):
+            assert isinstance(option_a, list)
+            assert isinstance(option_a[0], int)
+            assert isinstance(option_p, str)
+            assert isinstance(pos_a, int)
+
+        argv = "./foo fun --option-p xxx --option-a 1 42 3".split(" ")
+        cli(argv=argv, force=True)
+
+
+# specfying multiple options

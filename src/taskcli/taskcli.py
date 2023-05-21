@@ -118,7 +118,16 @@ def param_info_to_argparse_kwargs(param_data):
     if param_default is not inspect._empty:
         ap_kwargs['default'] = param_default
 
+    if param_type is bool and param_default == False:
+        ap_kwargs['action'] = 'store_true'
+        ap_kwargs.pop('type') # otherwise argparse will complain
 
+    if param_type is bool and param_default == True:
+        ap_kwargs['action'] = 'store_false'
+        ap_kwargs.pop('type') # otherwise argparse will complain
+
+    if param_type is bool and param_default is inspect._empty:
+        raise Exception("bool params must have a default value, otherwise they will be always true")
 
     return ap_kwargs
 
@@ -175,6 +184,14 @@ def task(namespace=None, foo=None, env=None, required_env=None):
         def wrapper(*args, **kwargs):
             # this gets called right before the function
             func_name = fn.__name__
+
+            # convert args and kwargs to a list of argpare args
+
+
+
+
+
+
             output = fn(*args, **kwargs)
             return output
 
@@ -217,7 +234,7 @@ def arg(*names, type=EMPTY, default=EMPTY, choices=None,required=EMPTY, help="",
             'dest': dest,
             'nargs': nargs,
         }
-        main_name = names[0]
+        main_name = names[0].lstrip('-').replace('-', '_')
         for name in names:
             if name in task_data_args[func_name]:
                 raise Exception(f"Duplicate arg decorator for '{name}' in {func_name}")
@@ -232,6 +249,7 @@ def arg(*names, type=EMPTY, default=EMPTY, choices=None,required=EMPTY, help="",
         found = False
         for param in func_sig_data['params'].values():
             name = param['param_name']
+
             if name == main_name:
                 found = True
         if not found:
@@ -329,6 +347,8 @@ def cli(argv=None, force=False) -> Any:
         return
 
     print("## Prepping the parser")
+    if len(argv) < 2:
+        sys.exit("Error: No task name provided")
     task_name = argv[1]
 
     parser = build_parser(argv)
