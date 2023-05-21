@@ -12,3 +12,5 @@ class TaskCLITestCase(TestCase):
         taskcli.taskcli.cleanup_for_tests()
 
 
+# TODO:
+# prevent foo(a:list[list[int]]) and other weird complex types if a matching 'arg' is not specified

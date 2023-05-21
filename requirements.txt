@@ -1,1 +1,3 @@
 black
+nox
+isort

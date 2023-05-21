@@ -8,7 +8,7 @@ from taskcli.taskcli import mock_decorator
 log = logging.getLogger(__name__)
 logging = logging.basicConfig(level=logging.DEBUG)
 
-@task()
+@task
 def add_no_type(a,b):
     assert isinstance(a, str)
     assert isinstance(b, str)
@@ -16,7 +16,7 @@ def add_no_type(a,b):
     return a + b
 
 
-@task()
+@task
 def add_typed_int(a:int,b:int):
     # no type, defaults to str
     assert isinstance(a, int)
