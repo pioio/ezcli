@@ -111,7 +111,7 @@ def task(namespace=None, foo=None, env=None, required_env=None):
     else:
         return task_wrapper # ... or 'decorator'
 
-def arg(name, type, choices=None,required=False, help="", metavar=None,dest=None):
+def arg(name, type, choices=None,required=False, help="", metavar=None,dest=None, nargs=None):
     # TODO some missing inthe signature
     def arg_decorator(fn):
         func_name = fn.__name__
@@ -124,6 +124,7 @@ def arg(name, type, choices=None,required=False, help="", metavar=None,dest=None
             'help': help,
             'metavar': metavar,
             'dest': dest,
+            'nargs': nargs,
         }
         if name in task_data_args[func_name]:
             raise Exception(f"Duplicate arg decorator for '{name}' in {func_name}")
@@ -142,7 +143,7 @@ class CustomArgumentParser(argparse.ArgumentParser):
     pass
 
 
-def cli(argv=None, force=False):
+def cli(argv=None, force=False) -> Any:
     if argv is None:
         argv = sys.argv
 
@@ -150,7 +151,7 @@ def cli(argv=None, force=False):
     frame = inspect.currentframe()
     module = inspect.getmodule(frame.f_back)
     if (module.__name__ != "__main__") and not force:
-        return 99
+        return
 
     print("## Dumping the parsed tasks")
     for task_name, task in task_data.items():

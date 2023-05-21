@@ -1,3 +1,4 @@
+from tkinter import N
 from unittest import TestCase
 
 import taskcli
@@ -64,7 +65,6 @@ class TestTaskCliCalls(TestCase):
                 assert isinstance(b, int)
                 return a + b
 
-
     def test_simple3_mixed_definitions(self):
         @task
         @arg("a", type=int)
@@ -75,3 +75,18 @@ class TestTaskCliCalls(TestCase):
 
         ret = cli(argv=["foo", "fun3", "1", "2"], force=True)
         self.assertEqual(ret, 3)
+
+class TestTaskCliCallsLists(TestCase):
+    def setUp(self) -> None:
+        taskcli.taskcli.cleanup_for_tests()
+
+    def test_simple_list_with_arg(self):
+        @task
+        @arg("a", type=int, nargs="+")
+        def fun(a):
+            assert isinstance(a, list)
+            assert isinstance(a[0], int)
+            return a
+
+        ret = cli(argv=["foo", "fun", "1", "2", "3"], force=True)
+        self.assertListEqual(ret, [1,2,3])
