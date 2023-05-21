@@ -4,8 +4,11 @@ import taskcli
 import inspect
 
 from taskcli import cli, task, arg
+from taskcli.taskcli import mock_decorator
 
 class TestTaskcli(TestCase):
+    def setUp(self) -> None:
+        taskcli.taskcli.cleanup_for_tests()
 
     def test_fun_rerunning_cli_works(self):
         @task
@@ -16,11 +19,10 @@ class TestTaskcli(TestCase):
             return a
 
         argv = ["foo", "fun", "1", "2", "3"]
-        ret = cli(argv=argv, force=True)
-        ret = cli(argv=argv, force=True)
+        cli(argv=argv, force=True)
+        cli(argv=argv, force=True)
 
     def test_analyze_signature(self):
-
         def fun(a, b, c):
             pass
 
@@ -82,6 +84,46 @@ class TestTaskCliCalls(TestCase):
         def fun3(a,b:int):
             assert isinstance(a, int)
             assert isinstance(b, int)
+            return a + b
+
+        ret = cli(argv=["foo", "fun3", "1", "2"], force=True)
+        self.assertEqual(ret, 3)
+
+class TestTaskCliDecoratorOrder(TestCase):
+    def setUp(self) -> None:
+        taskcli.taskcli.cleanup_for_tests()
+        print("------------")
+
+    def test_simple3_mixed_definitions_reversed_decorator_order(self):
+        @arg("a", type=int)
+        @task
+        def fun3(a,b:int):
+            assert isinstance(a, int)
+            assert isinstance(b, int)
+            return a + b
+
+        ret = cli(argv=["foo", "fun3", "1", "2"], force=True)
+        self.assertEqual(ret, 3)
+
+    def test_simple3_mixed_definitions_reversed_decorator_order(self):
+        @arg("a", type=int)
+        @task
+        @arg("b", type=int)
+        def fun3(a,b):
+            return a + b
+
+        ret = cli(argv=["foo", "fun3", "1", "2"], force=True)
+        self.assertEqual(ret, 3)
+
+    def test_other_decorator_types(self):
+        @mock_decorator()
+        @arg("a", type=int)
+        @mock_decorator()
+        @task
+        @mock_decorator()
+        @arg("b", type=int)
+        @mock_decorator()
+        def fun3(a,b):
             return a + b
 
         ret = cli(argv=["foo", "fun3", "1", "2"], force=True)
@@ -163,3 +205,31 @@ class TestTaskCliCallsLists(TestCase):
         ret = taskcli.taskcli.dispatch(config, 'fun')
 
         self.assertListEqual(ret, [], "Should have gotten an empty list, list[int] in params should result in nargs=* ")
+
+
+class TestTaskMisuse(TestCase):
+    def setUp(self) -> None:
+        taskcli.taskcli.cleanup_for_tests()
+        print("------------")
+
+    def test_two_task_decorators_fail(self):
+        with self.assertRaisesRegex(Exception, "Duplicate @task decorator"):
+            @task
+            @task
+            def fun():
+                pass
+
+    # Here, because order of decorators is not enforced, we can check only when running cli()
+    # def test_arg_task_required(self):
+    #     with self.assertRaisesRegex(Exception, "Duplicate @task decorator"):
+    #         @arg("a", type=int)
+    #         def fun():
+    #             pass
+
+
+    def test_arg_with_no_matching_param_fails(self):
+        with self.assertRaisesRegex(Exception, "arg decorator for 'a' in function 'fun' does not match any param in the function signature"):
+            @task
+            @arg("a", type=int)
+            def fun():
+                pass

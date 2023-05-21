@@ -26,6 +26,7 @@ def cleanup_for_tests():
     num_tasks = 0
     task_data_params.clear()
     task_data_args.clear()
+    task_data.clear()
 
 
 
@@ -180,6 +181,9 @@ def task(namespace=None, foo=None, env=None, required_env=None):
         data = analyze_signature(fn)
         task_name = data['func_name']
 
+        if task_name in task_data:
+            raise Exception(f"Duplicate @task decorator on function '{task_name}' on line {inspect.getsourcelines(fn)[1]}")
+
         task_data[task_name] = data  # here we store all the raw data
 
 
@@ -202,7 +206,7 @@ def arg(*names, type=EMPTY, default=EMPTY, choices=None,required=EMPTY, help="",
     # TODO some missing inthe signature
     def arg_decorator(fn):
         func_name = fn.__name__
-        data = {
+        func_sig_data = {
             'func_name': func_name,
             'param_names': names, # needs supporting multiple flags
             'type': type,
@@ -218,8 +222,23 @@ def arg(*names, type=EMPTY, default=EMPTY, choices=None,required=EMPTY, help="",
             if name in task_data_args[func_name]:
                 raise Exception(f"Duplicate arg decorator for '{name}' in {func_name}")
 
-        task_data_args[func_name][main_name] = arg_info_to_argparse_kwargs(data)
-        print("decorating function", func_name, "with arg params:", data )
+
+
+        task_data_args[func_name][main_name] = arg_info_to_argparse_kwargs(func_sig_data)
+
+        # check if matching param exists
+        func_sig_data = analyze_signature(fn)
+        task_name = func_sig_data['func_name']
+        found = False
+        for param in func_sig_data['params'].values():
+            name = param['param_name']
+            if name == main_name:
+                found = True
+        if not found:
+            raise Exception(f"arg decorator for '{main_name}' in function '{func_name}' does not match any param in the function signature")
+
+
+        print("decorating function", func_name, "with arg params:", func_sig_data )
 
         @functools.wraps(fn)
         def wrapper(*args, **kwargs):
