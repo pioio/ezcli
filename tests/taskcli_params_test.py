@@ -39,6 +39,17 @@ class TestTaskCliParamOptions(TaskCLITestCase):
         with self.assertRaisesRegex(Exception, "unrecognized arguments: 3"):
             cli(argv=["foo", "fun", "1", "2", "3"] , force=True)
 
+
+    def test_simple_but_long_name(self):
+        @task
+        def fun_fun(a, b):
+            assert isinstance(a, str)
+            assert isinstance(b, str)
+            return a + b
+
+        ret = cli(argv=["foo", "fun-fun", "1", "2"] , force=True)
+        self.assertEqual(ret, "12")
+
     def test_simple2(self):
         @task
         def fun2(a:int,b:int):

@@ -301,7 +301,7 @@ def build_parser(argv, exit_on_error=True):
     parser = ArgumentParser()
 
     assert len(argv) > 1, "No arguments provided"
-    task_name = argv[1]
+    task_name = argv[1].replace("-", "_")
 
 
     TASK_NAME_NOT_FOUND = task_name not in task_data
@@ -352,9 +352,6 @@ def parse(parser,argv):
 def dispatch(config, task_name):
     print("## About to dispatch " + task_name)
     fun = task_data[task_name]['func']
-    print("")
-    print("xxxxxxxxxxxxxxxxxxx", vars(config))
-    print("")
     ret = fun(**vars(config))
     return ret
 
@@ -372,7 +369,7 @@ def cli(argv=None, force=False) -> Any:
     print("## Prepping the parser")
     if len(argv) < 2:
         sys.exit("Error: No task name provided")
-    task_name = argv[1]
+    task_name = argv[1].replace("-", "_")
 
     parser = build_parser(argv)
     config = parse(parser, argv)
