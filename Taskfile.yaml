@@ -1,16 +1,34 @@
 # Taskfile
 version: 3
 
-
-
 tasks:
+
   default: task --list
   init-venv:
+    aliases: [iv]
     desc: Initialize virtual environment
+    status:
+      - test -d venv
     cmds:
-      - python3.11 -m venv venv
-      - source venv/bin/activate && pip install --upgrade setuptools wheel build twine
+      - test -d venv && rm -rf venv || true
+      - python3 -m venv venv
+      - source venv/bin/activate && pip install -e .
       - source venv/bin/activate && pip install -r requirements.txt
+
+  init-venv-build:
+    aliases: [ivb]
+    desc: Initialize build virtual environment
+    env:
+      VENV: source venv-build/bin/activate &&
+    status:
+      - test -d venv-build
+    cmds:
+      - test -d venv-build && rm -rf venv-build || true
+      - python3 -m venv venv-build
+      #- echo $IN_VENV_BUILD && false
+      - source venv-build/bin/activate && python3 -m venv venv-build
+      - source venv-build/bin/activate && pip install --upgrade setuptools wheel build twine
+      - source venv-build/bin/activate && source venv/bin/activate && pip install -r requirements.txt
 
   pre-commit:
     desc: Run pre-commit
@@ -24,36 +42,37 @@ tasks:
   black:
     desc: Run black
     cmds:
-      - black src/taskcli/*.py test/*.py examples/*.py
+      - . venv/bin/activate && black src/taskcli/*.py test/*.py examples/*.py
 
   build:
     desc: build package
     cmds:
-      - source venv/bin/activate && python -m build
+      - . venv-build/bin/activate && python -m build
 
   test:
     desc: Run tests
     aliases: [t]
     cmds:
-      - source venv/bin/activate && python -m unittest discover -s examples -p "*_test.py"
+      #- . venv/bin/activate && python -m unittest discover -s examples -p "*_test.py"
+      - . venv/bin/activate && python -m unittest discover -s tests -p "*_test.py"
 
   all-examples:
     desc: Run all examples
     aliases: [ae]
     cmds:
-      - ./examples/example1.py
-      - ./examples/example1.py hello-world -h
-      - ./examples/example1.py hello-world -hh
-      - ./examples/example1.py hello-world -n 5 -m "Hello!"
-      - ./examples/example1.py hello-world -n 1
+      - . venv/bin/activate && ./examples/example1.py
+      - . venv/bin/activate && ./examples/example1.py hello-world -h
+      - . venv/bin/activate && ./examples/example1.py hello-world -hh
+      - . venv/bin/activate && ./examples/example1.py hello-world -n 5 -m "Hello!"
+      - . venv/bin/activate && ./examples/example1.py hello-world -n 1
 
 
   upload-prod:
     desc: Upload to PyPI
     cmds:
-      - source venv/bin/activate && python -m twine upload dist/taskcli-*
+      - . venv-build/bin/activate && python -m twine upload dist/taskcli-*
 
   upload-test:
     desc: Upload to Test PyPI
     cmds:
-      - source venv/bin/activate && python -m twine upload --repository testpypi dist/taskcli-*
+      - . venv-build/bin/activate && python -m twine upload --repository testpypi dist/taskcli-*
