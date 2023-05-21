@@ -1,4 +1,3 @@
-from tkinter import N
 from unittest import TestCase
 
 import taskcli
@@ -7,6 +6,18 @@ import inspect
 from taskcli import cli, task, arg
 
 class TestTaskcli(TestCase):
+
+    def test_fun_rerunning_cli_works(self):
+        @task
+        @arg("a", type=int, nargs="+")
+        def fun(a:list[int]):
+            assert isinstance(a, list)
+            assert isinstance(a[0], int)
+            return a
+
+        argv = ["foo", "fun", "1", "2", "3"]
+        ret = cli(argv=argv, force=True)
+        ret = cli(argv=argv, force=True)
 
     def test_analyze_signature(self):
 
@@ -37,7 +48,7 @@ class TestTaskCliCalls(TestCase):
 
     def test_simple(self):
         @task
-        def fun(a,b):
+        def fun(a, b):
             assert isinstance(a, str)
             assert isinstance(b, str)
             return 1
@@ -79,6 +90,7 @@ class TestTaskCliCalls(TestCase):
 class TestTaskCliCallsLists(TestCase):
     def setUp(self) -> None:
         taskcli.taskcli.cleanup_for_tests()
+        print("------------")
 
     def test_simple_list_with_arg(self):
         @task
@@ -90,3 +102,64 @@ class TestTaskCliCallsLists(TestCase):
 
         ret = cli(argv=["foo", "fun", "1", "2", "3"], force=True)
         self.assertListEqual(ret, [1,2,3])
+
+    def test_simple_list_with_arg2(self):
+        @task
+        @arg("a", type=int, nargs=3)
+        def fun(a):
+            assert isinstance(a, list)
+            assert isinstance(a[0], int)
+            return a
+
+        ret = cli(argv=["foo", "fun", "1", "2", "3"], force=True)
+        self.assertListEqual(ret, [1,2,3])
+
+    def test_simple_list_with_arg2_raises_on_nargs_mismatch(self):
+        @task
+        @arg("a", type=int, nargs=3)
+        def fun(a):
+            assert isinstance(a, list)
+            assert isinstance(a[0], int)
+            return a
+
+        argv = ["foo", "fun", "1"]
+        parser = taskcli.taskcli.build_parser(argv, exit_on_error=False)
+        from taskcli.taskcli import ParsingError
+        with self.assertRaisesRegex(ParsingError, "the following arguments are required: a"):
+            taskcli.taskcli.parse(parser, argv)
+
+
+    def test_simple_list_without_arg(self):
+        @task
+        def fun(a:list[int]):
+            assert isinstance(a, list)
+            if len(a) > 0:
+                assert isinstance(a[0], int)
+            return a
+
+        argv = ["foo", "fun", "1", "2", "3"]
+        ret = taskcli.cli(argv=argv, force=True)
+        self.assertListEqual(ret, [1,2,3])
+
+        argv = ["foo", "fun", "1", "2", "3", "4"]
+        ret = taskcli.cli(argv=argv, force=True)
+        self.assertListEqual(ret, [1,2,3,4])
+
+        argv = ["foo", "fun"]
+        ret = taskcli.cli(argv=argv, force=True)
+        self.assertListEqual(ret, [])
+
+
+    def test_simple_list_without_arg_results_in_nargs_star(self):
+        @task
+        def fun(a:list[int]):
+            assert isinstance(a, list)
+            assert len(a) == 0
+            return a
+
+        argv = ["foo", "fun"]
+        parser = taskcli.taskcli.build_parser(argv)
+        config = taskcli.taskcli.parse(parser, argv)
+        ret = taskcli.taskcli.dispatch(config, 'fun')
+
+        self.assertListEqual(ret, [], "Should have gotten an empty list, list[int] in params should result in nargs=* ")

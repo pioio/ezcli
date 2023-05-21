@@ -1,3 +1,5 @@
+
+from collections.abc import Callable, Iterable, Sequence
 from email.policy import default
 import functools
 from math import e
@@ -12,13 +14,17 @@ import collections
 log = logging.getLogger("taskcli")
 
 num_tasks = 0
-task_data = {} # data from signatures
+#task_data = {} # data from signatures
+
+task_data = collections.defaultdict(dict) # data from signatures
 task_data_args = collections.defaultdict(dict) # data from @arg decorators
+task_data_params = collections.defaultdict(dict) # data from function signatures
+
 
 def cleanup_for_tests():
     global num_tasks
     num_tasks = 0
-    task_data.clear()
+    task_data_params.clear()
     task_data_args.clear()
 
 
@@ -77,6 +83,78 @@ def analyze_signature(fn):
     }
     return data
 
+def param_info_to_argparse_kwargs(param_data):
+    param_name = param_data['param_name']
+    param_type = param_data['type']
+    param_default = param_data['default']
+
+    ap_kwargs = {}
+    #ap_kwargs['param_names'] = [param_data['param_name']]
+
+    if param_default is not inspect._empty:
+        # if default set, we want a option
+
+        if len(param_name) == 1:
+            ap_kwargs['param_names'] = [f"-{param_name}"]
+        else:
+            ap_kwargs['param_names'] = [f"--{param_name.replace('_', '-')}"]
+            # TODO: add auto-adding short flags, but keep track which exist
+    else:
+        ap_kwargs['param_names'] = [param_name]
+        # if no default set, we want a positional
+        pass
+
+
+    if param_type is not inspect._empty:
+        ap_kwargs['type'] = param_type
+
+        for list_type in [int,str,float,bool]:
+            #print(",,,,,,,," + str(param_type), str(list[list_type]))
+            if param_type == list[list_type]:
+                ap_kwargs['nargs'] = '*'
+                ap_kwargs['type'] = list_type
+
+    if param_default is not inspect._empty:
+        ap_kwargs['default'] = param_default
+
+
+
+    return ap_kwargs
+
+
+def arg_info_to_argparse_kwargs(arg_data):
+    ap_kwargs = {}
+    assert 'param_names' in arg_data, 'arg_data must have a name'
+    ap_kwargs['param_names'] = arg_data['param_names']
+
+    if arg_data.get('type', EMPTY) != EMPTY:
+        ap_kwargs['type'] = arg_data['type']
+    if arg_data.get('default', EMPTY) != EMPTY:
+        ap_kwargs['default'] = arg_data['default']
+
+    if arg_data.get('type') is not None:
+        ap_kwargs['type'] = arg_data['type']
+    if arg_data.get('choices') is not None:
+        ap_kwargs['choices'] = arg_data['choices']
+    if arg_data.get('help') is not None:
+        ap_kwargs['help'] = arg_data['help']
+    if arg_data.get('metavar') is not None:
+        ap_kwargs['metavar'] = arg_data['metavar']
+    if arg_data.get('nargs') is not None:
+        ap_kwargs['nargs'] = arg_data['nargs']
+    if arg_data.get('dest') is not None:
+        ap_kwargs['dest'] = arg_data['dest']
+
+    if arg_data.get('required', EMPTY) != EMPTY:
+        ap_kwargs['required'] = arg_data['required']
+
+
+
+
+    return ap_kwargs
+
+EMPTY=inspect._empty
+
 def trace(msg):
     print(msg)
     pass
@@ -100,9 +178,17 @@ def task(namespace=None, foo=None, env=None, required_env=None):
             return output
 
         data = analyze_signature(fn)
-        func_name = data['func_name']
-        task_data[func_name] = data
-        trace(f"decorating function {func_name}")
+        task_name = data['func_name']
+
+        task_data[task_name] = data  # here we store all the raw data
+
+
+        for param_data in data['params'].values():
+            param_name = param_data['param_name']
+            ap_kwargs = param_info_to_argparse_kwargs(param_data)
+
+            # here, only the prepared argparse args
+            task_data_params[task_name][param_name] = ap_kwargs
 
         return wrapper
 
@@ -111,13 +197,14 @@ def task(namespace=None, foo=None, env=None, required_env=None):
     else:
         return task_wrapper # ... or 'decorator'
 
-def arg(name, type, choices=None,required=False, help="", metavar=None,dest=None, nargs=None):
+
+def arg(*names, type=EMPTY, default=EMPTY, choices=None,required=EMPTY, help="", metavar=None,dest=None, nargs=None):
     # TODO some missing inthe signature
     def arg_decorator(fn):
         func_name = fn.__name__
         data = {
             'func_name': func_name,
-            'name': name, # needs supporting multiple flags
+            'param_names': names, # needs supporting multiple flags
             'type': type,
             'choices': choices,
             'required': required,
@@ -126,11 +213,13 @@ def arg(name, type, choices=None,required=False, help="", metavar=None,dest=None
             'dest': dest,
             'nargs': nargs,
         }
-        if name in task_data_args[func_name]:
-            raise Exception(f"Duplicate arg decorator for '{name}' in {func_name}")
+        main_name = names[0]
+        for name in names:
+            if name in task_data_args[func_name]:
+                raise Exception(f"Duplicate arg decorator for '{name}' in {func_name}")
 
-        task_data_args[func_name][name] = data
-        print("decorating function", func_name, "with arg", name, data)
+        task_data_args[func_name][main_name] = arg_info_to_argparse_kwargs(data)
+        print("decorating function", func_name, "with arg params:", data )
 
         @functools.wraps(fn)
         def wrapper(*args, **kwargs):
@@ -139,10 +228,77 @@ def arg(name, type, choices=None,required=False, help="", metavar=None,dest=None
 
     return arg_decorator
 
-class CustomArgumentParser(argparse.ArgumentParser):
+# class CustomArgumentParser(argparse.ArgumentParser):
+#     pass
+
+class ParsingError(Exception):
     pass
+class ArgumentParser(argparse.ArgumentParser):
+    def error(self, message):
+        # to make it more convenient to unit test
+        self.print_help(sys.stderr)
+        raise ParsingError(message)
+        #self.exit(2, '%s: error: %s\n' % (self.prog, message))
 
+def debug(*args, **kwargs):
+    print("debug:", str(args), str(kwargs))
 
+def build_parser(argv, exit_on_error=True):
+    parser = ArgumentParser()
+
+    assert len(argv) > 1, "No arguments provided"
+    task_name = argv[1]
+
+    if task_name not in task_data_params:
+        print(f"Task {task_name} not found in {task_data_params.keys()}")
+        # TODO support running with a default task
+        sys.exit(111)
+
+    for param_name in task_data_params[task_name].keys():
+
+        DEFINED_VIA_ARG_DECORATOR = param_name in task_data_args[task_name]
+        if DEFINED_VIA_ARG_DECORATOR:
+            ap_kwargs = task_data_args[task_name][param_name]
+            import copy
+            copy_ap_kwargs = copy.deepcopy(ap_kwargs)
+
+            # pop from a copy so that we can rerun cli() in unittest
+            names = copy_ap_kwargs.pop('param_names')
+            print(f"adding arg {param_name} from decoratorr {names} -- {ap_kwargs}")
+
+            debug(*names, **ap_kwargs)
+            parser.add_argument(
+                *names,
+                **copy_ap_kwargs,
+            )
+        else:
+            ap_kwargs = task_data_params[task_name][param_name]
+            import copy
+            copy_ap_kwargs = copy.deepcopy(ap_kwargs)
+            # pop from a copy so that we can rerun cli() in unittest
+            names = copy_ap_kwargs.pop('param_names')
+            print(f"adding arg {param_name} from signature {names} -- {ap_kwargs}")
+
+            debug(*names, **ap_kwargs)
+            parser.add_argument(
+                *names,
+                **copy_ap_kwargs,
+            )
+
+    return parser
+
+def parse(parser,argv):
+    print("## About to parse...")
+    config = parser.parse_args(argv[2:])
+    return config
+
+def dispatch(config, task_name):
+    print("## About to dispatch " + task_name)
+    fun = task_data[task_name]['func']
+    ret = fun(**vars(config))
+    return ret
+
+from typing import Any
 def cli(argv=None, force=False) -> Any:
     if argv is None:
         argv = sys.argv
@@ -153,71 +309,15 @@ def cli(argv=None, force=False) -> Any:
     if (module.__name__ != "__main__") and not force:
         return
 
-    print("## Dumping the parsed tasks")
-    for task_name, task in task_data.items():
-        print(task)
-
     print("## Prepping the parser")
-    parser = argparse.ArgumentParser()
-
-    assert len(argv) > 1, "No arguments provided"
     task_name = argv[1]
 
-    if task_name not in task_data:
-        print(f"Task {task_name} not found in {task_data.keys()}")
-        # TODO support running with a default task
-        sys.exit(111)
+    parser = build_parser(argv)
+    config = parse(parser, argv)
+    ret = dispatch(config, task_name)
 
-    for param_data in task_data[task_name]['params'].values():
-        param_name = param_data['param_name']
-        param_type = param_data['type']
-        param_default = param_data['default']
+    print("## Finished dispatch, returned", ret)
 
-        DEFINED_VIA_ARG_DECORATOR = param_name in task_data_args[task_name]
-        if DEFINED_VIA_ARG_DECORATOR:
-
-            print("adding arg from decoratore")
-            arg_data = task_data_args[task_name][param_name]
-            # TODO check if function signature does not set disallowed or conflicting elements
-
-            kwargs = dict(
-                type=arg_data['type'],
-                choices=arg_data['choices'],
-                #required=arg_data['required'],
-                help=arg_data['help'],
-                metavar=arg_data['metavar'],
-#                dest=arg_data['dest'],
-            )
-            if arg_data['name'].startswith("--"):
-                kwargs['required'] = arg_data['required']
-
-            parser.add_argument(
-                arg_data['name'],
-                **kwargs
-            )
-        else:
-            #raise Exception("Not implemented yet")
-            if param_type is inspect._empty:
-                print("adding arg 1")
-                # TODO support default values
-                parser.add_argument(param_name)
-            else:
-                print("adding arg 2", param_type, param_name)
-                parser.add_argument(param_name, type=param_type)
-
-    print("## About to parse..")
-    try:
-        config = parser.parse_args(argv[2:])
-        print("## About to dispatch " + task_name)
-        fun = task_data[task_name]['func']
-        ret = fun(**vars(config))
-        print("## Finished dispatch, returned", ret)
-
-        pass
-    except SystemExit:
-        #log.exception("Failed to parse arguments")
-        print("Failed to parse arguments")
-        raise
     print("done")
     return ret
 
