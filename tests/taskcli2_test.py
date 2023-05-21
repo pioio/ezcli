@@ -39,19 +39,46 @@ class TestLongerCLI(TaskCLITestCase):
         cli(argv=argv, force=True)
 
 
-
-    @unittest.skip("broken")
-    def test_many_mixed_args_and_params_and_options(self):
+    @unittest.skip("broken, pos-a not remane to pos-a when dispatcihng")
+    def test_proper_name_conversion_from_arg_to_param(self):
         @task
         @arg("pos-a", type=int)
+        @arg("--param-b", type=int)
+        def fun(pos_a, param_b):
+            assert isinstance(pos_a, int)
+            assert isinstance(param_b, int)
+            pass
+
+        argv = "./foo fun 12 --param-b 33".split()
+        cli(argv=argv, force=True)
+
+
+    # def test_many_mixed_args_and_params_and_options(self):
+    #     @task
+    #     @arg("pos-a", type=int)
+    #     @arg("--option-a", type=int, nargs=2)
+    #     def fun(option_a,pos_a, option_p:str="foobar"):
+    #         assert isinstance(option_a, list)
+    #         assert isinstance(option_a[0], int)
+    #         assert isinstance(option_p, str)
+    #         assert isinstance(pos_a, int)
+
+    #     argv = "./foo fun --option-p xxx --option-a 1 42 3".split()
+    #     cli(argv=argv, force=True)
+
+
+
+class TestStuff(TaskCLITestCase):
+
+    def test_basic(self):
+        @task
         @arg("--option-a", type=int, nargs=2)
-        def fun(option_a,pos_a, option_p:str="foobar"):
+        def fun(option_a,pos_a):
             assert isinstance(option_a, list)
             assert isinstance(option_a[0], int)
-            assert isinstance(option_p, str)
-            assert isinstance(pos_a, int)
+            assert isinstance(pos_a, str)
 
-        argv = "./foo fun --option-p xxx --option-a 1 42 3".split(" ")
+        argv = "./foo fun  --option-a 1 42 xxx".split()
         cli(argv=argv, force=True)
 
 

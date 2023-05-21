@@ -112,6 +112,8 @@ def param_info_to_argparse_kwargs(param_data):
         for list_type in [int,str,float,bool]:
             #print(",,,,,,,," + str(param_type), str(list[list_type]))
             if param_type == list[list_type]:
+                if param_default is not inspect._empty:
+                    raise Exception(f"Function params ({param_name}) of type 'list' must not have a default value. Use an @arg decorator instead.")
                 ap_kwargs['nargs'] = '*'
                 ap_kwargs['type'] = list_type
 
@@ -128,6 +130,18 @@ def param_info_to_argparse_kwargs(param_data):
 
     if param_type is bool and param_default is inspect._empty:
         raise Exception("bool params must have a default value, otherwise they will be always true")
+
+    if param_default is not inspect._empty:
+        ap_kwargs['help'] = f"(default: {param_default})"
+
+    #if param_default is inspect._empty:
+    #    ap_kwargs['required'] = True
+
+    # validations
+    # print("aaaaaaaaaaaaaaaa")
+    # print("validating", param_name, param_type, param_default)
+    # if param_type == list and param_default is not inspect._empty:
+
 
     return ap_kwargs
 
@@ -234,14 +248,17 @@ def arg(*names, type=EMPTY, default=EMPTY, choices=None,required=EMPTY, help="",
             'dest': dest,
             'nargs': nargs,
         }
+
+
         main_name = names[0].lstrip('-').replace('-', '_')
+
+        # assert no duplicates
         for name in names:
             if name in task_data_args[func_name]:
                 raise Exception(f"Duplicate arg decorator for '{name}' in {func_name}")
 
-
-
         task_data_args[func_name][main_name] = arg_info_to_argparse_kwargs(func_sig_data)
+
 
         # check if matching param exists
         func_sig_data = analyze_signature(fn)
@@ -286,7 +303,10 @@ def build_parser(argv, exit_on_error=True):
     assert len(argv) > 1, "No arguments provided"
     task_name = argv[1]
 
-    if task_name not in task_data_params:
+
+    TASK_NAME_NOT_FOUND = task_name not in task_data
+    OTHER_TASKS_ARE_DEFINED = len(task_data) > 0  # without this check, if there's no params at all, it would crash
+    if TASK_NAME_NOT_FOUND and OTHER_TASKS_ARE_DEFINED:
         print(f"Task {task_name} not found in {task_data_params.keys()}")
         # TODO support running with a default task
         sys.exit(111)
@@ -301,9 +321,9 @@ def build_parser(argv, exit_on_error=True):
 
             # pop from a copy so that we can rerun cli() in unittest
             names = copy_ap_kwargs.pop('param_names')
-            print(f"adding arg {param_name} from decoratorr {names} -- {ap_kwargs}")
+            print(f"adding arg {param_name} from decoratorr {names} -- {copy_ap_kwargs}")
 
-            debug(*names, **ap_kwargs)
+            debug(*names, **copy_ap_kwargs)
             parser.add_argument(
                 *names,
                 **copy_ap_kwargs,
@@ -314,9 +334,9 @@ def build_parser(argv, exit_on_error=True):
             copy_ap_kwargs = copy.deepcopy(ap_kwargs)
             # pop from a copy so that we can rerun cli() in unittest
             names = copy_ap_kwargs.pop('param_names')
-            print(f"adding arg {param_name} from signature {names} -- {ap_kwargs}")
+            print(f"adding arg {param_name} from signature {names} -- {copy_ap_kwargs}")
 
-            debug(*names, **ap_kwargs)
+            debug(*names, **copy_ap_kwargs)
             parser.add_argument(
                 *names,
                 **copy_ap_kwargs,
@@ -332,6 +352,9 @@ def parse(parser,argv):
 def dispatch(config, task_name):
     print("## About to dispatch " + task_name)
     fun = task_data[task_name]['func']
+    print("")
+    print("xxxxxxxxxxxxxxxxxxx", vars(config))
+    print("")
     ret = fun(**vars(config))
     return ret
 
