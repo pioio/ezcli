@@ -225,12 +225,23 @@ def task(namespace=None, foo=None, env=None, required_env=None):
             # this gets called right before the function
             func_name = fn.__name__
 
-            # convert args and kwargs to a list of argpare args
+            required_envx = task_data[func_name]['required_env']
+            if required_envx:
+                missing = []
+                empty = []
+                for env in required_envx:
+                    if env not in os.environ:
+                        missing += [env]
+                    elif os.environ[env] == "":
+                        empty += [env]
 
-
-
-
-
+                if missing or empty:
+                    err = []
+                    if missing:
+                        err += [f"Missing required environment variables: {', '.join(missing)}"]
+                    if empty:
+                        err += [f"Empty required environment variables: {', '.join(empty)}"]
+                    sys.exit("Error: " + ", ".join(err))
 
             output = fn(*args, **kwargs)
             return output
@@ -398,7 +409,16 @@ def parse(parser,argv):
 def dispatch(config, task_name):
     print("## About to dispatch " + task_name)
     fun = task_data[task_name]['func']
-    ret = fun(**vars(config))
+    # resolve reference to original function to its decorated variant
+    # this way decorators trigger when we call it
+    module_name = task_data[task_name]['module']
+    module = sys.modules[module_name]
+    decorated_function = getattr(module, fun.__name__)
+
+    # decorated function
+
+
+    ret = decorated_function(**vars(config))
     return ret
 
 from typing import Any
