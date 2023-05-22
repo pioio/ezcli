@@ -54,8 +54,6 @@ class TestTaskCliCalls(TestCase):
     def setUp(self) -> None:
         taskcli.taskcli.cleanup_for_tests()
 
-
-
     def test_simple3_mixed_definitions_raises_on_dup(self):
         with self.assertRaisesRegex(Exception, "Duplicate arg decorator for 'a' in fun3"):
             @task

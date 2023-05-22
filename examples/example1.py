@@ -36,5 +36,12 @@ def alist(a:list[int]):
     log.info(a)
     return a
 
+@task(required_env=["FOOBAR", "BAR"])
+@arg("a", type=int, help="a help example")
+def add_with_def(a:int,b:int=1):
+    assert isinstance(a, int)
+    assert isinstance(b, int)
+    log.info (a + b)
+    return a + b
 
 cli()

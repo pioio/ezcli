@@ -17,3 +17,4 @@ def add_no_type(a,b):
 
 # TODO
 - make everythin a option. Require @arg for positional args.
+- also print env vars in help

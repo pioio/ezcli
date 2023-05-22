@@ -146,8 +146,30 @@ def param_info_to_argparse_kwargs(param_data):
     # print("validating", param_name, param_type, param_default)
     # if param_type == list and param_default is not inspect._empty:
 
-
+    common_ap_kwargs_changes(ap_kwargs)
     return ap_kwargs
+
+
+def common_ap_kwargs_changes(ap_kwargs):
+
+    IS_POSITIONAL = ap_kwargs['param_names'][0] != '-'
+    IS_REQUIRED = ap_kwargs.get('required', False)
+    HAS_NOT_DEFAULT = 'default' not in ap_kwargs.keys()
+
+    if (IS_POSITIONAL or IS_REQUIRED):
+
+        if sys.stderr.isatty() and sys.stdout.isatty():
+            RED = '\033[91m'
+            ENDC = '\033[0m'
+        else:
+            RED = ''
+            ENDC = ''
+
+        if HAS_NOT_DEFAULT:
+            help = ap_kwargs.get('help', '')
+            ap_kwargs['help'] = f"{help} {RED}(required){ENDC}"
+        else:
+            ap_kwargs['help'] = f"(default: {ap_kwargs['default']})"
 
 
 def arg_info_to_argparse_kwargs(arg_data):
@@ -178,7 +200,7 @@ def arg_info_to_argparse_kwargs(arg_data):
 
 
 
-
+    common_ap_kwargs_changes(ap_kwargs)
     return ap_kwargs
 
 EMPTY=inspect._empty
@@ -214,6 +236,9 @@ def task(namespace=None, foo=None, env=None, required_env=None):
             return output
 
         data = analyze_signature(fn)
+
+        data['required_env'] = required_env
+
         task_name = data['func_name']
 
         if task_name in task_data:
@@ -297,6 +322,23 @@ class ArgumentParser(argparse.ArgumentParser):
         self.print_help(sys.stderr)
         raise ParsingError(message)
         #self.exit(2, '%s: error: %s\n' % (self.prog, message))
+    def print_help(self, *args, **kwargs):
+        super().print_help(*args, **kwargs)
+        #print("taskcli: error: the following arguments are required: -a")
+        if hasattr(self, '_required_env') and self._required_env:
+            # print to stderr
+            print(f"", file=sys.stderr)
+            print(f"environment variables:", file=sys.stderr)
+            for env in self._required_env:
+                if env not in os.environ:
+                    print(f"  {env} {RED}(missing){ENDC}", file=sys.stderr)
+                elif os.environ[env] == "":
+                    print(f"  {env} {RED}(empty){ENDC}", file=sys.stderr)
+                else:
+                    print(f"  {env} ", file=sys.stderr)
+
+    def set_env(self, required_env):
+        self._required_env = required_env
 
 def debug(*args, **kwargs):
     print("debug:", str(args), str(kwargs))
@@ -376,6 +418,11 @@ def cli(argv=None, force=False) -> Any:
     task_name = argv[1].replace("-", "_")
 
     parser = build_parser(argv)
+    # add env data
+    if task_data[task_name]['required_env']:
+        parser.set_env(task_data[task_name]['required_env'])
+
+
     config = parse(parser, argv)
     ret = dispatch(config, task_name)
 
