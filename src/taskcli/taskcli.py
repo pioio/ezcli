@@ -92,18 +92,22 @@ def param_info_to_argparse_kwargs(param_data):
     ap_kwargs = {}
     #ap_kwargs['param_names'] = [param_data['param_name']]
 
-    if param_default is not inspect._empty:
-        # if default set, we want a option
+    # if param_default is not inspect._empty:
+    #     # if default set, we want a option
 
-        if len(param_name) == 1:
-            ap_kwargs['param_names'] = [f"-{param_name}"]
-        else:
-            ap_kwargs['param_names'] = [f"--{param_name.replace('_', '-')}"]
-            # TODO: add auto-adding short flags, but keep track which exist
+    # regardless off if we have a default or not, we want a option
+    if len(param_name) == 1:
+        ap_kwargs['param_names'] = [f"-{param_name}"]
     else:
-        ap_kwargs['param_names'] = [param_name]
-        # if no default set, we want a positional
-        pass
+        ap_kwargs['param_names'] = [f"--{param_name.replace('_', '-')}"]
+    if param_default is inspect._empty:
+        ap_kwargs['required'] = True
+
+        # TODO: add auto-adding short flags, but keep track which exist
+    # else:
+    #     ap_kwargs['param_names'] = [param_name]
+    #     # if no default set, we want a positional
+    #     pass
 
 
     if param_type is not inspect._empty:

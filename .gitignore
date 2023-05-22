@@ -1,4 +1,5 @@
 src/taskcli/old.py
+.vscode
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

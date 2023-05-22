@@ -31,11 +31,13 @@ class TestTaskCliParamOptions(TaskCLITestCase):
             assert isinstance(b, str)
             return a + b
 
-        ret = cli(argv=["foo", "fun", "1", "2"] , force=True)
+        argv = "./foo fun -a 1 -b 2".split()
+        ret = cli(argv=argv, force=True)
         self.assertEqual(ret, "12")
 
         with self.assertRaisesRegex(Exception, "unrecognized arguments: 3"):
-            cli(argv=["foo", "fun", "1", "2", "3"] , force=True)
+            argv = "./foo fun -a 1 -b 2 3".split()
+            cli(argv=argv , force=True)
 
 
     def test_simple_but_long_name(self):
@@ -45,7 +47,7 @@ class TestTaskCliParamOptions(TaskCLITestCase):
             assert isinstance(b, str)
             return a + b
 
-        ret = cli(argv=["foo", "fun-fun", "1", "2"] , force=True)
+        ret = cli(argv="foo fun_fun -a 1 -b 2".split() , force=True)
         self.assertEqual(ret, "12")
 
     def test_simple2(self):
@@ -55,7 +57,7 @@ class TestTaskCliParamOptions(TaskCLITestCase):
             assert isinstance(b, int)
             return a + b
 
-        ret = cli(argv=["foo", "fun2", "1", "2"], force=True)
+        ret = cli(argv="foo fun2 -a 1 -b 2".split(), force=True)
         self.assertEqual(ret, 3)
 
     def test_param_options(self):
@@ -139,24 +141,23 @@ class TestTaskCliParamsLists(TaskCLITestCase):
     def test_simple_list_without_arg(self):
         @task
         def fun(a:list[int]):
-            assert isinstance(a, list)
+            assert isinstance(a, list), f"expected list[int] got {type(a)}"
             if len(a) > 0:
-                assert isinstance(a[0], int)
+                assert isinstance(a[0], int), f"got {type(a[0])}"
             return a
 
-        argv = ["foo", "fun", "1", "2", "3"]
+
+        argv = "foo fun -a 1 2 3".split()
         ret = taskcli.cli(argv=argv, force=True)
         self.assertListEqual(ret, [1,2,3])
 
-        argv = ["foo", "fun", "1", "2", "3", "4"]
+        argv = "foo fun -a 1 2 3 4".split()
         ret = taskcli.cli(argv=argv, force=True)
         self.assertListEqual(ret, [1,2,3,4])
 
-        # argv = ["foo", "fun"]
-        # ret = taskcli.cli(argv=argv, force=True)
 
-        with self.assertRaisesRegex(Exception, "the following arguments are required: a"):
-            argv = ["foo", "fun"]
+        with self.assertRaisesRegex(Exception, "the following arguments are required: -a"):
+            argv = "foo fun".split()
             ret = taskcli.cli(argv=argv, force=True)
 
 

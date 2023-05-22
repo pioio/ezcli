@@ -23,7 +23,9 @@ class TestTaskCliWeirdDecoratorOrder(TaskCLITestCase):
             assert isinstance(b, int)
             return a + b
 
-        ret = cli(argv=["foo", "fun3", "1", "2"], force=True)
+
+        argv = "./foo fun3 1 -b 2".split()
+        ret = cli(argv=argv, force=True)
         self.assertEqual(ret, 3)
 
     def test_simple3_mixed_definitions_reversed_decorator_order_2(self):

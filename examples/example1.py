@@ -15,7 +15,6 @@ def add_no_type(a,b):
     log.info (a + b)
     return a + b
 
-
 @task
 def add_typed_int(a:int,b:int):
     # no type, defaults to str

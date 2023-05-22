@@ -16,26 +16,28 @@ class TestLongerCLI(TaskCLITestCase):
 
     def test_many_params(self):
         @task
-        def fun(a,b,_int:int,_str:str):
+        def fun(a,b,a_int:int,a_str:str):
             assert isinstance(a, str)
             assert isinstance(b, str)
-            assert isinstance(_int, int)
-            assert isinstance(_str, str)
+            assert isinstance(a_int, int)
+            assert isinstance(a_str, str)
 
-        argv = ["./foo", "fun", "aaa", "bbb", "123", "foobar"]
+        #argv = ["./foo", "fun", "aaa", "bbb", "123", "foobar"]
+        argv = "./foo fun -a aaa -b bbb --a-int 123 --a-str foobar".split()
         cli(argv=argv, force=True)
 
     def test_many_mixed_args_and_params(self):
         @task
         @arg("a", type=float)
         @arg("b", type=str, nargs=2)
-        def fun(a,b,_int:int,_str:str):
+        def fun(a,b,a_int:int,a_str:str):
             assert isinstance(a, float)
             assert isinstance(b, list)
-            assert isinstance(_int, int)
-            assert isinstance(_str, str)
+            assert isinstance(a_int, int)
+            assert isinstance(a_str, str)
 
-        argv = ["./foo", "fun", "1.1", "bbb1", "bbb2", "123", "foobar"]
+
+        argv = "./foo fun 1.1 bbb1 bbb2 --a-int 123 --a-str foobar".split()
         cli(argv=argv, force=True)
 
 
@@ -78,7 +80,7 @@ class TestStuff(TaskCLITestCase):
             assert isinstance(option_a[0], int)
             assert isinstance(pos_a, str)
 
-        argv = "./foo fun  --option-a 1 42 xxx".split()
+        argv = "./foo fun  --option-a 1 42 --pos-a xxx".split()
         cli(argv=argv, force=True)
 
 

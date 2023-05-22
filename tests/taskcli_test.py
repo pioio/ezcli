@@ -74,7 +74,7 @@ class TestTaskCliCalls(TestCase):
             assert isinstance(b, int)
             return a + b
 
-        ret = cli(argv=["foo", "fun3", "1", "2"], force=True)
+        ret = cli(argv="foo fun3 1 -b 2".split(), force=True)
         self.assertEqual(ret, 3)
 
 class TestTaskCliArgOptions(TestCase):
@@ -189,7 +189,7 @@ class TestCallingOtherTasks(TestCase):
         def fun2(a):
             return fun(a)
 
-        ret = cli(argv=["foo", "fun2", "1"], force=True)
+        ret = cli(argv=["foo", "fun2", "-a", "1"], force=True)
         self.assertEqual(ret, "1")
 
 

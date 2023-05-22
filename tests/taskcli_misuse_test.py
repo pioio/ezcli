@@ -59,7 +59,7 @@ class TestTaskMisuse(TestCase):
             assert isinstance(pos_a, str)
             return option_a, pos_a
 
-        argv = "./foo fun xxx_pos_a --option-a 1 42".split()
+        argv = "./foo fun --pos-a xxx_pos_a --option-a 1 42".split()
         a, b = cli(argv=argv, force=True)
 
         self.assertEqual(a, [1,42])
