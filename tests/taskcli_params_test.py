@@ -15,18 +15,18 @@ class TaskCLITestCase(TestCase):
 
 
 class TestTaskCliParamOptions(TaskCLITestCase):
-    def test_simplest_no_params(self):
+    def test_prints_error_if_not_need_arg_specified_when_none_expected(self):
         @task
         def fun():
             return 1
         ret = cli(argv=["foo", "fun"] , force=True)
         self.assertEqual(ret, 1)
 
-        with self.assertRaisesRegex(Exception, "unrecognized arguments:"):
-            with patch("taskcli.taskcli.ArgumentParser.print_help") as ph:
+        with patch("taskcli.taskcli.ArgumentParser.print_help") as ph:
+            with self.assertRaisesRegex(Exception, "unrecognized arguments:"):
                 cli(argv=["foo", "fun", "123"] , force=True)
 
-    def test_simple(self):
+    def test_prints_error_if_not_need_arg_specified_when_two_expected(self):
         @task
         def fun(a, b):
             assert isinstance(a, str)
