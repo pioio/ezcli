@@ -227,6 +227,9 @@ def task(namespace=None, foo=None, env=None, required_env=None):
 
             required_envx = task_data[func_name]['required_env']
             if required_envx:
+                # TODO: allow for * in env var name
+                # TODO: allow for | in env var names
+                # TODO: allow for global defaults
                 missing = []
                 empty = []
                 for env in required_envx:
@@ -402,12 +405,12 @@ def build_parser(argv, exit_on_error=True):
     return parser
 
 def parse(parser,argv):
-    print("## About to parse...")
+    #print("## About to parse...")
     config = parser.parse_args(argv[2:])
     return config
 
 def dispatch(config, task_name):
-    print("## About to dispatch " + task_name)
+    #print("## About to dispatch " + task_name)
     fun = task_data[task_name]['func']
     # resolve reference to original function to its decorated variant
     # this way decorators trigger when we call it
