@@ -15,7 +15,7 @@ class TaskCLITestCase(TestCase):
 
 class TestTaskCliWeirdDecoratorOrder(TaskCLITestCase):
 
-    def test_simple3_mixed_definitions_reversed_decorator_order(self):
+    def test_decorators_work_when_task_is_added_last(self):
         @arg("a", type=int)
         @task
         def fun3(a,b:int):
@@ -28,7 +28,7 @@ class TestTaskCliWeirdDecoratorOrder(TaskCLITestCase):
         ret = cli(argv=argv, force=True)
         self.assertEqual(ret, 3)
 
-    def test_simple3_mixed_definitions_reversed_decorator_order_2(self):
+    def test_decorators_work_when_task_is_in_between(self):
         @arg("a", type=int)
         @task
         @arg("b", type=int)
@@ -38,7 +38,7 @@ class TestTaskCliWeirdDecoratorOrder(TaskCLITestCase):
         ret = cli(argv=["foo", "fun3", "1", "2"], force=True)
         self.assertEqual(ret, 3)
 
-    def test_other_decorator_types(self):
+    def test_decorators_work_with_third_party_decorators(self):
         @mock_decorator()
         @arg("a", type=int)
         @mock_decorator()

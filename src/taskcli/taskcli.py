@@ -276,7 +276,7 @@ def task(namespace=None, foo=None, env=None, required_env=None):
         return task_wrapper # ... or 'decorator'
 
 
-def arg(*names, type=EMPTY, default=EMPTY, choices=None,required=EMPTY, help="", metavar=None,dest=None, nargs=None):
+def arg(*names, type=None, default=EMPTY, choices=None,required=EMPTY, help="", metavar=None,dest=None, nargs=None):
     # TODO some missing inthe signature
     def arg_decorator(fn):
         func_name = fn.__name__
@@ -438,7 +438,9 @@ def cli(argv=None, force=False) -> Any:
 
     # Detect if we're running as a script or not
     frame = inspect.currentframe()
+    assert frame is not None
     module = inspect.getmodule(frame.f_back)
+    assert module is not None
     if (module.__name__ != "__main__") and not force:
         return
 
