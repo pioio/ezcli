@@ -1,6 +1,7 @@
 # here we test only params, not args
 from unittest import TestCase
 import unittest
+from unittest.mock import patch
 
 import taskcli
 import inspect
@@ -22,7 +23,8 @@ class TestTaskCliParamOptions(TaskCLITestCase):
         self.assertEqual(ret, 1)
 
         with self.assertRaisesRegex(Exception, "unrecognized arguments:"):
-            cli(argv=["foo", "fun", "123"] , force=True)
+            with patch("taskcli.taskcli.ArgumentParser.print_help") as ph:
+                cli(argv=["foo", "fun", "123"] , force=True)
 
     def test_simple(self):
         @task
@@ -36,8 +38,9 @@ class TestTaskCliParamOptions(TaskCLITestCase):
         self.assertEqual(ret, "12")
 
         with self.assertRaisesRegex(Exception, "unrecognized arguments: 3"):
-            argv = "./foo fun -a 1 -b 2 3".split()
-            cli(argv=argv , force=True)
+            with patch("taskcli.taskcli.ArgumentParser.print_help") as ph:
+                argv = "./foo fun -a 1 -b 2 3".split()
+                cli(argv=argv , force=True)
 
 
     def test_simple_but_long_name(self):
@@ -74,10 +77,12 @@ class TestTaskCliParamOptions(TaskCLITestCase):
         self.assertEqual(ret, DEFAULT)
 
         with self.assertRaisesRegex(Exception, "unrecognized arguments:"):
-            cli(argv=["foo", "fun", "123"] , force=True)
+            with patch("taskcli.taskcli.ArgumentParser.print_help") as ph:
+                cli(argv=["foo", "fun", "123"] , force=True)
 
         with self.assertRaisesRegex(Exception, "argument --aa: expected one argument"):
-            cli(argv=["foo", "fun", "--aa"] , force=True)
+            with patch("taskcli.taskcli.ArgumentParser.print_help") as ph:
+                cli(argv=["foo", "fun", "--aa"] , force=True)
 
 
     def test_param_options_only_short(self):
@@ -94,10 +99,12 @@ class TestTaskCliParamOptions(TaskCLITestCase):
         self.assertEqual(ret, 3)
 
         with self.assertRaisesRegex(Exception, "unrecognized arguments:"):
-            cli(argv=["foo", "fun", "123"] , force=True)
+            with patch("taskcli.taskcli.ArgumentParser.print_help") as ph:
+                cli(argv=["foo", "fun", "123"] , force=True)
 
         with self.assertRaisesRegex(Exception, "argument -a: expected one argument"):
-            cli(argv=["foo", "fun", "-a"] , force=True)
+            with patch("taskcli.taskcli.ArgumentParser.print_help") as ph:
+                cli(argv=["foo", "fun", "-a"] , force=True)
 
 
 
@@ -157,8 +164,9 @@ class TestTaskCliParamsLists(TaskCLITestCase):
 
 
         with self.assertRaisesRegex(Exception, "the following arguments are required: -a"):
-            argv = "foo fun".split()
-            ret = taskcli.cli(argv=argv, force=True)
+            with patch("taskcli.taskcli.ArgumentParser.print_help") as ph:
+                argv = "foo fun".split()
+                ret = taskcli.cli(argv=argv, force=True)
 
 
     def test_simple_list_with_defaults_fails(self):

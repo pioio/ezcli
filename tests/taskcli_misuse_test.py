@@ -17,7 +17,7 @@ class TaskCLITestCase(TestCase):
 class TestTaskMisuse(TestCase):
     def setUp(self) -> None:
         taskcli.taskcli.cleanup_for_tests()
-        print("------------")
+        #print("------------")
 
     def test_two_task_decorators_fail(self):
         with self.assertRaisesRegex(Exception, "Duplicate @task decorator"):

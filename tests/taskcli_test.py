@@ -1,5 +1,6 @@
 from unittest import TestCase
 import unittest
+from unittest.mock import patch
 
 import taskcli
 import inspect
@@ -117,10 +118,6 @@ class TestTaskCliArgOptions(TestCase):
         ret = cli(argv=["foo", "fun", "--aaa", "1"], force=True)
         self.assertEqual(ret, 1)
 
-
-
-
-
         # ret = cli(argv=["foo", "fun", "0"], force=True)
         # self.assertEqual(ret, False)
 
@@ -130,7 +127,7 @@ class TestTaskCliArgOptions(TestCase):
 class TestTaskCliCallsLists(TestCase):
     def setUp(self) -> None:
         taskcli.taskcli.cleanup_for_tests()
-        print("------------")
+        #print("------------")
 
     def test_simple_list_with_arg(self):
         @task
@@ -166,7 +163,8 @@ class TestTaskCliCallsLists(TestCase):
         parser = taskcli.taskcli.build_parser(argv, exit_on_error=False)
         from taskcli.taskcli import ParsingError
         with self.assertRaisesRegex(ParsingError, "the following arguments are required: a"):
-            taskcli.taskcli.parse(parser, argv)
+            with patch("taskcli.taskcli.ArgumentParser.print_help") as ph:
+                taskcli.taskcli.parse(parser, argv)
 
 
 
@@ -176,7 +174,7 @@ class TestTaskCliCallsLists(TestCase):
 class TestCallingOtherTasks(TestCase):
     def setUp(self) -> None:
         taskcli.taskcli.cleanup_for_tests()
-        print("------------")
+        #print("------------")
 
     def test_calling_other_tasks(self):
         @task
@@ -207,8 +205,11 @@ class TestCallingOtherTasks(TestCase):
             assert isinstance(a, int)
             return a
 
+
+
         with self.assertRaisesRegex(Exception, "argument a: invalid int value: 'xxxx'"):
-            ret = cli(argv=["foo", "fun", "xxxx"], force=True)
+            with patch("taskcli.taskcli.ArgumentParser.print_help") as ph:
+                ret = cli(argv=["foo", "fun", "xxxx"], force=True)
 
 
     @unittest.skip("Not implemented yet - likely a lot of work")

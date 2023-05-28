@@ -49,7 +49,7 @@ def mock_decorator():
     def decorator(fn):
         @functools.wraps(fn)
         def wrapper(*args, **kwargs):
-            print("mock_decorator")
+        #    print("mock_decorator")
             return fn(*args, **kwargs)
         return wrapper
     return decorator
@@ -316,7 +316,7 @@ def arg(*names, type=EMPTY, default=EMPTY, choices=None,required=EMPTY, help="",
             raise Exception(f"arg decorator for '{main_name}' in function '{func_name}' does not match any param in the function signature")
 
 
-        print("decorating function", func_name, "with arg params:", func_sig_data )
+        #print("decorating function", func_name, "with arg params:", func_sig_data )
 
         @functools.wraps(fn)
         def wrapper(*args, **kwargs):
@@ -331,6 +331,11 @@ def arg(*names, type=EMPTY, default=EMPTY, choices=None,required=EMPTY, help="",
 class ParsingError(Exception):
     pass
 class ArgumentParser(argparse.ArgumentParser):
+    def __init__(self, *args, print_help=True, **kwargs,):
+
+        super().__init__(*args, **kwargs)
+        self._print_help = print_help
+
     def error(self, message):
         # to make it more convenient to unit test
         self.print_help(sys.stderr)
@@ -355,7 +360,8 @@ class ArgumentParser(argparse.ArgumentParser):
         self._required_env = required_env
 
 def debug(*args, **kwargs):
-    print("debug:", str(args), str(kwargs))
+    pass
+    #print("debug:", str(args), str(kwargs))
 
 def build_parser(argv, exit_on_error=True):
     parser = ArgumentParser()
@@ -381,7 +387,7 @@ def build_parser(argv, exit_on_error=True):
 
             # pop from a copy so that we can rerun cli() in unittest
             names = copy_ap_kwargs.pop('param_names')
-            print(f"adding arg {param_name} from decoratorr {names} -- {copy_ap_kwargs}")
+            #print(f"adding arg {param_name} from decoratorr {names} -- {copy_ap_kwargs}")
 
             debug(*names, **copy_ap_kwargs)
             parser.add_argument(
@@ -394,7 +400,7 @@ def build_parser(argv, exit_on_error=True):
             copy_ap_kwargs = copy.deepcopy(ap_kwargs)
             # pop from a copy so that we can rerun cli() in unittest
             names = copy_ap_kwargs.pop('param_names')
-            print(f"adding arg {param_name} from signature {names} -- {copy_ap_kwargs}")
+            #print(f"adding arg {param_name} from signature {names} -- {copy_ap_kwargs}")
 
             debug(*names, **copy_ap_kwargs)
             parser.add_argument(
@@ -412,16 +418,17 @@ def parse(parser,argv):
 def dispatch(config, task_name):
     #print("## About to dispatch " + task_name)
     fun = task_data[task_name]['func']
+    ret = fun(**vars(config))
     # resolve reference to original function to its decorated variant
     # this way decorators trigger when we call it
-    module_name = task_data[task_name]['module']
-    module = sys.modules[module_name]
-    decorated_function = getattr(module, fun.__name__)
-
-    # decorated function
-
-
-    ret = decorated_function(**vars(config))
+    # module_name = task_data[task_name]['module']
+    # module = sys.modules[module_name]
+    # decorated_function = getattr(module, fun.__name__)
+#
+#decorated function
+#
+#
+    # ret = decorated_function(**vars(config))
     return ret
 
 from typing import Any
@@ -435,7 +442,7 @@ def cli(argv=None, force=False) -> Any:
     if (module.__name__ != "__main__") and not force:
         return
 
-    print("## Prepping the parser")
+#    print("## Prepping the parser")
     if len(argv) < 2:
         sys.exit("Error: No task name provided")
     task_name = argv[1].replace("-", "_")
@@ -449,9 +456,9 @@ def cli(argv=None, force=False) -> Any:
     config = parse(parser, argv)
     ret = dispatch(config, task_name)
 
-    print("## Finished dispatch, returned", ret)
+ #   print("## Finished dispatch, returned", ret)
 
-    print("done")
+ #   print("done")
     return ret
 
 
