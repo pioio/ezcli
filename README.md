@@ -49,3 +49,4 @@ In taskcli registering tasks takes place via the `task` decorator
 - [ ] add @task(namespace)
 - [ ] allow importing tasks from other modules, even with same names
   - [ ] Right now, this will likely break task_data_args[func_name][main_name]
+- [ ] Consider support file with functions prefixed with "task_", and use "main" as the default task by default

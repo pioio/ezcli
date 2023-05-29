@@ -2,7 +2,7 @@
 from collections.abc import Callable, Iterable, Sequence
 from email.policy import default
 import functools
-from math import e
+from math import e, exp
 import os
 import inspect
 import argparse
@@ -16,6 +16,9 @@ log = logging.getLogger("taskcli")
 
 #task_data = {} # data from signatures
 
+#     pass
+
+
 class Task:
     def __init__(self) -> None:
         self.signature = {}  # raw signature data of the function/tasks
@@ -27,7 +30,30 @@ class Task:
         # To support decorators being in a different order, and throw errors if @task decorator is specified twice.
         self.task_decorator_seen = False
 
+    @property
+    def name(self):
+        return self.signature['func_name']
+
+    def has_positional_args(self):
+        for arg in self.data_args.values():
+            if arg['param_names'][0] != '-':
+                return True
+        return False
         # self.module_name = None
+
+class Namespace:
+    def __init__(self, tasks):
+        self.tasks = tasks
+
+    def has_default_task(self) -> bool:
+        dt = [t for t in self.tasks.values() if t.is_main]
+        assert len(dt) in [0, 1], f"Expected 0 or 1 main tasks, got {len(dt)}, {dt}"
+        return len(dt) == 1
+
+    def get_default_task(self) -> Task:
+        return [t for t in self.tasks.values() if t.is_main][0]
+
+
 
 tasks = {}
 
@@ -403,11 +429,8 @@ def debug(*args, **kwargs):
     pass
     #print("debug:", str(args), str(kwargs))
 
-def build_parser(argv, exit_on_error=True):
+def build_parser_for_task(task_name, exit_on_error=True):
     parser = ArgumentParser()
-
-    assert len(argv) > 1, "No arguments provided"
-    task_name = argv[1].replace("-", "_")
 
 
     TASK_NAME_NOT_FOUND = task_name not in tasks
@@ -454,7 +477,7 @@ def build_parser(argv, exit_on_error=True):
 
 def parse(parser,argv):
     #print("## About to parse...")
-    config = parser.parse_args(argv[2:])
+    config = parser.parse_args(argv)
     return config
 
 def dispatch(config, task_name):
@@ -486,11 +509,15 @@ def dispatch(config, task_name):
 #             break
     
 
-
 from typing import Any
-def cli(argv=None, force=False) -> Any:
+def cli(argv=None, force=False, explicit_default_task=False) -> Any:
+    """
+
+    implicit_default_task: set this to `True` to prevent parser from treating the only task as the default task.
+    """
     if argv is None:
         argv = sys.argv
+
 
     # Detect if we're running as a script or not
     frame = inspect.currentframe()
@@ -500,14 +527,36 @@ def cli(argv=None, force=False) -> Any:
     if (module.__name__ != "__main__") and not force:
         return
 
-    if len(argv) < 2:
-        raise Exception("NOT IMPLEMENTED - defautl tasks")
-        sys.exit("Error: No task name provided")
-    task_name = argv[1].replace("-", "_")
+    ns = Namespace(tasks)
+    if ns.has_default_task():
+        dt = ns.get_default_task()
+        if dt.has_positional_args() and len(ns.tasks) > 1:
+            raise Exception(f"The default task {dt.name} has positional arguments as they can be confused with names of other tasks. This is not supported. Either make it a named task, or make positional arguments be params instead.")
 
-    parser = build_parser(argv)
+
+    if len(argv) < 2: # only sys.argv[0]
+        if ns.has_default_task():
+            task_name = ns.get_default_task().name
+        else:
+            if len(tasks) == 0:
+                raise Exception("No tasks were defined. Use @task decorator to define tasks.")
+            elif len(tasks) == 1 and not explicit_default_task:
+                task_name = list(tasks.keys())[0]
+            else:
+                raise Exception("No task name provided, and there's no default task defined.")
+    else:
+        assert len(argv) >= 2
+        task_name = argv[1].replace("-", "_")
+        argv = [argv[0]] + argv[2:] # remove task name from argv
+
+    from rich import print
+    #print(argv)
+    argv = argv[1:]
+    #print("task name ", task_name)
+    assert isinstance(task_name, str), f"task name must be a string, got {type(task_name)}, {task_name}"
+    parser = build_parser_for_task(task_name)
     # add env data
-    import rich
+
     if task_name not in tasks or tasks[task_name].task_decorator_seen == False:
         raise Exception(f"Task {task_name} is not among known tasks. Did you forget to add the @task decorator?")
 

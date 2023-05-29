@@ -26,6 +26,16 @@ class TestTaskCliParamOptions(TaskCLITestCase):
             with self.assertRaisesRegex(Exception, "unrecognized arguments:"):
                 cli(argv=["foo", "fun", "123"] , force=True)
 
+    def test_params_with_no_default_are_required(self):
+        @task
+        def fun(a):
+            return a
+
+        with patch("taskcli.taskcli.ArgumentParser.print_help") as ph:
+            with self.assertRaisesRegex(Exception, "the following arguments are required: -a"):
+                cli(argv=["foo", "fun"] , force=True)
+
+
     def test_prints_error_if_not_need_arg_specified_when_two_expected(self):
         @task
         def fun(a, b):

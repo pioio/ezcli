@@ -151,7 +151,7 @@ class TestTaskCliCallsLists(TestCase):
         ret = cli(argv=["foo", "fun", "1", "2", "3"], force=True)
         self.assertListEqual(ret, [1,2,3])
 
-    def test_simple_list_with_arg2_raises_on_nargs_mismatch(self):
+    def test_simple_list_with_arg_raises_on_nargs_mismatch(self):
         @task
         @arg("a", type=int, nargs=3)
         def fun(a):
@@ -160,7 +160,8 @@ class TestTaskCliCallsLists(TestCase):
             return a
 
         argv = ["foo", "fun", "1"]
-        parser = taskcli.taskcli.build_parser(argv, exit_on_error=False)
+        argv = argv[2:] # since we're using build_parser_for_task directly, we need to remove the first two elements
+        parser = taskcli.taskcli.build_parser_for_task(task_name='fun', exit_on_error=False)
         from taskcli.taskcli import ParsingError
         with self.assertRaisesRegex(ParsingError, "the following arguments are required: a"):
             with patch("taskcli.taskcli.ArgumentParser.print_help") as ph:
