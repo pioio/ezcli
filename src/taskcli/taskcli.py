@@ -484,7 +484,8 @@ def dispatch(config, task_name):
 
 from typing import Any
 
-#from rich import print
+# from rich import print
+
 
 def cli(argv=None, force=False, explicit_default_task=False) -> Any:
     """
@@ -521,7 +522,17 @@ def cli(argv=None, force=False, explicit_default_task=False) -> Any:
                 default_text = " (default)" if task.is_main else ""
                 print(f"## {task.name.replace('_', '-')} {default_text}", file=sys.stderr)
                 parser.print_usage(file=sys.stderr)
-                #parser.print_help()
+                # parser.print_help()
+            sys.exit(0)
+        else:
+            # TODO: print help for specified task
+            for task in tasks.values():
+                parser = build_parser_for_task(task.name)
+                print("", file=sys.stderr)
+                default_text = " (default)" if task.is_main else ""
+                print(f"## {task.name.replace('_', '-')} {default_text}", file=sys.stderr)
+                parser.print_usage(file=sys.stderr)
+                # parser.print_help()
             sys.exit(0)
 
     if len(argv) < 2:  # only sys.argv[0]
@@ -535,10 +546,17 @@ def cli(argv=None, force=False, explicit_default_task=False) -> Any:
             else:
                 raise Exception("No task name provided, and there's no default task defined.")
     else:
-        assert len(argv) >= 2
-        task_name = argv[1].replace("-", "_")
-        argv = [argv[0]] + argv[2:]  # remove task name from argv
+        if argv[1].startswith("-") and ns.has_default_task():
 
+            assert len(argv) >= 2
+            task_name = ns.get_default_task().name
+        elif argv[1].startswith("-") and not ns.get_default_task():
+            raise Exception("No task name provided, and there's no default task defined.")
+        else:
+
+            assert len(argv) >= 2
+            task_name = argv[1].replace("-", "_")
+            argv = [argv[0]] + argv[2:]  # remove task name from argv
 
     argv = argv[1:]
     assert isinstance(task_name, str), f"task name must be a string, got {type(task_name)}, {task_name}"
