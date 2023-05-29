@@ -484,6 +484,7 @@ def dispatch(config, task_name):
 
 from typing import Any
 
+#from rich import print
 
 def cli(argv=None, force=False, explicit_default_task=False) -> Any:
     """
@@ -511,6 +512,18 @@ def cli(argv=None, force=False, explicit_default_task=False) -> Any:
                   or make positional arguments be params instead."
             )
 
+    if "-h" in argv or "--help" in argv:
+        idx = argv.index("-h") if "-h" in argv else argv.index("--help")
+        if len(argv) == 2:
+            for task in tasks.values():
+                parser = build_parser_for_task(task.name)
+                print("", file=sys.stderr)
+                default_text = " (default)" if task.is_main else ""
+                print(f"## {task.name.replace('_', '-')} {default_text}", file=sys.stderr)
+                parser.print_usage(file=sys.stderr)
+                #parser.print_help()
+            sys.exit(0)
+
     if len(argv) < 2:  # only sys.argv[0]
         if ns.has_default_task():
             task_name = ns.get_default_task().name
@@ -526,7 +539,6 @@ def cli(argv=None, force=False, explicit_default_task=False) -> Any:
         task_name = argv[1].replace("-", "_")
         argv = [argv[0]] + argv[2:]  # remove task name from argv
 
-    from rich import print
 
     argv = argv[1:]
     assert isinstance(task_name, str), f"task name must be a string, got {type(task_name)}, {task_name}"

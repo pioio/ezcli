@@ -55,6 +55,9 @@ tasks:
       - task: black
       - . venv/bin/activate && python -m unittest discover -s tests -p "*_test.py" {{.CLI_ARGS}} -v
       - . venv/bin/activate && python -m unittest discover -s examples -p "*_test.py" {{.CLI_ARGS}} -v
+      - . venv/bin/activate && examples/defaulttask.py | grep "Hello"
+      - . venv/bin/activate && examples/example1.py -a 1 -b 2
+      - . venv/bin/activate && examples/example1.py -h
 
 
   all-examples:

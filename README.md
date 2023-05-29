@@ -37,6 +37,8 @@ Rationale:
 - The library uses `argparse` behing the scenes.
 
 
+# FIXME
+- [ ] Text in help output broken - does include task name. We should modify parser's print-usage to include task name
 # TODOs
 - [ ] also print env vars in help
 - [ ] add -v to help
