@@ -8,8 +8,6 @@ import argparse
 
 import logging
 
-import collections
-
 log = logging.getLogger("taskcli")
 
 
