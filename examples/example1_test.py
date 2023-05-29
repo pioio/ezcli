@@ -1,11 +1,12 @@
-
 from re import T
 from unittest import TestCase
 
 import example1 as example
 
 import logging
+
 logging.disable(logging.CRITICAL)
+
 
 class TestExample1(TestCase):
     def setUp(self):

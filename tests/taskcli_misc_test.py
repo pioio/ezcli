@@ -8,21 +8,20 @@ import inspect
 from taskcli import cli, task, arg
 from taskcli.taskcli import mock_decorator
 
+
 class TaskCLITestCase(TestCase):
     def setUp(self) -> None:
         taskcli.taskcli.cleanup_for_tests()
 
 
 class TestTaskCliWeirdDecoratorOrder(TaskCLITestCase):
-
     def test_decorators_work_when_task_is_added_last(self):
         @arg("a", type=int)
         @task
-        def fun3(a,b:int):
+        def fun3(a, b: int):
             assert isinstance(a, int)
             assert isinstance(b, int)
             return a + b
-
 
         argv = "./foo fun3 1 -b 2".split()
         ret = cli(argv=argv, force=True)
@@ -32,7 +31,7 @@ class TestTaskCliWeirdDecoratorOrder(TaskCLITestCase):
         @arg("a", type=int)
         @task
         @arg("b", type=int)
-        def fun3(a,b):
+        def fun3(a, b):
             return a + b
 
         ret = cli(argv=["foo", "fun3", "1", "2"], force=True)
@@ -46,7 +45,7 @@ class TestTaskCliWeirdDecoratorOrder(TaskCLITestCase):
         @mock_decorator()
         @arg("b", type=int)
         @mock_decorator()
-        def fun3(a,b):
+        def fun3(a, b):
             return a + b
 
         ret = cli(argv=["foo", "fun3", "1", "2"], force=True)

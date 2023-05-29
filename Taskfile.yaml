@@ -42,7 +42,7 @@ tasks:
   black:
     desc: Run black
     cmds:
-      - . venv/bin/activate && black src/taskcli/*.py test/*.py examples/*.py
+      - . venv/bin/activate && black src/taskcli/*.py tests/*.py examples/*.py --line-length 120
 
   build:
     desc: build package
@@ -53,7 +53,7 @@ tasks:
     desc: Run tests
     aliases: [t]
     cmds:
-      #- . venv/bin/activate && python -m unittest discover -s examples -p "*_test.py"
+      - task: black
       - . venv/bin/activate && python -m unittest discover -s tests -p "*_test.py" {{.CLI_ARGS}} -v
 
 

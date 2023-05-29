@@ -12,20 +12,18 @@ from taskcli.taskcli import mock_decorator
 from taskcli.taskcli import Task
 
 
-
 class TaskCLITestCase(TestCase):
     def setUp(self) -> None:
         taskcli.taskcli.cleanup_for_tests()
 
+
 class TestTaskMain(TaskCLITestCase):
-
-
     def test_main_task_works(self):
         @task(main=True)
         def fun():
             return 1
-        taskcli.cli(argv="foo".split(" "), force=True)
 
+        taskcli.cli(argv="foo".split(" "), force=True)
 
     def test_conflicts(self):
         # if we have a default function with a (unnamed) argument
@@ -35,7 +33,7 @@ class TestTaskMain(TaskCLITestCase):
         # to avoid ambiguity, we raise an error
 
         @task(main=True)
-        @arg("my_arg") # mandatory argument
+        @arg("my_arg")  # mandatory argument
         def fun(my_arg):
             return "fun_was_called"
 
@@ -47,17 +45,18 @@ class TestTaskMain(TaskCLITestCase):
             with self.assertRaisesRegex(Exception, "The default task"):
                 taskcli.cli(argv="foo foobar".split(" "), force=True)
 
-
     def test_if_there_only_one_task_make_it_main(self):
         @task
         def fun():
             return 1
+
         taskcli.cli(argv="foo".split(" "), force=True)
 
     def test_implicit_default_task_works(self):
         @task
         def fun():
             return 1
+
         with patch("taskcli.taskcli.ArgumentParser.print_help") as ph:
             with self.assertRaisesRegex(Exception, "No task name provided, and there's no default task"):
                 taskcli.cli(argv="foo".split(" "), force=True, explicit_default_task=True)
@@ -70,7 +69,7 @@ class TestTaskClass(TaskCLITestCase):
         def fun(a):
             return a
 
-        atask = taskcli.taskcli.tasks['fun']
+        atask = taskcli.taskcli.tasks["fun"]
         self.assertEqual(atask.has_positional_args(), True)
 
     def test_task_class2(self):
@@ -78,5 +77,5 @@ class TestTaskClass(TaskCLITestCase):
         def fun(a):
             return a
 
-        atask = taskcli.taskcli.tasks['fun']
+        atask = taskcli.taskcli.tasks["fun"]
         self.assertEqual(atask.has_positional_args(), False)

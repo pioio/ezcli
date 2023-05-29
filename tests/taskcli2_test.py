@@ -7,22 +7,22 @@ import inspect
 from taskcli import cli, task, arg
 from taskcli.taskcli import mock_decorator
 
+
 class TaskCLITestCase(TestCase):
     def setUp(self) -> None:
         taskcli.taskcli.cleanup_for_tests()
 
 
 class TestLongerCLI(TaskCLITestCase):
-
     def test_many_params(self):
         @task
-        def fun(a,b,a_int:int,a_str:str):
+        def fun(a, b, a_int: int, a_str: str):
             assert isinstance(a, str)
             assert isinstance(b, str)
             assert isinstance(a_int, int)
             assert isinstance(a_str, str)
 
-        #argv = ["./foo", "fun", "aaa", "bbb", "123", "foobar"]
+        # argv = ["./foo", "fun", "aaa", "bbb", "123", "foobar"]
         argv = "./foo fun -a aaa -b bbb --a-int 123 --a-str foobar".split()
         cli(argv=argv, force=True)
 
@@ -30,16 +30,14 @@ class TestLongerCLI(TaskCLITestCase):
         @task
         @arg("a", type=float)
         @arg("b", type=str, nargs=2)
-        def fun(a,b,a_int:int,a_str:str):
+        def fun(a, b, a_int: int, a_str: str):
             assert isinstance(a, float)
             assert isinstance(b, list)
             assert isinstance(a_int, int)
             assert isinstance(a_str, str)
 
-
         argv = "./foo fun 1.1 bbb1 bbb2 --a-int 123 --a-str foobar".split()
         cli(argv=argv, force=True)
-
 
     @unittest.skip("broken, pos-a not remane to pos-a when dispatcihng")
     def test_proper_name_conversion_from_arg_to_param(self):
@@ -53,7 +51,6 @@ class TestLongerCLI(TaskCLITestCase):
 
         argv = "./foo fun 12 --param-b 33".split()
         cli(argv=argv, force=True)
-
 
     # def test_many_mixed_args_and_params_and_options(self):
     #     @task
@@ -69,13 +66,11 @@ class TestLongerCLI(TaskCLITestCase):
     #     cli(argv=argv, force=True)
 
 
-
 class TestStuff(TaskCLITestCase):
-
     def test_basic(self):
         @task
         @arg("--option-a", type=int, nargs=2)
-        def fun(option_a,pos_a):
+        def fun(option_a, pos_a):
             assert isinstance(option_a, list)
             assert isinstance(option_a[0], int)
             assert isinstance(pos_a, str)

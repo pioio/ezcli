@@ -4,7 +4,6 @@ import logging
 
 
 def setup_logging():
-
     level = logging.INFO
     if "-v" in sys.argv[1:]:
         level = logging.DEBUG

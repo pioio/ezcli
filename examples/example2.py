@@ -2,15 +2,16 @@
 
 from taskcli import task, arg, cli
 import logging
+
 log = logging.getLogger(__name__)
 logging = logging.basicConfig(level=logging.DEBUG)
 
 
 @task
-@arg("a", nargs="+", type=int)    # FIXME, without @arg here this results a list of strings
+@arg("a", nargs="+", type=int)  # FIXME, without @arg here this results a list of strings
 def list_ints_with_arg_but_no_type(a):
     assert isinstance(a, list)
-    assert isinstance(a[0], int),  f"Expected int inside the list, got {type(a[0])}"
+    assert isinstance(a[0], int), f"Expected int inside the list, got {type(a[0])}"
     log.info(a)
     return a
 
