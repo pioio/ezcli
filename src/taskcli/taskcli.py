@@ -16,7 +16,8 @@ log = logging.getLogger("taskcli")
 num_tasks = 0
 #task_data = {} # data from signatures
 
-task_data = collections.defaultdict(dict) # data from signatures
+
+task_data = collections.defaultdict(dict) # data from @task decorators
 task_data_args = collections.defaultdict(dict) # data from @arg decorators
 task_data_params = collections.defaultdict(dict) # data from function signatures
 
@@ -260,7 +261,6 @@ def task(namespace=None, foo=None, env=None, required_env=None):
 
         task_data[task_name] = data  # here we store all the raw data
 
-
         for param_data in data['params'].values():
             param_name = param_data['param_name']
             ap_kwargs = param_info_to_argparse_kwargs(param_data)
@@ -270,10 +270,22 @@ def task(namespace=None, foo=None, env=None, required_env=None):
 
         return wrapper
 
+    # Needed, so that we can use "@task" and "@task()" interchangeably
     if callable(namespace):
         return task_wrapper(namespace) # return 'wrapper'
     else:
         return task_wrapper # ... or 'decorator'
+
+# class VerifyDecorators:
+#     def __init__(self):
+#         self.current_task = None
+#         self.previous_task = None
+
+#     def processing_arg(self, func_name):
+#         self.current_task = func_name
+#         if self.previous_task != self.current_task:
+#             for k,v in task_data.items():
+
 
 
 def arg(*names, type=None, default=EMPTY, choices=None,required=EMPTY, help="", metavar=None,dest=None, nargs=None):
@@ -451,6 +463,11 @@ def cli(argv=None, force=False) -> Any:
 
     parser = build_parser(argv)
     # add env data
+    import rich
+    if task_name not in task_data:
+        raise Exception(f"Task {task_name} is not among known tasks. Did you forget to add the @task decorator?")
+
+
     if task_data[task_name]['required_env']:
         parser.set_env(task_data[task_name]['required_env'])
 

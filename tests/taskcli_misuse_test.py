@@ -26,12 +26,20 @@ class TestTaskMisuse(TestCase):
             def fun():
                 pass
 
-    # Here, because order of decorators is not enforced, we can check only when running cli()
-    # def test_arg_task_required(self):
-    #     with self.assertRaisesRegex(Exception, "Duplicate @task decorator"):
-    #         @arg("a", type=int)
-    #         def fun():
-    #             pass
+    #Here, because order of decorators is not enforced, we can check only when running cli()
+    def test_arg_task_required(self):
+        @arg("a", type=int)
+        def fun(a):
+            pass
+
+        with self.assertRaisesRegex(Exception, "Did you forget to add the @task decorator?"):
+            taskcli.cli(argv="foo fun 32".split(" "), force=True)
+
+        def fun_no_arg():
+            pass
+
+        with self.assertRaisesRegex(Exception, "Did you forget to add the @task decorator?"):
+            taskcli.cli(argv="foo fun_no_arg".split(" "), force=True)
 
 
     def test_arg_with_no_matching_param_fails(self):

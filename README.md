@@ -41,3 +41,8 @@ In taskcli registering tasks takes place via the `task` decorator
 - [ ] also print env vars in help
 - [ ] add -v to help
 - [ ] support 'help' syntax
+- [ ] add auto short flags
+- [ ] add "--no-*" versino of bool flags.
+- [ ] add default subtask
+- [ ] allow importing tasks from other modules, even with same names
+  - [ ] Right now, this will likely break task_data_args[func_name][main_name]
