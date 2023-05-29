@@ -7,9 +7,10 @@ log = logging.getLogger(__name__)
 logging = logging.basicConfig(level=logging.DEBUG)
 
 
+
 @task
-@arg("a", nargs="+", type=int)  # FIXME, without @arg here this results a list of strings
-def list_ints_with_arg_but_no_type(a):
+@arg("a", nargs="+", type=int) # FIXME: without 'type' arg here, it results in a list of strings. We should be inferring type from the param type hint
+def list_ints_with_arg_but_no_type(a:list[int]):
     assert isinstance(a, list)
     assert isinstance(a[0], int), f"Expected int inside the list, got {type(a[0])}"
     log.info(a)
@@ -18,18 +19,10 @@ def list_ints_with_arg_but_no_type(a):
 
 @task
 @arg("a", nargs="+", type=int)
-def list_ints_with_arg(a):
+def list_ints_with_arg(a:list[int]):
     assert isinstance(a, list)
     assert isinstance(a[0], int), f"Expected int, got {type(a[0])}"
     log.info(a)
     return a
-
-
-# @task
-# def list_ints_no_arg(a:list[int]):
-#     assert isinstance(a, list)
-#     assert isinstance(a[0], str)
-#     log.info(a)
-#     return a
 
 cli()

@@ -8,8 +8,6 @@ from taskcli.taskcli import mock_decorator
 log = logging.getLogger(__name__)
 logging = logging.basicConfig(level=logging.DEBUG)
 
-# TODO
-
 
 @task(main=True)
 def add_no_type(a, b):

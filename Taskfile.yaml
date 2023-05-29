@@ -25,7 +25,6 @@ tasks:
     cmds:
       - test -d venv-build && rm -rf venv-build || true
       - python3 -m venv venv-build
-      #- echo $IN_VENV_BUILD && false
       - source venv-build/bin/activate && python3 -m venv venv-build
       - source venv-build/bin/activate && pip install --upgrade setuptools wheel build twine
       - source venv-build/bin/activate && source venv/bin/activate && pip install -r requirements.txt
@@ -55,6 +54,7 @@ tasks:
     cmds:
       - task: black
       - . venv/bin/activate && python -m unittest discover -s tests -p "*_test.py" {{.CLI_ARGS}} -v
+      - . venv/bin/activate && python -m unittest discover -s examples -p "*_test.py" {{.CLI_ARGS}} -v
 
 
   all-examples:

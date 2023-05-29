@@ -528,7 +528,6 @@ def cli(argv=None, force=False, explicit_default_task=False) -> Any:
 
     from rich import print
 
-
     argv = argv[1:]
     assert isinstance(task_name, str), f"task name must be a string, got {type(task_name)}, {task_name}"
     parser = build_parser_for_task(task_name)
