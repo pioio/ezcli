@@ -223,11 +223,12 @@ def trace(msg):
     pass
 
 
-def task(namespace=None, foo=None, env=None, required_env=None, main=False):
+def task(namespace=None, foo=None, env=None, required_env=None, main=False, aliases=None):
     """
     ns: command namespace. Allows for laying command in additional namespace
     env: environment variables to assert
     main: if True, this task will be run if no task name is specified
+    aliases: not implemented yet
     """
 
     def task_wrapper(fn):
@@ -312,7 +313,6 @@ def task(namespace=None, foo=None, env=None, required_env=None, main=False):
 #         if self.previous_task != self.current_task:
 #             for k,v in task_data.items():
 
-import rich
 
 
 def arg(
