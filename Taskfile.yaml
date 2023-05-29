@@ -56,6 +56,7 @@ tasks:
       #- . venv/bin/activate && python -m unittest discover -s examples -p "*_test.py"
       - . venv/bin/activate && python -m unittest discover -s tests -p "*_test.py" {{.CLI_ARGS}} -v
 
+
   all-examples:
     desc: Run all examples
     aliases: [ae]

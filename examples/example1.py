@@ -11,7 +11,7 @@ logging = logging.basicConfig(level=logging.DEBUG)
 # TODO
 
 
-@task
+@task(main=True)
 def add_no_type(a,b):
     assert isinstance(a, str)
     assert isinstance(b, str)

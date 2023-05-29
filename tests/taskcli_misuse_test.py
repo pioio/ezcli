@@ -35,11 +35,12 @@ class TestTaskMisuse(TestCase):
         with self.assertRaisesRegex(Exception, "Did you forget to add the @task decorator?"):
             taskcli.cli(argv="foo fun 32".split(" "), force=True)
 
-        def fun_no_arg():
-            pass
+    # def test_task_arg_required(self):
+    #     def fun():
+    #         pass
 
-        with self.assertRaisesRegex(Exception, "Did you forget to add the @task decorator?"):
-            taskcli.cli(argv="foo fun_no_arg".split(" "), force=True)
+    #     with self.assertRaisesRegex(Exception, "Did you forget to add the @task decorator?"):
+    #         taskcli.cli(argv="foo fun-no-argx".split(" "), force=True)
 
 
     def test_arg_with_no_matching_param_fails(self):
@@ -72,3 +73,17 @@ class TestTaskMisuse(TestCase):
 
         self.assertEqual(a, [1,42])
         self.assertEqual(b, "xxx_pos_a")
+
+    def test_raises_if_no_tasks_defined(self):
+        def fun():
+            pass
+
+        with self.assertRaisesRegex(Exception, "No tasks were defined."):
+            taskcli.cli(argv="foo foo".split(" "), force=True)
+
+    def test_raises_if_no_tasks_defined_(self):
+        def fun():
+            pass
+
+        with self.assertRaisesRegex(Exception, "No tasks were defined."):
+            taskcli.cli(argv="foo".split(" "), force=True)

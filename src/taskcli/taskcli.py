@@ -13,21 +13,37 @@ import logging
 import collections
 log = logging.getLogger("taskcli")
 
-num_tasks = 0
+
 #task_data = {} # data from signatures
 
+class Task:
+    def __init__(self) -> None:
+        self.signature = {}  # raw signature data of the function/tasks
+        self.data_args = {}  # data for argparse from @arg decorators
+        self.data_params = {} # data for argparse parsed from the raw function signature (from parameters)
+        self.required_env = None 
+        self.is_main = False
+        
+        # To support decorators being in a different order, and throw errors if @task decorator is specified twice.
+        self.task_decorator_seen = False
 
-task_data = collections.defaultdict(dict) # data from @task decorators
-task_data_args = collections.defaultdict(dict) # data from @arg decorators
-task_data_params = collections.defaultdict(dict) # data from function signatures
+        # self.module_name = None
+
+tasks = {}
+
+# task_data = collections.defaultdict(dict) # data from @task decorators
+# task_data_args = collections.defaultdict(dict) # data from @arg decorators
+# task_data_params = collections.defaultdict(dict) # data from function signatures
 
 
 def cleanup_for_tests():
-    global num_tasks
+    # called form unit test to cleanup global state between invocation.
+    global tasks
     num_tasks = 0
-    task_data_params.clear()
-    task_data_args.clear()
-    task_data.clear()
+    tasks = {}
+    # task_data_params.clear()
+    # task_data_args.clear()
+    # task_data.clear()
 
 
 
@@ -210,23 +226,22 @@ def trace(msg):
     print(msg)
     pass
 
-def task(namespace=None, foo=None, env=None, required_env=None):
+def task(namespace=None, foo=None, env=None, required_env=None, main=False):
     """
     ns: command namespace. Allows for laying command in additional namespace
     env: environment variables to assert
+    main: if True, this task will be run if no task name is specified
     """
-    #namespace = namespace
-    global num_tasks
-    num_tasks += 1
+
 
     def task_wrapper(fn):
-        # this generated the decorator
+        # this generats the decorator
         @functools.wraps(fn)
         def wrapper(*args, **kwargs):
             # this gets called right before the function
             func_name = fn.__name__
 
-            required_envx = task_data[func_name]['required_env']
+            required_envx = tasks[func_name].required_env
             if required_envx:
                 # TODO: allow for * in env var name
                 # TODO: allow for | in env var names
@@ -250,23 +265,34 @@ def task(namespace=None, foo=None, env=None, required_env=None):
             output = fn(*args, **kwargs)
             return output
 
-        data = analyze_signature(fn)
 
-        data['required_env'] = required_env
+        func_signature = analyze_signature(fn)
 
-        task_name = data['func_name']
-
-        if task_name in task_data:
+        task_name = func_signature['func_name']
+        if task_name in tasks and tasks[task_name].task_decorator_seen:
             raise Exception(f"Duplicate @task decorator on function '{task_name}' on line {inspect.getsourcelines(fn)[1]}")
 
-        task_data[task_name] = data  # here we store all the raw data
+        if task_name not in tasks:
+            # could have been set by @arg decorator
+            tasks[task_name] = Task()
+        
+        tasks[task_name].task_decorator_seen = True
 
-        for param_data in data['params'].values():
+        task = tasks[task_name]
+
+        task.required_env = required_env
+        task.is_main = main
+        task.signature = func_signature
+        
+        if task.is_main:
+            for other_tasks in [t for t in tasks.values() if t != task]:
+                if other_tasks.is_main and main:
+                    raise Exception(f"Multiple tasks marked as main. Only one @task decorator per namespace can be marked as main.")
+
+        for param_data in task.signature['params'].values():
             param_name = param_data['param_name']
             ap_kwargs = param_info_to_argparse_kwargs(param_data)
-
-            # here, only the prepared argparse args
-            task_data_params[task_name][param_name] = ap_kwargs
+            task.data_params[param_name] = ap_kwargs
 
         return wrapper
 
@@ -286,7 +312,7 @@ def task(namespace=None, foo=None, env=None, required_env=None):
 #         if self.previous_task != self.current_task:
 #             for k,v in task_data.items():
 
-
+import rich
 
 def arg(*names, type=None, default=EMPTY, choices=None,required=EMPTY, help="", metavar=None,dest=None, nargs=None):
     # TODO some missing inthe signature
@@ -303,29 +329,31 @@ def arg(*names, type=None, default=EMPTY, choices=None,required=EMPTY, help="", 
             'dest': dest,
             'nargs': nargs,
         }
+        
+        if func_name not in tasks:
+            tasks[func_name] = Task()
 
 
-        main_name = names[0].lstrip('-').replace('-', '_')
+        primary_arg_name = names[0].lstrip('-').replace('-', '_')
 
         # assert no duplicates
         for name in names:
-            if name in task_data_args[func_name]:
+            if name in tasks[func_name].data_args:
                 raise Exception(f"Duplicate arg decorator for '{name}' in {func_name}")
 
-        task_data_args[func_name][main_name] = arg_info_to_argparse_kwargs(func_sig_data)
+        tasks[func_name].data_args[primary_arg_name] = arg_info_to_argparse_kwargs(func_sig_data)
 
 
         # check if matching param exists
         func_sig_data = analyze_signature(fn)
-        task_name = func_sig_data['func_name']
         found = False
         for param in func_sig_data['params'].values():
             name = param['param_name']
 
-            if name == main_name:
+            if name == primary_arg_name:
                 found = True
         if not found:
-            raise Exception(f"arg decorator for '{main_name}' in function '{func_name}' does not match any param in the function signature")
+            raise Exception(f"arg decorator for '{primary_arg_name}' in function '{func_name}' does not match any param in the function signature: ")
 
 
         #print("decorating function", func_name, "with arg params:", func_sig_data )
@@ -382,18 +410,20 @@ def build_parser(argv, exit_on_error=True):
     task_name = argv[1].replace("-", "_")
 
 
-    TASK_NAME_NOT_FOUND = task_name not in task_data
-    OTHER_TASKS_ARE_DEFINED = len(task_data) > 0  # without this check, if there's no params at all, it would crash
+    TASK_NAME_NOT_FOUND = task_name not in tasks
+    OTHER_TASKS_ARE_DEFINED = len(tasks) > 0  # without this check, if there's no params at all, it would crash
     if TASK_NAME_NOT_FOUND and OTHER_TASKS_ARE_DEFINED:
-        print(f"Task {task_name} not found in {task_data_params.keys()}")
+        err = f"Task {task_name} not found among '{list(tasks.keys())}' tasks."
         # TODO support running with a default task
-        sys.exit(111)
+        raise Exception(err)
+    if TASK_NAME_NOT_FOUND and not OTHER_TASKS_ARE_DEFINED:
+        raise Exception("No tasks were defined. Use @task decorator to define tasks.")
 
-    for param_name in task_data_params[task_name].keys():
-
-        DEFINED_VIA_ARG_DECORATOR = param_name in task_data_args[task_name]
+    task = tasks[task_name]
+    for param_name in task.data_params.keys():
+        DEFINED_VIA_ARG_DECORATOR = param_name in task.data_args
         if DEFINED_VIA_ARG_DECORATOR:
-            ap_kwargs = task_data_args[task_name][param_name]
+            ap_kwargs = task.data_args[param_name]
             import copy
             copy_ap_kwargs = copy.deepcopy(ap_kwargs)
 
@@ -407,7 +437,7 @@ def build_parser(argv, exit_on_error=True):
                 **copy_ap_kwargs,
             )
         else:
-            ap_kwargs = task_data_params[task_name][param_name]
+            ap_kwargs = task.data_params[param_name]
             import copy
             copy_ap_kwargs = copy.deepcopy(ap_kwargs)
             # pop from a copy so that we can rerun cli() in unittest
@@ -429,7 +459,7 @@ def parse(parser,argv):
 
 def dispatch(config, task_name):
     #print("## About to dispatch " + task_name)
-    fun = task_data[task_name]['func']
+    fun = tasks[task_name].signature["func"]
     ret = fun(**vars(config))
     # resolve reference to original function to its decorated variant
     # this way decorators trigger when we call it
@@ -442,6 +472,20 @@ def dispatch(config, task_name):
 #
     # ret = decorated_function(**vars(config))
     return ret
+
+# def assert_no_name_conflicts():
+#     main_task_data = [k for k,v in tasks.items() if v['is_main']]
+#     if not main_task_data:
+#         return
+#     MAIN_TASK_DEFINED = bool(main_task_data)
+
+#     MAIN_TASK_HAS_POSITIONAL_ARGUMENTS = None
+#     for arg in task_data_args[main_task_data[0]].values():
+#         if arg['param_names'][0] != '-':
+#             MAIN_TASK_HAS_POSITIONAL_ARGUMENTS = True
+#             break
+    
+
 
 from typing import Any
 def cli(argv=None, force=False) -> Any:
@@ -456,28 +500,24 @@ def cli(argv=None, force=False) -> Any:
     if (module.__name__ != "__main__") and not force:
         return
 
-#    print("## Prepping the parser")
     if len(argv) < 2:
+        raise Exception("NOT IMPLEMENTED - defautl tasks")
         sys.exit("Error: No task name provided")
     task_name = argv[1].replace("-", "_")
 
     parser = build_parser(argv)
     # add env data
     import rich
-    if task_name not in task_data:
+    if task_name not in tasks or tasks[task_name].task_decorator_seen == False:
         raise Exception(f"Task {task_name} is not among known tasks. Did you forget to add the @task decorator?")
 
-
-    if task_data[task_name]['required_env']:
-        parser.set_env(task_data[task_name]['required_env'])
-
+    task = tasks[task_name]
+    if task.required_env:
+        parser.set_env(task.required_env)
 
     config = parse(parser, argv)
     ret = dispatch(config, task_name)
 
- #   print("## Finished dispatch, returned", ret)
-
- #   print("done")
     return ret
 
 

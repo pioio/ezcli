@@ -96,7 +96,7 @@ class TestTaskCliArgOptions(TestCase):
         @task
         @arg("-a", type=int)
         def fun(a):
-            assert isinstance(a, int)
+            assert isinstance(a, int), f"Expected int, got {type(a)}"
             return a
 
         ret = cli(argv=["foo", "fun", "-a", "1"], force=True)
