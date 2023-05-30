@@ -46,6 +46,7 @@ tasks:
   build:
     desc: build package
     cmds:
+      - test -d dist && rm -rf dist || true
       - . venv-build/bin/activate && python -m build
 
   test:
