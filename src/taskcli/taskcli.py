@@ -314,7 +314,6 @@ def task(namespace=None, foo=None, env=None, required_env=None, main=False, alia
 #             for k,v in task_data.items():
 
 
-
 def arg(
     *names,
     type=None,
@@ -498,8 +497,8 @@ def cli(argv=None, force=False, explicit_default_task=False) -> Any:
     assert frame is not None
     module = inspect.getmodule(frame.f_back)
     assert module is not None
-    if (module.__name__ != "__main__") and not force:
-        return
+    # if (module.__name__ != "__main__") and not force:
+    #     return
 
     ns = Namespace(tasks)
     if ns.has_default_task():
@@ -545,13 +544,11 @@ def cli(argv=None, force=False, explicit_default_task=False) -> Any:
                 raise Exception("No task name provided, and there's no default task defined.")
     else:
         if argv[1].startswith("-") and ns.has_default_task():
-
             assert len(argv) >= 2
             task_name = ns.get_default_task().name
         elif argv[1].startswith("-") and not ns.get_default_task():
             raise Exception("No task name provided, and there's no default task defined.")
         else:
-
             assert len(argv) >= 2
             task_name = argv[1].replace("-", "_")
             argv = [argv[0]] + argv[2:]  # remove task name from argv
