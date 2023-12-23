@@ -80,7 +80,6 @@ def run_tasks(path) -> tuple[str, str]:
     return stdout.decode(), stderr.decode()
 
 def test_basic2():
-
     stdout, stderr = run_tasks("tests/fixtures/groups.py")
     assert stderr == ""
 
@@ -88,8 +87,23 @@ def test_basic2():
     lines = [line.strip() for line in lines]
     assert lines == [
         "*** default",
-        "* task3",
+        "* task4",
         "*** foobar",
-        "* task2",
         "* task1",
+        "* task2",
+        "* task3",
+    ]
+
+
+def test_sort_important():
+    stdout, stderr = run_tasks("tests/fixtures/sort_important.py")
+    assert stderr == ""
+
+    lines = stdout.splitlines()
+    lines = [line.strip() for line in lines]
+    assert lines == [
+        "* task2", # marked as important
+        "* task1",
+        "* task3",
+        "* task4",
     ]

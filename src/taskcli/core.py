@@ -28,6 +28,17 @@ def run(argv: list[str] | None = None, default:AnyFunction|None=None)->None:
             logging.exception("message")
         raise
 
+def _argh_dispatch_commands(functions:list[AnyFunction], **kwargs)->None:
+    """Custom disaptch function to be able to control name mapping policy.
+
+    The new name mapping policy (BY_NAME_IF_KWONLY) is not the default not, but we want to use it here.
+    Hence, we need this function.
+    """
+    import argparse
+    parser = argparse.ArgumentParser(formatter_class=argh.dispatching.PARSER_FORMATTER)
+    argh.add_commands(parser, functions, name_mapping_policy=argh.assembling.NameMappingPolicy.BY_NAME_IF_KWONLY)
+    argh.dispatch(parser, **kwargs)
+
 def _run_unsafe(argv: list[str] | None = None, default:AnyFunction|None=None)->None:
     argv = argv or sys.argv[1:]
     calling_module = sys.modules[sys._getframe(2).f_globals["__name__"]]
@@ -38,6 +49,13 @@ def _run_unsafe(argv: list[str] | None = None, default:AnyFunction|None=None)->N
     if not calling_module.decorated_functions:
         print("No tasks found, decorate a function with @task")
         sys.exit(1)
+
+
+    # BY_NAME_IF_HAS_DEFAULT is the legacy one, not enabled by default as of 0.30
+    # so, we use BY_NAME_IF_KWONLY, the new recommended one
+    #argh.assembling.NameMappingPolicy.BY_NAME_IF_HAS_DEFAULT = argh.assembling.NameMappingPolicy.BY_NAME_IF_KWONLY
+
+    #name_matching_policy = argh.assembling.NameMappingPolicy.BY_NAME_IF_KWONLY
 
     # Decorate with module name
     def decorate_with_namespace(root_module:Module, functions:list[DecoratedFunction]) -> list[DecoratedFunction]:
@@ -68,12 +86,15 @@ def _run_unsafe(argv: list[str] | None = None, default:AnyFunction|None=None)->N
         #sys.exit(1)
         actual_functions = [func.func for func in functions]
         print("Starting completion", flush=True)
-        argh.dispatch_commands(actual_functions, argv=argv)
+        #argh.dispatch_commands(actual_functions, argv=argv)
+        _argh_dispatch_commands(actual_functions, argv=argv)
 
 
 
     if len(argv) == 0 and default:
-        argh.dispatch_command(default, argv=argv)
+        #argh.dispatch_command(default, argv=argv)
+        _argh_dispatch_commands([default], argv=argv)
+
     # TODO support '--list -vv'
     elif (
         (len(argv) == 0 and not default)
@@ -98,7 +119,8 @@ def _run_unsafe(argv: list[str] | None = None, default:AnyFunction|None=None)->N
         _list_tasks(functions, root_module=root_module, verbose=verbose)
     else:
         actual_functions = [func.func for func in functions]
-        argh.dispatch_commands(actual_functions, argv=argv)
+        #argh.dispatch_commands(actual_functions, argv=argv)
+        _argh_dispatch_commands(actual_functions, argv=argv)
 
 
 
@@ -145,6 +167,34 @@ class SeparatorRow:
     name: str = ""
 
 
+ORDER_TYPE_DEFINITION = "definition"
+ORDER_TYPE_ALPHA = "alpha"
+ORDER_TYPE_DEFAULT = ORDER_TYPE_ALPHA
+
+def _sort_tasks(tasks: list[Task], sort:str, sort_important_first:str) -> list[Task]:
+    names = [task.name for task in tasks]
+
+    presorted = []
+    if sort == ORDER_TYPE_ALPHA:
+        presorted = sorted(tasks, key=lambda task: task.name)
+    else:
+        # dont's sort
+        presorted = tasks
+
+    if sort_important_first:
+        # Bubble the important ones to the top
+        tasks = []
+        for task in presorted:
+            if task.func.important:
+                tasks.append(task)
+        for task in presorted:
+            if not task.func.important:
+                tasks.append(task)
+
+    return tasks
+    return sorted(tasks, key=lambda task: task.name)
+
+
 def _list_tasks(decorated_functions: list[DecoratedFunction], root_module:Any, verbose:int) -> None:
     ENDC = configuration.get_end_color()
 
@@ -155,6 +205,7 @@ def _list_tasks(decorated_functions: list[DecoratedFunction], root_module:Any, v
         assert isinstance(func, DecoratedFunction), f"Expected DecoratedFunction, got {type(func)}"
         task = Task(func=func, name=name)
         tasks.append(task)
+
 
     # TODO: extract groups info
     groups = create_groups(tasks=tasks, group_order=configuration.config.group_order)
@@ -174,6 +225,9 @@ def _list_tasks(decorated_functions: list[DecoratedFunction], root_module:Any, v
     for group_name, tasks in groups.items():
         if len(groups) > 1:
             rows.append(SeparatorRow(name=group_name))
+
+
+        tasks = _sort_tasks(tasks, sort=config.sort, sort_important_first=config.sort_important_first)
 
         for task in tasks:
             row = Row(task)

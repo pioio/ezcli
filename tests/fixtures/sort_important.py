@@ -2,25 +2,26 @@
 
 from taskcli import run_task
 from taskcli import task
-
-def task_group(func, **kwargs):
-    return task(group="foobar", **kwargs)(func)
+import taskcli
 
 # order is mixed, as we want to test sortking
+
+taskcli.config.sort_important_first
+taskcli.config.sort = taskcli.core.ORDER_TYPE_ALPHA
 
 @task
 def task4():
     pass
 
-@task_group
+@task
 def task3():
     pass
 
-@task_group
+@task
 def task1():
     pass
 
-@task_group
+@task(important=True)
 def task2():
     pass
 

@@ -35,6 +35,7 @@ class Colors:
     white: str = COLOR_WHITE
     yellow: str = COLOR_YELLOW
     green: str = COLOR_GREEN
+    pink: str = "\033[95m"
     end: str = COLOR_END
     blue: str = "\033[94m"
     red: str = "\033[91m"
@@ -84,7 +85,7 @@ class Config:
     # foo = {"force": colors.red}
     render_hide_optional_args: list[str] = dataclasses.field(default_factory=list)
 
-    render_format_of_important_tasks: str = "{red}{name}{clear_format}"
+    render_format_of_important_tasks: str = "{pink}{name}{clear_format}"
 
     # The left column (with task name and args) will pref
     # Only rows with very long task names will be longer than this.
@@ -110,6 +111,13 @@ class Config:
 
     # -1 for full terminal width
     render_group_header_len: int = 40
+
+    sort = "alpha" # "alpha"  "definition"
+
+    # If true, tasks marked as important will be shown first.
+    # If false, marking task as important will not impact its position in the list
+    sort_important_first: bool = True
+
 
     #####################################################################
     # Advanced config options
