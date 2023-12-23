@@ -4,11 +4,10 @@ from taskcli import arg
 from taskcli import run as invoke
 from taskcli import run as taskrun
 from taskcli import task
-import taskcli
-import tasks_lint
+#import taskcli
+#import tasks_lint
 
-taskcli.include(tasks_lint, "lint")
-
+#taskcli.include(tasks_lint, "lint")
 
 
 @task
@@ -33,7 +32,7 @@ def ruff():
 @task_lint
 def mypy():
     """Detect code issues."""
-    run("mypy src/")
+    run("mypy src/ --strict")
 
 @task_lint
 def isort():

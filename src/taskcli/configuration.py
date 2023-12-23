@@ -4,6 +4,7 @@
 import dataclasses
 # ENABLE_COLORS = config.render_colors == "auto" and sys.stdout.isatty() or config.render_colors == "always"
 import sys
+from typing import Any, Callable  # noqa: F401
 
 LIST_DETAILS_LOW = 0
 
@@ -72,16 +73,16 @@ class Config:
     render_prefix: str = f"{colors.yellow}*{colors.end} "
 
     # Always show these args in the task list, even if they are optional
-    render_always_show_args: list = dataclasses.field(default_factory=list)
+    render_always_show_args: list[str] = dataclasses.field(default_factory=list)
 
     # Use to hide rarely used params,or params with long, names from the task list to reduce the noise
     # Hidden params still show up in the tab completion.
     # TODO make work
     # XXXXXXXXx
     # TODO hightlight soome arguments in special color
-    render_highligh_params: dict = dataclasses.field(default_factory=dict)
+    render_highligh_params: dict[str,str] = dataclasses.field(default_factory=dict)
     # foo = {"force": colors.red}
-    render_hide_optional_args: list = dataclasses.field(default_factory=list)
+    render_hide_optional_args: list[str] = dataclasses.field(default_factory=list)
 
     render_format_of_important_tasks: str = "{red}{name}{clear_format}"
 
@@ -129,13 +130,13 @@ config = Config()
 
 
 
-def get_end_color():
+def get_end_color() -> str:
     if ENABLE_COLORS:
         return colors.end
     return ""
 
 
-def get_underline():
+def get_underline() -> str:
     if ENABLE_COLORS:
         return COLOR_UNDERLINE
     return ""
@@ -146,6 +147,6 @@ _list_details = 0
 _set_list_show_args = None
 
 
-def set_list_render_fun(callable):
+def set_list_render_fun(callable:Any) -> None:
     global _set_list_show_args
     _set_list_show_args = callable

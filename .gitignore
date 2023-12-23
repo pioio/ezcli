@@ -1,7 +1,10 @@
 src/taskcli/old.py
 .vscode
-
+.env
 venv-build
+
+# for logging tab completion errors
+taskcli-completion-error.log
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

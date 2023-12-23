@@ -1,5 +1,7 @@
-from argh import arg
 
-from .core import arg_optional, include, run, task
+from argh import arg  # type: ignore[import]
 
-__all__ = ["task", "include", "arg_optional", "run", "arg"]
+from . import configuration
+from .core import include, run, task
+
+__all__ = ["task", "include", "arg_optional", "run", "arg", "configuration"]

@@ -4,16 +4,24 @@ import inspect
 import os
 import re
 import sys
+import types
 from typing import Any, Callable
 
-import argh
+import argh  # type: ignore[import]
 
 from . import configuration
 from .configuration import config
 
 
+@dataclasses.dataclass
+class Group:
+    name: str
+    hidden: bool = False
+
+AnyFunction = Callable[..., Any]
+Module = types.ModuleType
 class DecoratedFunction:
-    def __init__(self, func, group, hidden: bool, important: bool):
+    def __init__(self, func:AnyFunction, group:Group, hidden: bool, important: bool):
         self.func = func
         self.group = group
         self.hidden = hidden
@@ -23,22 +31,35 @@ class DecoratedFunction:
 # ENDC = ""
 
 
-def run(argv: list[str] | None = None, default=None):
+
+
+def run(argv: list[str] | None = None, default:AnyFunction|None=None)->None:
+    try:
+        _run_unsafe(argv=argv, default=default)
+    except Exception as _:
+        if "_ARGCOMPLETE" in os.environ and "TASKCLI_LOG_COMPLETION_ERRORS" in os.environ:
+            log_filename = "taskcli-completion-error.log"
+            import logging
+            logging.basicConfig(filename=log_filename, level=logging.DEBUG, format="%(asctime)s %(message)s")
+            logging.exception("message")
+        raise
+
+def _run_unsafe(argv: list[str] | None = None, default:AnyFunction|None=None)->None:
     argv = argv or sys.argv[1:]
-    calling_module = sys.modules[sys._getframe(1).f_globals["__name__"]]
+    calling_module = sys.modules[sys._getframe(2).f_globals["__name__"]]
     root_module = calling_module
     if "decorated_functions" not in calling_module.__dir__():
         # add decorated_functions to module
         calling_module.decorated_functions = [] # type: ignore[attr-defined]
     if not calling_module.decorated_functions:
-        # print("No tasks found, decorate a function with @task")
+        print("No tasks found, decorate a function with @task")
         sys.exit(1)
 
 
 
 
     # Decorate with module name
-    def decorate_with_namespace(root_module, functions):
+    def decorate_with_namespace(root_module:Module, functions:list[DecoratedFunction]) -> list[DecoratedFunction]:
         out = []
         for function in functions:
             func = function.func  # actual python function
@@ -99,7 +120,7 @@ def run(argv: list[str] | None = None, default=None):
 
 
 class Task:
-    def __init__(self, func: DecoratedFunction, name):
+    def __init__(self, func: DecoratedFunction, name:str):
         #assert isinstance(func, DecoratedFunction), f"Expected DecoratedFunction, got {type(task.func)}"
         self.func: DecoratedFunction = func
         self.name = name
@@ -133,7 +154,7 @@ def create_groups(tasks: list[Task], group_order: list[str]) -> dict[str, list[T
         groups[task.func.group.name].append(task)
     return groups
 
-def strip_escape_codes(s):
+def strip_escape_codes(s:str) ->str :
 
     ENDC = configuration.get_end_color()
     UNDERLINE = configuration.get_underline()
@@ -153,7 +174,7 @@ class SeparatorRow:
     name: str = ""
 
 
-def _list_tasks(decorated_functions: list[DecoratedFunction], root_module, verbose):
+def _list_tasks(decorated_functions: list[DecoratedFunction], root_module:Any, verbose:int) -> None:
     ENDC = configuration.get_end_color()
 
     tasks = []
@@ -229,7 +250,7 @@ def _list_tasks(decorated_functions: list[DecoratedFunction], root_module, verbo
     longest_left_col = max(line_lens)
     print_rows(rows, longest_left_col)
 
-def print_rows(rows:list[Row|SeparatorRow], longest_left_col):
+def print_rows(rows:list[Row|SeparatorRow], longest_left_col:int) -> None:
     # Print everything
     for row in rows:
         if isinstance(row, SeparatorRow):
@@ -253,13 +274,13 @@ def print_rows(rows:list[Row|SeparatorRow], longest_left_col):
 
 
 
-class SafeFormatDict(dict):
+class SafeFormatDict(dict[str,str]):
     """Makes placeholders in a string optional,
 
     e.g. "Hello {name}" will be rendered as "Hello {name}" if name is not in the dict.
     """
 
-    def __missing__(self, key):
+    def __missing__(self, key:str) -> str:
         return "{" + key + "}"  # Return the key as is
 
 
@@ -297,13 +318,13 @@ def render_separator_row(name: str) -> str:
 
 
 
-def build_pretty_param_string(task: Task, include_optional=True, include_defaults=True, truncate_long=True) -> str:
+def build_pretty_param_string(task: Task, include_optional:bool=True, include_defaults:bool=True, truncate_long:bool=True) -> str:
     ENDC = configuration.get_end_color()
     pretty_params = build_pretty_param_list(task, include_optional=include_optional, include_defaults=include_defaults)
     return f"{config.render_color_summary},{ENDC}".join(pretty_params)
 
 
-def build_pretty_param_list(task: Task, include_optional=True, include_defaults=True, truncate_long=True) -> list[str]:
+def build_pretty_param_list(task: Task, include_optional:bool=True, include_defaults:bool=True, truncate_long:bool=True) -> list[str]:
     signature = inspect.signature(task.func.func)
 
     ENDC = configuration.get_end_color()
@@ -353,7 +374,7 @@ def build_pretty_param_list(task: Task, include_optional=True, include_defaults=
     return pretty_params
 
 
-def arg_to_cli_arg(arg):
+def arg_to_cli_arg(arg:str) -> str:
     """Convert foo_bar to --foo-bar, and g to -g"""
     if len(arg) == 1:
         return "-" + arg.replace("_", "-")
@@ -361,27 +382,27 @@ def arg_to_cli_arg(arg):
         return "--" + arg.replace("_", "-")
 
 
-def get_mandatory_and_optional_args(arg_spec):
-    """
-    Example:
-      args = ["a", "b", "c"]
-      defaults = ["2", "3"]
-      so, a is mandatory, b and c are optional
-      the defaultas ALWAYS apply from the end of the list
-    """
-    # they could be None, so cast to empty list
-    args = arg_spec.args or []
-    args_defaults = arg_spec.defaults or []
+# def get_mandatory_and_optional_args(arg_spec: inspect.FullArgSpec):
+#     """
+#     Example:
+#       args = ["a", "b", "c"]
+#       defaults = ["2", "3"]
+#       so, a is mandatory, b and c are optional
+#       the defaultas ALWAYS apply from the end of the list
+#     """
+#     # they could be None, so cast to empty list
+#     args = arg_spec.args or []
+#     args_defaults = arg_spec.defaults or []
 
-    if len(args) != len(args_defaults):
-        num_mandatory_args = len(args) - len(args_defaults)
-        mandatory_args = args[:num_mandatory_args]
-        optional_args = args[num_mandatory_args:]
-    else:
-        mandatory_args = []
-        optional_args = args
+#     if len(args) != len(args_defaults):
+#         num_mandatory_args = len(args) - len(args_defaults)
+#         mandatory_args = args[:num_mandatory_args]
+#         optional_args = args[num_mandatory_args:]
+#     else:
+#         mandatory_args = []
+#         optional_args = args
 
-    return mandatory_args, optional_args
+#     return mandatory_args, optional_args
 
 
 
@@ -394,59 +415,53 @@ class Arg:
     is_kwarg: bool = False
 
 
-def get_args(arg_spec) -> list[Arg]:
-    """Return a list of Arg objects, one for each argument of the function."""
-    out = []
-    mandatory_args, optional_args = get_mandatory_and_optional_args(arg_spec)
-    default_args = arg_spec.defaults or []
+# def get_args(arg_spec) -> list[Arg]:
+#     """Return a list of Arg objects, one for each argument of the function."""
+#     out = []
+#     mandatory_args, optional_args = get_mandatory_and_optional_args(arg_spec)
+#     default_args = arg_spec.defaults or []
 
-    out.extend([Arg(name=arg, has_default=False, is_kwarg=False) for arg in mandatory_args])
-    out.extend(
-        [
-            Arg(name=arg, has_default=True, default=default, is_kwarg=False)
-            for arg, default in zip(optional_args, default_args)
-        ]
-    )
+#     out.extend([Arg(name=arg, has_default=False, is_kwarg=False) for arg in mandatory_args])
+#     out.extend(
+#         [
+#             Arg(name=arg, has_default=True, default=default, is_kwarg=False)
+#             for arg, default in zip(optional_args, default_args)
+#         ]
+#     )
 
-    mandatory_kwargs, optional_args = get_mandatory_and_optional_kwargs(arg_spec)
-    default_kwargs = arg_spec.kwonlydefaults or {}
+#     mandatory_kwargs, optional_args = get_mandatory_and_optional_kwargs(arg_spec)
+#     default_kwargs = arg_spec.kwonlydefaults or {}
 
-    out.extend([Arg(name=arg, has_default=False, default=None, is_kwarg=True) for arg in mandatory_kwargs])
-    out.extend(
-        [Arg(name=arg, has_default=True, default=default, is_kwarg=True) for arg, default in default_kwargs.items()]
-    )
+#     out.extend([Arg(name=arg, has_default=False, default=None, is_kwarg=True) for arg in mandatory_kwargs])
+#     out.extend(
+#         [Arg(name=arg, has_default=True, default=default, is_kwarg=True) for arg, default in default_kwargs.items()]
+#     )
 
-    return out
+#     return out
 
 
-def get_mandatory_and_optional_kwargs(arg_spec):
-    # TODO: what is varkw?
-    args = arg_spec.kwonlyargs or []
-    defaults = arg_spec.kwonlydefaults or {}
+# def get_mandatory_and_optional_kwargs(arg_spec:Any)-> :
+#     # TODO: what is varkw?
+#     args = arg_spec.kwonlyargs or []
+#     defaults = arg_spec.kwonlydefaults or {}
 
-    mandatory_args = []
-    optional_args = []
-    for arg in args:
-        if arg in defaults:
-            optional_args.append(arg)
-        else:
-            mandatory_args.append(arg)
-    return mandatory_args, optional_args
+#     mandatory_args = []
+#     optional_args = []
+#     for arg in args:
+#         if arg in defaults:
+#             optional_args.append(arg)
+#         else:
+#             mandatory_args.append(arg)
+#     return mandatory_args, optional_args
 
 
 # TODO: launch task from parent file
 
 
-@dataclasses.dataclass
-class Group:
-    name: str
-    hidden: bool = False
 
 
 
-
-
-def _get_wrapper(func, group: str | Group = "default", hidden: bool = False, prefix: str = "", important: bool = False):
+def _get_wrapper(func:AnyFunction, group: str | Group = "default", hidden: bool = False, prefix: str = "", important: bool = False) -> AnyFunction:
     if isinstance(group, str):
         group = Group(name=group)
     if config.adv_hide_private_tasks and (func.__name__.startswith("_") and not hidden):
@@ -461,12 +476,12 @@ def _get_wrapper(func, group: str | Group = "default", hidden: bool = False, pre
     del kwargs["func"]
     del kwargs["prefix"]
 
-    module_which_defines_task = func.__module__
-    module_which_defines_task = sys.modules[module_which_defines_task]
+    module_which_defines_task_name = func.__module__
+    module_which_defines_task = sys.modules[module_which_defines_task_name]
 
     if "decorated_functions" not in module_which_defines_task.__dir__():
         # add decorated_functions to module
-        module_which_defines_task.decorated_functions = []
+        module_which_defines_task.decorated_functions = [] # type: ignore[attr-defined]
 
     # #module_which_defines_task.__decorated_funs.append(func)
     # #mylib.decorated_functions.append(func)
@@ -477,47 +492,45 @@ def _get_wrapper(func, group: str | Group = "default", hidden: bool = False, pre
     # DecoratedFunction
 
     @functools.wraps(func)
-    def wrapper(*args, **kwargs):
+    def wrapper(*args:list[Any], **kwargs:dict[str,Any]) -> Any:
         return func(*args, **kwargs)
 
     return wrapper
 
 
-def task(*args, **kwargs):
+def task(*args:Any, **kwargs:Any) -> AnyFunction:
     if len(args) == 1 and callable(args[0]):
         # Decorator is used without arguments
         return _get_wrapper(args[0])
     else:
         # Decorator is used with arguments
-        def decorator(func):
+        def decorator(func:AnyFunction) -> AnyFunction:
             return _get_wrapper(func, *args, **kwargs)
 
         return decorator
 
 
-def include(module, change_dir=True, cwd=""):
+def include(module:Module, change_dir:bool=True, cwd:str="") -> None:
     """iterate over functions, functions with decorate @task should be"""
     import inspect
     import sys
 
     if "decorated_functions" not in module.__dir__():
         # add decorated_functions to module
-        module.decorated_functions = []
+        module.decorated_functions = [] # type: ignore[attr-defined]
 
     calling_module = sys.modules[inspect.stack()[1].frame.f_globals["__name__"]]
 
     if "decorated_functions" not in calling_module.__dir__():
         # add decorated_functions to module
-        calling_module.decorated_functions = []
+        calling_module.decorated_functions = [] # type: ignore[attr-defined]
 
-    def change_working_directory(func, new_cwd):
+    def change_working_directory(func:AnyFunction, new_cwd:str) -> Any:
         """change working directory to the directory of the module which defines the task, and then change back"""
-        assert isinstance(func, Callable), f"Expected Callable, got {type(func)}"
-
 
 
         @functools.wraps(func)
-        def wrapper(*args, **kwargs):
+        def wrapper(*args:Any, **kwargs:Any) -> Any:
             cwd = os.getcwd()
             os.chdir(new_cwd)
             try:
@@ -534,8 +547,8 @@ def include(module, change_dir=True, cwd=""):
         if change_dir or cwd:
             if not cwd:
 
-                module_which_defines_task = decorated_fun.func.__module__
-                module_which_defines_task = sys.modules[module_which_defines_task]
+                module_which_defines_task_name = decorated_fun.func.__module__
+                module_which_defines_task = sys.modules[module_which_defines_task_name]
                 cwd = os.path.dirname(inspect.getfile(module_which_defines_task))
             decorated_fun.func = change_working_directory(decorated_fun.func, new_cwd=cwd)
         calling_module.decorated_functions.append(decorated_fun)
@@ -545,9 +558,9 @@ def include(module, change_dir=True, cwd=""):
 
 
 
-def arg_optional(function, argument, *args, **kwargs):
+# def arg_optional(function, argument, *args, **kwargs):
 
-    if argument.replace("--", "") in inspect.signature(function).parameters:
-        # print(f"DECORATING {function.__name__} with {argument}")
-        function = argh.arg(argument, *args, **kwargs)(function)
-    return function
+#     if argument.replace("--", "") in inspect.signature(function).parameters:
+#         # print(f"DECORATING {function.__name__} with {argument}")
+#         function = argh.arg(argument, *args, **kwargs)(function)
+#     return function
