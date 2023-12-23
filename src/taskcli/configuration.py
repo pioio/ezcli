@@ -1,9 +1,9 @@
 # name, desc
 
 
-from contextlib import redirect_stderr
 import dataclasses
-
+# ENABLE_COLORS = config.render_colors == "auto" and sys.stdout.isatty() or config.render_colors == "always"
+import sys
 
 LIST_DETAILS_LOW = 0
 
@@ -42,8 +42,6 @@ class Colors:
 
 colors = Colors()
 
-# ENABLE_COLORS = config.render_colors == "auto" and sys.stdout.isatty() or config.render_colors == "always"
-import sys
 
 ENABLE_COLORS = sys.stdout.isatty()
 if not ENABLE_COLORS:
@@ -129,7 +127,6 @@ class Config:
 
 config = Config()
 
-import sys
 
 
 def get_end_color():

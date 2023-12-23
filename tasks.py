@@ -32,7 +32,6 @@ def lint(group="lint", imporant=True):
 def ruff():
     run("ruff check src/")
 
-
 @task_lint
 def isort():
     run("isort src/ --float-to-top")

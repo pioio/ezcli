@@ -1,12 +1,20 @@
+import dataclasses
+import functools
+import inspect
+import os
+import re
+import sys
+from typing import Any, Callable
+
+import argh
+
+from . import configuration
+from .configuration import config
+
 decorated_functions = []
 
-import functools
-from os import name
 
-import sys
 
-from .configuration import config
-import inspect
 
 
 class DecoratedFunction:
@@ -30,8 +38,9 @@ def run(argv: list[str] | None = None, default=None):
     if not calling_module.decorated_functions:
         # print("No tasks found, decorate a function with @task")
         sys.exit(1)
-    import argh
-    import os
+
+
+
 
     # Decorate with module name
     def decorate_with_namespace(root_module, functions):
@@ -102,8 +111,6 @@ def run(argv: list[str] | None = None, default=None):
         argh.dispatch_commands(actual_functions, argv=argv)
 
 
-import dataclasses
-import argh
 
 
 class Task:
@@ -119,8 +126,6 @@ class Task:
         return self.func.func.__doc__.split("\n")[0]
 
 
-from . import configuration
-from .configuration import config
 
 
 def create_groups(tasks: list[Task], group_order: list[str]) -> dict[str, list[Task]]:
@@ -142,9 +147,7 @@ def create_groups(tasks: list[Task], group_order: list[str]) -> dict[str, list[T
         groups[task.func.group.name].append(task)
     return groups
 
-
 def strip_escape_codes(s):
-    import re
 
     ENDC = configuration.get_end_color()
     UNDERLINE = configuration.get_underline()
@@ -314,7 +317,7 @@ def build_pretty_param_list(task: Task, include_optional=True, include_defaults=
     signature = inspect.signature(task.func.func)
 
     ENDC = configuration.get_end_color()
-    UNDERLINE = configuration.get_underline()
+
     pretty_params = []
     for param in signature.parameters.values():
         param_has_a_default = param.default is not inspect.Parameter.empty
@@ -354,7 +357,7 @@ def build_pretty_param_list(task: Task, include_optional=True, include_defaults=
                     f"{config.render_color_optional_arg}={ENDC}{config.render_color_default_arg}{default_value}{ENDC}"
                 )
             else:
-                rendered += f""
+                rendered += ""
         pretty_params.append(rendered)
 
     return pretty_params
@@ -391,7 +394,6 @@ def get_mandatory_and_optional_args(arg_spec):
     return mandatory_args, optional_args
 
 
-from typing import Any, Callable
 
 
 @dataclasses.dataclass
@@ -490,12 +492,10 @@ def _get_wrapper(func, group: str | Group = "default", hidden: bool = False, pre
 
     return wrapper
 
-import os
 
 def task(*args, **kwargs):
     if len(args) == 1 and callable(args[0]):
         # Decorator is used without arguments
-        func = args[0]
         return _get_wrapper(args[0])
     else:
         # Decorator is used with arguments
@@ -507,7 +507,8 @@ def task(*args, **kwargs):
 
 def include(module, change_dir=True, cwd=""):
     """iterate over functions, functions with decorate @task should be"""
-    import inspect, sys
+    import inspect
+    import sys
 
     if "decorated_functions" not in module.__dir__():
         # add decorated_functions to module
@@ -542,7 +543,6 @@ def include(module, change_dir=True, cwd=""):
         # Decorate with CWD change
         if change_dir or cwd:
             if not cwd:
-                import os
 
                 module_which_defines_task = decorated_fun.func.__module__
                 module_which_defines_task = sys.modules[module_which_defines_task]
@@ -554,8 +554,8 @@ def include(module, change_dir=True, cwd=""):
     # calling_module.decorated_functions.extend(module.decorated_functions)
 
 
+
 def arg_optional(function, argument, *args, **kwargs):
-    import inspect, argh
 
     if argument.replace("--", "") in inspect.signature(function).parameters:
         # print(f"DECORATING {function.__name__} with {argument}")
