@@ -107,3 +107,17 @@ def test_sort_important():
         "* task3",
         "* task4",
     ]
+
+import taskcli
+from taskcli.core import _extract_extra_args, TaskCLI
+
+def test_extracting_double_hyphen_args():
+    args = ["foo", "--", "--baz", "--bar"]
+    task_cli = TaskCLI()
+    args = _extract_extra_args(args, task_cli)
+    assert args == ["foo"]
+    assert task_cli.extra_args_list == ["--baz", "--bar"]
+
+    taskcli.core.task_cli = task_cli
+    assert taskcli.extra_args_list() == ["--baz", "--bar"]
+    assert taskcli.extra_args() == "--baz --bar"

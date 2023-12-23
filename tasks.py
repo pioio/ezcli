@@ -56,11 +56,14 @@ def lint():
     ruff()
     mypy()
 
+DEFAULT_LINT_PATH = "src/"
 
 @task(group="lint")
-def ruff(path:str|None=None):
+def ruff(path:str="src/"):
     """Detect code issues."""
-    run(f"ruff check {path}")
+    paths = DEFAULT_LINT_PATH or taskcli.args()
+    taskcli.args_list
+    run(f"ruff check {taskcli.args}")
 
 
 @task(group="lint")

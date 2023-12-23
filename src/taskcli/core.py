@@ -10,12 +10,25 @@ import argh  # type: ignore[import]
 from . import configuration
 from .configuration import config
 from .decoratedfunction import DecoratedFunction
-from .task import Task
+from .task import Task, task
 from .types import Any, AnyFunction, Module
 
 # ENDC = ""
 
+class TaskCLI:
+    # Any extra arguments passed to the script after a "--"
+    # They can be retrieved later to easily inject them to commands being run.
+    extra_args_list:list[str] = []
 
+task_cli = TaskCLI()
+
+def extra_args() -> str:
+    """A string containing arguments passed to the script after "--".  See also extra_args_list()."""
+    return " ".join(extra_args_list())
+
+def extra_args_list() -> list[str]:
+    """A list containing arguments passed to the script after "--".  See also extra_args()."""
+    return task_cli.extra_args_list
 
 def run(argv: list[str] | None = None, default:AnyFunction|None=None)->None:
     try:
@@ -39,6 +52,21 @@ def _argh_dispatch_commands(functions:list[AnyFunction], **kwargs)->None:
     argh.add_commands(parser, functions, name_mapping_policy=argh.assembling.NameMappingPolicy.BY_NAME_IF_KWONLY)
     argh.dispatch(parser, **kwargs)
 
+# def _init_library() -> None:
+#     """re-initialize the library"""
+#     global task_cli
+#     task_cli = TaskCLI()
+
+def _extract_extra_args(argv:list[str], task_cli:TaskCLI) -> list[str]:
+    first_double_hyphen = argv.index("--") if "--" in argv else -1
+    if first_double_hyphen == -1:
+        return argv
+    else:
+        task_cli.extra_args_list = argv[first_double_hyphen + 1 :]
+        return argv[:first_double_hyphen]
+
+
+
 def _run_unsafe(argv: list[str] | None = None, default:AnyFunction|None=None)->None:
     argv = argv or sys.argv[1:]
     calling_module = sys.modules[sys._getframe(2).f_globals["__name__"]]
@@ -56,6 +84,9 @@ def _run_unsafe(argv: list[str] | None = None, default:AnyFunction|None=None)->N
     #argh.assembling.NameMappingPolicy.BY_NAME_IF_HAS_DEFAULT = argh.assembling.NameMappingPolicy.BY_NAME_IF_KWONLY
 
     #name_matching_policy = argh.assembling.NameMappingPolicy.BY_NAME_IF_KWONLY
+
+
+    argv = _extract_extra_args(argv, task_cli)
 
     # Decorate with module name
     def decorate_with_namespace(root_module:Module, functions:list[DecoratedFunction]) -> list[DecoratedFunction]:
