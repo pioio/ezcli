@@ -1,8 +1,8 @@
 #!/usr/bin/env python
+from asyncio import run_coroutine_threadsafe
 from run import run
 from taskcli import arg
-from taskcli import run as invoke
-from taskcli import run as taskrun
+from taskcli import run_task
 from taskcli import task
 #import taskcli
 #import tasks_lint
@@ -13,6 +13,15 @@ from taskcli import task
 @task
 def default():
     print("hello")
+
+@task
+def tests():
+    run("pytest tests/ -vvv")
+
+@task
+def nox():
+    """Run extensive tests using nox"""
+    run("nox")
 
 def task_lint(func, **kwargs):
     return task(group="lint", **kwargs)(func)
@@ -40,4 +49,4 @@ def isort():
     run("isort src/ --float-to-top")
 
 if __name__ == "__main__":
-    taskrun()
+    run_task()

@@ -39,9 +39,6 @@ def _run_unsafe(argv: list[str] | None = None, default:AnyFunction|None=None)->N
         print("No tasks found, decorate a function with @task")
         sys.exit(1)
 
-
-
-
     # Decorate with module name
     def decorate_with_namespace(root_module:Module, functions:list[DecoratedFunction]) -> list[DecoratedFunction]:
         out = []
