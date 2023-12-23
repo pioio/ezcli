@@ -1,24 +1,19 @@
 #!/usr/bin/env python
+from run import run
 from taskcli import arg
 from taskcli import run as invoke
 from taskcli import run as taskrun
 from taskcli import task
+import taskcli
+import tasks_lint
 
-# class Run:
-#     def __sub__(self, other) -> None:
-#         self.function(other)
+taskcli.include(tasks_lint, "lint")
 
-#     def function(self, arg):
-#         print(arg)
-#         import os
-#         os.system(arg)
 
-def run(cmd):
-    BLUE = "\033[94m"
-    END = "\033[0m"
-    print(f"{BLUE}@@ {cmd}{END}")
-    import os
-    os.system(cmd)
+
+@task
+def default():
+    print("hello")
 
 def task_lint(func, **kwargs):
     return task(group="lint", **kwargs)(func)
@@ -27,18 +22,23 @@ def task_lint(func, **kwargs):
 def lint(group="lint", imporant=True):
     isort()
     ruff()
+    mypy()
 
 @task_lint
 def ruff():
+    """Detect code issues."""
     run("ruff check src/")
+
+
+@task_lint
+def mypy():
+    """Detect code issues."""
+    run("mypy src/")
 
 @task_lint
 def isort():
+    """Reorder imports, float them to top."""
     run("isort src/ --float-to-top")
-
-@task
-def default():
-    print("hello")
 
 if __name__ == "__main__":
     taskrun()

@@ -1,3 +1,4 @@
 ruff
 nox
 isort
+mypy==1.8.0

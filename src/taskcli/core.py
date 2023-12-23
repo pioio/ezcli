@@ -11,11 +11,6 @@ import argh
 from . import configuration
 from .configuration import config
 
-decorated_functions = []
-
-
-
-
 
 class DecoratedFunction:
     def __init__(self, func, group, hidden: bool, important: bool):
@@ -34,7 +29,7 @@ def run(argv: list[str] | None = None, default=None):
     root_module = calling_module
     if "decorated_functions" not in calling_module.__dir__():
         # add decorated_functions to module
-        calling_module.decorated_functions = []
+        calling_module.decorated_functions = [] # type: ignore[attr-defined]
     if not calling_module.decorated_functions:
         # print("No tasks found, decorate a function with @task")
         sys.exit(1)
@@ -69,18 +64,8 @@ def run(argv: list[str] | None = None, default=None):
     if "_ARGCOMPLETE" in os.environ:
         # if completion dos not work, set _ARGCOMPLETE=1 and run task to see the error
         actual_functions = [func.func for func in functions]
-        for f in actual_functions:
-            assert isinstance(f, Callable), f"Expected Callable, got {type(f)}"
         argh.dispatch_commands(actual_functions, argv=argv)
         sys.exit(0)
-    # with open("arghtask.log", "w") as f:
-    #     import os
-    #     f.write(str(os.environ))
-
-    # if running in completion mode,
-    # if  argv[0] == "--completion":
-    # argh.dispatch_commands(calling_module.decorated_functions, argv=argv)
-    # sys.exit(0)
 
     if len(argv) == 0 and default:
         argh.dispatch_command(default, argv=argv)
@@ -115,10 +100,11 @@ def run(argv: list[str] | None = None, default=None):
 
 class Task:
     def __init__(self, func: DecoratedFunction, name):
-        assert isinstance(func, DecoratedFunction), f"Expected DecoratedFunction, got {type(task.func)}"
+        #assert isinstance(func, DecoratedFunction), f"Expected DecoratedFunction, got {type(task.func)}"
         self.func: DecoratedFunction = func
         self.name = name
         self.arg_spec = argh.utils.get_arg_spec(func.func)
+        self.prefix = ""
 
     def get_summary_line(self) -> str:
         if self.func.func.__doc__ is None:
@@ -130,7 +116,7 @@ class Task:
 
 def create_groups(tasks: list[Task], group_order: list[str]) -> dict[str, list[Task]]:
     """Return a dict of group_name -> list of tasks, ordered per group_order, group not listed there will be last."""
-    groups = {}
+    groups:dict[str,list[Task]] = {}
     remaining_tasks = set()
     for expected_group in group_order:
         for task in tasks:
@@ -153,6 +139,18 @@ def strip_escape_codes(s):
     UNDERLINE = configuration.get_underline()
 
     return re.sub(r"\033\[[0-9;]*m", "", s).replace(ENDC, "").replace(UNDERLINE, "")
+
+@dataclasses.dataclass
+class Row:
+    task: Task
+    left_col: str = ""
+    right_col: str = ""
+    extra_lines: list[str] = dataclasses.field(default_factory=list)
+    is_separator = False
+
+@dataclasses.dataclass
+class SeparatorRow:
+    name: str = ""
 
 
 def _list_tasks(decorated_functions: list[DecoratedFunction], root_module, verbose):
@@ -177,20 +175,9 @@ def _list_tasks(decorated_functions: list[DecoratedFunction], root_module, verbo
             prefix = f"{module_name}."
         task.prefix = prefix
 
-    @dataclasses.dataclass
-    class Row:
-        task: Task
-        left_col: str = ""
-        right_col: str = ""
-        extra_lines: list[str] = dataclasses.field(default_factory=list)
-        is_separator = False
-
-    @dataclasses.dataclass
-    class SeparatorRow:
-        name: str = ""
 
     # first, prepare rows, row can how more than one line
-    rows = []
+    rows:list[Row|SeparatorRow] = []
 
     for group_name, tasks in groups.items():
         if len(groups) > 1:
@@ -219,7 +206,7 @@ def _list_tasks(decorated_functions: list[DecoratedFunction], root_module, verbo
                 row.right_col = task.get_summary_line()
             if verbose == 2:
                 args = build_pretty_param_string(task, include_optional=True, include_defaults=False)
-                row.left_col = f"* {task.prefix}{config.render_color_task_name}{task_name}{ENDC} {args}"
+                row.left_col = f"{config.render_prefix}{config.render_color_task_name}{task_name}{ENDC} {args}"
                 row.right_col = task.get_summary_line()
             if verbose == 3:
                 args = build_pretty_param_string(task, include_optional=True, include_defaults=True)
@@ -240,7 +227,9 @@ def _list_tasks(decorated_functions: list[DecoratedFunction], root_module, verbo
     ## determine longest left col
     line_lens = [len(strip_escape_codes(row.left_col)) for row in rows if not isinstance(row, SeparatorRow)]
     longest_left_col = max(line_lens)
+    print_rows(rows, longest_left_col)
 
+def print_rows(rows:list[Row|SeparatorRow], longest_left_col):
     # Print everything
     for row in rows:
         if isinstance(row, SeparatorRow):
@@ -261,6 +250,7 @@ def _list_tasks(decorated_functions: list[DecoratedFunction], root_module, verbo
         print(line)
         for line in row.extra_lines:
             print(config.render_extra_line_indent + line)
+
 
 
 class SafeFormatDict(dict):
