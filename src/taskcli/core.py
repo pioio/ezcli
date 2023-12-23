@@ -65,9 +65,12 @@ def _run_unsafe(argv: list[str] | None = None, default:AnyFunction|None=None)->N
     # to argh, which will print the completion options
     if "_ARGCOMPLETE" in os.environ:
         # if completion dos not work, set _ARGCOMPLETE=1 and run task to see the error
+        #sys.exit(1)
         actual_functions = [func.func for func in functions]
+        print("Starting completion", flush=True)
         argh.dispatch_commands(actual_functions, argv=argv)
-        sys.exit(0)
+
+
 
     if len(argv) == 0 and default:
         argh.dispatch_command(default, argv=argv)
