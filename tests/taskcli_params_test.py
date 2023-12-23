@@ -1,12 +1,11 @@
+import inspect
+import unittest
 # here we test only params, not args
 from unittest import TestCase
-import unittest
 from unittest.mock import patch
 
 import taskcli
-import inspect
-
-from taskcli import cli, task, arg
+from taskcli import arg, cli, task
 from taskcli.taskcli import mock_decorator
 
 

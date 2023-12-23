@@ -1,10 +1,9 @@
-from unittest import TestCase
+import inspect
 import unittest
+from unittest import TestCase
 
 import taskcli
-import inspect
-
-from taskcli import cli, task, arg
+from taskcli import arg, cli, task
 from taskcli.taskcli import mock_decorator
 
 

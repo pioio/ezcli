@@ -1,6 +1,6 @@
+import logging
 # Common code for all examples
 import sys
-import logging
 
 
 def setup_logging():

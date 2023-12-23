@@ -1,15 +1,12 @@
+import inspect
+import unittest
 # Here we run tests that ensure that misuing the api results in errors
 from unittest import TestCase
-import unittest
 from unittest.mock import patch
 
-
 import taskcli
-import inspect
-
-from taskcli import cli, task, arg
-from taskcli.taskcli import mock_decorator
-from taskcli.taskcli import Task
+from taskcli import arg, cli, task
+from taskcli.taskcli import Task, mock_decorator
 
 
 class TaskCLITestCase(TestCase):

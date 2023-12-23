@@ -1,6 +1,5 @@
-import logging
+from .core import task, include, arg_optional, run
 
-log = logging.getLogger(__name__)
-log.debug("Initializing taskcli")
+from argh import arg
 
-from .taskcli import task, cli, arg  # , analyze_signature
+__all__ = ["task", "include", "arg_optional", "run", "arg"]

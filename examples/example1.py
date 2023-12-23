@@ -1,15 +1,14 @@
 #!/usr/bin/env python3
 
-from taskcli import task, cli, arg
 import logging
 
-from taskcli.taskcli import mock_decorator
+from taskcli import arg, run, task
 
 log = logging.getLogger(__name__)
 logging = logging.basicConfig(level=logging.DEBUG)
 
 
-@task(main=True)
+@task()
 def add_no_type(a, b):
     assert isinstance(a, str)
     assert isinstance(b, str)
@@ -40,7 +39,8 @@ def alist(a: list[int]):
     return a
 
 
-@task(required_env=["FOOBAR", "BAR"])
+# @task(required_env=["FOOBAR", "BAR"])
+@task
 @arg("a", type=int, help="a help example")
 def add_with_def(a: int, b: int = 1):
     assert isinstance(a, int)
@@ -49,4 +49,5 @@ def add_with_def(a: int, b: int = 1):
     return a + b
 
 
-cli()
+if __name__ == "__main__":
+    run()
