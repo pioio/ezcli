@@ -21,6 +21,6 @@ def run(cmd, check=True) -> RunResult:
         ENDC = "\033[0m"
         sys.stdout.flush()
         sys.stderr.flush()
-        print(f"{RED}Command failed with exit code {exit_code}{ENDC}\n", stderr, flush=True)
+        print(f"{RED}Command failed with exit code {exit_code}{ENDC}\n", flush=True, file=stderr)
         raise Exception(f"Command failed with exit code {exit_code}")
     return RunResult(exit_code=exit_code)
