@@ -99,6 +99,7 @@ from .parameter import Parameter
 def _add_param_to_subparser(param:Parameter, subparser:argparse.ArgumentParser) -> None:
     args = param.get_argparse_names()
     kwargs = {}
+
     if param.has_default():
         kwargs['default'] = param.default
         if param.kind == inspect.Parameter.POSITIONAL_OR_KEYWORD:
@@ -122,81 +123,6 @@ def _add_param_to_subparser(param:Parameter, subparser:argparse.ArgumentParser) 
     subparser.add_argument(*args, **kwargs)
 
 
-def _add_param_to_subparserold(param:inspect.Parameter, subparser:argparse.ArgumentParser) -> None:
-
-    param_has_annotation = param.annotation is not inspect.Parameter.empty
-    param_using_typing_annotated =  getattr(param.annotation, "__metadata__", None) is not None
-    metadata = [] if not param_using_typing_annotated else param.annotation.__metadata__
-
-    # It might, or might not be there
-    arg_annotation:annotations.Arg|None = None
-
-    for data in metadata:
-        if isinstance(data, annotations.Arg):
-            arg_annotation = data
-            break
-
-    args = []
-    kwargs = {}
-    name = _build_parser_name(param)
-
-    # Default value is either in the param, or in the annotation
-    # The default value from param takes precedence
-    has_default = False
-    default_value = None
-    assert 'default' not in kwargs
-    if param.default is not inspect.Parameter.empty:
-        kwargs['default'] = param.default
-    elif arg_annotation:
-        if arg_annotation.default is not annotations.Empty:
-            kwargs['default'] = arg_annotation.default
-    if 'default' in kwargs:
-        default_value = kwargs['default']
-        has_default = True
-
-
-    if param.kind == inspect.Parameter.POSITIONAL_OR_KEYWORD:
-        if 'default' in kwargs:
-            kwargs['nargs'] = '?'
-        else:
-            kwargs['nargs'] = 1
-
-    if param_has_annotation:
-        thetype = param.annotation if not param_using_typing_annotated else param.annotation.__origin__
-        if thetype is not inspect.Parameter.empty:
-            if thetype is bool:
-                if has_default:
-                    kwargs['action'] = "store_true"
-                else:
-                    if default_value:
-                        kwargs['action'] = "store_false"
-                    else:
-                        kwargs['action'] = "store_true"
-
-    new_kwargs = {}
-    if param_has_annotation and param_using_typing_annotated:
-        metadata = param.annotation.__metadata__
-
-        for data in metadata:
-            if isinstance(data, str):
-                kwargs["help"] = metadata[0]
-
-            if isinstance(data, annotations.Help):
-                kwargs["help"] = data.text
-            if isinstance(data, annotations.Choice):
-                kwargs["choices"] = data.text
-            if isinstance(data, annotations.Arg):
-                new_kwargs = data.get_argparse_fields()
-                if "default" in new_kwargs:
-                    del new_kwargs["default"] # we used it above
-                # pass to argparse
-                kwargs.update(new_kwargs)
-        #print("zzzzzz ", dfunc.func.__name__)
-
-
-    #print(f"Adding argument {name} with kwargs {kwargs}")
-    subparser.add_argument(name, **kwargs)
-            #
 
 def _build_parser_name(param:inspect.Parameter) -> str:
     if param.kind == inspect.Parameter.POSITIONAL_OR_KEYWORD:

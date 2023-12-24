@@ -102,10 +102,9 @@ def test_list_positional_mandatory():
     assert re.match(r"\* foobar\s+NAME\s+This is the first task", lines[0]), "No arguments lister"
 
 
-def test_list_short_args_share_line_with_task():
+def test_list_short_args_share_line_with_task_with_default():
     @task
-    #def isort(paths:list[str]=["src/"]):
-    def isort(paths:list[str]=["src/"]):
+    def foobar(paths:list[str]=["src/"]):
         """This is the first task"""
         pass
 
@@ -114,8 +113,21 @@ def test_list_short_args_share_line_with_task():
     lines = list_tasks(tasks, verbose=0)
     assert len(lines) == 1
 
-    assert re.match(r"\* foobar\s+PATHS\s+This is the first task", lines[0]), "No arguments lister"
+    assert re.match(r"\* foobar\s+This is the first task", lines[0]), "Since we have a default, we should not see it listed"
 
+
+def test_list_short_args_share_line_with_task_no_default():
+    @task
+    def foobar(paths:list[str]):
+        """This is the first task"""
+        pass
+
+    tasks = include_tasks()
+
+    lines = list_tasks(tasks, verbose=0)
+    assert len(lines) == 1
+
+    assert re.match(r"\* foobar\s+PATHS\s+This is the first task", lines[0]), "No default, so it should appear"
 
 
 def test_run_default_args_str():
