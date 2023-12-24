@@ -79,3 +79,14 @@ def test_basic_default_from_param_and_annotated():
     assert param2.type == str
     assert param2.default == "from-signature"
     assert param2.has_default()
+
+def test_basic_no_default_but_annotated():
+    xxx = arg(str)
+    def foo(x:xxx):
+        pass
+
+    param = Task(foo).params[0]
+    assert param.name == "x"
+    assert param.type == str
+    assert param.default == Parameter.Empty
+    assert not param.has_default()

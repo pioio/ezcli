@@ -173,19 +173,19 @@ def build_pretty_param_string(task: Task, include_optional:bool=True, include_de
 
 
 def build_pretty_param_list(task: Task, include_optional:bool=True, include_defaults:bool=True, truncate_long:bool=True) -> list[str]:
-    signature = inspect.signature(task.func)
+
 
     ENDC = configuration.get_end_color()
     underline = configuration.get_underline()
 
     pretty_params = []
-    for param in signature.parameters.values():
-        param_has_a_default = param.default is not inspect.Parameter.empty
+    for param in task.params:
         #    if not include_optional and param_has_a_default and (param.name not in config.render_always_show_args):
-        if not include_optional and param_has_a_default:
+        if not include_optional and param.has_default():
             # skip args which have a default value specified
             continue
-        if param_has_a_default and param.name in config.render_hide_optional_args:
+
+        if param.has_default() and param.name in config.render_hide_optional_args:
             continue
         rendered = param.name
 
@@ -194,7 +194,7 @@ def build_pretty_param_list(task: Task, include_optional:bool=True, include_defa
         elif param.kind in [inspect.Parameter.KEYWORD_ONLY]:
             rendered = param_to_cli_option(rendered)
 
-        if not param_has_a_default:
+        if not param.has_default():
             rendered = f"{config.render_color_mandatory_arg}{rendered}{ENDC}"
         else:
             rendered = f"{config.render_color_optional_arg}{rendered}{ENDC}"
@@ -216,8 +216,8 @@ def build_pretty_param_list(task: Task, include_optional:bool=True, include_defa
             raise Exception(f"Unknown parameter kind: {param.kind}")
 
 
-        if include_defaults and not param.annotation == bool:
-            if param_has_a_default:
+        if include_defaults and not param.type == bool:
+            if param.has_default():
                 # Shorten default value
                 default_value = param.default
                 if truncate_long:

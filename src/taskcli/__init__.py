@@ -1,7 +1,10 @@
 
+from ast import Param
 from dataclasses import dataclass
 from typing import Annotated as ann, Iterable
 from typing import Any
+
+from .parameter import Parameter
 
 from . import configuration
 from . import listing
@@ -29,7 +32,7 @@ def arg(typevar,  help:str|None=None, /,
         choices:Iterable[Any]|None=None,
         metavar:str|None=None,
         nargs:str|int|None=None,
-        default:Any=None,
+        default:Any=Parameter.Empty,
         ):
     kwargs = locals()
     del kwargs["help"]

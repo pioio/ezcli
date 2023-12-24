@@ -31,6 +31,7 @@ def nox():
 
 
 Paths = arg(list[str], "foobar", default=["src/"])
+Paths = arg(list[str], "foobar")
 
 @task(important=True, group="lint")
 def lint(paths:Paths):
