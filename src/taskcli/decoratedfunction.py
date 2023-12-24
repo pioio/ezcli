@@ -7,13 +7,13 @@ from .types import AnyFunction
 
 class Task:
     """A decorated function."""
-    def __init__(self, func:AnyFunction, group:Group|None=None, hidden: bool=False, important: bool=False):
-        """
 
-        Args:
-            func: The decorated python function.
-            hidden: If True, the task will not be listed in the help by default.
-            important: If True, the task will be listed in the help in a way which stands out. See config for details.
+    def __init__(self, func: AnyFunction, group: Group | None = None, hidden: bool = False, important: bool = False):
+        """Create a new Task.
+
+        func: The decorated python function.
+        hidden: If True, the task will not be listed in the help by default.
+        important: If True, the task will be listed in the help in a way which stands out. See config for details.
         """
         self.func = func
         self.group = group or Group("default")
@@ -22,15 +22,18 @@ class Task:
         self.params = [Parameter(param) for param in inspect.signature(func).parameters.values()]
 
     def is_hidden(self) -> bool:
+        """Return True if the task is hidden."""
         return self.hidden or self.func.__name__.startswith("_")
 
     @property
     def name(self) -> str:
+        """Return the name of the task."""
         return self.get_full_task_name()
 
     def get_full_task_name(self) -> str:
+        """Return the full name of the task, including the group."""
         out = self.func.__name__.replace("_", "-")
-        out.lstrip("-") # for _private functions
+        out.lstrip("-")  # for _private functions
 
         if self.hidden:
             out = "_" + out

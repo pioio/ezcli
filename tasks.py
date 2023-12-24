@@ -1,23 +1,19 @@
 #!/usr/bin/env python
-from asyncio import run_coroutine_threadsafe
-from os import path
-from pyclbr import Function
-from typing import Annotated, TypeVar
-#import parser
+
 from run import run
 from taskcli import group
-from taskcli import run_task
+import taskcli
+
 from taskcli import task
-#import taskcli
-#import tasks_lint
-from taskcli import ann, arg
-#taskcli.include(tasks_lint, "lint")
+
+from taskcli import arg
 import taskcli
 
 
 @task(group='dev')
 def foobar():
     print("foobar!")
+
 
 @task(group='dev')
 def test():
@@ -47,7 +43,8 @@ def _get_lint_paths():
 @task(group="lint")
 def ruff(paths:Paths):
     path_txt = " ".join(paths)
-    run(f"ruff check {path_txt}")
+    run(f"ruff format {path_txt}")
+    run(f"ruff check {path_txt} --fix")
 
 
 @task(group="dev")
@@ -101,15 +98,16 @@ def example_fun2b(arg1:str,very_long_arg_name:str,  arg55:int="czxcd",*, confirm
 
 @task(important=True, group="examples")
 def example_fun3(arg1:str,very_long_arg_name, arg2, arg3, arg4, arg5="xxx",*, arg55:int,arg6:int=32423423423):
+    """Example function."""
     pass
 
 @task(important=True, group="examples")
 def example_fun4(arg1:str, arg2, arg3, arg4, arg5, arg6):
-    """Too many params for one line """
+    """Too many params for one line."""
     pass
 
 
 taskcli.hide_group("examples")
 
 if __name__ == "__main__":
-    run_task()
+    taskcli.dispatch()

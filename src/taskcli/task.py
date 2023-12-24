@@ -8,24 +8,25 @@ from .group import Group
 from .types import Any, AnyFunction
 
 
-def task(*args:Any, **kwargs:Any) -> AnyFunction:
+def task(*args: Any, **kwargs: Any) -> AnyFunction:
+    """Decorator to mark a function as a task."""
     if len(args) == 1 and callable(args[0]):
         # Decorator is used without arguments
         return _get_wrapper(args[0])
     else:
         # Decorator is used with arguments
-        def decorator(func:AnyFunction) -> AnyFunction:
+        def decorator(func: AnyFunction) -> AnyFunction:
             return _get_wrapper(func, *args, **kwargs)
 
         return decorator
 
 
-def _get_wrapper(func:AnyFunction, group: str | Group = "default", hidden: bool = False, prefix: str = "", important: bool = False) -> AnyFunction:
+def _get_wrapper(
+    func: AnyFunction, group: str | Group = "default", hidden: bool = False, prefix: str = "", important: bool = False
+) -> AnyFunction:
     if isinstance(group, str):
         group = Group(name=group)
     if config.adv_hide_private_tasks and (func.__name__.startswith("_") and not hidden):
-        # func.__name__ = func.__name__[1:]
-        # lstrip _
         func.__name__ = func.__name__.lstrip("_")
         hidden = True
     if prefix:
@@ -38,10 +39,9 @@ def _get_wrapper(func:AnyFunction, group: str | Group = "default", hidden: bool 
     module_which_defines_task_name = func.__module__
     module_which_defines_task = sys.modules[module_which_defines_task_name]
 
-
     decorated = Task(func, **kwargs)
     if not hasattr(module_which_defines_task, "decorated_functions"):
-        module_which_defines_task.decorated_functions:list[Task] = []  # type: ignore
+        module_which_defines_task.decorated_functions: list[Task] = []  # type: ignore
 
     module_which_defines_task.decorated_functions.append(decorated)
 
@@ -53,9 +53,7 @@ def _get_wrapper(func:AnyFunction, group: str | Group = "default", hidden: bool 
 
     # DecoratedFunction
     @functools.wraps(func)
-    def wrapper(*args:list[Any], **kwargs:dict[str,Any]) -> Any:
+    def wrapper(*args: list[Any], **kwargs: dict[str, Any]) -> Any:
         return func(*args, **kwargs)
 
     return wrapper
-
-

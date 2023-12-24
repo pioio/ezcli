@@ -7,9 +7,10 @@ from .utils import param_to_cli_option
 # So that we don't duplicate the default value of arg annotation
 default_arg_annotation = annotations.Arg()
 
+
 class Parameter:
-    """A wrapper around inspect.Parameter to make it easier to work with.
-    """
+    """A wrapper around inspect.Parameter to make it easier to work with."""
+
     class Empty:
         pass
 
@@ -19,24 +20,30 @@ class Parameter:
     VAR_POSITIONAL = inspect.Parameter.VAR_POSITIONAL
     VAR_KEYWORD = inspect.Parameter.VAR_KEYWORD
 
-    def __init__(self, param:inspect.Parameter):
-        """Reads the parameter and stores the information in this class for easier access."""
+    def __init__(self, param: inspect.Parameter):
+        """Read the parameter and stores the information in this class for easier access."""
         # original inspect.Parameter
-        self.param:inspect.Parameter = param
+        self.param: inspect.Parameter = param
 
-        param_using_typing_annotated =  getattr(param.annotation, "__metadata__", None) is not None
+        param_using_typing_annotated = getattr(param.annotation, "__metadata__", None) is not None
 
         # Metadata coming from typing.Annotated, empty list if not using it
-        self.metadata:list[Any] = [] if not param_using_typing_annotated else param.annotation.__metadata__
+        self.metadata: list[Any] = [] if not param_using_typing_annotated else param.annotation.__metadata__
 
-        self.arg_annotation:annotations.Arg|None = None
+        self.arg_annotation: annotations.Arg | None = None
         for data in self.metadata:
             if isinstance(data, annotations.Arg):
                 self.arg_annotation = data
                 break
 
         self.kind = param.kind
-        assert self.kind in [inspect.Parameter.POSITIONAL_ONLY, inspect.Parameter.POSITIONAL_OR_KEYWORD, inspect.Parameter.KEYWORD_ONLY, inspect.Parameter.VAR_POSITIONAL, inspect.Parameter.VAR_KEYWORD]
+        assert self.kind in [
+            inspect.Parameter.POSITIONAL_ONLY,
+            inspect.Parameter.POSITIONAL_OR_KEYWORD,
+            inspect.Parameter.KEYWORD_ONLY,
+            inspect.Parameter.VAR_POSITIONAL,
+            inspect.Parameter.VAR_KEYWORD,
+        ]
 
         # type can come from three places
         # 1. The annotation  (foobar: int)
@@ -48,8 +55,8 @@ class Parameter:
         if self.type is inspect.Parameter.empty:
             self.type = Parameter.Empty
 
-        self.help:str|None = None
-        for data in self.metadata: # Find the help string in annotation
+        self.help: str | None = None
+        for data in self.metadata:  # Find the help string in annotation
             if isinstance(data, str):
                 self.help = data
                 break
@@ -79,6 +86,3 @@ class Parameter:
         else:
             name = param_to_cli_option(self.name)
         return [name]
-
-
-

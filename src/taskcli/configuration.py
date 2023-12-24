@@ -2,9 +2,7 @@
 
 
 import dataclasses
-# ENABLE_COLORS = config.render_colors == "auto" and sys.stdout.isatty() or config.render_colors == "always"
 import sys
-from typing import Any, Callable  # noqa: F401
 
 LIST_DETAILS_LOW = 0
 
@@ -30,6 +28,8 @@ COLOR_UNDERLINE = "\033[4m"
 
 @dataclasses.dataclass
 class Colors:
+    """Colors used for rendering the task list."""
+
     none: str = COLOR_NONE
     dark_gray: str = COLOR_DARK_GRAY
     white: str = COLOR_WHITE
@@ -47,10 +47,7 @@ colors = Colors()
 
 ENABLE_COLORS = sys.stdout.isatty()
 if not ENABLE_COLORS:
-    # for attr in dir(config):
-    #     if attr.startswith("render_color_"):
-    #         setattr(config, attr, "")
-    for key, value in colors.__dict__.items():
+    for key, _ in colors.__dict__.items():
         if key.startswith("__"):
             continue
         setattr(colors, key, "")
@@ -58,6 +55,8 @@ if not ENABLE_COLORS:
 
 @dataclasses.dataclass
 class Config:
+    """The main runtime config of the library."""
+
     # The order of groups of tasks when list
     # All tasks are by default in the "default" group unless task(group="foo") is used
     # Any group not listed here will be shown last, in the order they were defined.
@@ -71,7 +70,7 @@ class Config:
     render_color_namespace: str = colors.none
     render_color_group_name: str = colors.white
     render_extra_line_indent: str = "    "
-    #render_prefix: str = f"{colors.white}*{colors.end} "
+
     render_task_name: str = "{white}* {green}{name}{clear_format}"
 
     # Always show these args in the task list, even if they are optional
@@ -79,11 +78,10 @@ class Config:
 
     # Use to hide rarely used params,or params with long, names from the task list to reduce the noise
     # Hidden params still show up in the tab completion.
-    # TODO make work
-    # XXXXXXXXx
+
     # TODO hightlight soome arguments in special color
-    render_highligh_params: dict[str,str] = dataclasses.field(default_factory=dict)
-    # foo = {"force": colors.red}
+    render_highligh_params: dict[str, str] = dataclasses.field(default_factory=dict)
+
     render_hide_optional_args: list[str] = dataclasses.field(default_factory=list)
 
     render_format_of_important_tasks: str = "{pink}{name}{clear_format}"
@@ -120,12 +118,11 @@ class Config:
     # -1 for full terminal width
     render_group_header_len: int = 40
 
-    sort = "alpha" # "alpha"  "definition"
+    sort = "alpha"  # "alpha"  "definition"
 
     # If true, tasks marked as important will be shown first.
     # If false, marking task as important will not impact its position in the list
     sort_important_first: bool = True
-
 
     #####################################################################
     # Advanced config options
@@ -139,30 +136,20 @@ class Config:
     # Python string format for the separator line
     # justify name center
     adv_render_separator_line_title: str = "{underline}{white}*** {underline}{name}{clear_format}"
-    # adv_render_separator_line_title:str = "{line_chars}"
 
 
 config = Config()
 
 
-
 def get_end_color() -> str:
+    """Return the escape code to reset the terminal color."""
     if ENABLE_COLORS:
         return colors.end
     return ""
 
 
 def get_underline() -> str:
+    """Return the escape code to underline the text."""
     if ENABLE_COLORS:
         return COLOR_UNDERLINE
     return ""
-
-
-_list_details = 0
-
-_set_list_show_args = None
-
-
-def set_list_render_fun(callable:Any) -> None:
-    global _set_list_show_args
-    _set_list_show_args = callable

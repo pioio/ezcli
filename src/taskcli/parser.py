@@ -9,6 +9,7 @@ import taskcli
 from .decoratedfunction import Task
 from .listing import list_tasks
 from .parameter import Parameter
+from .taskcli import TaskCLI
 from .utils import param_to_cli_option
 
 """"
@@ -18,30 +19,39 @@ TODO:
 """
 
 log = logging.getLogger(__name__)
-logging.basicConfig(level=logging.DEBUG, format='%(asctime)s %(levelname)s|  %(message)s')
+logging.basicConfig(level=logging.DEBUG, format="%(asctime)s %(levelname)s|  %(message)s")
 
 
-def dispatch(argv:list[str]|None=None) -> None:
-    decorated_function:list[Task] = taskcli.get_runtime().tasks
+def _extract_extra_args(argv: list[str], task_cli: TaskCLI) -> list[str]:
+    first_double_hyphen = argv.index("--") if "--" in argv else -1
+    if first_double_hyphen == -1:
+        return argv
+    else:
+        task_cli.extra_args_list = argv[first_double_hyphen + 1 :]
+        return argv[:first_double_hyphen]
+
+
+def dispatch(argv: list[str] | None = None) -> None:
+    """Dispatch the command line arguments to the correct function."""
+    decorated_function: list[Task] = taskcli.get_runtime().tasks
 
     parser = build_parser(decorated_function)
-    # support argcomplete
-    #if "argcomplete" in sys.modules:
+
     if "_ARGCOMPLETE" in os.environ:
         import argcomplete
-        print("Starting completion") # for unit tests
+
+        print("Starting completion")  # for unit tests # noqa: T201
         argcomplete.autocomplete(parser)
         # it will exit if it's a completion request
 
     argv = argv or sys.argv[1:]
 
-    from .core import _extract_extra_args
     argv = _extract_extra_args(argv, taskcli.get_runtime())
 
     argconfig = parser.parse_args(argv)
 
     if argconfig.version:
-        print("version info...")
+        print("version info...")  # noqa: T201
         sys.exit(0)
 
     if hasattr(argconfig, "task"):
@@ -55,29 +65,23 @@ def dispatch(argv:list[str]|None=None) -> None:
                 dfunc.func(**kwargs)
                 return None
 
-        print(f"Task {argconfig.task} not found")
+        print(f"Task {argconfig.task} not found")  # noqa: T201
         sys.exit(1)
     else:
-
         lines = list_tasks(decorated_function, verbose=3)
         for line in lines:
-            print(line)
-
-
-    #print("done")
-    #log.info("done" + str(argconfig))
+            print(line)  # noqa: T201
 
     return None
 
 
-
-def build_parser(decorated_function:list[Task]) -> argparse.ArgumentParser:
+def build_parser(decorated_function: list[Task]) -> argparse.ArgumentParser:
     root_parser = argparse.ArgumentParser()
 
     # Main parsers
     root_parser.add_argument("--version", action="store_true")
 
-    subparsers = root_parser.add_subparsers(help='Task to run')
+    subparsers = root_parser.add_subparsers(help="Task to run")
 
     for dfunc in decorated_function:
         subparser = subparsers.add_parser(dfunc.get_full_task_name())
@@ -85,49 +89,43 @@ def build_parser(decorated_function:list[Task]) -> argparse.ArgumentParser:
 
         for param in dfunc.params:
             _add_param_to_subparser(param, subparser)
-        # signature = inspect.signature(dfunc.func)
-        # for param in signature.parameters.values():
-        #     _add_param_to_subparser(param, subparser)
 
     return root_parser
 
 
-def _add_param_to_subparser(param:Parameter, subparser:argparse.ArgumentParser) -> None:
+def _add_param_to_subparser(param: Parameter, subparser: argparse.ArgumentParser) -> None:
     args = param.get_argparse_names()
     kwargs = {}
 
     if param.has_default():
-        kwargs['default'] = param.default
+        kwargs["default"] = param.default
         if param.kind == inspect.Parameter.POSITIONAL_OR_KEYWORD:
-            kwargs['nargs'] = '?'
+            kwargs["nargs"] = "?"
 
     if param.type is bool:
         if param.has_default():
             if param.default:
-                kwargs['action'] = "store_false"
+                kwargs["action"] = "store_false"
             else:
-                kwargs['action'] = "store_true"
+                kwargs["action"] = "store_true"
         else:
-            kwargs['action'] = "store_true"
+            kwargs["action"] = "store_true"
 
     if param.help:
-        kwargs['help'] = param.help
+        kwargs["help"] = param.help
 
-    # TODO:
-    # if param.metavar:
-    #     kwargs['metavar'] = param.metavar
     subparser.add_argument(*args, **kwargs)
 
 
-
-def _build_parser_name(param:inspect.Parameter) -> str:
+def _build_parser_name(param: inspect.Parameter) -> str:
     if param.kind == inspect.Parameter.POSITIONAL_OR_KEYWORD:
         name = param.name.replace("_", "-")
     else:
         name = param_to_cli_option(param.name)
     return name
 
-def _build_parser_default(param:inspect.Parameter) -> str|None:
+
+def _build_parser_default(param: inspect.Parameter) -> str | None:
     if param.default is inspect.Parameter.empty:
         return None
     else:
