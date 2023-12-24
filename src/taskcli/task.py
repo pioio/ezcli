@@ -6,6 +6,7 @@ from .decoratedfunction import Task
 from .group import Group
 from .types import Any, AnyFunction
 
+from . import utils
 
 
 def task(*args:Any, **kwargs:Any) -> AnyFunction:
@@ -19,7 +20,6 @@ def task(*args:Any, **kwargs:Any) -> AnyFunction:
 
         return decorator
 
-from . import utils
 
 def _get_wrapper(func:AnyFunction, group: str | Group = "default", hidden: bool = False, prefix: str = "", important: bool = False) -> AnyFunction:
     if isinstance(group, str):

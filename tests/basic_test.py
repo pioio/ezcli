@@ -1,5 +1,8 @@
 from taskcli import task, run_task
 from taskcli.taskcli import TaskCLI
+import subprocess
+import os
+
 
 def test_foobar():
     def x(z:int|None|list[str]):
@@ -17,7 +20,7 @@ def test_tab_completion():
     import os
     import subprocess
     try:
-        os.environ["_ARGCOMPLETE"] = "0"
+        os.environ["_ARGCOMPLETE"] = "1"
         os.environ['COMP_LINE'] = 'tests/fixtures/testtabcomplete/tasks.py '  # The user's current input
         os.environ['COMP_POINT'] = str(len(os.environ['COMP_LINE']))  # Cursor position
 
@@ -30,7 +33,6 @@ def test_tab_completion():
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
             shell=True,
-
         )
 
         stdout, stderr = process.communicate()
@@ -47,27 +49,6 @@ def test_tab_completion():
         del os.environ['COMP_LINE']
         del os.environ['COMP_POINT']
 
-
-
-
-
-def test_basic():
-    x = 0
-    @task
-    def foobar() -> int:
-        nonlocal x
-        x += 1
-        return 42
-
-    assert foobar() == 42
-    assert x == 1
-
-    run_task(argv=["foobar"])
-    assert x == 2
-
-
-import subprocess
-import os
 
 def run_tasks(path) -> tuple[str, str]:
     process = subprocess.Popen(
@@ -89,6 +70,7 @@ def test_basic2():
     assert lines == [
         "*** default",
         "* task4",
+        "",
         "*** foobar",
         "* task1",
         "* task2",

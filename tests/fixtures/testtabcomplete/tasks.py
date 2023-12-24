@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+import dis
 from taskcli import task, run_task
 
 @task

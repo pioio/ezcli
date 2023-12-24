@@ -9,6 +9,7 @@ from . import annotations
 from .decoratedfunction import Task
 from .types import AnyFunction
 from .utils import param_to_cli_option
+from .listing import list_tasks
 import taskcli
 """"
 TODO:
@@ -19,16 +20,19 @@ TODO:
 log = logging.getLogger(__name__)
 logging.basicConfig(level=logging.DEBUG, format='%(asctime)s %(levelname)s|  %(message)s')
 
-
+import os
 
 def dispatch(argv:list[str]|None=None) -> None:
     decorated_function:list[Task] = taskcli.get_runtime().tasks
 
     parser = build_parser(decorated_function)
     # support argcomplete
-    if "argcomplete" in sys.modules:
+    #if "argcomplete" in sys.modules:
+    if "_ARGCOMPLETE" in os.environ:
         import argcomplete
+        print("Starting completion") # for unit tests
         argcomplete.autocomplete(parser)
+        # it will exit if it's a completion request
 
     argv = argv or sys.argv[1:]
 
@@ -54,8 +58,11 @@ def dispatch(argv:list[str]|None=None) -> None:
         print(f"Task {argconfig.task} not found")
         sys.exit(1)
     else:
-        from .core import _list_tasks
-        _list_tasks(decorated_function, root_module=None, verbose=3)
+
+        lines = list_tasks(decorated_function, verbose=3)
+        for line in lines:
+            print(line)
+
 
     #print("done")
     #log.info("done" + str(argconfig))

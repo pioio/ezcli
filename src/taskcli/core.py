@@ -5,6 +5,7 @@ import os
 from random import choices
 import re
 import sys
+from token import NAME
 
 from .taskcli import TaskCLI
 
@@ -15,6 +16,7 @@ from .parser import dispatch
 from .task import Task, task
 from .types import Any, AnyFunction, Module
 from .utils import param_to_cli_option
+from . import utils
 
 task_cli = TaskCLI()
 
@@ -51,33 +53,6 @@ def _extract_extra_args(argv:list[str], task_cli:TaskCLI) -> list[str]:
 
 
 
-
-def create_groups(tasks: list[Task], group_order: list[str]) -> dict[str, list[Task]]:
-    """Return a dict of group_name -> list of tasks, ordered per group_order, group not listed there will be last."""
-    groups:dict[str,list[Task]] = {}
-    remaining_tasks:set[Task] = set()
-    for expected_group in group_order:
-        for task in tasks:
-            #assert isinstance(task.func, Task), f"Expected DecoratedFunction, got {type(task.func)}"
-            if task.group.name == expected_group:
-                if expected_group not in groups:
-                    groups[expected_group] = []
-                groups[expected_group].append(task)
-            else:
-                remaining_tasks.add(task)
-    for task in remaining_tasks:
-        if task.group.name not in groups:
-            groups[task.group.name] = []
-        groups[task.group.name].append(task)
-    return groups
-
-def strip_escape_codes(s:str) ->str :
-
-    ENDC = configuration.get_end_color()
-    UNDERLINE = configuration.get_underline()
-
-    return re.sub(r"\033\[[0-9;]*m", "", s).replace(ENDC, "").replace(UNDERLINE, "")
-
 @dataclasses.dataclass
 class Row:
     task: Task
@@ -91,114 +66,59 @@ class SeparatorRow:
     name: str = ""
 
 
-ORDER_TYPE_DEFINITION = "definition"
-ORDER_TYPE_ALPHA = "alpha"
-ORDER_TYPE_DEFAULT = ORDER_TYPE_ALPHA
-
-def _sort_tasks(tasks: list[Task], sort:str, sort_important_first:str) -> list[Task]:
-    names = [task.name for task in tasks]
-
-    presorted = []
-    if sort == ORDER_TYPE_ALPHA:
-        presorted = sorted(tasks, key=lambda task: task.name)
-    else:
-        # dont's sort
-        presorted = tasks
-
-    if sort_important_first:
-        # Bubble the important ones to the top
-        tasks = []
-        for task in presorted:
-            if task.important:
-                tasks.append(task)
-        for task in presorted:
-            if not task.important:
-                tasks.append(task)
-
-    return tasks
 
 
-def _list_tasks(tasks: list[Task], root_module:Any, verbose:int) -> None:
-    ENDC = configuration.get_end_color()
-    assert len(tasks) > 0, "No tasks found"
+# def task_to_row(task:Task, verbose:int=1) -> Row:
+#     ENDC = configuration.get_end_color()
 
+#     row = Row(task)
+#     task_name = task.name
+#     task_name = f"{task_name.ljust(config.render_min_task_name)}"
+#     if task.important:
+#         format = SafeFormatDict(name=task_name, clear_format=configuration.colors.end)
+#         colors = {
+#             color: value for color, value in configuration.colors.__dict__.items() if isinstance(value, str)
+#         }
+#         format.update(colors)
+#         task_name = config.render_format_of_important_tasks.format(**format)
+#         task_name = f"{configuration.colors.blue}{task_name}{ENDC}"
 
-    # TODO: extract groups info
-    groups = create_groups(tasks=tasks, group_order=configuration.config.group_order)
+#     if verbose == 0:
+#         # args = build_pretty_arg_string(task, include_optional=False, include_defaults=False)
+#         row.left_col = f"{config.render_prefix}{config.render_color_task_name}{task_name}{ENDC}"
+#         row.right_col = task.get_summary_line()
+#     if verbose == 1:
+#         args = build_pretty_param_string(task, include_optional=False, include_defaults=False)
+#         row.left_col = f"{config.render_prefix}{config.render_color_task_name}{task_name}{ENDC} {args}"
+#         row.right_col = task.get_summary_line()
+#     if verbose == 2:
+#         args = build_pretty_param_string(task, include_optional=True, include_defaults=False)
+#         row.left_col = f"{config.render_prefix}{config.render_color_task_name}{task_name}{ENDC} {args}"
+#         row.right_col = task.get_summary_line()
+#     if verbose == 3:
+#         args = build_pretty_param_string(task, include_optional=True, include_defaults=True)
+#         row.left_col = f"{config.render_prefix}{config.render_color_task_name}{task_name}{ENDC}"
+#         row.right_col = task.get_summary_line()
+#         if args:
+#             row.extra_lines = [args]
+#     if verbose == 4:
+#         args_list = build_pretty_param_list(
+#             task, include_optional=True, include_defaults=True, truncate_long=False
+#         )
+#         row.left_col = f"{config.render_prefix}{config.render_color_task_name}{task_name}{ENDC}"
+#         row.right_col = task.get_summary_line()
+#         for arg in args_list:
+#             row.extra_lines += [arg]
 
-    # for task in tasks:
-    #     module_name = task.func.__module__
-    #     root_module_name = root_module.__name__
-    #     prefix = ""
-    #     if module_name != root_module_name:
-    #         prefix = f"{module_name}."
-    #     task.prefix = prefix
-
-
-    # first, prepare rows, row can how more than one line
-    rows:list[Row|SeparatorRow] = []
-
-    for group_name, tasks in groups.items():
-        if len(groups) > 1:
-            rows.append(SeparatorRow(name=group_name))
-
-
-        tasks = _sort_tasks(tasks, sort=config.sort, sort_important_first=config.sort_important_first)
-
-        for task in tasks:
-            row = Row(task)
-            task_name = task.name
-            task_name = f"{task_name.ljust(config.render_min_task_name)}"
-            if task.important:
-                format = SafeFormatDict(name=task_name, clear_format=configuration.colors.end)
-                colors = {
-                    color: value for color, value in configuration.colors.__dict__.items() if isinstance(value, str)
-                }
-                format.update(colors)
-                task_name = config.render_format_of_important_tasks.format(**format)
-                task_name = f"{configuration.colors.blue}{task_name}{ENDC}"
-
-            if verbose == 0:
-                # args = build_pretty_arg_string(task, include_optional=False, include_defaults=False)
-                row.left_col = f"{config.render_prefix}{config.render_color_task_name}{task_name}{ENDC}"
-                row.right_col = task.get_summary_line()
-            if verbose == 1:
-                args = build_pretty_param_string(task, include_optional=False, include_defaults=False)
-                row.left_col = f"{config.render_prefix}{config.render_color_task_name}{task_name}{ENDC} {args}"
-                row.right_col = task.get_summary_line()
-            if verbose == 2:
-                args = build_pretty_param_string(task, include_optional=True, include_defaults=False)
-                row.left_col = f"{config.render_prefix}{config.render_color_task_name}{task_name}{ENDC} {args}"
-                row.right_col = task.get_summary_line()
-            if verbose == 3:
-                args = build_pretty_param_string(task, include_optional=True, include_defaults=True)
-                row.left_col = f"{config.render_prefix}{config.render_color_task_name}{task_name}{ENDC}"
-                row.right_col = task.get_summary_line()
-                if args:
-                    row.extra_lines = [args]
-            if verbose == 4:
-                args_list = build_pretty_param_list(
-                    task, include_optional=True, include_defaults=True, truncate_long=False
-                )
-                row.left_col = f"{config.render_prefix}{config.render_color_task_name}{task_name}{ENDC}"
-                row.right_col = task.get_summary_line()
-                for arg in args_list:
-                    row.extra_lines += [arg]
-            rows += [row]
-
-    ## determine longest left col
-    line_lens = [len(strip_escape_codes(row.left_col)) for row in rows if not isinstance(row, SeparatorRow)]
-    longest_left_col = max(line_lens)
-    print_rows(rows, longest_left_col)
-
-def print_rows(rows:list[Row|SeparatorRow], longest_left_col:int) -> None:
+def render_rows(rows:list[Row|SeparatorRow], longest_left_col:int) -> list[str]:
+    out = []
     # Print everything
     for row in rows:
         if isinstance(row, SeparatorRow):
-            print(render_separator_row(row.name))
+            out += [render_separator_row(row.name)]
             continue
         # Each row has a different num of invisible characters we need to account for
-        num_invisible_chars = len(row.left_col) - len(strip_escape_codes(row.left_col))
+        num_invisible_chars = len(row.left_col) - len(utils.strip_escape_codes(row.left_col))
 
         maximum_left_col_len = longest_left_col
         maximum_left_col_len = min(maximum_left_col_len, config.render_max_left_column_width)
@@ -209,197 +129,47 @@ def print_rows(rows:list[Row|SeparatorRow], longest_left_col:int) -> None:
 
         line = f"{row.left_col.ljust(justify_width)} {row.right_col}"
         # line = strip_escape_codes(line)
-        print(line)
+        out += [line]
         for line in row.extra_lines:
-            print(config.render_extra_line_indent + line)
-
-
-
-class SafeFormatDict(dict[str,str]):
-    """Makes placeholders in a string optional,
-
-    e.g. "Hello {name}" will be rendered as "Hello {name}" if name is not in the dict.
-    """
-
-    def __missing__(self, key:str) -> str:
-        return "{" + key + "}"  # Return the key as is
-
-
-def render_separator_row(name: str) -> str:
-    line_char = config.adv_render_separator_line_char
-    assert len(line_char) in [1, 0], f"Expected line_char to be a zero or a single character, got {line_char}"
-
-    end = configuration.get_end_color()
-    underline = configuration.get_underline()
-    color = configuration.config.render_color_group_name
-
-    template = config.adv_render_separator_line_title + "{clear_format}"
-
-    format = SafeFormatDict(name=name, color=color, end=end, underline=underline, clear_format=end, line_char=line_char)
-    colors = {color: value for color, value in configuration.colors.__dict__.items() if isinstance(value, str)}
-    format.update(colors)
-
-    line = template.format_map(format)
-
-    # num_visible_chars = len(strip_escape_codes(line))
-
-    # if configuration.config.render_group_header_len != -1:
-    #     if num_visible_chars < configuration.config.render_group_header_len:
-    #         line += line_char * (configuration.config.render_group_header_len - num_visible_chars)
-    # else:
-    #     import os
-    #     if os.isatty(1):
-    #         cols = os.get_terminal_size().columns
-    #     else:
-    #         cols = 40
-    #     if num_visible_chars < cols:
-    #         line += line_char * (cols - num_visible_chars)
-    return line
+            out += [config.render_extra_line_indent + line]
+    out = [line.rstrip() for line in out]
+    return out
 
 
 
 
-def build_pretty_param_string(task: Task, include_optional:bool=True, include_defaults:bool=True, truncate_long:bool=True) -> str:
-    ENDC = configuration.get_end_color()
-    pretty_params = build_pretty_param_list(task, include_optional=include_optional, include_defaults=include_defaults)
-    return f"{config.render_color_summary},{ENDC}".join(pretty_params)
+# def render_separator_row(name: str) -> str:
+#     line_char = config.adv_render_separator_line_char
+#     assert len(line_char) in [1, 0], f"Expected line_char to be a zero or a single character, got {line_char}"
+
+#     end = configuration.get_end_color()
+#     underline = configuration.get_underline()
+#     color = configuration.config.render_color_group_name
+
+#     template = config.adv_render_separator_line_title + "{clear_format}"
+
+#     format = SafeFormatDict(name=name, color=color, end=end, underline=underline, clear_format=end, line_char=line_char)
+#     colors = {color: value for color, value in configuration.colors.__dict__.items() if isinstance(value, str)}
+#     format.update(colors)
+
+#     line = template.format_map(format)
+
+#     # num_visible_chars = len(strip_escape_codes(line))
+
+#     # if configuration.config.render_group_header_len != -1:
+#     #     if num_visible_chars < configuration.config.render_group_header_len:
+#     #         line += line_char * (configuration.config.render_group_header_len - num_visible_chars)
+#     # else:
+#     #     import os
+#     #     if os.isatty(1):
+#     #         cols = os.get_terminal_size().columns
+#     #     else:
+#     #         cols = 40
+#     #     if num_visible_chars < cols:
+#     #         line += line_char * (cols - num_visible_chars)
+#     return line
 
 
-def build_pretty_param_list(task: Task, include_optional:bool=True, include_defaults:bool=True, truncate_long:bool=True) -> list[str]:
-    signature = inspect.signature(task.func)
-
-    ENDC = configuration.get_end_color()
-
-    pretty_params = []
-    for param in signature.parameters.values():
-        param_has_a_default = param.default is not inspect.Parameter.empty
-        #    if not include_optional and param_has_a_default and (param.name not in config.render_always_show_args):
-        if not include_optional and param_has_a_default:
-            # skip args which have a default value specified
-            continue
-        if param_has_a_default and param.name in config.render_hide_optional_args:
-            continue
-        rendered = param.name
-
-        if param.kind in [inspect.Parameter.POSITIONAL_ONLY, inspect.Parameter.POSITIONAL_OR_KEYWORD]:
-            rendered = param.name.upper()
-        elif param.kind in [inspect.Parameter.KEYWORD_ONLY]:
-            rendered = param_to_cli_option(param.name)
-        elif param.kind in [inspect.Parameter.VAR_POSITIONAL]:
-            rendered = f"*{param.name}"
-        elif param.kind in [inspect.Parameter.VAR_KEYWORD]:
-            rendered = f"**{param.name}"
-        else:
-            raise Exception(f"Unknown parameter kind: {param.kind}")
-
-        if not param_has_a_default:
-            rendered = f"{config.render_color_mandatory_arg}{rendered}{ENDC}"
-        else:
-            rendered = f"{config.render_color_optional_arg}{rendered}{ENDC}"
-
-        if include_defaults and not param.annotation == bool:
-            if param_has_a_default:
-                # Shorten default value
-                default_value = param.default
-                if truncate_long:
-                    if len(str(default_value)) > config.render_max_default_arg_width:
-                        default_value = str(default_value)[: config.render_max_default_arg_width] + "..."
-
-                rendered += (
-                    f"{config.render_color_optional_arg}={ENDC}{config.render_color_default_arg}{default_value}{ENDC}"
-                )
-            else:
-                rendered += ""
-        pretty_params.append(rendered)
-
-    return pretty_params
-
-
-
-
-# def get_mandatory_and_optional_args(arg_spec: inspect.FullArgSpec):
-#     """
-#     Example:
-#       args = ["a", "b", "c"]
-#       defaults = ["2", "3"]
-#       so, a is mandatory, b and c are optional
-#       the defaultas ALWAYS apply from the end of the list
-#     """
-#     # they could be None, so cast to empty list
-#     args = arg_spec.args or []
-#     args_defaults = arg_spec.defaults or []
-
-#     if len(args) != len(args_defaults):
-#         num_mandatory_args = len(args) - len(args_defaults)
-#         mandatory_args = args[:num_mandatory_args]
-#         optional_args = args[num_mandatory_args:]
-#     else:
-#         mandatory_args = []
-#         optional_args = args
-
-#     return mandatory_args, optional_args
-
-
-from typing import Iterable
-
-# @dataclasses.dataclass
-# class Arg:
-#     name: str = ""
-#     default: Any = ""
-
-#     has_default: bool = False
-#     is_kwarg: bool = False
-
-#     # argparse
-#     action:str|None=None
-#     choices:Iterable[Any]|None=None
-#     metavar:str|None=None
-#     nargs:str|int|None=None
-#     default:Any=None
-
-
-
-# def get_args(arg_spec) -> list[Arg]:
-#     """Return a list of Arg objects, one for each argument of the function."""
-#     out = []
-#     mandatory_args, optional_args = get_mandatory_and_optional_args(arg_spec)
-#     default_args = arg_spec.defaults or []
-
-#     out.extend([Arg(name=arg, has_default=False, is_kwarg=False) for arg in mandatory_args])
-#     out.extend(
-#         [
-#             Arg(name=arg, has_default=True, default=default, is_kwarg=False)
-#             for arg, default in zip(optional_args, default_args)
-#         ]
-#     )
-
-#     mandatory_kwargs, optional_args = get_mandatory_and_optional_kwargs(arg_spec)
-#     default_kwargs = arg_spec.kwonlydefaults or {}
-
-#     out.extend([Arg(name=arg, has_default=False, default=None, is_kwarg=True) for arg in mandatory_kwargs])
-#     out.extend(
-#         [Arg(name=arg, has_default=True, default=default, is_kwarg=True) for arg, default in default_kwargs.items()]
-#     )
-
-#     return out
-
-
-# def get_mandatory_and_optional_kwargs(arg_spec:Any)-> :
-#     # TODO: what is varkw?
-#     args = arg_spec.kwonlyargs or []
-#     defaults = arg_spec.kwonlydefaults or {}
-
-#     mandatory_args = []
-#     optional_args = []
-#     for arg in args:
-#         if arg in defaults:
-#             optional_args.append(arg)
-#         else:
-#             mandatory_args.append(arg)
-#     return mandatory_args, optional_args
-
-
-# TODO: launch task from parent file
 
 
 

@@ -2,6 +2,17 @@ import sys
 import taskcli
 from .decoratedfunction import Task
 
+from . import configuration
+import re
+
+def strip_escape_codes(s:str) ->str :
+
+    ENDC = configuration.get_end_color()
+    UNDERLINE = configuration.get_underline()
+
+    return re.sub(r"\033\[[0-9;]*m", "", s).replace(ENDC, "").replace(UNDERLINE, "")
+
+
 def param_to_cli_option(arg:str) -> str:
     """Convert foo_bar to --foo-bar, and g to -g"""
     if len(arg) == 1:
@@ -18,7 +29,7 @@ def reset_tasks():
     # clear tasks in each module
     for module in sys.modules.values():
         if hasattr(module, "decorated_functions"):
-            module.decorated_functions = []
+            module.decorated_functions = [] # type: ignore
 
 
 

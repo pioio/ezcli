@@ -3,14 +3,22 @@
 A library for building pragmatic CLI interfaces.
 
 Features:
+- have one taskcli per module? each set of tasks needs own settings. some settings should take precedence over others.
 - simple to use for small scripts.
 - powerful enough for more complex tools (argparse-based)
 - familiar `argparse` syntax in the `arg` decorator.
 - automatically adds "-v|--verbose" flag to all tasks
 - automatically adds "-h|--help" flag to all tasks
+- accept environment vars to args?
+- expect environment? Print it in task list?
+-  @task(env=[var1,var2])
+- --[no-]confirm - no underscored?
+- auto put important tasks in default.
 
-Heavily inspired by the excellent `argh` library.
+# Later
+- Include Taskfile
 
+2023-12-24Heavily inspired by the excellent `argh` library.
 
 ## Acknowledgements
 - This library builds on ideas from the `argh` project

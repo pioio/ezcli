@@ -3,7 +3,15 @@ from .types import AnyFunction
 
 
 class Task:
+    """A decorated function."""
     def __init__(self, func:AnyFunction, group:Group, hidden: bool, important: bool):
+        """
+
+        Args:
+            func: The decorated python function.
+            hidden: If True, the task will not be listed in the help by default.
+            important: If True, the task will be listed in the help in a way which stands out. See config for details.
+        """
         self.func = func
         self.group = group
         self.hidden = hidden

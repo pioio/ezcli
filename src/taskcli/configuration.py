@@ -71,7 +71,8 @@ class Config:
     render_color_namespace: str = colors.none
     render_color_group_name: str = colors.white
     render_extra_line_indent: str = "    "
-    render_prefix: str = f"{colors.yellow}*{colors.end} "
+    #render_prefix: str = f"{colors.white}*{colors.end} "
+    render_task_name: str = "{white}* {green}{name}{clear_format}"
 
     # Always show these args in the task list, even if they are optional
     render_always_show_args: list[str] = dataclasses.field(default_factory=list)
@@ -87,11 +88,18 @@ class Config:
 
     render_format_of_important_tasks: str = "{pink}{name}{clear_format}"
 
+    # Prefix with "\n" to separate group names with a newline
+    # use {NAME} instead of {name} to print group name in uppercase
+    render_format_of_group_name: str = "\n{white}{underline}{white}*** {name}{clear_format}"
+
     # The left column (with task name and args) will pref
     # Only rows with very long task names will be longer than this.
     # If your task have many manadatory arguments, you may want to increase
     # this to vertically align the summaries of tasks.
     render_max_left_column_width: int = 30
+
+    # any tasks with more rendered params then this will be split into multiple lines
+    render_max_params_per_line: int = 5
 
     # The left column will never be smaller than this, even with short task names
     # Increaase it if you prefer your summaries to be more to the right.

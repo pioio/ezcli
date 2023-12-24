@@ -6,15 +6,23 @@ Since that module is that main module, it has to be excplicitly included in each
 """
 
 import taskcli
-from taskcli import arg, task
+from taskcli import task
+import pytest
 import sys
+from taskcli.task import Task
+import re
 this_module = sys.modules[__name__]
 
-import pytest
 
 @pytest.fixture(autouse=True)
 def prepare():
     taskcli.utils.reset_tasks()
+
+
+def include_tasks() -> list[Task]:
+    """Goes through the usual process of including tasks."""
+    taskcli.include(this_module)
+    return taskcli.get_runtime().tasks
 
 
 def test_basic():
@@ -22,8 +30,7 @@ def test_basic():
     def foo():
         pass
 
-    taskcli.include(this_module)
-    tasks = taskcli.utils.get_tasks()
+    tasks = include_tasks()
     assert len(tasks) == 1
     assert tasks[0].name == "foo"
 
@@ -37,8 +44,8 @@ def test_basic2():
     def foobar2():
         pass
 
-    taskcli.include(this_module)
-    tasks = taskcli.utils.get_tasks()
+    tasks = include_tasks()
+
     assert len(tasks) == 2
     assert tasks[0].name == "foobar1"
     assert not tasks[0].important
@@ -47,19 +54,59 @@ def test_basic2():
 
 
 
-def test_basic2():
+
+def test_list_basic():
+    @task
+    def foobar1():
+        """This is the first task"""
+        pass
+
+    tasks = include_tasks()
+    lines = taskcli.core.list_tasks(tasks, verbose=0)
+    assert len(lines) == 1
+    assert re.match(r"\* foobar1\s+This is the first task", lines[0])
+
+def test_groups_basic():
     @task
     def foobar1():
         pass
 
-    @task(important=True)
-    def foobar2():
+    @task(group="magical tasks")
+    def magic():
         pass
 
-    taskcli.include(this_module)
-    tasks = taskcli.utils.get_tasks()
-    assert len(tasks) == 2
-    assert tasks[0].name == "foobar1"
-    assert not tasks[0].important
-    assert tasks[1].name == "foobar2"
-    assert tasks[1].important
+    tasks = include_tasks()
+    assert tasks[0].group.name == "default"
+    assert tasks[1].group.name == "magical tasks"
+    lines = taskcli.core.list_tasks(tasks, verbose=0)
+    assert """*** default
+* foobar1
+*** magical tasks
+* magic""" in "\n".join(lines)
+
+
+def test_list_positional_mandatory():
+    @task
+    def foobar(name:int):
+        """This is the first task"""
+        pass
+
+    tasks = include_tasks()
+
+    lines = taskcli.core.list_tasks(tasks, verbose=0)
+    assert len(lines) == 1
+    assert re.match(r"\* foobar\s+NAME\s+This is the first task", lines[0]), "No arguments lister"
+
+
+def test_run_default_args():
+    done = False
+    @task
+    def foobar(name:int=done):
+        """This is the first task"""
+        nonlocal done
+        done = True
+        pass
+    include_tasks()
+
+    taskcli.dispatch(argv=["foobar"])
+    assert done

@@ -13,7 +13,11 @@ from .parser import dispatch
 from .task import task
 from . import utils
 from .utils import get_runtime
+import taskcli
 
+def hide_group(group:str):
+    """Hide a group from the help message"""
+    taskcli.utils.get_runtime().hidden_groups.append(group)
 
 def arg(typevar,  help:str|None=None, /,
         # Specific to taskcli
