@@ -1,7 +1,11 @@
 import sys
 import taskcli
-from .decoratedfunction import Task
-from taskcli.taskcli import TaskCLI
+
+import typing
+if typing.TYPE_CHECKING:
+    from .decoratedfunction import Task
+    from taskcli.taskcli import TaskCLI
+
 
 from . import configuration
 import re
@@ -34,7 +38,7 @@ def reset_tasks():
 
 
 
-def get_tasks() -> list[Task]:
+def get_tasks() -> list["Task"]:
     """Return the list of tasks"""
     return taskcli.utils.get_runtime().tasks
 
@@ -42,5 +46,5 @@ def get_root_module() -> str:
     return sys.modules["__main__"].__name__
 
 
-def get_runtime() -> TaskCLI:
+def get_runtime() -> "TaskCLI":
     return taskcli.core.task_cli

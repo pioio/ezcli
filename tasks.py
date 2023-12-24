@@ -16,6 +16,10 @@ import taskcli
 
 
 @task(group='dev')
+def foobar():
+    print("foobar!")
+
+@task(group='dev')
 def test():
     run(f"pytest tests/ -vvv {taskcli.extra_args()}")
 

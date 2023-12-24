@@ -1,10 +1,12 @@
 from .group import Group
 from .types import AnyFunction
 
+from .parameter import Parameter
+import inspect
 
 class Task:
     """A decorated function."""
-    def __init__(self, func:AnyFunction, group:Group, hidden: bool, important: bool):
+    def __init__(self, func:AnyFunction, group:Group|None=None, hidden: bool=False, important: bool=False):
         """
 
         Args:
@@ -13,9 +15,10 @@ class Task:
             important: If True, the task will be listed in the help in a way which stands out. See config for details.
         """
         self.func = func
-        self.group = group
+        self.group = group or Group("default")
         self.hidden = hidden
         self.important = important
+        self.params = [Parameter(param) for param in inspect.signature(func).parameters.values()]
 
     def is_hidden(self) -> bool:
         return self.hidden or self.func.__name__.startswith("_")

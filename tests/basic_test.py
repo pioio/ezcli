@@ -92,6 +92,15 @@ def test_sort_important():
         "* task4",
     ]
 
+# def test_xxx():
+#     def somefun(foo:int):
+#         pass
+#     import inspect
+#     signature = inspect.signature(somefun)
+#     for param in signature.parameters.values():
+#         assert param.
+
+
 import taskcli
 from taskcli.core import _extract_extra_args
 

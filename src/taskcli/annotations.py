@@ -2,6 +2,7 @@ from dataclasses import dataclass
 from typing import Any, Iterable
 
 
+# We need a special class to denote default not being set, as a "None" can also be a default
 class Empty:
     pass
 
