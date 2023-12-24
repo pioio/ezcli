@@ -3,12 +3,12 @@ from asyncio import run_coroutine_threadsafe
 from pyclbr import Function
 #import parser
 from run import run
-from taskcli import arg, group
+from taskcli import group
 from taskcli import run_task
 from taskcli import task
 #import taskcli
 #import tasks_lint
-
+from taskcli import ann, arg
 #taskcli.include(tasks_lint, "lint")
 
 
@@ -61,9 +61,10 @@ DEFAULT_LINT_PATH = "src/"
 def _get_lint_paths():
     return taskcli.extra_args() or "src/"
 
+Paths = ann[list[str], arg(nargs="*", default=["x", "z"])]
+
 @task(group="lint")
-@arg("paths", nargs="*", default=["x", "z"])
-def ruff(paths:list[str]):
+def ruff(paths:Paths):
     print("ruff", paths)
 
 @task

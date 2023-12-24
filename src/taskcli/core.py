@@ -5,7 +5,9 @@ import os
 import re
 import sys
 
-import argh  # type: ignore[import]
+from .parser import dispatch
+from .utils import param_to_cli_option
+
 
 from . import configuration
 from .configuration import config
@@ -32,7 +34,8 @@ def extra_args_list() -> list[str]:
 
 def run(argv: list[str] | None = None, default:AnyFunction|None=None)->None:
     try:
-        _run_unsafe(argv=argv, default=default)
+        #_run_unsafe(argv=argv, default=default)
+        dispatch(argv=argv)
     except Exception as _:
         if "_ARGCOMPLETE" in os.environ and "TASKCLI_LOG_COMPLETION_ERRORS" in os.environ:
             log_filename = "taskcli-completion-error.log"
@@ -41,23 +44,6 @@ def run(argv: list[str] | None = None, default:AnyFunction|None=None)->None:
             logging.exception("message")
         raise
 
-def _argh_dispatch_commands(functions:list[AnyFunction], **kwargs)->None:
-    """Custom disaptch function to be able to control name mapping policy.
-
-    The new name mapping policy (BY_NAME_IF_KWONLY) is not the default not, but we want to use it here.
-    Hence, we need this function.
-    """
-    # import argparse
-    # parser = argparse.ArgumentParser(formatter_class=argh.dispatching.PARSER_FORMATTER)
-    # argh.add_commands(parser, functions, name_mapping_policy=argh.assembling.NameMappingPolicy.BY_NAME_IF_KWONLY)
-    # argh.dispatch(parser, **kwargs)
-    from . import parser
-    parser.dispatch_commands(functions)
-
-# def _init_library() -> None:
-#     """re-initialize the library"""
-#     global task_cli
-#     task_cli = TaskCLI()
 
 def _extract_extra_args(argv:list[str], task_cli:TaskCLI) -> list[str]:
     first_double_hyphen = argv.index("--") if "--" in argv else -1
@@ -66,95 +52,6 @@ def _extract_extra_args(argv:list[str], task_cli:TaskCLI) -> list[str]:
     else:
         task_cli.extra_args_list = argv[first_double_hyphen + 1 :]
         return argv[:first_double_hyphen]
-
-
-
-def _run_unsafe(argv: list[str] | None = None, default:AnyFunction|None=None)->None:
-    argv = argv or sys.argv[1:]
-    calling_module = sys.modules[sys._getframe(2).f_globals["__name__"]]
-    root_module = calling_module
-    if "decorated_functions" not in calling_module.__dir__():
-        # add decorated_functions to module
-        calling_module.decorated_functions = [] # type: ignore[attr-defined]
-    if not calling_module.decorated_functions:
-        print("No tasks found, decorate a function with @task")
-        sys.exit(1)
-
-
-    # BY_NAME_IF_HAS_DEFAULT is the legacy one, not enabled by default as of 0.30
-    # so, we use BY_NAME_IF_KWONLY, the new recommended one
-    #argh.assembling.NameMappingPolicy.BY_NAME_IF_HAS_DEFAULT = argh.assembling.NameMappingPolicy.BY_NAME_IF_KWONLY
-
-    #name_matching_policy = argh.assembling.NameMappingPolicy.BY_NAME_IF_KWONLY
-
-
-    argv = _extract_extra_args(argv, task_cli)
-
-    # Decorate with module name
-    def decorate_with_namespace(root_module:Module, functions:list[DecoratedFunction]) -> list[DecoratedFunction]:
-        out = []
-        for function in functions:
-            func = function.func  # actual python function
-            fun_module_name = sys.modules[func.__module__].__name__
-            root_module_name = root_module.__name__
-            if fun_module_name != root_module_name:
-                new_name = fun_module_name + "." + func.__name__.replace("_", "-")
-                func = argh.named(new_name)(func)
-            function.func = func
-            out.append(function)
-        return out
-
-    for fd in calling_module.decorated_functions:
-        assert isinstance(fd, DecoratedFunction), f"Expected DecoratedFunction, got {type(fd)}"
-    # functions = calling_module.decorated_functions
-    functions = decorate_with_namespace(root_module, calling_module.decorated_functions)
-
-    # module_of_function = calling_module.__name__
-
-    # Detect if running in completion mode (e.g. after user pressed tab)
-    # And if so, don't run the default command but instead forward execution
-    # to argh, which will print the completion options
-    if "_ARGCOMPLETE" in os.environ:
-        # if completion dos not work, set _ARGCOMPLETE=1 and run task to see the error
-        #sys.exit(1)
-        actual_functions = [func.func for func in functions]
-        print("Starting completion", flush=True)
-        #argh.dispatch_commands(actual_functions, argv=argv)
-        _argh_dispatch_commands(actual_functions, argv=argv)
-
-
-
-    if len(argv) == 0 and default:
-        #argh.dispatch_command(default, argv=argv)
-        _argh_dispatch_commands([default], argv=argv)
-
-    # TODO support '--list -vv'
-    elif (
-        (len(argv) == 0 and not default)
-        or (argv and argv[0] == "--list")
-        or (argv and argv[0] in ["-v", "-vv", "-vvv", "-vvvv", "-vvvv"])
-    ):
-        # print("No task specified! Listing tasks and their args ")
-        verbose = config.render_default_list_details
-        if "-v" in argv:
-            verbose = 2
-        elif "-vv" in argv:
-            verbose = 3
-        elif "-vvv" in argv:
-            verbose = 4
-        elif "-vvvv" in argv:
-            verbose = 4
-        elif "-vvvvv" in argv:
-            verbose = 4
-        if "-H" in argv:
-            config.show_hidden_tasks = True
-
-        _list_tasks(functions, root_module=root_module, verbose=verbose)
-    else:
-        actual_functions = [func.func for func in functions]
-        #argh.dispatch_commands(actual_functions, argv=argv)
-        _argh_dispatch_commands(actual_functions, argv=argv)
-
 
 
 
@@ -229,10 +126,10 @@ def _sort_tasks(tasks: list[Task], sort:str, sort_important_first:str) -> list[T
 
 def _list_tasks(decorated_functions: list[DecoratedFunction], root_module:Any, verbose:int) -> None:
     ENDC = configuration.get_end_color()
+    assert len(decorated_functions) > 0, "No tasks found"
 
     tasks = []
     for func in decorated_functions:
-        # TODO: does tno account for @argh.named
         name = func.func.__name__.replace("_", "-")
         assert isinstance(func, DecoratedFunction), f"Expected DecoratedFunction, got {type(func)}"
         task = Task(func=func, name=name)
@@ -431,12 +328,6 @@ def build_pretty_param_list(task: Task, include_optional:bool=True, include_defa
     return pretty_params
 
 
-def param_to_cli_option(arg:str) -> str:
-    """Convert foo_bar to --foo-bar, and g to -g"""
-    if len(arg) == 1:
-        return "-" + arg.replace("_", "-")
-    else:
-        return "--" + arg.replace("_", "-")
 
 
 # def get_mandatory_and_optional_args(arg_spec: inspect.FullArgSpec):
@@ -566,9 +457,3 @@ def include(module:Module, change_dir:bool=True, cwd:str="") -> None:
 
 
 
-# def arg_optional(function, argument, *args, **kwargs):
-
-#     if argument.replace("--", "") in inspect.signature(function).parameters:
-#         # print(f"DECORATING {function.__name__} with {argument}")
-#         function = argh.arg(argument, *args, **kwargs)(function)
-#     return function

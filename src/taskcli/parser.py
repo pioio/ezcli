@@ -2,10 +2,11 @@ from ast import Store, arg
 import inspect
 import argparse
 
+from .utils import param_to_cli_option
 
 from .decoratedfunction import DecoratedFunction
 from .types import AnyFunction
-from .core import param_to_cli_option
+from .utils import param_to_cli_option
 """"
 TODO:
   auto-aliases for commands
@@ -17,9 +18,13 @@ import logging
 log = logging.getLogger(__name__)
 logging.basicConfig(level=logging.DEBUG, format='%(asctime)s %(levelname)s|  %(message)s')
 
+
+
 def get_callers_decorated_functions() -> list[DecoratedFunction]:
-    calling_module_name = inspect.stack()[2].frame.f_globals["__name__"]
-    calling_module = sys.modules[calling_module_name]
+
+    # calling_module_name = inspect.stack()[2].frame.f_globals["__name__"]
+    # calling_module = sys.modules[calling_module_name]
+    calling_module = sys.modules["__main__"]
     if "decorated_functions" not in calling_module.__dir__():
         # add decorated_functions to module
         return []

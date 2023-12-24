@@ -11,26 +11,6 @@ Features:
 
 Heavily inspired by the excellent `argh` library.
 
-## Differences to `argh`
-### Registering tasks
-In `taskcli` registering tasks takes place via the `@task` decorator
-### Parameters without default values
-Given a function with a parameter without a default value:
-```
-def foobar(path)
-    print(a)
-```
-
-In `argh`, such a function results in
-`./tool.py /tmp/somefile`
-
-in `taskcli`
-`./tools --path /tmp/somefile`
-
-Rationale:
-- This makes it easier to add a default value later, without breaking existing calls
-- Arguments without default value should be used rarely. It's prudent to require the user to specify them explicitly via `arg` decorator.
-
 
 ## Acknowledgements
 - This library builds on ideas from the `argh` project

@@ -1,8 +1,6 @@
 import functools
 import sys
 
-import argh.utils  # type: ignore[import]
-
 from .configuration import config
 from .decoratedfunction import DecoratedFunction
 from .group import Group
@@ -14,7 +12,6 @@ class Task:
         #assert isinstance(func, DecoratedFunction), f"Expected DecoratedFunction, got {type(task.func)}"
         self.func: DecoratedFunction = func
         self.name = name
-        self.arg_spec = argh.utils.get_arg_spec(func.func)
         self.prefix = ""
 
     def get_summary_line(self) -> str:
