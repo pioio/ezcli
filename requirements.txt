@@ -3,4 +3,5 @@ nox
 isort
 mypy==1.8.0
 pytest
-pytest-clarity
+pytest-clarity  # better pytest output
+pytest-randomly # randomize test order

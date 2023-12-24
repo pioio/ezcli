@@ -133,7 +133,7 @@ def build_parser(decorated_function:list[Task]) -> argparse.ArgumentParser:
                 #print("zzzzzz ", dfunc.func.__name__)
 
 
-            print(f"Adding argument {name} with kwargs {kwargs}")
+            #print(f"Adding argument {name} with kwargs {kwargs}")
             subparser.add_argument(name, **kwargs)
             #
 

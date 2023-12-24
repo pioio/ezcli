@@ -102,7 +102,10 @@ def test_list_positional_mandatory():
     assert re.match(r"\* foobar\s+NAME\s+This is the first task", lines[0]), "No arguments lister"
 
 
-def test_run_default_args():
+def test_run_default_args_str():
+    """Test that default arguments are passed to the task."""
+
+
     done:str = ""
     @task
     def foobar(name:str="xxx"):
@@ -116,3 +119,35 @@ def test_run_default_args():
     except SystemExit:
         pytest.fail("SystemExit should not be raised")
     assert done == "xxx"
+
+
+
+
+@pytest.mark.parametrize("default_arg", [
+     None,
+                           42,
+                           "zzz",
+                           ["foo", 134],
+                           [],
+                           None
+                           ])
+def test_run_default_args(default_arg):
+    """Test that default arguments are passed to the task."""
+
+    done:str = ""
+    @task
+    def foobar(name=default_arg):
+        nonlocal done
+        done = name
+        pass
+
+    include_tasks()
+
+    try:
+        taskcli.dispatch(argv=["foobar"])
+    except SystemExit:
+        pytest.fail("SystemExit should not be raised")
+    assert done == default_arg
+
+
+
