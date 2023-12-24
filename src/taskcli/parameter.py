@@ -1,8 +1,11 @@
 import inspect
-from typing import TypeVar, Any
+from typing import Any, TypeVar
 
 from . import annotations
 from .utils import param_to_cli_option
+
+# So that we don't duplicate the default value of arg annotation
+default_arg_annotation = annotations.Arg()
 
 class Parameter:
     """A wrapper around inspect.Parameter to make it easier to work with.
@@ -31,7 +34,6 @@ class Parameter:
             if isinstance(data, annotations.Arg):
                 self.arg_annotation = data
                 break
-
 
         self.kind = param.kind
         assert self.kind in [inspect.Parameter.POSITIONAL_ONLY, inspect.Parameter.POSITIONAL_OR_KEYWORD, inspect.Parameter.KEYWORD_ONLY, inspect.Parameter.VAR_POSITIONAL, inspect.Parameter.VAR_KEYWORD]
@@ -62,6 +64,9 @@ class Parameter:
 
         self.name = param.name
 
+    @property
+    def important(self) -> bool:
+        return self.arg_annotation.important if self.arg_annotation else default_arg_annotation.important
 
     def has_default(self) -> bool:
         return self.default is not Parameter.Empty

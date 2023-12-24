@@ -1,10 +1,11 @@
 import inspect
+
 import taskcli
-from .decoratedfunction import Task
-from . import configuration
+
+from . import configuration, utils
 from .configuration import config
+from .decoratedfunction import Task
 from .utils import param_to_cli_option
-from . import utils
 
 ORDER_TYPE_DEFINITION = "definition"
 ORDER_TYPE_ALPHA = "alpha"
@@ -181,7 +182,7 @@ def build_pretty_param_list(task: Task, include_optional:bool=True, include_defa
     pretty_params = []
     for param in task.params:
         #    if not include_optional and param_has_a_default and (param.name not in config.render_always_show_args):
-        if not include_optional and param.has_default():
+        if not include_optional and param.has_default() and not param.important:
             # skip args which have a default value specified
             continue
 

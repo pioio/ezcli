@@ -29,9 +29,9 @@ def nox():
     run("nox")
 
 
-
-Paths = arg(list[str], "foobar", default=["src/"])
-Paths = arg(list[str], "foobar")
+# TODO: instead of important, use a not-important, and hide them explicitly instead
+Paths = arg(list[str], "foobar", default=["src"], important=True)
+#Paths = arg(list[str], "foobar")
 
 @task(important=True, group="lint")
 def lint(paths:Paths):
@@ -110,7 +110,6 @@ def example_fun4(arg1:str, arg2, arg3, arg4, arg5, arg6):
 
 
 taskcli.hide_group("examples")
-
 
 if __name__ == "__main__":
     run_task()

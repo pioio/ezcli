@@ -2,21 +2,19 @@ import dataclasses
 import functools
 import inspect
 import os
-from random import choices
 import re
 import sys
+from random import choices
 from token import NAME
 
-from .taskcli import TaskCLI
-
-from . import configuration
+from . import configuration, utils
 from .configuration import config
 from .decoratedfunction import Task
 from .parser import dispatch
 from .task import Task, task
+from .taskcli import TaskCLI
 from .types import Any, AnyFunction, Module
 from .utils import param_to_cli_option
-from . import utils
 
 task_cli = TaskCLI()
 
@@ -179,7 +177,9 @@ def include(module:Module, change_dir:bool=True, cwd:str="") -> None:
     """iterate over functions, functions with decorate @task should be"""
     import inspect
     import sys
+
     import taskcli
+
     #decorated_functions = taskcli.get_runtime().tasks
 
     def change_working_directory(func:AnyFunction, new_cwd:str) -> Any:

@@ -1,12 +1,11 @@
 import functools
 import sys
 
+from . import utils
 from .configuration import config
 from .decoratedfunction import Task
 from .group import Group
 from .types import Any, AnyFunction
-
-from . import utils
 
 
 def task(*args:Any, **kwargs:Any) -> AnyFunction:

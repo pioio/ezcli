@@ -1,14 +1,17 @@
+import re
 import sys
+import typing
+
 import taskcli
 
-import typing
+from . import configuration
+
 if typing.TYPE_CHECKING:
-    from .decoratedfunction import Task
     from taskcli.taskcli import TaskCLI
 
+    from .decoratedfunction import Task
 
-from . import configuration
-import re
+
 
 def strip_escape_codes(s:str) ->str :
 

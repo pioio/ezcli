@@ -1,8 +1,9 @@
+import inspect
+
 from .group import Group
+from .parameter import Parameter
 from .types import AnyFunction
 
-from .parameter import Parameter
-import inspect
 
 class Task:
     """A decorated function."""
