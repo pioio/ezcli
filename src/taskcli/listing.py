@@ -1,10 +1,11 @@
 import inspect
+from typing import Any
 
 import taskcli
 
 from . import configuration, utils
 from .configuration import config
-from .decoratedfunction import Task
+from .task import Task
 from .utils import param_to_cli_option
 
 ORDER_TYPE_DEFINITION = "definition"
@@ -24,9 +25,7 @@ class SafeFormatDict(dict[str, str]):
         return "{" + key + "}"  # Return the key as is
 
 
-def _sort_tasks(tasks: list[Task], sort: str, sort_important_first: str) -> list[Task]:
-    names = [task.name for task in tasks]
-
+def _sort_tasks(tasks: list[Task], sort: str, sort_important_first: bool) -> list[Task]:
     presorted = []
     if sort == ORDER_TYPE_ALPHA:
         presorted = sorted(tasks, key=lambda task: task.name)
@@ -85,6 +84,7 @@ def list_tasks(tasks: list[Task], verbose: int) -> list[str]:
 
 def smart_task_lines(task: Task, verbose: int) -> list[str]:
     """Render a single task into a list of lines, scale formatting to the amount of content."""
+    del verbose
     lines: list[str] = []
 
     name = task.name
@@ -134,7 +134,7 @@ def smart_task_lines(task: Task, verbose: int) -> list[str]:
     return lines
 
 
-def format_colors(template, **kwargs):
+def format_colors(template: str, **kwargs: Any) -> str:
     """Apply colors to a template string of e.g. '{red}foobar{pink}bar."""
     if "name" in kwargs:
         kwargs["NAME"] = kwargs["name"].upper()
@@ -174,6 +174,7 @@ def build_pretty_param_string(task: Task, include_optional: bool = True, include
 def build_pretty_param_list(  # noqa: C901
     task: Task, include_optional: bool = True, include_defaults: bool = True, truncate_long: bool = True
 ) -> list[str]:
+    """Return a list of params, each element a string formatted for the console."""
     end_color = configuration.get_end_color()
 
     pretty_params = []
@@ -213,12 +214,15 @@ def build_pretty_param_list(  # noqa: C901
         if include_defaults and not param.type == bool:
             if param.has_default():
                 # Shorten default value
-                default_value = param.default
+                default_value: Any = param.default
                 if truncate_long:
                     if len(str(default_value)) > config.render_max_default_arg_width:
                         default_value = str(default_value)[: config.render_max_default_arg_width] + "..."
 
-                rendered += f"{config.render_color_optional_arg}={end_color}{config.render_color_default_arg}{default_value}{end_color}"
+                rendered += (
+                    f"{config.render_color_optional_arg}={end_color}"
+                    f"{config.render_color_default_arg}{default_value}{end_color}"
+                )
             else:
                 rendered += ""
         pretty_params.append(rendered)

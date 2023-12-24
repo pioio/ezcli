@@ -1,5 +1,5 @@
 from typing import Annotated as ann  # noqa: N813
-from typing import Any, Iterable
+from typing import Any, Iterable, Sequence
 
 import taskcli
 
@@ -15,13 +15,13 @@ from .utils import get_runtime
 # from . import taskcli taskclimodule
 
 
-def hide_group(group: str):
+def hide_group(group: str) -> None:
     """Hide a group from the help message."""
     utils.get_runtime().hidden_groups.append(group)
 
 
 def arg(
-    typevar,
+    typevar: Any,
     help: str | None = None,
     /,
     # Specific to taskcli
@@ -32,24 +32,23 @@ def arg(
     metavar: str | None = None,
     nargs: str | int | None = None,
     default: Any = Parameter.Empty,
-):
+) -> Any:
     kwargs = locals()
     del kwargs["help"]
     del kwargs["typevar"]
     return ann[typevar, help, Arg(**kwargs)]
 
 
-__all__ = [
+__all__: Sequence[str] = [
     "task",
     "include",
-    "run_task",
     "utils",
     "configuration",
     "config",
     "extra_args",
     "extra_args_list",
     "Arg",
-    ann,
+    "ann",
     "get_runtime",
     "dispatch",
 ]

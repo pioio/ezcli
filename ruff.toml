@@ -1,0 +1,58 @@
+line-length = 120
+
+select = [
+ "ALL",      # We enable all check, and then selective disable the ones we don't want
+
+ # Here we enable some specific checks that got disabled via the 'ignore' section below
+ "FIX003",   # Make Ruff complain fr line contains string "XXX"
+ "S506",     # Make Ruff complain for unsafe loads from YAML files
+]
+
+
+ignore = [
+    "A001",   # Don't complain about built-ins being shadowed
+    "A002",   # Don't complain about built-ins being shadowed
+    "FA102",  # Don't require about missing __future__ imports
+    "ANN",    # type annotation
+    "I",      # isort
+    "FBT",    # boolean trap
+    "S",      # Security related checks, not applicable here
+#    "A",     # Builtin shadowing
+#    "DTZ",
+    "DJ",     # Disable djano checks
+    "G",      # Various logging checks
+    "RET",
+    "SIM",
+    "D104",   # Don't require  'Missing docstring in public package', otherwise stub __init__.py files have to have a useless comment.
+    "C408",   # Don't require dict literal, disallows dict(key=value).
+    "D107",   # Don't require docstring in __init__'.
+    "D213",   # Conflicts with D212 (D212:  Multi-line docstring summary should start at the first line)
+    "D203",   # Conflicts with D211, generating a warning
+    "D105",   # Don't require docstring in magic methods
+    "F401",   # Don't complain for unused imports
+    "D100",   # Don't require docstring in public modules
+    "D407",   # Don't require fancy formatting for the docstring section headers
+    "PTH",    # Pathlib
+    "TD",     # Found TODO tags
+    "PL",     # Various Pylint checks
+    "FIX",    # Found FIXME tags
+    "TRY",    #
+    "PERF",   #
+    "COM812",
+    "ISC001",
+    "TD002",  # Requires author in TODOs
+
+]
+
+unfixable = [
+    "ERA001", # Don't remove commented out code (often it's there temporarily)
+    "RUF100", # Don't remove unused noqa
+    "F841",   # Don't remove unused local variable (often they are merely temporary)
+]
+
+[per-file-ignores]
+
+"tests/**.py" = [
+    "D",      # Don't require docstrings for unit tests.
+    "SLF001", # Don't complain about acessing private fields.
+   ]

@@ -1,15 +1,16 @@
 import functools
+import inspect
 import sys
 
 from . import utils
 from .configuration import config
-from .decoratedfunction import Task
 from .group import Group
+from .parameter import Parameter
 from .types import Any, AnyFunction
 
 
 def task(*args: Any, **kwargs: Any) -> AnyFunction:
-    """Decorator to mark a function as a task."""
+    """Decorate a function as a task."""
     if len(args) == 1 and callable(args[0]):
         # Decorator is used without arguments
         return _get_wrapper(args[0])
@@ -19,6 +20,47 @@ def task(*args: Any, **kwargs: Any) -> AnyFunction:
             return _get_wrapper(func, *args, **kwargs)
 
         return decorator
+
+
+class Task:
+    """A decorated function."""
+
+    def __init__(self, func: AnyFunction, group: Group | None = None, hidden: bool = False, important: bool = False):
+        """Create a new Task.
+
+        func: The decorated python function.
+        hidden: If True, the task will not be listed in the help by default.
+        important: If True, the task will be listed in the help in a way which stands out. See config for details.
+        """
+        self.func = func
+        self.group = group or Group("default")
+        self.hidden = hidden
+        self.important = important
+        self.params = [Parameter(param) for param in inspect.signature(func).parameters.values()]
+
+    def is_hidden(self) -> bool:
+        """Return True if the task is hidden."""
+        return self.hidden or self.func.__name__.startswith("_")
+
+    @property
+    def name(self) -> str:
+        """Return the name of the task."""
+        return self.get_full_task_name()
+
+    def get_full_task_name(self) -> str:
+        """Return the full name of the task, including the group."""
+        out = self.func.__name__.replace("_", "-")
+        out.lstrip("-")  # for _private functions
+
+        if self.hidden:
+            out = "_" + out
+        return out
+
+    def get_summary_line(self) -> str:
+        """Return the first line of docstring, or empty string if no docstring."""
+        if self.func.__doc__ is None:
+            return ""
+        return self.func.__doc__.split("\n")[0]
 
 
 def _get_wrapper(
@@ -41,7 +83,7 @@ def _get_wrapper(
 
     decorated = Task(func, **kwargs)
     if not hasattr(module_which_defines_task, "decorated_functions"):
-        module_which_defines_task.decorated_functions: list[Task] = []  # type: ignore
+        module_which_defines_task.decorated_functions = []  # type: ignore[attr-defined]
 
     module_which_defines_task.decorated_functions.append(decorated)
 

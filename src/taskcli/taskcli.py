@@ -1,7 +1,12 @@
-from .decoratedfunction import Task
+import typing
+
+if typing.TYPE_CHECKING:
+    from .task import Task
 
 
 class TaskCLI:
+    """Configuration of a module which defines tasks."""
+
     def __init__(self) -> None:
         self.extra_args_list: list[str] = []
         self.tasks: list[Task] = []

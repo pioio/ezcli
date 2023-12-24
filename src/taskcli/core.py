@@ -6,13 +6,9 @@ import sys
 
 import taskcli
 
-from .configuration import config
-from .decoratedfunction import Task
-from .parser import dispatch
-from .task import task
+from .task import Task
 from .taskcli import TaskCLI
 from .types import Any, AnyFunction, Module
-from .utils import param_to_cli_option
 
 task_cli = TaskCLI()
 

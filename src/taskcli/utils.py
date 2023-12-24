@@ -9,7 +9,7 @@ from . import configuration
 if typing.TYPE_CHECKING:
     from taskcli.taskcli import TaskCLI
 
-    from .decoratedfunction import Task
+    from .task import Task
 
 
 ENDC = configuration.get_end_color()
@@ -29,7 +29,7 @@ def param_to_cli_option(arg: str) -> str:
         return "--" + arg.replace("_", "-")
 
 
-def reset_tasks():
+def reset_tasks() -> None:
     """Clear the list of tasks."""
     # clear included tasks
     taskcli.utils.get_runtime().tasks = []
@@ -37,7 +37,7 @@ def reset_tasks():
     # clear tasks in each module
     for module in sys.modules.values():
         if hasattr(module, "decorated_functions"):
-            module.decorated_functions = []  # type: ignore
+            module.decorated_functions = []  # type: ignore[attr-defined]
 
 
 def get_tasks() -> list["Task"]:

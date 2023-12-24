@@ -12,7 +12,7 @@ class Parameter:
     """A wrapper around inspect.Parameter to make it easier to work with."""
 
     class Empty:
-        pass
+        """A class to represent an empty value."""
 
     POSITIONAL_ONLY = inspect.Parameter.POSITIONAL_ONLY
     POSITIONAL_OR_KEYWORD = inspect.Parameter.POSITIONAL_OR_KEYWORD
@@ -61,8 +61,9 @@ class Parameter:
                 self.help = data
                 break
 
-        # Default value is either in the in the signature (precedence), or in the custom arg annotation (where it can be a shared default for many parameters)
-        self.default = Parameter.Empty
+        # Default value is either in the in the signature (precedence), or
+        # in the custom arg annotation (where it can be a shared default for many parameters)
+        self.default: Any = Parameter.Empty
         if param.default is not inspect.Parameter.empty:
             self.default = param.default
         elif self.arg_annotation:
@@ -73,9 +74,11 @@ class Parameter:
 
     @property
     def important(self) -> bool:
+        """Return True if the parameter is marked as important."""
         return self.arg_annotation.important if self.arg_annotation else default_arg_annotation.important
 
     def has_default(self) -> bool:
+        """Return True if the parameter has a default value."""
         return self.default is not Parameter.Empty
 
     def get_argparse_names(self) -> list[str]:

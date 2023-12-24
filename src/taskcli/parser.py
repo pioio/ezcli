@@ -3,12 +3,13 @@ import inspect
 import logging
 import os
 import sys
+from typing import Any
 
 import taskcli
 
-from .decoratedfunction import Task
 from .listing import list_tasks
 from .parameter import Parameter
+from .task import Task
 from .taskcli import TaskCLI
 from .utils import param_to_cli_option
 
@@ -76,6 +77,7 @@ def dispatch(argv: list[str] | None = None) -> None:
 
 
 def build_parser(decorated_function: list[Task]) -> argparse.ArgumentParser:
+    """Build the parser."""
     root_parser = argparse.ArgumentParser()
 
     # Main parsers
@@ -95,7 +97,7 @@ def build_parser(decorated_function: list[Task]) -> argparse.ArgumentParser:
 
 def _add_param_to_subparser(param: Parameter, subparser: argparse.ArgumentParser) -> None:
     args = param.get_argparse_names()
-    kwargs = {}
+    kwargs: dict[str, Any] = {}
 
     if param.has_default():
         kwargs["default"] = param.default
@@ -129,4 +131,5 @@ def _build_parser_default(param: inspect.Parameter) -> str | None:
     if param.default is inspect.Parameter.empty:
         return None
     else:
+        assert isinstance(param.default, str) or param.default is None
         return param.default
