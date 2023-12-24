@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 from asyncio import run_coroutine_threadsafe
 from pyclbr import Function
+#import parser
 from run import run
 from taskcli import arg, group
 from taskcli import run_task
@@ -48,7 +49,7 @@ def nox():
 
 # def task_lint(func, **kwargs):
 #     return task(group="lint", **kwargs)(func)
-
+import taskcli
 
 @task(important=True, group="lint")
 def lint():
@@ -57,14 +58,21 @@ def lint():
     mypy()
 
 DEFAULT_LINT_PATH = "src/"
+def _get_lint_paths():
+    return taskcli.extra_args() or "src/"
 
 @task(group="lint")
-def ruff(path:str="src/"):
-    """Detect code issues."""
-    paths = DEFAULT_LINT_PATH or taskcli.args()
-    taskcli.args_list
-    run(f"ruff check {taskcli.args}")
+@arg("paths", nargs="*", default=["x", "z"])
+def ruff(paths:list[str]):
+    print("ruff", paths)
 
+@task
+def argparse():
+    import argparse
+    parser = argparse.ArgumentParser()
+    parser.add_argument("foo" ,nargs="*", default=["x", "y"])
+    print(parser.parse_args([]))
+    print(parser.parse_args(["a", "b"]))
 
 @task(group="lint")
 def mypy(*, path="src/"):
@@ -75,6 +83,12 @@ def mypy(*, path="src/"):
 def isort(path="src/"):
     """Reorder imports, float them to top."""
     run(f"isort {path} --float-to-top")
+
+@task
+def pc():
+    """Run pre-commit hooks."""
+    lint()
+
 
 if __name__ == "__main__":
     run_task()
