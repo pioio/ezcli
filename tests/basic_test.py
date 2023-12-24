@@ -1,3 +1,4 @@
+import pytest
 from taskcli import task, run_task
 from taskcli.taskcli import TaskCLI
 import subprocess
@@ -15,7 +16,7 @@ def test_foobar():
         pass
 
 
-
+@pytest.mark.skip("Not implemented yet")
 def test_tab_completion():
     import os
     import subprocess

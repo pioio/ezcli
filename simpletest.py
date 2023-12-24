@@ -3,9 +3,12 @@ import taskcli
 from taskcli import task, Arg
 
 from typing import Annotated
+
 @task
-def foo():
+def foobar(name:str="xxx"):
+    print(name)
     pass
 
-tasks = taskcli.utils.get_tasks()
-print(tasks)
+taskcli.dispatch()
+#tasks = taskcli.utils.get_tasks()
+#print(tasks)

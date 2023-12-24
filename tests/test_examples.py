@@ -11,6 +11,8 @@ import pytest
 import sys
 from taskcli.task import Task
 import re
+
+from taskcli.listing import list_tasks
 this_module = sys.modules[__name__]
 
 
@@ -62,7 +64,7 @@ def test_list_basic():
         pass
 
     tasks = include_tasks()
-    lines = taskcli.core.list_tasks(tasks, verbose=0)
+    lines = list_tasks(tasks, verbose=0)
     assert len(lines) == 1
     assert re.match(r"\* foobar1\s+This is the first task", lines[0])
 
@@ -78,9 +80,11 @@ def test_groups_basic():
     tasks = include_tasks()
     assert tasks[0].group.name == "default"
     assert tasks[1].group.name == "magical tasks"
-    lines = taskcli.core.list_tasks(tasks, verbose=0)
+    lines = list_tasks(tasks, verbose=0)
+
     assert """*** default
 * foobar1
+
 *** magical tasks
 * magic""" in "\n".join(lines)
 
@@ -93,20 +97,22 @@ def test_list_positional_mandatory():
 
     tasks = include_tasks()
 
-    lines = taskcli.core.list_tasks(tasks, verbose=0)
+    lines = list_tasks(tasks, verbose=0)
     assert len(lines) == 1
     assert re.match(r"\* foobar\s+NAME\s+This is the first task", lines[0]), "No arguments lister"
 
 
 def test_run_default_args():
-    done = False
+    done:str = ""
     @task
-    def foobar(name:int=done):
-        """This is the first task"""
+    def foobar(name:str="xxx"):
         nonlocal done
-        done = True
+        done = name
         pass
     include_tasks()
 
-    taskcli.dispatch(argv=["foobar"])
-    assert done
+    try:
+        taskcli.dispatch(argv=["foobar"])
+    except SystemExit:
+        pytest.fail("SystemExit should not be raised")
+    assert done == "xxx"

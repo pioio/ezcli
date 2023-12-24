@@ -1,6 +1,7 @@
 import sys
 import taskcli
 from .decoratedfunction import Task
+from taskcli.taskcli import TaskCLI
 
 from . import configuration
 import re
@@ -40,8 +41,6 @@ def get_tasks() -> list[Task]:
 def get_root_module() -> str:
     return sys.modules["__main__"].__name__
 
-import taskcli.core
-from taskcli.taskcli import TaskCLI
 
 def get_runtime() -> TaskCLI:
     return taskcli.core.task_cli

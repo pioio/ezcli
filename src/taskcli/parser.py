@@ -1,6 +1,7 @@
 import argparse
 import inspect
 import logging
+import re
 import sys
 import typing
 from ast import Store, arg
@@ -54,7 +55,8 @@ def dispatch(argv:list[str]|None=None) -> None:
                     name = param.name.replace("_", "-")
                     kwargs[name] = getattr(argconfig, name)
                 dfunc.func(**kwargs)
-                sys.exit(0)
+                return None
+
         print(f"Task {argconfig.task} not found")
         sys.exit(1)
     else:
@@ -67,10 +69,7 @@ def dispatch(argv:list[str]|None=None) -> None:
     #print("done")
     #log.info("done" + str(argconfig))
 
-    sys.exit(1)
-
-
-
+    return None
 
 
 
@@ -98,6 +97,11 @@ def build_parser(decorated_function:list[Task]) -> argparse.ArgumentParser:
 
             kwargs['default'] = _build_parser_default(param)
             default_value = kwargs['default']
+            if param.kind == inspect.Parameter.POSITIONAL_OR_KEYWORD:
+                if param_has_a_default:
+                    kwargs['nargs'] = '?'
+                else:
+                    kwargs['nargs'] = 1
 
             if param_has_annotation:
                 thetype = param.annotation if not param_using_typing_annotated else param.annotation.__origin__
@@ -129,8 +133,9 @@ def build_parser(decorated_function:list[Task]) -> argparse.ArgumentParser:
                 #print("zzzzzz ", dfunc.func.__name__)
 
 
-#            log.debug(f"Adding argument {name} with kwargs {kwargs}")
+            print(f"Adding argument {name} with kwargs {kwargs}")
             subparser.add_argument(name, **kwargs)
+            #
 
     return root_parser
 

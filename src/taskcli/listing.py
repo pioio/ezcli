@@ -1,8 +1,8 @@
 import inspect
+import taskcli
 from .decoratedfunction import Task
 from . import configuration
 from .configuration import config
-import taskcli
 from .utils import param_to_cli_option
 from . import utils
 
