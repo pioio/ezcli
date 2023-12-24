@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-from taskcli import run_task
+from taskcli import dispatch
 from taskcli import task
 
 def task_group(func, **kwargs):
@@ -26,4 +26,4 @@ def task2():
 
 
 if __name__ == "__main__":
-    run_task()
+    dispatch()

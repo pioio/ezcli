@@ -2,7 +2,7 @@
 from typing import Annotated
 from taskcli.parameter import Parameter
 from taskcli import arg
-from taskcli.decoratedfunction import Task
+from taskcli.task import Task
 
 def test_basic():
 

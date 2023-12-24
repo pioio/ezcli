@@ -1,8 +1,12 @@
 import pytest
-from taskcli import task, run_task
+
 from taskcli.taskcli import TaskCLI
 import subprocess
 import os
+import taskcli
+
+from taskcli.parser import _extract_extra_args
+
 
 
 def test_foobar():
@@ -92,17 +96,7 @@ def test_sort_important():
         "* task4",
     ]
 
-# def test_xxx():
-#     def somefun(foo:int):
-#         pass
-#     import inspect
-#     signature = inspect.signature(somefun)
-#     for param in signature.parameters.values():
-#         assert param.
 
-
-import taskcli
-from taskcli.core import _extract_extra_args
 
 def test_extracting_double_hyphen_args():
     args = ["foo", "--", "--baz", "--bar"]

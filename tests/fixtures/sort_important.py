@@ -1,12 +1,11 @@
 #!/usr/bin/env python
 
-from taskcli import run_task
+from taskcli import dispatch
 from taskcli import task
 import taskcli
 
 # order is mixed, as we want to test sortking
 
-taskcli.config.sort_important_first
 taskcli.config.sort = taskcli.listing.ORDER_TYPE_ALPHA
 
 @task
@@ -27,4 +26,4 @@ def task2():
 
 
 if __name__ == "__main__":
-    run_task()
+    dispatch()
