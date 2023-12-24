@@ -2,22 +2,10 @@ import functools
 import sys
 
 from .configuration import config
-from .decoratedfunction import DecoratedFunction
+from .decoratedfunction import Task
 from .group import Group
 from .types import Any, AnyFunction
 
-
-class Task:
-    def __init__(self, func: DecoratedFunction, name:str):
-        #assert isinstance(func, DecoratedFunction), f"Expected DecoratedFunction, got {type(task.func)}"
-        self.func: DecoratedFunction = func
-        self.name = name
-        self.prefix = ""
-
-    def get_summary_line(self) -> str:
-        if self.func.func.__doc__ is None:
-            return ""
-        return self.func.func.__doc__.split("\n")[0]
 
 
 def task(*args:Any, **kwargs:Any) -> AnyFunction:
@@ -52,9 +40,9 @@ def _get_wrapper(func:AnyFunction, group: str | Group = "default", hidden: bool 
     module_which_defines_task = sys.modules[module_which_defines_task_name]
 
 
-    decorated = DecoratedFunction(func, **kwargs)
+    decorated = Task(func, **kwargs)
     if not hasattr(module_which_defines_task, "decorated_functions"):
-        module_which_defines_task.decorated_functions:list[DecoratedFunction] = []  # type: ignore
+        module_which_defines_task.decorated_functions:list[Task] = []  # type: ignore
 
     module_which_defines_task.decorated_functions.append(decorated)
 

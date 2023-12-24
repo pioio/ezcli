@@ -1,6 +1,6 @@
 import sys
 import taskcli
-from .decoratedfunction import DecoratedFunction
+from .decoratedfunction import Task
 
 def param_to_cli_option(arg:str) -> str:
     """Convert foo_bar to --foo-bar, and g to -g"""
@@ -22,7 +22,7 @@ def reset_tasks():
 
 
 
-def get_tasks() -> list[DecoratedFunction]:
+def get_tasks() -> list[Task]:
     """Return the list of tasks"""
     return taskcli.utils.get_runtime().tasks
 

@@ -2,7 +2,7 @@ from .group import Group
 from .types import AnyFunction
 
 
-class DecoratedFunction:
+class Task:
     def __init__(self, func:AnyFunction, group:Group, hidden: bool, important: bool):
         self.func = func
         self.group = group
@@ -23,3 +23,9 @@ class DecoratedFunction:
         if self.hidden:
             out = "_" + out
         return out
+
+    def get_summary_line(self) -> str:
+        """Return the first line of docstring, or empty string if no docstring."""
+        if self.func.__doc__ is None:
+            return ""
+        return self.func.__doc__.split("\n")[0]

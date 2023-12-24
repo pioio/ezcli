@@ -10,7 +10,7 @@ from .taskcli import TaskCLI
 
 from . import configuration
 from .configuration import config
-from .decoratedfunction import DecoratedFunction
+from .decoratedfunction import Task
 from .parser import dispatch
 from .task import Task, task
 from .types import Any, AnyFunction, Module
@@ -55,20 +55,20 @@ def _extract_extra_args(argv:list[str], task_cli:TaskCLI) -> list[str]:
 def create_groups(tasks: list[Task], group_order: list[str]) -> dict[str, list[Task]]:
     """Return a dict of group_name -> list of tasks, ordered per group_order, group not listed there will be last."""
     groups:dict[str,list[Task]] = {}
-    remaining_tasks = set()
+    remaining_tasks:set[Task] = set()
     for expected_group in group_order:
         for task in tasks:
-            assert isinstance(task.func, DecoratedFunction), f"Expected DecoratedFunction, got {type(task.func)}"
-            if task.func.group.name == expected_group:
+            #assert isinstance(task.func, Task), f"Expected DecoratedFunction, got {type(task.func)}"
+            if task.group.name == expected_group:
                 if expected_group not in groups:
                     groups[expected_group] = []
                 groups[expected_group].append(task)
             else:
                 remaining_tasks.add(task)
     for task in remaining_tasks:
-        if task.func.group.name not in groups:
-            groups[task.func.group.name] = []
-        groups[task.func.group.name].append(task)
+        if task.group.name not in groups:
+            groups[task.group.name] = []
+        groups[task.group.name].append(task)
     return groups
 
 def strip_escape_codes(s:str) ->str :
@@ -109,25 +109,18 @@ def _sort_tasks(tasks: list[Task], sort:str, sort_important_first:str) -> list[T
         # Bubble the important ones to the top
         tasks = []
         for task in presorted:
-            if task.func.important:
+            if task.important:
                 tasks.append(task)
         for task in presorted:
-            if not task.func.important:
+            if not task.important:
                 tasks.append(task)
 
     return tasks
 
 
-def _list_tasks(decorated_functions: list[DecoratedFunction], root_module:Any, verbose:int) -> None:
+def _list_tasks(tasks: list[Task], root_module:Any, verbose:int) -> None:
     ENDC = configuration.get_end_color()
-    assert len(decorated_functions) > 0, "No tasks found"
-
-    tasks = []
-    for func in decorated_functions:
-        name = func.func.__name__.replace("_", "-")
-        assert isinstance(func, DecoratedFunction), f"Expected DecoratedFunction, got {type(func)}"
-        task = Task(func=func, name=name)
-        tasks.append(task)
+    assert len(tasks) > 0, "No tasks found"
 
 
     # TODO: extract groups info
@@ -156,7 +149,7 @@ def _list_tasks(decorated_functions: list[DecoratedFunction], root_module:Any, v
             row = Row(task)
             task_name = task.name
             task_name = f"{task_name.ljust(config.render_min_task_name)}"
-            if task.func.important:
+            if task.important:
                 format = SafeFormatDict(name=task_name, clear_format=configuration.colors.end)
                 colors = {
                     color: value for color, value in configuration.colors.__dict__.items() if isinstance(value, str)
@@ -273,7 +266,7 @@ def build_pretty_param_string(task: Task, include_optional:bool=True, include_de
 
 
 def build_pretty_param_list(task: Task, include_optional:bool=True, include_defaults:bool=True, truncate_long:bool=True) -> list[str]:
-    signature = inspect.signature(task.func.func)
+    signature = inspect.signature(task.func)
 
     ENDC = configuration.get_end_color()
 
@@ -417,7 +410,7 @@ def include(module:Module, change_dir:bool=True, cwd:str="") -> None:
     import inspect
     import sys
     import taskcli
-    decorated_functions = taskcli.get_runtime().tasks
+    #decorated_functions = taskcli.get_runtime().tasks
 
     def change_working_directory(func:AnyFunction, new_cwd:str) -> Any:
         """change working directory to the directory of the module which defines the task, and then change back"""
@@ -436,7 +429,7 @@ def include(module:Module, change_dir:bool=True, cwd:str="") -> None:
         return wrapper
 
     for decorated_fun in module.decorated_functions:
-        assert isinstance(decorated_fun, DecoratedFunction), f"Expected DecoratedFunction, got {type(decorated_fun)}"
+        assert isinstance(decorated_fun, Task), f"Expected DecoratedFunction, got {type(decorated_fun)}"
         # Decorate with CWD change
         if change_dir or cwd:
             if not cwd:

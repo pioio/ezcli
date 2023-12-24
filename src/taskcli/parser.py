@@ -6,7 +6,7 @@ import typing
 from ast import Store, arg
 
 from . import annotations
-from .decoratedfunction import DecoratedFunction
+from .decoratedfunction import Task
 from .types import AnyFunction
 from .utils import param_to_cli_option
 import taskcli
@@ -22,7 +22,7 @@ logging.basicConfig(level=logging.DEBUG, format='%(asctime)s %(levelname)s|  %(m
 
 
 def dispatch(argv:list[str]|None=None) -> None:
-    decorated_function:list[DecoratedFunction] = taskcli.get_runtime().tasks
+    decorated_function:list[Task] = taskcli.get_runtime().tasks
 
     parser = build_parser(decorated_function)
     # support argcomplete
@@ -67,7 +67,7 @@ def dispatch(argv:list[str]|None=None) -> None:
 
 
 
-def build_parser(decorated_function:list[DecoratedFunction]) -> argparse.ArgumentParser:
+def build_parser(decorated_function:list[Task]) -> argparse.ArgumentParser:
     root_parser = argparse.ArgumentParser()
 
     # Main parsers
