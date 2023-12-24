@@ -47,10 +47,12 @@ def _argh_dispatch_commands(functions:list[AnyFunction], **kwargs)->None:
     The new name mapping policy (BY_NAME_IF_KWONLY) is not the default not, but we want to use it here.
     Hence, we need this function.
     """
-    import argparse
-    parser = argparse.ArgumentParser(formatter_class=argh.dispatching.PARSER_FORMATTER)
-    argh.add_commands(parser, functions, name_mapping_policy=argh.assembling.NameMappingPolicy.BY_NAME_IF_KWONLY)
-    argh.dispatch(parser, **kwargs)
+    # import argparse
+    # parser = argparse.ArgumentParser(formatter_class=argh.dispatching.PARSER_FORMATTER)
+    # argh.add_commands(parser, functions, name_mapping_policy=argh.assembling.NameMappingPolicy.BY_NAME_IF_KWONLY)
+    # argh.dispatch(parser, **kwargs)
+    from . import parser
+    parser.dispatch_commands(functions)
 
 # def _init_library() -> None:
 #     """re-initialize the library"""
@@ -223,7 +225,6 @@ def _sort_tasks(tasks: list[Task], sort:str, sort_important_first:str) -> list[T
                 tasks.append(task)
 
     return tasks
-    return sorted(tasks, key=lambda task: task.name)
 
 
 def _list_tasks(decorated_functions: list[DecoratedFunction], root_module:Any, verbose:int) -> None:
@@ -241,13 +242,13 @@ def _list_tasks(decorated_functions: list[DecoratedFunction], root_module:Any, v
     # TODO: extract groups info
     groups = create_groups(tasks=tasks, group_order=configuration.config.group_order)
 
-    for task in tasks:
-        module_name = task.func.__module__
-        root_module_name = root_module.__name__
-        prefix = ""
-        if module_name != root_module_name:
-            prefix = f"{module_name}."
-        task.prefix = prefix
+    # for task in tasks:
+    #     module_name = task.func.__module__
+    #     root_module_name = root_module.__name__
+    #     prefix = ""
+    #     if module_name != root_module_name:
+    #         prefix = f"{module_name}."
+    #     task.prefix = prefix
 
 
     # first, prepare rows, row can how more than one line
@@ -399,7 +400,7 @@ def build_pretty_param_list(task: Task, include_optional:bool=True, include_defa
         if param.kind in [inspect.Parameter.POSITIONAL_ONLY, inspect.Parameter.POSITIONAL_OR_KEYWORD]:
             rendered = param.name.upper()
         elif param.kind in [inspect.Parameter.KEYWORD_ONLY]:
-            rendered = arg_to_cli_arg(param.name)
+            rendered = param_to_cli_option(param.name)
         elif param.kind in [inspect.Parameter.VAR_POSITIONAL]:
             rendered = f"*{param.name}"
         elif param.kind in [inspect.Parameter.VAR_KEYWORD]:
@@ -430,7 +431,7 @@ def build_pretty_param_list(task: Task, include_optional:bool=True, include_defa
     return pretty_params
 
 
-def arg_to_cli_arg(arg:str) -> str:
+def param_to_cli_option(arg:str) -> str:
     """Convert foo_bar to --foo-bar, and g to -g"""
     if len(arg) == 1:
         return "-" + arg.replace("_", "-")
