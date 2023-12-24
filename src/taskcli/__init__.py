@@ -12,6 +12,8 @@ from .core import run as run_task
 from .parser import dispatch
 from .task import task
 from . import utils
+from .utils import get_runtime
+
 
 def arg(typevar,  help:str|None=None, /,
         # Specific to taskcli
@@ -30,4 +32,4 @@ def arg(typevar,  help:str|None=None, /,
     return ann[typevar, help, Arg(**kwargs)]
 
 
-__all__ = ["task", "include", "run_task", "configuration", "config", "extra_args", "extra_args_list", "Arg", ann]
+__all__ = ["task", "include", "run_task", "configuration", "config", "extra_args", "extra_args_list", "Arg", ann, "get_runtime"]

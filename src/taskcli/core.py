@@ -416,16 +416,8 @@ def include(module:Module, change_dir:bool=True, cwd:str="") -> None:
     """iterate over functions, functions with decorate @task should be"""
     import inspect
     import sys
-
-    if "decorated_functions" not in module.__dir__():
-        # add decorated_functions to module
-        module.decorated_functions = [] # type: ignore[attr-defined]
-
-    calling_module = sys.modules[inspect.stack()[1].frame.f_globals["__name__"]]
-
-    if "decorated_functions" not in calling_module.__dir__():
-        # add decorated_functions to module
-        calling_module.decorated_functions = [] # type: ignore[attr-defined]
+    import taskcli
+    decorated_functions = taskcli.get_runtime().tasks
 
     def change_working_directory(func:AnyFunction, new_cwd:str) -> Any:
         """change working directory to the directory of the module which defines the task, and then change back"""
@@ -453,7 +445,9 @@ def include(module:Module, change_dir:bool=True, cwd:str="") -> None:
                 module_which_defines_task = sys.modules[module_which_defines_task_name]
                 cwd = os.path.dirname(inspect.getfile(module_which_defines_task))
             decorated_fun.func = change_working_directory(decorated_fun.func, new_cwd=cwd)
-        calling_module.decorated_functions.append(decorated_fun)
+        #calling_module.decorated_functions.append(decorated_fun)
+        runtime = taskcli.get_runtime()
+        runtime.tasks.append(decorated_fun)
         # calling_module.decorated_functions.extend(module.decorated_functions)
 
     # calling_module.decorated_functions.extend(module.decorated_functions)

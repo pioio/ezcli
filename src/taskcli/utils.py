@@ -12,17 +12,19 @@ def param_to_cli_option(arg:str) -> str:
 
 def reset_tasks():
     """Clear the list of tasks"""
-    main_module = sys.modules["__main__"]
-    main_module.decorated_functions = [] # type: ignore[attr-defined]
+    # clear included tasks
+    taskcli.utils.get_runtime().tasks = []
+
+    # clear tasks in each module
+    for module in sys.modules.values():
+        if hasattr(module, "decorated_functions"):
+            module.decorated_functions = []
+
+
 
 def get_tasks() -> list[DecoratedFunction]:
     """Return the list of tasks"""
-    main_module = sys.modules["__main__"]
-    if "decorated_functions" not in main_module.__dir__():
-        # add decorated_functions to module
-        return []
-    else:
-        return main_module.decorated_functions # type: ignore[attr-defined]
+    return taskcli.utils.get_runtime().tasks
 
 def get_root_module() -> str:
     return sys.modules["__main__"].__name__
@@ -30,5 +32,5 @@ def get_root_module() -> str:
 import taskcli.core
 from taskcli.taskcli import TaskCLI
 
-def get_taskcli() -> TaskCLI:
+def get_runtime() -> TaskCLI:
     return taskcli.core.task_cli

@@ -1,4 +1,5 @@
 from taskcli import task, run_task
+from taskcli.taskcli import TaskCLI
 
 def test_foobar():
     def x(z:int|None|list[str]):
@@ -109,7 +110,7 @@ def test_sort_important():
     ]
 
 import taskcli
-from taskcli.core import _extract_extra_args, TaskCLI
+from taskcli.core import _extract_extra_args
 
 def test_extracting_double_hyphen_args():
     args = ["foo", "--", "--baz", "--bar"]

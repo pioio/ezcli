@@ -9,7 +9,7 @@ from . import annotations
 from .decoratedfunction import DecoratedFunction
 from .types import AnyFunction
 from .utils import param_to_cli_option
-
+import taskcli
 """"
 TODO:
   auto-aliases for commands
@@ -20,19 +20,9 @@ log = logging.getLogger(__name__)
 logging.basicConfig(level=logging.DEBUG, format='%(asctime)s %(levelname)s|  %(message)s')
 
 
-def get_callers_decorated_functions() -> list[DecoratedFunction]:
-
-    # calling_module_name = inspect.stack()[2].frame.f_globals["__name__"]
-    # calling_module = sys.modules[calling_module_name]
-    calling_module = sys.modules["__main__"]
-    if "decorated_functions" not in calling_module.__dir__():
-        # add decorated_functions to module
-        return []
-    else:
-        return calling_module.decorated_functions # type: ignore[attr-defined]
 
 def dispatch(argv:list[str]|None=None) -> None:
-    decorated_function:list[DecoratedFunction] = get_callers_decorated_functions()
+    decorated_function:list[DecoratedFunction] = taskcli.get_runtime().tasks
 
     parser = build_parser(decorated_function)
     # support argcomplete
@@ -42,9 +32,8 @@ def dispatch(argv:list[str]|None=None) -> None:
 
     argv = argv or sys.argv[1:]
 
-    import taskcli
     from .core import _extract_extra_args
-    argv = _extract_extra_args(argv, taskcli.utils.get_taskcli())
+    argv = _extract_extra_args(argv, taskcli.get_runtime())
 
     argconfig = parser.parse_args(argv)
 

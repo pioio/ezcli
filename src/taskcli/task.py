@@ -31,7 +31,7 @@ def task(*args:Any, **kwargs:Any) -> AnyFunction:
 
         return decorator
 
-
+from . import utils
 
 def _get_wrapper(func:AnyFunction, group: str | Group = "default", hidden: bool = False, prefix: str = "", important: bool = False) -> AnyFunction:
     if isinstance(group, str):
@@ -51,18 +51,20 @@ def _get_wrapper(func:AnyFunction, group: str | Group = "default", hidden: bool 
     module_which_defines_task_name = func.__module__
     module_which_defines_task = sys.modules[module_which_defines_task_name]
 
-    if "decorated_functions" not in module_which_defines_task.__dir__():
-        # add decorated_functions to module
-        module_which_defines_task.decorated_functions = [] # type: ignore[attr-defined]
-
-    # #module_which_defines_task.__decorated_funs.append(func)
-    # #mylib.decorated_functions.append(func)
 
     decorated = DecoratedFunction(func, **kwargs)
+    if not hasattr(module_which_defines_task, "decorated_functions"):
+        module_which_defines_task.decorated_functions:list[DecoratedFunction] = []  # type: ignore
 
     module_which_defines_task.decorated_functions.append(decorated)
-    # DecoratedFunction
 
+    if module_which_defines_task_name == "__main__":
+        # Auto-include to the runtime if the module defining the tasks is the one we started (./tasks.py)
+        # everything else needs to be explicitly included
+        runtime = utils.get_runtime()
+        runtime.tasks.append(decorated)
+
+    # DecoratedFunction
     @functools.wraps(func)
     def wrapper(*args:list[Any], **kwargs:dict[str,Any]) -> Any:
         return func(*args, **kwargs)
