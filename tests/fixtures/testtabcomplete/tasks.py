@@ -1,6 +1,8 @@
 #!/usr/bin/env python
 import dis
-from taskcli import task, run_task
+
+from taskcli import dispatch, task
+
 
 @task
 def foobar():
@@ -8,4 +10,4 @@ def foobar():
 
 
 if __name__ == "__main__":
-    run_task()
+    dispatch()

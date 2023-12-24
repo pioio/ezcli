@@ -3,7 +3,7 @@ from typing import Any, Iterable, Sequence
 
 import taskcli
 
-from . import configuration, utils
+from . import configuration, listing, utils
 from .annotations import Arg
 from .configuration import config
 from .core import extra_args, extra_args_list, include
@@ -11,7 +11,7 @@ from .parameter import Parameter
 from .parser import dispatch
 from .task import task
 from .utils import get_runtime
-from . import listing
+
 # from . import taskcli taskclimodule
 
 

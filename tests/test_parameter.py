@@ -1,11 +1,11 @@
-
 from typing import Annotated
-from taskcli.parameter import Parameter
+
 from taskcli import arg
+from taskcli.parameter import Parameter
 from taskcli.task import Task
 
-def test_basic():
 
+def test_basic():
     def foo(x):
         pass
 
@@ -15,10 +15,8 @@ def test_basic():
     assert param.type == Parameter.Empty
 
 
-
 def test_basic_types_from_signature():
-
-    def foo(x:str):
+    def foo(x: str) -> None:
         pass
 
     param = Task(foo).params[0]
@@ -27,8 +25,9 @@ def test_basic_types_from_signature():
     assert param.default == Parameter.Empty
     assert not param.has_default()
 
+
 def test_basic_types_from_annotated():
-    def foo(x:Annotated[str, None]):
+    def foo(x: Annotated[str, None]) -> None:
         pass
 
     param = Task(foo).params[0]
@@ -39,7 +38,7 @@ def test_basic_types_from_annotated():
 
 
 def test_basic_default_from_param():
-    def foo(x:str="foobar"):
+    def foo(x: str = "foobar") -> None:
         pass
 
     param = Task(foo).params[0]
@@ -51,7 +50,8 @@ def test_basic_default_from_param():
 
 def test_basic_default_from_annotated():
     xxx = arg(str, default="from-annotated")
-    def foo(x:xxx):
+
+    def foo(x: xxx):  # type: ignore # noqa: PGH003
         pass
 
     param = Task(foo).params[0]
@@ -63,7 +63,11 @@ def test_basic_default_from_annotated():
 
 def test_basic_default_from_param_and_annotated():
     xxx = arg(str, default="from-annotated")
-    def foo(x:xxx, y:xxx="from-signature", ):
+
+    def foo(
+        x: xxx,  # type: ignore # noqa: PGH003
+        y: xxx = "from-signature",  # type: ignore # noqa: PGH003
+    ) -> None:
         pass
 
     task = Task(foo)
@@ -80,9 +84,11 @@ def test_basic_default_from_param_and_annotated():
     assert param2.default == "from-signature"
     assert param2.has_default()
 
+
 def test_basic_no_default_but_annotated():
     xxx = arg(str)
-    def foo(x:xxx):
+
+    def foo(x: xxx) -> None:  # type: ignore # noqa: PGH003
         pass
 
     param = Task(foo).params[0]

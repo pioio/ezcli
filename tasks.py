@@ -26,8 +26,7 @@ def nox():
 
 
 # TODO: instead of important, use a not-important, and hide them explicitly instead
-Paths = arg(list[str], "foobar", default=["src"], important=True)
-#Paths = arg(list[str], "foobar")
+Paths = arg(list[str], "foobar", default=["src", "tests"], important=True)
 
 @task(important=True, group="lint")
 def lint(paths:Paths):

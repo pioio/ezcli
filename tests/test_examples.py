@@ -5,20 +5,23 @@ Since that module is that main module, it has to be excplicitly included in each
 
 """
 
+import re
+import sys
+
+import pytest
+
 import taskcli
 from taskcli import task
-import pytest
-import sys
-from taskcli.task import Task
-import re
-
 from taskcli.listing import list_tasks
+from taskcli.task import Task
+
 this_module = sys.modules[__name__]
 
 
 @pytest.fixture(autouse=True)
-def prepare():
+def prepare() -> None:
     taskcli.utils.reset_tasks()
+    return None
 
 
 def include_tasks() -> list[Task]:
@@ -55,26 +58,24 @@ def test_basic2():
     assert tasks[1].important
 
 
-
-
 def test_list_basic():
     @task
     def foobar1():
         """This is the first task"""
-        pass
 
     tasks = include_tasks()
     lines = list_tasks(tasks, verbose=0)
     assert len(lines) == 1
     assert re.match(r"\* foobar1\s+This is the first task", lines[0])
 
+
 def test_groups_basic():
     @task
-    def foobar1():
+    def foobar1() -> None:
         pass
 
     @task(group="magical tasks")
-    def magic():
+    def magic() -> None:
         pass
 
     tasks = include_tasks()
@@ -91,9 +92,8 @@ def test_groups_basic():
 
 def test_list_positional_mandatory():
     @task
-    def foobar(name:int):
+    def foobar(name: int) -> None:
         """This is the first task"""
-        pass
 
     tasks = include_tasks()
 
@@ -104,23 +104,23 @@ def test_list_positional_mandatory():
 
 def test_list_short_args_share_line_with_task_with_default():
     @task
-    def foobar(paths:list[str]=["src/"]):
+    def foobar(paths: list[str] = ["src/"]) -> None:  # noqa:  B006
         """This is the first task"""
-        pass
 
     tasks = include_tasks()
 
     lines = list_tasks(tasks, verbose=0)
     assert len(lines) == 1
 
-    assert re.match(r"\* foobar\s+This is the first task", lines[0]), "Since we have a default, we should not see it listed"
+    assert re.match(
+        r"\* foobar\s+This is the first task", lines[0]
+    ), "Since we have a default, we should not see it listed"
 
 
 def test_list_short_args_share_line_with_task_no_default():
     @task
-    def foobar(paths:list[str]):
+    def foobar(paths: list[str]) -> None:
         """This is the first task"""
-        pass
 
     tasks = include_tasks()
 
@@ -133,42 +133,29 @@ def test_list_short_args_share_line_with_task_no_default():
 def test_run_default_args_str():
     """Test that default arguments are passed to the task."""
 
+    done: str = ""
 
-    done:str = ""
     @task
-    def foobar(name:str="xxx"):
+    def foobar(name: str = "xxx") -> None:
         nonlocal done
         done = name
-        pass
-    include_tasks()
 
+    include_tasks()
 
     taskcli.dispatch(argv=["foobar"])
     assert done == "xxx"
 
 
-
-
-
-
-
-@pytest.mark.parametrize("default_arg", [
-     None,
-                           42,
-                           "zzz",
-                           ["foo", 134],
-                           [],
-                           None
-                           ])
+@pytest.mark.parametrize("default_arg", [None, 42, "zzz", ["foo", 134], []])
 def test_run_default_args(default_arg):
     """Test that default arguments are passed to the task."""
 
-    done:str = ""
+    done: str = ""
+
     @task
     def foobar(name=default_arg):
         nonlocal done
         done = name
-        pass
 
     include_tasks()
 
@@ -177,6 +164,3 @@ def test_run_default_args(default_arg):
     except SystemExit:
         pytest.fail("SystemExit should not be raised")
     assert done == default_arg
-
-
-

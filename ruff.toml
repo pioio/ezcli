@@ -55,4 +55,7 @@ unfixable = [
 "tests/**.py" = [
     "D",      # Don't require docstrings for unit tests.
     "SLF001", # Don't complain about acessing private fields.
+    "T201",   # Don't complain about print being used.
+    "ARG001", # Don't complain about unused function arguments.
+    "F841",   # Don't complain about local var being assigned and not used
    ]
