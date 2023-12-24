@@ -102,6 +102,22 @@ def test_list_positional_mandatory():
     assert re.match(r"\* foobar\s+NAME\s+This is the first task", lines[0]), "No arguments lister"
 
 
+def test_list_short_args_share_line_with_task():
+    @task
+    #def isort(paths:list[str]=["src/"]):
+    def isort(paths:list[str]=["src/"]):
+        """This is the first task"""
+        pass
+
+    tasks = include_tasks()
+
+    lines = list_tasks(tasks, verbose=0)
+    assert len(lines) == 1
+
+    assert re.match(r"\* foobar\s+PATHS\s+This is the first task", lines[0]), "No arguments lister"
+
+
+
 def test_run_default_args_str():
     """Test that default arguments are passed to the task."""
 
@@ -114,11 +130,12 @@ def test_run_default_args_str():
         pass
     include_tasks()
 
-    try:
-        taskcli.dispatch(argv=["foobar"])
-    except SystemExit:
-        pytest.fail("SystemExit should not be raised")
+
+    taskcli.dispatch(argv=["foobar"])
     assert done == "xxx"
+
+
+
 
 
 

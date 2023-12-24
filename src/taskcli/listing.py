@@ -108,7 +108,7 @@ def smart_task_lines(task:Task, verbose:int) -> list[str]:
     one_line_params = build_pretty_param_string(task, include_optional=include_optional, include_defaults=include_defaults)
 
     potential_line = line + " " + one_line_params
-    if len(potential_line) < max_left:
+    if len(utils.strip_escape_codes(potential_line)) < max_left:
         line = potential_line
         one_line_params = "" # clear, to avoid adding it again later
 

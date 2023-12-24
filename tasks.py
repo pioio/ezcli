@@ -26,10 +26,10 @@ def nox():
 
 
 
-Paths = arg(list[str], "foobar", default=["global-default"])
+Paths = arg(list[str], "foobar", default=["src/"])
 
 @task(important=True, group="lint")
-def lint(paths:Paths=["src/"]):
+def lint(paths:Paths):
     isort(paths)
     ruff(paths)
     mypy(paths)

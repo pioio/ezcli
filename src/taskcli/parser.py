@@ -95,8 +95,22 @@ def build_parser(decorated_function:list[Task]) -> argparse.ArgumentParser:
             kwargs = {}
             name = _build_parser_name(param)
 
-            kwargs['default'] = _build_parser_default(param)
-            default_value = kwargs['default']
+            # Default value is either in the param, or in the annotation
+            # The default value from param takes precedence
+            if param.default is not inspect.Parameter.empty:
+                kwargs['default'] = param.default
+            else:
+                if param_has_annotation and param_using_typing_annotated:
+                    for data in param.annotation.__metadata__:
+                        if isinstance(data, annotations.Arg):
+                            if data.default is not annotations.Empty:
+                                kwargs['default'] = data.default
+                            break
+
+
+            #kwargs['default'] = _build_parser_default(param)
+
+            default_value = kwargs['default'] if 'default' in kwargs else None
             if param.kind == inspect.Parameter.POSITIONAL_OR_KEYWORD:
                 if param_has_a_default:
                     kwargs['nargs'] = '?'
@@ -128,8 +142,11 @@ def build_parser(decorated_function:list[Task]) -> argparse.ArgumentParser:
                     if isinstance(data, annotations.Choice):
                         kwargs["choices"] = data.text
                     if isinstance(data, annotations.Arg):
+                        new_kwargs = data.get_argparse_fields()
+                        if "default" in new_kwargs:
+                            del new_kwargs["default"] # we used it above
                         # pass to argparse
-                        kwargs.update(data.get_argparse_fields())
+                        kwargs.update(new_kwargs)
                 #print("zzzzzz ", dfunc.func.__name__)
 
 

@@ -1,10 +1,14 @@
 from dataclasses import dataclass
 from typing import Any, Iterable
 
+
+class Empty:
+    pass
+
 @dataclass
 class Arg:
     name: str = ""
-    default: Any = ""
+    default: Any = Empty
     important: bool = False
     has_default: bool = False
     is_kwarg: bool = False
