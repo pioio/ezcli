@@ -12,6 +12,10 @@ class DecoratedFunction:
     def is_hidden(self) -> bool:
         return self.hidden or self.func.__name__.startswith("_")
 
+    @property
+    def name(self) -> str:
+        return self.get_full_task_name()
+
     def get_full_task_name(self) -> str:
         out = self.func.__name__.replace("_", "-")
         out.lstrip("-") # for _private functions

@@ -1,6 +1,8 @@
 #!/usr/bin/env python
 from asyncio import run_coroutine_threadsafe
+from os import path
 from pyclbr import Function
+from typing import Annotated, TypeVar
 #import parser
 from run import run
 from taskcli import group
@@ -18,7 +20,7 @@ def default():
 
 @task
 def tests():
-    run("pytest tests/ -vvv")
+    run(f"pytest tests/ -vvv {taskcli.extra_args()}")
 
 @task
 def nox():
@@ -26,46 +28,33 @@ def nox():
     run("nox")
 
 
-# def get_group(group_name, *args):
-#     """Create a new group of tasks,
-
-#     support using it as @group and @group(kwarg=3, kwarg=4)
-#     """
-#     if len(args) == 1 and callable(args[0]):
-#         # Decorator is used without arguments
-#         return task(group=group_name)(args[0])
-#     else:
-#         # Decorator is used with arguments
-#         def decorator(func, *args, **kwargs):
-#             return task(group=group_name, *args, **kwargs)(func)
-
-#         return decorator
-
-
-# def task_lint(decorated:Function, **kwargs):
-#     """Decorator to mark a function as a task."""
-#     return task(group="lint", **kwargs)(decorated)
-
-
-# def task_lint(func, **kwargs):
-#     return task(group="lint", **kwargs)(func)
 import taskcli
+#Paths = ann[list[str], "The paths to lint", arg(nargs="*", default=["global-default"])]
+# def xxx(typevar,  help:str|None=None, /, default=["global-default"]):
+#     return ann[typevar, help, arg(nargs="*", default=default)]
+
+Paths = arg(list[str], "foobar", default=["global-default"])
 
 @task(important=True, group="lint")
-def lint():
-    isort()
-    ruff()
-    mypy()
+def lint(paths:Paths=["src/"]):
+    isort(paths)
+    ruff(paths)
+    mypy(paths)
+
 
 DEFAULT_LINT_PATH = "src/"
 def _get_lint_paths():
     return taskcli.extra_args() or "src/"
 
-Paths = ann[list[str], arg(nargs="*", default=["x", "z"])]
-
 @task(group="lint")
 def ruff(paths:Paths):
-    print("ruff", paths)
+    path_txt = " ".join(paths)
+    run(f"ruff check {path_txt}")
+
+@task
+def rufftwice():
+    ruff()
+    ruff()
 
 @task
 def argparse():
@@ -76,14 +65,16 @@ def argparse():
     print(parser.parse_args(["a", "b"]))
 
 @task(group="lint")
-def mypy(*, path="src/"):
+def mypy(paths:Paths):
     """Detect code issues."""
-    run(f"mypy {path} --strict")
+    path_txt = " ".join(paths)
+    run(f"mypy {path_txt} --strict")
 
 @task(group="lint")
-def isort(path="src/"):
+def isort(paths:Paths):
     """Reorder imports, float them to top."""
-    run(f"isort {path} --float-to-top")
+    path_txt = " ".join(paths)
+    run(f"isort {path_txt} --float-to-top")
 
 @task
 def pc():

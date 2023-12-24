@@ -1,23 +1,23 @@
-from ast import Store, arg
-import inspect
 import argparse
+import inspect
+import logging
+import sys
+import typing
+from ast import Store, arg
 
-from .utils import param_to_cli_option
-
+from . import annotations
 from .decoratedfunction import DecoratedFunction
 from .types import AnyFunction
 from .utils import param_to_cli_option
+
 """"
 TODO:
   auto-aliases for commands
 
 """
-from .types import AnyFunction
 
-import logging
 log = logging.getLogger(__name__)
 logging.basicConfig(level=logging.DEBUG, format='%(asctime)s %(levelname)s|  %(message)s')
-
 
 
 def get_callers_decorated_functions() -> list[DecoratedFunction]:
@@ -41,6 +41,11 @@ def dispatch(argv:list[str]|None=None) -> None:
         argcomplete.autocomplete(parser)
 
     argv = argv or sys.argv[1:]
+
+    import taskcli
+    from .core import _extract_extra_args
+    argv = _extract_extra_args(argv, taskcli.utils.get_taskcli())
+
     argconfig = parser.parse_args(argv)
 
     if argconfig.version:
@@ -63,17 +68,14 @@ def dispatch(argv:list[str]|None=None) -> None:
         from .core import _list_tasks
         _list_tasks(decorated_function, root_module=None, verbose=3)
 
-    print("done")
-    log.info("done" + str(argconfig))
+    #print("done")
+    #log.info("done" + str(argconfig))
 
     sys.exit(1)
 
 
 
 
-import typing
-from . import annotations
-import sys
 
 
 def build_parser(decorated_function:list[DecoratedFunction]) -> argparse.ArgumentParser:
@@ -116,17 +118,19 @@ def build_parser(decorated_function:list[DecoratedFunction]) -> argparse.Argumen
             new_kwargs = {}
             if param_has_annotation and param_using_typing_annotated:
                 metadata = param.annotation.__metadata__
-                if len(metadata) == 1 and isinstance(metadata[0], str):
-                    kwargs["help"] = metadata[0]
-                else:
-                    for data in metadata:
-                        if isinstance(data, annotations.Help):
-                            kwargs["help"] = data.text
-                        if isinstance(data, annotations.Choice):
-                            kwargs["choices"] = data.text
-                        if isinstance(data, annotations.Arg):
-                            # pass to argparse
-                            kwargs.update(data.kwargs)
+
+                for data in metadata:
+                    if isinstance(data, str):
+                        kwargs["help"] = metadata[0]
+
+                    if isinstance(data, annotations.Help):
+                        kwargs["help"] = data.text
+                    if isinstance(data, annotations.Choice):
+                        kwargs["choices"] = data.text
+                    if isinstance(data, annotations.Arg):
+                        # pass to argparse
+                        kwargs.update(data.get_argparse_fields())
+                #print("zzzzzz ", dfunc.func.__name__)
 
 
 #            log.debug(f"Adding argument {name} with kwargs {kwargs}")

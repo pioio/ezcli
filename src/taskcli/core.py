@@ -2,25 +2,19 @@ import dataclasses
 import functools
 import inspect
 import os
+from random import choices
 import re
 import sys
 
-from .parser import dispatch
-from .utils import param_to_cli_option
-
+from .taskcli import TaskCLI
 
 from . import configuration
 from .configuration import config
 from .decoratedfunction import DecoratedFunction
+from .parser import dispatch
 from .task import Task, task
 from .types import Any, AnyFunction, Module
-
-# ENDC = ""
-
-class TaskCLI:
-    # Any extra arguments passed to the script after a "--"
-    # They can be retrieved later to easily inject them to commands being run.
-    extra_args_list:list[str] = []
+from .utils import param_to_cli_option
 
 task_cli = TaskCLI()
 
@@ -353,14 +347,23 @@ def build_pretty_param_list(task: Task, include_optional:bool=True, include_defa
 #     return mandatory_args, optional_args
 
 
+from typing import Iterable
 
+# @dataclasses.dataclass
+# class Arg:
+#     name: str = ""
+#     default: Any = ""
 
-@dataclasses.dataclass
-class Arg:
-    name: str = ""
-    default: Any = ""
-    has_default: bool = False
-    is_kwarg: bool = False
+#     has_default: bool = False
+#     is_kwarg: bool = False
+
+#     # argparse
+#     action:str|None=None
+#     choices:Iterable[Any]|None=None
+#     metavar:str|None=None
+#     nargs:str|int|None=None
+#     default:Any=None
+
 
 
 # def get_args(arg_spec) -> list[Arg]:
