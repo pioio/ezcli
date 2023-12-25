@@ -24,11 +24,22 @@ def extra_args_list() -> list[str]:
     return task_cli.extra_args_list
 
 
-def include(module: Module, change_dir: bool = True, cwd: str = "") -> None:
+def include(module: Module) -> None:
+    for decorated_fun in module.decorated_functions:
+        assert isinstance(decorated_fun, Task), f"Expected Task, got {type(decorated_fun)}"
+        runtime = taskcli.get_runtime()
+        runtime.tasks.append(decorated_fun)
+
+
+def includeold(module: Module, change_dir: bool = True, cwd: str = "") -> None:
     """Iterate over functions, functions with decorate @task should be."""
 
     def change_working_directory(func: AnyFunction, new_cwd: str) -> Any:
-        """Change working directory to the directory of the module which defines the task, and then change back."""
+        """Change working directory to the directory of the module which defines the task, and then change back.
+
+        A decorator.
+        TODO: assign to each task during task creation, not only included tasks.
+        """
 
         @functools.wraps(func)
         def wrapper(*args: Any, **kwargs: Any) -> Any:

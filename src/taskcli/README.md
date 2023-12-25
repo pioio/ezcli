@@ -29,3 +29,33 @@ Features:
 Bugs:
     ARG1,ARG2=zzz,ARG3OPTIONAL=xxx,KW=3
 FullArgSpec(args=['arg1', 'arg2', 'arg3optional', 'kw'], varargs=None, varkw=None, defaults=('zzz', 'xxx', 3), kwonlyargs=[], kwonlydefaults=None, annotations={'arg1': <class 'str'>, 'arg2': <class 'str'>, 'arg3optional': <class 'str'>, 'kw': <class 'int'>})
+
+
+## Include
+check all dirs up to the parent,
+try to include tasks.py from a chain of parent dirs, under ..
+
+*** some group
+* task1
+* task2
+
+*** soe other group
+* task3
+* task4
+
+*** [..]prent-group1
+* parent1
+* parent2
+
+*** [...]parent-group2
+* parent1
+
+..paren
+
+parent taskfile must explicly agree
+taskfile.settings.include_parent_from_children = True
+taskfile.settings.group_to_show_in_children = [] # all
+
+task -l
+echo 'parent task available, use -ll to show'
+task ...parent-group1.parent1

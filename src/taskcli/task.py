@@ -17,6 +17,8 @@ def task(*args: Any, **kwargs: Any) -> AnyFunction:
         return _get_wrapper(args[0])
     else:
         # Decorator is used with arguments
+
+        # Which functool wrap to add???
         def decorator(func: AnyFunction) -> AnyFunction:
             return _get_wrapper(func, *args, **kwargs)
 
@@ -79,6 +81,19 @@ class Task:
             return ""
         return self.func.__doc__.split("\n")[0]
 
+    def get_taskfile_dir(self) -> str:
+        """Return the directory in which the task was define."""
+        func = self.func
+        # get directory in which this file is located
+        import inspect
+        import os
+
+        module = inspect.getmodule(func)
+
+        filepath = inspect.getfile(module)
+        dirpath = os.path.dirname(filepath)
+        return dirpath
+
 
 def _get_wrapper(
     func: AnyFunction,
@@ -87,6 +102,7 @@ def _get_wrapper(
     prefix: str = "",
     important: bool = False,
     aliases: Iterable[str] | None = None,
+    change_dir: bool = True,
 ) -> AnyFunction:
     # TODo: allow defining groups via string at task-creationg time
     # >  if isinstance(group, str):
@@ -105,6 +121,9 @@ def _get_wrapper(
     kwargs = locals()
     del kwargs["func"]
     del kwargs["prefix"]
+    del kwargs["change_dir"]
+
+    import os
 
     module_which_defines_task_name = func.__module__
     module_which_defines_task = sys.modules[module_which_defines_task_name]
@@ -118,24 +137,43 @@ def _get_wrapper(
     if isinstance(aliases, str):
         aliases = [aliases]
 
+
+    # DecoratedFunction
+    @functools.wraps(func)
+    def wrapper(*args: list[Any], **kwargs: dict[str, Any]) -> Any:
+
+        if change_dir:
+            with utils.change_dir(task.get_taskfile_dir()):
+                return func(*args, **kwargs)
+        else:
+            return func(*args, **kwargs)
+
+
+
     del kwargs["group"]
     del kwargs["aliases"]
-    decorated = Task(func, group=group, aliases=aliases, **kwargs)
+    task = Task(wrapper, group=group, aliases=aliases, **kwargs)
 
     if not hasattr(module_which_defines_task, "decorated_functions"):
         module_which_defines_task.decorated_functions = []  # type: ignore[attr-defined]
 
-    module_which_defines_task.decorated_functions.append(decorated)
+    module_which_defines_task.decorated_functions.append(task)
 
     if module_which_defines_task_name == "__main__":
         # Auto-include to the runtime if the module defining the tasks is the one we started (./tasks.py)
         # everything else needs to be explicitly included
         runtime = utils.get_runtime()
-        runtime.tasks.append(decorated)
+        runtime.tasks.append(task)
 
-    # DecoratedFunction
-    @functools.wraps(func)
-    def wrapper(*args: list[Any], **kwargs: dict[str, Any]) -> Any:
-        return func(*args, **kwargs)
+
+        #return func(*args, **kwargs)
+
+    # # change dir
+    # if change_dir:
+    #     pare
+    #     @functools.wraps(wrapper)
+    #     def wrapper2(*args: list[Any], **kwargs: dict[str, Any]) -> Any:
+    #         with utils.change_dir():
+    #             return func(*args, **kwargs)
 
     return wrapper

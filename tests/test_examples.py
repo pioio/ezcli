@@ -90,7 +90,9 @@ def test_groups_basic():
 * foobar1
 
 *** magical tasks
-* magic""" in "\n".join(lines)
+* magic""" in "\n".join(
+        lines
+    )
 
 
 def test_list_positional_mandatory():
@@ -148,6 +150,31 @@ def test_list_important_optional_args_are_shown():
     assert re.match(
         r"\* foobar\s+NAME\s+This is the first task", lines[0]
     ), "Text is optional, but not important, so it should not be shown. Name is optional, but important, so show it."
+
+
+def test_list_hidden_tasks_dont_show_up_by_default():
+    @task
+    def foobar(paths: list[str]) -> None:
+        """This is the first task"""
+
+    @task(hidden=True)
+    def hidden_task() -> None:
+        """This is the hidden task"""
+
+    tasks = include_tasks()
+
+    lines = list_tasks(tasks, verbose=0)
+
+    task_names = [task.name for task in tasks]
+    assert "_hidden-task" in task_names, "Hidden task should be in the list of tasks, but it is not"
+
+    for line in lines:
+        assert (
+            "hidden-task" not in line
+        ), f"Hidden task should be missing from listing by default, but it is not, line: {line}"
+
+    lines = list_tasks(tasks, verbose=3)
+    assert "hidden-task" in "\n".join(lines), "Hidden task should be in the task listing when high verbose"
 
 
 def test_run_default_args_str():

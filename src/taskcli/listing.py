@@ -73,7 +73,10 @@ def list_tasks(tasks: list[Task], verbose: int) -> list[str]:
 
         tasks = _sort_tasks(group.tasks, sort=config.sort, sort_important_first=config.sort_important_first)
 
+        show_hidden_tasks = verbose >= 3 or configuration.config.show_hidden_tasks
         for task in tasks:
+            if task.is_hidden() and not show_hidden_tasks:
+                continue
             lines.extend(smart_task_lines(task, verbose=verbose))
     lines = [line.rstrip() for line in lines]
 

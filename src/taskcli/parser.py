@@ -11,6 +11,7 @@ from .listing import list_tasks
 from .parameter import Parameter
 from .task import Task
 from .taskcli import TaskCLI
+from .types import AnyFunction
 from .utils import param_to_cli_option
 
 """"
@@ -32,11 +33,11 @@ def _extract_extra_args(argv: list[str], task_cli: TaskCLI) -> list[str]:
         return argv[:first_double_hyphen]
 
 
-def dispatch(argv: list[str] | None = None) -> None:
+def dispatch(argv: list[str] | None = None) -> None:  # noqa: C901
     """Dispatch the command line arguments to the correct function."""
-    decorated_function: list[Task] = taskcli.get_runtime().tasks
+    tasks: list[Task] = taskcli.get_runtime().tasks
 
-    parser = build_parser(decorated_function)
+    parser = build_parser(tasks)
 
     if "_ARGCOMPLETE" in os.environ:
         import argcomplete
@@ -59,34 +60,33 @@ def dispatch(argv: list[str] | None = None) -> None:
         taskcli.config.show_hidden_groups = True
 
     if argconfig.list:
-        print_listed_tasks(decorated_function, verbose=argconfig.list)
+        print_listed_tasks(tasks, verbose=argconfig.list)
         sys.exit(0)
 
+    def _dispatch(fun: AnyFunction):
+        signature = inspect.signature(task.func)
+        kwargs = {}
+        for param in signature.parameters.values():
+            name = param.name.replace("_", "-")
+            kwargs[name] = getattr(argconfig, name)
+        task.func(**kwargs)
+
     if hasattr(argconfig, "task"):
-        for dfunc in decorated_function:
-            if dfunc.get_full_task_name() == argconfig.task:
-                signature = inspect.signature(dfunc.func)
-                kwargs = {}
-                for param in signature.parameters.values():
-                    name = param.name.replace("_", "-")
-                    kwargs[name] = getattr(argconfig, name)
-                dfunc.func(**kwargs)
+        for task in tasks:
+            if task.get_full_task_name() == argconfig.task:
+                _dispatch(task.func)
                 return None
+
         # Not found, search aliases
-        for dfunc in decorated_function:
-            if argconfig.task in dfunc.aliases:
-                signature = inspect.signature(dfunc.func)
-                kwargs = {}
-                for param in signature.parameters.values():
-                    name = param.name.replace("_", "-")
-                    kwargs[name] = getattr(argconfig, name)
-                dfunc.func(**kwargs)
+        for task in tasks:
+            if argconfig.task in task.aliases:
+                _dispatch(task.func)
                 return None
 
         print(f"Task {argconfig.task} not found")  # noqa: T201
         sys.exit(1)
     else:
-        print_listed_tasks(decorated_function, verbose=1)
+        print_listed_tasks(tasks, verbose=1)
 
     return None
 

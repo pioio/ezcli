@@ -12,6 +12,7 @@ from .parameter import Parameter
 from .parser import dispatch
 from .task import task
 from .utils import get_runtime
+from .task import Task
 
 from typing import Annotated as ann  # noqa: N813 # isort: skip
 
@@ -59,4 +60,5 @@ __all__: Sequence[str] = [
     "listing",
     "Annotated",
     "Group",
+    "Task",
 ]

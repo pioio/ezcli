@@ -3,6 +3,7 @@
 from typing import Annotated, Type, TypeVar
 
 import taskcli
+import testing
 from run import run
 from taskcli import Arg, Group, ann, arg, task
 
@@ -10,7 +11,7 @@ important = Group("Important", desc="Development tasks")
 dev = Group("dev", desc="Development tasks")
 
 
-@task(group=dev,aliases="t")
+@task(group=dev, aliases="t")
 def test():
     """Run unit tests."""
     run(f"pytest tests/ -vvv {taskcli.extra_args()}")
@@ -22,8 +23,22 @@ def nox():
     run("nox")
 
 
+@task(group=dev, hidden=True)
+def nox_special():
+    """(test) Run specia tests using nox."""
+    run("nox")
+
+
 # TODO: instead of important, use a not-important, and hide them explicitly instead
 Paths = arg(list[str], "foobar", default=["src", "tests", "tasks.py"], important=True)
+
+
+with Group("Testing module"):
+    taskcli.include(testing)
+
+    @task
+    def testing_foobar():
+        print("testing foobar")
 
 
 with Group("Hidden Group", hidden=True):

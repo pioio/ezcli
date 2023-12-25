@@ -1,3 +1,4 @@
+import contextlib
 import re
 import sys
 import typing
@@ -14,6 +15,19 @@ if typing.TYPE_CHECKING:
 
 ENDC = configuration.get_end_color()
 UNDERLINE = configuration.get_underline()
+
+import os
+
+
+@contextlib.contextmanager
+def change_dir(path: str) -> typing.Iterator[None]:
+    """Context manager to change the current working directory."""
+    old_dir = os.getcwd()
+    os.chdir(path)
+    try:
+        yield
+    finally:
+        os.chdir(old_dir)
 
 
 def strip_escape_codes(s: str) -> str:
