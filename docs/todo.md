@@ -11,6 +11,11 @@
   - [ ] include not decorated function
   - [ ] A includes B, B includes A
   - [ ] task ... task --foo
+  - [ ] include in tasks.py still broken
+    - [ ] def xxx():
+            pass
+
+        include(xxx)
 - [ ] FIXME: broken 'task ruff src'
 - [ ] Aliases
 - [ ] -L list all

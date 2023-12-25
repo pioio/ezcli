@@ -1,6 +1,7 @@
+########################################################################################################################
+import pytest
+
 import taskcli
-
-
 from taskcli import Task, dispatch, include, task
 
 from .basic_test import run_tasks
@@ -92,35 +93,21 @@ def test_include_from_subsubdir_works():
     assert stdout.strip() == """* subsubchild"""
 
 
-########################################################################################################################
-import pytest
-@pytest.mark.skip
-def test_including_not_decorated_function():
+def test_including_not_decorated_function(prepare):
     done = 0
-    def somefun():
+
+    def somefun2():
         nonlocal done
         done = 42
 
-    include(somefun)
+    include(somefun2)
 
-    taskcli.dispatch(["somefun"])
+    taskcli.dispatch(["somefun2"])
     assert done == 42
 
 
-def test_including_not_decorated_function():
-    done = 0
-
-    def somefun():
-        nonlocal done
-        done = 42
-
-    include(somefun)
-
-    taskcli.dispatch(["somefun"])
-    assert done == 42
-
-@pytest.mark.skip
-def test_including_not_decorated_function_name_change():
+@pytest.mark.skip()
+def test_including_not_decorated_function_name_change(prepare):
     done = 0
 
     def somefun():
@@ -133,7 +120,7 @@ def test_including_not_decorated_function_name_change():
     assert done == 42
 
 
-def test_including_decorated_function():
+def test_including_decorated_function(prepare):
     done = 0
 
     @task
@@ -147,11 +134,11 @@ def test_including_decorated_function():
     assert done == 42
 
 
-
-def test_double_task_decorator_failes():
+def test_double_task_decorator_failes(prepare):
     done = 0
 
     with pytest.raises(ValueError, match="already decorated"):
+
         @task
         @task
         def somefun():

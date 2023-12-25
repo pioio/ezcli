@@ -159,7 +159,6 @@ def _get_wrapper(
             msg = f"Function {func} is already decorated as a task"
             raise ValueError(msg)
 
-
     module_which_defines_task.decorated_functions.append(task)
 
     if module_which_defines_task_name == "__main__":

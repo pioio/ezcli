@@ -9,32 +9,36 @@ from taskcli import Arg, Group, ann, arg, include, task
 from tests.includetest2.subdir.subsubdir import tasks as subsubtasks
 
 important = Group("Important", desc="Development tasks")
-dev = Group("dev", desc="Development tasks")
 
 
-@task(group=dev, aliases="t")
-def test():
-    """Run unit tests."""
-    run(f"pytest tests/ -vvv {taskcli.extra_args()}")
+with Group("dev", desc="Development tasks"):
+    @task(aliases="t")
+    def test():
+        """Run unit tests."""
+        run(f"pytest tests/ -vvv {taskcli.extra_args()}")
 
 
-@task(group=dev)
-def nox():
-    """Run extensive tests using nox."""
-    run("nox")
+    @task()
+    def nox():
+        """Run extensive tests using nox."""
+        run("nox")
 
 
-@task(group=dev, hidden=True)
-def nox_special():
-    """(test) Run specia tests using nox."""
-    run("nox")
+    @task(hidden=True)
+    def nox_special():
+        """(test) Run specia tests using nox."""
+        run("nox")
 
 
-@task(group=dev)
-def nox_special2(mandatory_arg: str):
-    del mandatory_arg
-    """(test) Run even more special tests using nox."""
-    run("nox")
+    @task()
+    def nox_special2(mandatory_arg: str):
+        del mandatory_arg
+        """(test) Run even more special tests using nox."""
+        run("nox")
+
+    @task
+    def runcompletion():
+        run("_ARGCOMPLETE=1 ./tasks.py")
 
 
 # TODO: instead of important, use a not-important, and hide them explicitly instead
@@ -65,13 +69,18 @@ with Group("Hidden Group2", hidden=True):
 
 DEFAULT_LINT_PATH = "src/"
 
+# TODO: fixme
+# def xxx():
+#     pass
+
+# include(xxx)
+
 
 def _get_lint_paths():
     return taskcli.extra_args() or "src/"
 
 
-with Group("lint"):
-
+with Group("lint", desc='Code cleanup tasks') as x:
     @task(aliases="r")
     def ruff(paths: Paths, example_arg: str = "foobar", example_arg2: str = "foobar"):
         """Run ruff linter."""
@@ -99,12 +108,6 @@ with Group("lint"):
         """Reorder imports, float them to top."""
         path_txt = " ".join(paths)
         run(f"isort {path_txt} --float-to-top")
-
-
-@task(group=dev)
-def runcompletion():
-    run("_ARGCOMPLETE=1 ./tasks.py")
-
 
 @task
 def rufftwice():
