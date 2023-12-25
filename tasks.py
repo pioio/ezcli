@@ -6,10 +6,11 @@ import taskcli
 from run import run
 from taskcli import Arg, Group, ann, arg, task
 
+important = Group("Important", desc="Development tasks")
 dev = Group("dev", desc="Development tasks")
 
 
-@task(group=dev)
+@task(group=dev,aliases="t")
 def test():
     """Run unit tests."""
     run(f"pytest tests/ -vvv {taskcli.extra_args()}")
@@ -48,14 +49,14 @@ def _get_lint_paths():
 
 with Group("lint"):
 
-    @task
+    @task(aliases="r")
     def ruff(paths: Paths):
         """Run ruff linter."""
         path_txt = " ".join(paths)
         run(f"ruff format {path_txt}")
         run(f"ruff check {path_txt} --fix")
 
-    @task(important=True)
+    @task(important=True, aliases=("l"))
     def lint(paths: Paths):
         """Run all linting tasks."""
         isort(paths)

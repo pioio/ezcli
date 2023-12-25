@@ -1,6 +1,7 @@
 import functools
 import inspect
 import sys
+from typing import Iterable
 
 from . import utils
 from .configuration import config
@@ -25,7 +26,14 @@ def task(*args: Any, **kwargs: Any) -> AnyFunction:
 class Task:
     """A decorated function."""
 
-    def __init__(self, func: AnyFunction, group: Group | None = None, hidden: bool = False, important: bool = False):
+    def __init__(
+        self,
+        func: AnyFunction,
+        group: Group | None = None,
+        hidden: bool = False,
+        aliases: Iterable[str] | None = None,
+        important: bool = False,
+    ):
         """Create a new Task.
 
         func: The decorated python function.
@@ -33,7 +41,7 @@ class Task:
         important: If True, the task will be listed in the help in a way which stands out. See config for details.
         """
         self.func = func
-
+        self.aliases = aliases or []
         self.hidden = hidden
         self.important = important
         self.params = [Parameter(param) for param in inspect.signature(func).parameters.values()]
@@ -61,6 +69,10 @@ class Task:
             out = "_" + out
         return out
 
+    def get_all_task_names(self) -> list[str]:
+        """Return all names of the task, including aliases."""
+        return [self.get_full_task_name(), *self.aliases]
+
     def get_summary_line(self) -> str:
         """Return the first line of docstring, or empty string if no docstring."""
         if self.func.__doc__ is None:
@@ -69,7 +81,12 @@ class Task:
 
 
 def _get_wrapper(
-    func: AnyFunction, group: Group | None = None, hidden: bool = False, prefix: str = "", important: bool = False
+    func: AnyFunction,
+    group: Group | None = None,
+    hidden: bool = False,
+    prefix: str = "",
+    important: bool = False,
+    aliases: Iterable[str] | None = None,
 ) -> AnyFunction:
     # TODo: allow defining groups via string at task-creationg time
     # >  if isinstance(group, str):
@@ -77,6 +94,8 @@ def _get_wrapper(
     # >          group = DEFAULT_GROUP
     # >      else:
     # >          group = Group(name=group)
+    aliases = aliases or []
+
     if config.adv_auto_hide_private_tasks and (func.__name__.startswith("_") and not hidden):
         func.__name__ = func.__name__.lstrip("_")
         hidden = True
@@ -96,8 +115,12 @@ def _get_wrapper(
         group = get_current_group()
     assert isinstance(group, Group), f"Expected group to be a Group, got {group!r}"
 
+    if isinstance(aliases, str):
+        aliases = [aliases]
+
     del kwargs["group"]
-    decorated = Task(func, group=group, **kwargs)
+    del kwargs["aliases"]
+    decorated = Task(func, group=group, aliases=aliases, **kwargs)
 
     if not hasattr(module_which_defines_task, "decorated_functions"):
         module_which_defines_task.decorated_functions = []  # type: ignore[attr-defined]

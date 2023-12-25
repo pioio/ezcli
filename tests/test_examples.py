@@ -86,7 +86,7 @@ def test_groups_basic():
     assert tasks[1].group.name == "magical tasks"
     lines = list_tasks(tasks, verbose=0)
 
-    assert """*** default  Default tasks
+    assert """*** default         Default tasks
 * foobar1
 
 *** magical tasks

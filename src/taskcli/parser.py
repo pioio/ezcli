@@ -72,6 +72,16 @@ def dispatch(argv: list[str] | None = None) -> None:
                     kwargs[name] = getattr(argconfig, name)
                 dfunc.func(**kwargs)
                 return None
+        # Not found, search aliases
+        for dfunc in decorated_function:
+            if argconfig.task in dfunc.aliases:
+                signature = inspect.signature(dfunc.func)
+                kwargs = {}
+                for param in signature.parameters.values():
+                    name = param.name.replace("_", "-")
+                    kwargs[name] = getattr(argconfig, name)
+                dfunc.func(**kwargs)
+                return None
 
         print(f"Task {argconfig.task} not found")  # noqa: T201
         sys.exit(1)
@@ -102,11 +112,14 @@ def build_parser(decorated_function: list[Task]) -> argparse.ArgumentParser:
     subparsers = root_parser.add_subparsers(help="Task to run")
 
     for dfunc in decorated_function:
-        subparser = subparsers.add_parser(dfunc.get_full_task_name())
-        subparser.set_defaults(task=dfunc.get_full_task_name())
+        all_names_of_task = dfunc.get_all_task_names()
 
-        for param in dfunc.params:
-            _add_param_to_subparser(param, subparser)
+        for name in all_names_of_task:
+            subparser = subparsers.add_parser(name)
+            subparser.set_defaults(task=name)
+
+            for param in dfunc.params:
+                _add_param_to_subparser(param, subparser)
 
     return root_parser
 

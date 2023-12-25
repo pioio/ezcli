@@ -75,7 +75,7 @@ def test_basic2():
     lines = stdout.splitlines()
     lines = [line.strip() for line in lines]
     assert lines == [
-        "*** default  Default tasks",
+        "*** default         Default tasks",
         "* task4",
         "",
         "*** foobar",
