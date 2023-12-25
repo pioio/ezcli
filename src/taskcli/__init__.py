@@ -1,5 +1,5 @@
-from typing import Annotated as ann  # noqa: N813
-from typing import Any, Iterable, Sequence
+# from . import taskcli taskclimodule
+from typing import Annotated, Any, Iterable, Sequence, TypeVar
 
 import taskcli
 
@@ -12,7 +12,7 @@ from .parser import dispatch
 from .task import task
 from .utils import get_runtime
 
-# from . import taskcli taskclimodule
+from typing import Annotated as ann  # noqa: N813 # isort: skip
 
 
 def hide_group(group: str) -> None:
@@ -20,8 +20,11 @@ def hide_group(group: str) -> None:
     utils.get_runtime().hidden_groups.append(group)
 
 
+T = TypeVar("T")
+
+
 def arg(
-    typevar: Any,
+    typevar: T,
     help: str | None = None,
     /,
     # Specific to taskcli
@@ -32,11 +35,12 @@ def arg(
     metavar: str | None = None,
     nargs: str | int | None = None,
     default: Any = Parameter.Empty,
-) -> Any:
+) -> Annotated[T, str, Arg]:
     kwargs = locals()
+
     del kwargs["help"]
     del kwargs["typevar"]
-    return ann[typevar, help, Arg(**kwargs)]
+    return Annotated[typevar, help, Arg(**kwargs)]  # type: ignore # noqa: PGH003
 
 
 __all__: Sequence[str] = [
@@ -52,4 +56,5 @@ __all__: Sequence[str] = [
     "get_runtime",
     "dispatch",
     "listing",
+    "Annotated",
 ]
