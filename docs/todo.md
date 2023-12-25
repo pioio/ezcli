@@ -2,10 +2,13 @@
 - [x] add `taskcli.extra_args` to get `-- args`
 - [ ] include
 - [ ] task script
+- [ ] add auto conversion to int/float from string
 - [ ]
   - [ ] per module task list
   - [ ] include(child_tasks.child1)
   - [ ] include to group
+  - [ ]
+  - [ ] add warning if function name overwridden
   - [ ] include(group, newgroupname)
   - [ ] include(group.task, new-task-name-in-current-group)
   - [ ] include not decorated function

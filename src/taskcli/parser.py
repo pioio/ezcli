@@ -69,19 +69,18 @@ def dispatch(argv: list[str] | None = None) -> None:  # noqa: C901
         for param in signature.parameters.values():
             name = param.name.replace("_", "-")
             kwargs[name] = getattr(argconfig, name)
-        task.func(**kwargs)
+        return task.func(**kwargs)
+
 
     if hasattr(argconfig, "task"):
         for task in tasks:
             if task.get_full_task_name() == argconfig.task:
-                _dispatch(task.func)
-                return None
+                return _dispatch(task.func)
 
         # Not found, search aliases
         for task in tasks:
             if argconfig.task in task.aliases:
-                _dispatch(task.func)
-                return None
+                return _dispatch(task.func)
 
         print(f"Task {argconfig.task} not found")  # noqa: T201
         sys.exit(1)

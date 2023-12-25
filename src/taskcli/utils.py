@@ -67,3 +67,7 @@ def get_root_module() -> str:
 def get_runtime() -> "TaskCLI":
     """Return the TaskCLI runtime."""
     return taskcli.core.task_cli
+
+def some_test_function(a:int, b:int):
+
+    print("Hello from inside taskcli:", str(a+b))

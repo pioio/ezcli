@@ -76,6 +76,14 @@ DEFAULT_LINT_PATH = "src/"
 # include(xxx)
 
 
+# iterate over all functions
+import inspect, sys
+for name, fun in inspect.getmembers(taskcli.utils, inspect.isfunction):
+    include(fun)
+
+#include(taskcli.utils)
+
+
 def _get_lint_paths():
     return taskcli.extra_args() or "src/"
 
