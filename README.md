@@ -1,6 +1,6 @@
 # `taskcli` - a library for pragmatic and powerful CLI tools
 
-A Python `task` tool for creating powerful CLI interfaces for task automation out of simple Python function.
+A Python `task` tool for turning Python function into powerful CLI interfaces for real-life task automation.
 
 It's like a Makefile, but in Python.
 
@@ -16,17 +16,21 @@ You can group tasks, highlight the important ones, combine tasks from many files
 
 ## Disclaimer
 This library is still in early development and API will continue to change.
-If you need a more mature  solution, consider using [pyinvoke](https://www.pyinvoke.org/).
+If you need a more mature solution, consider using [pyinvoke](https://www.pyinvoke.org/).
 
-## Comparison to other tools
+## Prior art and comparison
 ### pyinvoke
 `taskcli` is very similar to pyinvoke, and builds on many of its ideas.
 
-Unlike pyinvoke, `taskcli` does way with explitic context object that needs to be passed around.
-This makes defining tasks a bit easier.
-`taskcli` aims to provides a richer task list output and overview out of the box.
-`taskcli` infers more information from type annotations, relying less on duplicating information in decorators.
+- `taskcli` automatically assumes real-life tasks often come with co-located files, so by default it automatically switches directories
+    when running tasks imported from other directories. This can be disabled.
+- Unlike pyinvoke, `taskcli` does way with explitic context object that needs to be passed around. This makes defining tasks a bit easier.
+- `taskcli` aims to provides a richer task list output and overview out of the box.
+- `taskcli` infers more information from type annotations, relying less on duplicating information in decorators.
+- `taskcli` offers more elaborate include capability, and hierarchical discovery of tasks.
 
+
+Note, unlike pyinvoke, taskcli is still in development.
 
 ### Taskfile.dev
 Unlike Taskfile, `taskcli` does not rely on YAML. It's pure python.
