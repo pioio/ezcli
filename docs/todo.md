@@ -1,5 +1,5 @@
-TODO:
-- add `taskcli.args` to get `-- args`
+#TODO:
+- [x] add `taskcli.extra_args` to get `-- args`
 - changing to task file dir also when invoking a function via python. But make it configurable.
 - add separattors to task list, or group
   @separator("dev tasks - use)
@@ -27,6 +27,23 @@ Features:
 - diaply arg help when -vvvv used
 - list of optional arg names to always hide from listing
 
-Bugs:
-    ARG1,ARG2=zzz,ARG3OPTIONAL=xxx,KW=3
-FullArgSpec(args=['arg1', 'arg2', 'arg3optional', 'kw'], varargs=None, varkw=None, defaults=('zzz', 'xxx', 3), kwonlyargs=[], kwonlydefaults=None, annotations={'arg1': <class 'str'>, 'arg2': <class 'str'>, 'arg3optional': <class 'str'>, 'kw': <class 'int'>})
+
+# Later
+- Include Taskfile
+
+# FIXME
+- [ ] Text in help output broken - does include task name. We should modify parser's print-usage to include task name
+
+# TODOs
+- [ ] also print env vars in help
+- [ ] add -v to help
+- [ ] support 'help' syntax
+- [ ] add auto short flags
+- [ ] add "--no-*" versino of bool flags.
+- [ ] add default subtask
+- [ ] add @task(name)
+- [ ] add @task(aliases)
+- [ ] add @task(namespace)
+- [ ] allow importing tasks from other modules, even with same names
+  - [ ] Right now, this will likely break task_data_args[func_name][main_name]
+- [ ] Consider support file with functions prefixed with "task_", and use "main" as the default task by default

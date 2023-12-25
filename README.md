@@ -1,42 +1,52 @@
 # `taskcli` - a library for pragmatic CLI tools
 
-A library for building pragmatic CLI interfaces.
+A Python `task` tool for creating powerful CLI interfaces for task automation out of simple Python function.
 
-Features:
-- have one taskcli per module? each set of tasks needs own settings. some settings should take precedence over others.
-- simple to use for small scripts.
-- powerful enough for more complex tools (argparse-based)
-- familiar `argparse` syntax in the `arg` decorator.
-- automatically adds "-v|--verbose" flag to all tasks
-- automatically adds "-h|--help" flag to all tasks
-- accept environment vars to args?
-- expect environment? Print it in task list?
--  @task(env=[var1,var2])
-- --[no-]confirm - no underscored?
-- auto put important tasks in default.
+It's like a Makefile, but in Python.
 
-# Later
-- Include Taskfile
+## Overview
+All projects revolve around performing small tasks.
+Be it complication, deployment, testing, making an API call, or anything else, it's all just a task.
+As projects grow, so does the number of tasks.
+Over time, it becomes harder and harder to organize them.
 
-2023-12-24Heavily inspired by the excellent `argh` library.
+This library aims to solve this problem by providing means of not only easily creating tasks,
+but also easily navigating them later on.
+You can group tasks, highlight the important ones, combine tasks from many files and directories.
+
+## Disclaimer
+This library is still in early development and API will continue to change.
+If you need a more mature  solution, consider using [pyinvoke](https://www.pyinvoke.org/).
+
+## Comparison to other tools
+### pyinvoke
+`taskcli` is very similar to pyinvoke, and builds on many of its ideas.
+
+Unlike pyinvoke, `taskcli` does way with explitic context object that needs to be passed around.
+This makes defining tasks a bit easier.
+`taskcli` aims to provides a richer task list output and overview out of the box.
+`taskcli` infers more information from type annotations, relying less on duplicating information in decorators.
+
+
+### Taskfile.dev
+Unlike Taskfile, `taskcli` does not rely on YAML. It's pure python.
+YAML has its benefits, but also drawbacks.
+
+### argh
+`argh` is a great library for creating CLI interfaces from python functions.
+It can also be used for creating simple tasks.
+
+## Key features
+- Pythonic way of defining tasks - simply create a function.
+- Easily manage, group, highlight, list your tasks.
+- Import and reuse tasks from other modules/dirs.
+- Quickly see the overview of all the tasks, along with optional and mandatory arguments.
+- Customize the way your tasks are listed. Customize it on per-project basis, or globally for many projects.
+- Configurable: easy to start, but also easy to customize for larger projects.
+- Automatically switch directries when running tasks imported from other directories (can be disabled).
 
 ## Acknowledgements
-- This library builds on ideas from the `argh` project
-- The library uses `argparse` behing the scenes.
+- The idea was inspired by Taskfile.dev and `Justfile`
+- This library builds on many ideas from the excellent `argh` project. If you like the idea of building CLI interfaces from python function signatures, but don't need the advanced task-like features, check `argh` out.
+- The library uses `argparse` and `argcomplete` behing the scenes.
 
-
-# FIXME
-- [ ] Text in help output broken - does include task name. We should modify parser's print-usage to include task name
-# TODOs
-- [ ] also print env vars in help
-- [ ] add -v to help
-- [ ] support 'help' syntax
-- [ ] add auto short flags
-- [ ] add "--no-*" versino of bool flags.
-- [ ] add default subtask
-- [ ] add @task(name)
-- [ ] add @task(aliases)
-- [ ] add @task(namespace)
-- [ ] allow importing tasks from other modules, even with same names
-  - [ ] Right now, this will likely break task_data_args[func_name][main_name]
-- [ ] Consider support file with functions prefixed with "task_", and use "main" as the default task by default
