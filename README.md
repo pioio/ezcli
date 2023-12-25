@@ -16,7 +16,7 @@ You can group tasks, highlight the important ones, combine tasks from many files
 
 ## Disclaimer
 This library is still in early development and API will continue to change.
-If you need a more mature solution, consider using [pyinvoke](https://www.pyinvoke.org/).
+If you need a more mature solution, consider using [pyinvoke](https://www.pyinvoke.org/) or Taskfile.dev.
 
 ## Prior art and comparison
 ### pyinvoke
