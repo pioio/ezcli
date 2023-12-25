@@ -19,6 +19,7 @@
 - before/after to run a function only once
 - aliases
 - listing all tasks in all dirs above, up intil a custom root (configurable)
+  - task .
 
 Features:
 - hidden tasks: _foobar: use "named" decorator?

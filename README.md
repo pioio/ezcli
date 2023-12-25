@@ -1,6 +1,6 @@
 # `taskcli` - a library for pragmatic and powerful CLI tools
 
-A Python `task` tool for turning Python function into powerful CLI interfaces for real-life task automation.
+A tool for turning Python functions into powerful CLI interfaces for real-life task automation.
 
 It's like a Makefile, but in Python.
 
@@ -28,7 +28,7 @@ If you need a more mature solution, consider using [pyinvoke](https://www.pyinvo
 - `taskcli` aims to provides a richer task list output and overview out of the box.
 - `taskcli` infers more information from type annotations, relying less on duplicating information in decorators.
 - `taskcli` offers more elaborate include capability, and hierarchical discovery of tasks.
-
+- `taskcli` user experience is more opinionated, aiming to out of the box reduce the amount of keystrokes needed to navigate and tasks.
 
 Note, unlike pyinvoke, taskcli is still in development.
 
