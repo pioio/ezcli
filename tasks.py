@@ -28,6 +28,12 @@ def lint(paths:Paths):
     mypy(paths)
 
 
+@task(group="lint")
+def _hidden_task(paths:Paths):
+    isort(paths)
+    ruff(paths)
+    mypy(paths)
+
 
 DEFAULT_LINT_PATH = "src/"
 def _get_lint_paths():
