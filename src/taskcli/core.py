@@ -27,22 +27,35 @@ def extra_args_list() -> list[str]:
 def include(module: Module|AnyFunction, **kwargs:Any) -> None:
     """Iterate over decorated @task functions in the module."""
 
-    for decorated_fun in module.decorated_functions:
-        assert isinstance(decorated_fun, Task), f"Expected Task, got {type(decorated_fun)}"
-        runtime = taskcli.get_runtime()
-        runtime.tasks.append(decorated_fun)
+    if isinstance(module, Module):
+       for decorated_fun in module.decorated_functions:
+            assert isinstance(decorated_fun, Task), f"Expected Task, got {type(decorated_fun)}"
+            runtime = taskcli.get_runtime()
+            runtime.tasks.append(decorated_fun)
+            pass
+    elif inspect.isfunction(module):
+        fun = module
+        # XXX TODO: check if decorated
 
-    # if isinstance(module, Module):
-    #     for decorated_fun in module.decorated_functions:
-    #         assert isinstance(decorated_fun, Task), f"Expected Task, got {type(decorated_fun)}"
-    #         runtime = taskcli.get_runtime()
-    #         runtime.tasks.append(decorated_fun)
-    # else:
-    #     fun = module
-    #     # XXX TODO: check if decorated
-    #     fun = task()(fun)
-    #     runtime = taskcli.get_runtime()
-    #     runtime.tasks.append(fun)
+        module_of_fun = sys.modules[fun.__module__]
+        if not hasattr(module_of_fun, "decorated_functions"):
+            module_of_fun.decorated_functions = []
+
+
+        found = False
+        for atask in module_of_fun.decorated_functions:
+            if atask.func == fun:
+                found = True
+                break
+        if not found:
+            # function has not been decorated with @task yet, decore it, so that we can include it
+            task(fun, **kwargs)
+        thetask = module_of_fun.decorated_functions[-1]
+
+        runtime = taskcli.get_runtime()
+        runtime.tasks.append(thetask)
+        return
+
 
 
 def includeold(module: Module, change_dir: bool = True, cwd: str = "") -> None:

@@ -153,6 +153,13 @@ def _get_wrapper(
     if not hasattr(module_which_defines_task, "decorated_functions"):
         module_which_defines_task.decorated_functions = []  # type: ignore[attr-defined]
 
+    # Ensure no double decoration
+    for atask in module_which_defines_task.decorated_functions:
+        if atask.func == func:
+            msg = f"Function {func} is already decorated as a task"
+            raise ValueError(msg)
+
+
     module_which_defines_task.decorated_functions.append(task)
 
     if module_which_defines_task_name == "__main__":

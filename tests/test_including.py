@@ -105,3 +105,55 @@ def test_including_not_decorated_function():
 
     taskcli.dispatch(["somefun"])
     assert done == 42
+
+
+def test_including_not_decorated_function():
+    done = 0
+
+    def somefun():
+        nonlocal done
+        done = 42
+
+    include(somefun)
+
+    taskcli.dispatch(["somefun"])
+    assert done == 42
+
+@pytest.mark.skip
+def test_including_not_decorated_function_name_change():
+    done = 0
+
+    def somefun():
+        nonlocal done
+        done = 42
+
+    include(somefun, name="xxx")
+
+    taskcli.dispatch(["xxx"])
+    assert done == 42
+
+
+def test_including_decorated_function():
+    done = 0
+
+    @task
+    def somefun():
+        nonlocal done
+        done = 42
+
+    include(somefun)
+
+    taskcli.dispatch(["somefun"])
+    assert done == 42
+
+
+
+def test_double_task_decorator_failes():
+    done = 0
+
+    with pytest.raises(ValueError, match="already decorated"):
+        @task
+        @task
+        def somefun():
+            nonlocal done
+            done = 42
