@@ -5,7 +5,8 @@ from typing import Annotated, Type, TypeVar
 import taskcli
 import testing
 from run import run
-from taskcli import Arg, Group, ann, arg, task
+from taskcli import Arg, Group, ann, arg, include, task
+from tests.includetest2.subdir.subsubdir import tasks as subsubtasks
 
 important = Group("Important", desc="Development tasks")
 dev = Group("dev", desc="Development tasks")
@@ -29,8 +30,15 @@ def nox_special():
     run("nox")
 
 
+@task(group=dev)
+def nox_special2(mandatory_arg: str):
+    del mandatory_arg
+    """(test) Run even more special tests using nox."""
+    run("nox")
+
+
 # TODO: instead of important, use a not-important, and hide them explicitly instead
-Paths = arg(list[str], "foobar", default=["src", "tests", "tasks.py"], important=True)
+Paths = arg(list[str], "The paths to lint", default=["src", "tests", "tasks.py"], important=True)
 
 
 with Group("Testing module"):
@@ -65,8 +73,9 @@ def _get_lint_paths():
 with Group("lint"):
 
     @task(aliases="r")
-    def ruff(paths: Paths):
+    def ruff(paths: Paths, example_arg: str = "foobar", example_arg2: str = "foobar"):
         """Run ruff linter."""
+        del example_arg
         path_txt = " ".join(paths)
         run(f"ruff format {path_txt}")
         run(f"ruff check {path_txt} --fix")
@@ -101,6 +110,9 @@ def runcompletion():
 def rufftwice():
     ruff()
     ruff()
+
+
+include(subsubtasks)
 
 
 @task

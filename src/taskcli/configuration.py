@@ -64,6 +64,7 @@ class Config:
 
     render_color_mandatory_arg: str = colors.yellow
     render_color_optional_arg: str = colors.dark_gray
+    render_color_optional_and_important_arg: str = ""
     render_color_default_arg = colors.dark_gray + colors.underline
     render_color_task_name: str = colors.green
     render_color_summary: str = colors.white

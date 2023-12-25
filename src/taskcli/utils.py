@@ -1,4 +1,5 @@
 import contextlib
+import os
 import re
 import sys
 import typing
@@ -15,8 +16,6 @@ if typing.TYPE_CHECKING:
 
 ENDC = configuration.get_end_color()
 UNDERLINE = configuration.get_underline()
-
-import os
 
 
 @contextlib.contextmanager

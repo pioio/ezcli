@@ -1,9 +1,16 @@
 #TODO:
 - [x] add `taskcli.extra_args` to get `-- args`
 - [ ] include
+- [ ] task script
 - [ ]
   - [ ] per module task list
   - [ ] include(child_tasks.child1)
+  - [ ] include to group
+  - [ ] include(group, newgroupname)
+  - [ ] include(group.task, new-task-name-in-current-group)
+  - [ ] include not decorated function
+  - [ ] A includes B, B includes A
+  - [ ] task ... task --foo
 - [ ] FIXME: broken 'task ruff src'
 - [ ] Aliases
 - [ ] -L list all

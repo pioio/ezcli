@@ -137,18 +137,14 @@ def _get_wrapper(
     if isinstance(aliases, str):
         aliases = [aliases]
 
-
     # DecoratedFunction
     @functools.wraps(func)
     def wrapper(*args: list[Any], **kwargs: dict[str, Any]) -> Any:
-
         if change_dir:
             with utils.change_dir(task.get_taskfile_dir()):
                 return func(*args, **kwargs)
         else:
             return func(*args, **kwargs)
-
-
 
     del kwargs["group"]
     del kwargs["aliases"]
@@ -165,8 +161,7 @@ def _get_wrapper(
         runtime = utils.get_runtime()
         runtime.tasks.append(task)
 
-
-        #return func(*args, **kwargs)
+        # return func(*args, **kwargs)
 
     # # change dir
     # if change_dir:

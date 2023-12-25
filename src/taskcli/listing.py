@@ -215,7 +215,10 @@ def build_pretty_param_list(  # noqa: C901
         if not param.has_default():
             rendered = f"{config.render_color_mandatory_arg}{rendered}{end_color}"
         else:
-            rendered = f"{config.render_color_optional_arg}{rendered}{end_color}"
+            if param.important:
+                rendered = f"{config.render_color_optional_and_important_arg}{rendered}{end_color}"
+            else:
+                rendered = f"{config.render_color_optional_arg}{rendered}{end_color}"
 
         if param.kind in [inspect.Parameter.POSITIONAL_ONLY, inspect.Parameter.POSITIONAL_OR_KEYWORD]:
             rendered = rendered

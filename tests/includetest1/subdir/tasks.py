@@ -1,6 +1,7 @@
-from taskcli import task, include, dispatch
-
 import os
+
+from taskcli import dispatch, include, task
+
 
 @task
 def child1() -> None:

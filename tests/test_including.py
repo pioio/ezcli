@@ -1,6 +1,9 @@
-from pdb import run
-from taskcli import task, include, dispatch, Task
+import taskcli
 
+
+from taskcli import Task, dispatch, include, task
+
+from .basic_test import run_tasks
 from .test_examples import prepare
 
 
@@ -13,9 +16,6 @@ def test_get_taskfile_dir(prepare):
     dirpath = t.get_taskfile_dir()
     assert dirpath.startswith("/")
     assert dirpath.endswith("/tests")
-
-
-from .basic_test import run_tasks
 
 
 def clean_stdout(stdout):
@@ -41,9 +41,10 @@ def test_include_basic():
 ########################################################################################################################
 # Here we test that  when calling included task the CWD is changed properly
 # Confounders:
-    # - task can be defined ith, or ithout "change_dir"
-    # - task can be called directly via task cli, or via the taskfile of the parent which includes it
-    #   in both cases if @task decorator is there, we want to change the dir if change_dir=True (the default)
+# - task can be defined ith, or ithout "change_dir"
+# - task can be called directly via task cli, or via the taskfile of the parent which includes it
+#   in both cases if @task decorator is there, we want to change the dir if change_dir=True (the default)
+
 
 def test_include_cwd_change():
     stdout, _ = run_tasks("tests/includetest1/parent_test_1.py parent")
@@ -54,24 +55,33 @@ def test_include_cwd_change():
     assert stdout.strip().endswith("tests/includetest1")
     # this test is ran from above "tests/includetest1", parent1 task should change dir to "tests/includetest1"
 
+
 def test_include_cwd_change_child1():
     stdout, _ = run_tasks("tests/includetest1/parent_test_1.py child1")
     assert stdout.strip().endswith("tests/includetest1/subdir"), "should have changed dir"
+
 
 def test_include_cwd_change_child1_via_parent():
     stdout, _ = run_tasks("tests/includetest1/parent_test_1.py child1-via-parent")
     assert stdout.strip().endswith("tests/includetest1/subdir"), "should have changed dir"
 
+
 # child2 does not change dir upon entering the task
 def test_include_cwd_change_child2():
     import os
+
     cwd = os.getcwd()
     stdout, _ = run_tasks("tests/includetest1/parent_test_1.py child2")
-    assert stdout.strip() == f"child2: {cwd}", "should be whatever is the current directory, as child2 tasks did not change the dir"
+    assert (
+        stdout.strip() == f"child2: {cwd}"
+    ), "should be whatever is the current directory, as child2 tasks did not change the dir"
+
 
 def test_include_cwd_change_child2_via_parent():
     stdout, _ = run_tasks("tests/includetest1/parent_test_1.py child2-via-parent")
-    assert stdout.strip().endswith("tests/includetest1"), "should be parent's directory, as parent task changed the dir, but child2 task did not"
+    assert stdout.strip().endswith(
+        "tests/includetest1"
+    ), "should be parent's directory, as parent task changed the dir, but child2 task did not"
 
 
 ########################################################################################################################
@@ -80,3 +90,18 @@ def test_include_from_subsubdir_works():
     stdout, _ = run_tasks("tests/includetest1/parent_test_2.py")
 
     assert stdout.strip() == """* subsubchild"""
+
+
+########################################################################################################################
+import pytest
+@pytest.mark.skip
+def test_including_not_decorated_function():
+    done = 0
+    def somefun():
+        nonlocal done
+        done = 42
+
+    include(somefun)
+
+    taskcli.dispatch(["somefun"])
+    assert done == 42

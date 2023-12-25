@@ -7,7 +7,7 @@ import sys
 import taskcli
 
 from .group import Group
-from .task import Task
+from .task import Task, task
 from .taskcli import TaskCLI
 from .types import Any, AnyFunction, Module
 
@@ -24,11 +24,25 @@ def extra_args_list() -> list[str]:
     return task_cli.extra_args_list
 
 
-def include(module: Module) -> None:
+def include(module: Module|AnyFunction, **kwargs:Any) -> None:
+    """Iterate over decorated @task functions in the module."""
+
     for decorated_fun in module.decorated_functions:
         assert isinstance(decorated_fun, Task), f"Expected Task, got {type(decorated_fun)}"
         runtime = taskcli.get_runtime()
         runtime.tasks.append(decorated_fun)
+
+    # if isinstance(module, Module):
+    #     for decorated_fun in module.decorated_functions:
+    #         assert isinstance(decorated_fun, Task), f"Expected Task, got {type(decorated_fun)}"
+    #         runtime = taskcli.get_runtime()
+    #         runtime.tasks.append(decorated_fun)
+    # else:
+    #     fun = module
+    #     # XXX TODO: check if decorated
+    #     fun = task()(fun)
+    #     runtime = taskcli.get_runtime()
+    #     runtime.tasks.append(fun)
 
 
 def includeold(module: Module, change_dir: bool = True, cwd: str = "") -> None:

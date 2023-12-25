@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
 import dis
-from taskcli import task, include, dispatch
+import os
 
 import subdir.subsubdir.tasks as child_tasks2
-import os
+
+from taskcli import dispatch, include, task
 
 include(child_tasks2)
 
