@@ -72,3 +72,11 @@ def test_include_cwd_change_child2():
 def test_include_cwd_change_child2_via_parent():
     stdout, _ = run_tasks("tests/includetest1/parent_test_1.py child2-via-parent")
     assert stdout.strip().endswith("tests/includetest1"), "should be parent's directory, as parent task changed the dir, but child2 task did not"
+
+
+########################################################################################################################
+def test_include_from_subsubdir_works():
+    """Test that including a task from a sub-subdir, which is not a python module, works."""
+    stdout, _ = run_tasks("tests/includetest1/parent_test_2.py")
+
+    assert stdout.strip() == """* subsubchild"""

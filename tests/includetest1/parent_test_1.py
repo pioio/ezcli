@@ -21,7 +21,6 @@ def child2_via_parent() -> None:
 
 include(child_tasks)
 
-
 # TODO: include(child_tasks.child1)
 
 if __name__ == "__main__":
