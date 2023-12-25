@@ -41,6 +41,7 @@ ignore = [
     "COM812",
     "ISC001",
     "TD002",  # Requires author in TODOs
+    "N806",   # Don't complain about uppercase variables inside functions, we use those as constant
 
 ]
 

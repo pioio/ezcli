@@ -7,11 +7,12 @@ Since that module is that main module, it has to be excplicitly included in each
 
 import re
 import sys
+from typing import Annotated
 
 import pytest
 
 import taskcli
-from taskcli import task
+from taskcli import Group, arg, task
 from taskcli.listing import list_tasks
 from taskcli.task import Task
 
@@ -74,7 +75,8 @@ def test_groups_basic():
     def foobar1() -> None:
         pass
 
-    group  = taskcli.group.Group("magical tasks")
+    group = taskcli.group.Group("magical tasks")
+
     @task(group=group)
     def magic() -> None:
         pass
@@ -131,6 +133,23 @@ def test_list_short_args_share_line_with_task_no_default():
     assert re.match(r"\* foobar\s+PATHS\s+This is the first task", lines[0]), "No default, so it should appear"
 
 
+def test_list_important_optional_args_are_shown():
+    Name = arg(str, important=True)
+    Text = arg(str)
+
+    @task
+    def foobar(message: Text = "some text", name: Name = "alice") -> None:  # type: ignore # noqa: PGH003
+        """This is the first task"""
+
+    tasks = include_tasks()
+
+    lines = list_tasks(tasks, verbose=0)
+    assert len(lines) == 1
+    assert re.match(
+        r"\* foobar\s+NAME\s+This is the first task", lines[0]
+    ), "Text is optional, but not important, so it should not be shown. Name is optional, but important, so show it."
+
+
 def test_run_default_args_str():
     """Test that default arguments are passed to the task."""
 
@@ -165,3 +184,17 @@ def test_run_default_args(default_arg):
     except SystemExit:
         pytest.fail("SystemExit should not be raised")
     assert done == default_arg
+
+
+def test_group_context_manager():
+    """Test that default arguments are passed to the task."""
+
+    with Group("bar") as group:
+
+        @task
+        def foobar():
+            pass
+
+        atask = include_tasks()[0]
+        assert atask.group.name == "bar"
+        assert atask.group == group

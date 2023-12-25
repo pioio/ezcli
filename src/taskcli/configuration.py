@@ -87,7 +87,7 @@ class Config:
 
     # Prefix with "\n" to separate group names with a newline
     # use {NAME} instead of {name} to print group name in uppercase
-    render_format_of_group_name: str = "\n{white}{underline}{white}*** {name}{clear}  {dark_gray}{desc}{clear}"
+    render_format_of_group_name: str = "\n{white}{underline}{white}*** {name:<14}{clear}  {dark_gray}{desc}{clear}"
 
     # The left column (with task name and args) will pref
     # Only rows with very long task names will be longer than this.
@@ -112,7 +112,7 @@ class Config:
 
     # Default args longer than this will be truncated
 
-    render_max_default_arg_width: int = 20
+    render_max_default_arg_width: int = 40
 
     # -1 for full terminal width
     render_group_header_len: int = 40
@@ -127,8 +127,10 @@ class Config:
     # Advanced config options
 
     # if true, @task function prefixed with "_" will be marked as hidden
-    adv_hide_private_tasks: bool = True
+    adv_auto_hide_private_tasks: bool = True
+
     show_hidden_tasks: bool = False
+    show_hidden_groups: bool = False
 
     adv_render_separator_line_char: str = "="
 

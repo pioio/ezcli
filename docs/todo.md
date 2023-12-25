@@ -1,5 +1,6 @@
 #TODO:
 - [x] add `taskcli.extra_args` to get `-- args`
+- [ ]
 - changing to task file dir also when invoking a function via python. But make it configurable.
 - add separattors to task list, or group
   @separator("dev tasks - use)

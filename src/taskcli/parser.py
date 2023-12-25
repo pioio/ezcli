@@ -54,6 +54,13 @@ def dispatch(argv: list[str] | None = None) -> None:
     if argconfig.version:
         print("version info...")  # noqa: T201
         sys.exit(0)
+    if argconfig.show_hidden:
+        taskcli.config.show_hidden_tasks = True
+        taskcli.config.show_hidden_groups = True
+
+    if argconfig.list:
+        print_listed_tasks(decorated_function, verbose=argconfig.list)
+        sys.exit(0)
 
     if hasattr(argconfig, "task"):
         for dfunc in decorated_function:
@@ -69,11 +76,16 @@ def dispatch(argv: list[str] | None = None) -> None:
         print(f"Task {argconfig.task} not found")  # noqa: T201
         sys.exit(1)
     else:
-        lines = list_tasks(decorated_function, verbose=3)
-        for line in lines:
-            print(line)  # noqa: T201
+        print_listed_tasks(decorated_function, verbose=1)
 
     return None
+
+
+def print_listed_tasks(tasks: list[Task], verbose: int) -> None:
+    """Print the listed tasks."""
+    lines = list_tasks(tasks, verbose=verbose)
+    for line in lines:
+        print(line)  # noqa: T201
 
 
 def build_parser(decorated_function: list[Task]) -> argparse.ArgumentParser:
@@ -82,6 +94,10 @@ def build_parser(decorated_function: list[Task]) -> argparse.ArgumentParser:
 
     # Main parsers
     root_parser.add_argument("--version", action="store_true")
+    root_parser.add_argument(
+        "-l", "--list", action="count", default=0, help="List tasks, use -ll and -lll for more info"
+    )
+    root_parser.add_argument("--show-hidden", "-H", action="store_true", default=False)
 
     subparsers = root_parser.add_subparsers(help="Task to run")
 

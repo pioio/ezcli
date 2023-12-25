@@ -1,8 +1,9 @@
 #!/usr/bin/env python
 
-from taskcli import dispatch, task, Group
+from taskcli import Group, dispatch, task
 
 group = Group("foobar")
+
 
 def task_group(func, **kwargs):
     return task(group=group, **kwargs)(func)

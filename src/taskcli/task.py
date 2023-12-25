@@ -77,7 +77,7 @@ def _get_wrapper(
     # >          group = DEFAULT_GROUP
     # >      else:
     # >          group = Group(name=group)
-    if config.adv_hide_private_tasks and (func.__name__.startswith("_") and not hidden):
+    if config.adv_auto_hide_private_tasks and (func.__name__.startswith("_") and not hidden):
         func.__name__ = func.__name__.lstrip("_")
         hidden = True
     if prefix:

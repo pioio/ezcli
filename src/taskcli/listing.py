@@ -51,6 +51,8 @@ def list_tasks(tasks: list[Task], verbose: int) -> list[str]:
     """Return a list of lines to be printed to the console."""
     assert len(tasks) > 0, "No tasks found"
 
+    show_hidden_groups = verbose >= 3 or configuration.config.show_hidden_groups
+
     # TODO: extract groups info
     groups = create_groups(tasks=tasks, group_order=configuration.config.group_order)
 
@@ -60,7 +62,9 @@ def list_tasks(tasks: list[Task], verbose: int) -> list[str]:
     num_visible_groups = len([group.name for group in groups if group.name not in taskcli.get_runtime().hidden_groups])
 
     for group in groups:
-        if group.hidden or group.name in taskcli.get_runtime().hidden_groups:
+        GROUP_IS_HIDDEN = group.hidden or group.name in taskcli.get_runtime().hidden_groups
+
+        if not show_hidden_groups and GROUP_IS_HIDDEN:
             continue
 
         if num_visible_groups > 1:
@@ -73,7 +77,7 @@ def list_tasks(tasks: list[Task], verbose: int) -> list[str]:
             lines.extend(smart_task_lines(task, verbose=verbose))
     lines = [line.rstrip() for line in lines]
 
-    FIRST_LINE_STARTS_WITH_NEW_LINE = lines and lines[0] and lines[0][0] == "\n"  # noqa: N806
+    FIRST_LINE_STARTS_WITH_NEW_LINE = lines and lines[0] and lines[0][0] == "\n"
     if FIRST_LINE_STARTS_WITH_NEW_LINE:
         # This can happen if user prefixes the custom group format with a "\n" to separate groups with whitesapce
         lines[0] = lines[0][1:]
@@ -83,7 +87,6 @@ def list_tasks(tasks: list[Task], verbose: int) -> list[str]:
 
 def smart_task_lines(task: Task, verbose: int) -> list[str]:
     """Render a single task into a list of lines, scale formatting to the amount of content."""
-    del verbose
     lines: list[str] = []
 
     name = task.name
@@ -100,8 +103,8 @@ def smart_task_lines(task: Task, verbose: int) -> list[str]:
         format = config.render_format_important_tasks
     line = format_colors(format, name=name)
 
-    include_optional = False
-    include_defaults = False
+    include_optional = verbose >= 2
+    include_defaults = verbose >= 3
 
     one_line_params = build_pretty_param_string(
         task, include_optional=include_optional, include_defaults=include_defaults
