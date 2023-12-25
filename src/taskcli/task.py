@@ -4,7 +4,7 @@ import sys
 
 from . import utils
 from .configuration import config
-from .group import Group
+from .group import DEFAULT_GROUP, Group
 from .parameter import Parameter
 from .types import Any, AnyFunction
 
@@ -33,10 +33,15 @@ class Task:
         important: If True, the task will be listed in the help in a way which stands out. See config for details.
         """
         self.func = func
-        self.group = group or Group("default")
+
         self.hidden = hidden
         self.important = important
         self.params = [Parameter(param) for param in inspect.signature(func).parameters.values()]
+
+        self.group: Group = group or DEFAULT_GROUP
+
+        if self not in self.group.tasks:
+            self.group.tasks.append(self)
 
     def is_hidden(self) -> bool:
         """Return True if the task is hidden."""
@@ -64,10 +69,14 @@ class Task:
 
 
 def _get_wrapper(
-    func: AnyFunction, group: str | Group = "default", hidden: bool = False, prefix: str = "", important: bool = False
+    func: AnyFunction, group: Group | None = None, hidden: bool = False, prefix: str = "", important: bool = False
 ) -> AnyFunction:
-    if isinstance(group, str):
-        group = Group(name=group)
+    # TODo: allow defining groups via string at task-creationg time
+    # >  if isinstance(group, str):
+    # >      if group == "default":
+    # >          group = DEFAULT_GROUP
+    # >      else:
+    # >          group = Group(name=group)
     if config.adv_hide_private_tasks and (func.__name__.startswith("_") and not hidden):
         func.__name__ = func.__name__.lstrip("_")
         hidden = True
@@ -81,7 +90,15 @@ def _get_wrapper(
     module_which_defines_task_name = func.__module__
     module_which_defines_task = sys.modules[module_which_defines_task_name]
 
-    decorated = Task(func, **kwargs)
+    from .group import get_current_group
+
+    if group is None:
+        group = get_current_group()
+    assert isinstance(group, Group), f"Expected group to be a Group, got {group!r}"
+
+    del kwargs["group"]
+    decorated = Task(func, group=group, **kwargs)
+
     if not hasattr(module_which_defines_task, "decorated_functions"):
         module_which_defines_task.decorated_functions = []  # type: ignore[attr-defined]
 

@@ -5,6 +5,7 @@ import taskcli
 
 from . import configuration, utils
 from .configuration import config
+from .group import Group
 from .task import Task
 from .utils import param_to_cli_option
 
@@ -56,19 +57,17 @@ def list_tasks(tasks: list[Task], verbose: int) -> list[str]:
     # first, prepare rows, row can how more than one line
     lines: list[str] = []
 
-    num_visible_groups = len(
-        [group_name for group_name in groups if group_name not in taskcli.get_runtime().hidden_groups]
-    )
+    num_visible_groups = len([group.name for group in groups if group.name not in taskcli.get_runtime().hidden_groups])
 
-    for group_name, tasks in groups.items():
-        if group_name in taskcli.get_runtime().hidden_groups:
+    for group in groups:
+        if group.hidden or group.name in taskcli.get_runtime().hidden_groups:
             continue
 
         if num_visible_groups > 1:
-            group_name_rendered = format_colors(config.render_format_of_group_name, name=group_name)
+            group_name_rendered = format_colors(config.render_format_of_group_name, name=group.name, desc=group.desc)
             lines += [group_name_rendered]
 
-        tasks = _sort_tasks(tasks, sort=config.sort, sort_important_first=config.sort_important_first)
+        tasks = _sort_tasks(group.tasks, sort=config.sort, sort_important_first=config.sort_important_first)
 
         for task in tasks:
             lines.extend(smart_task_lines(task, verbose=verbose))
@@ -88,6 +87,7 @@ def smart_task_lines(task: Task, verbose: int) -> list[str]:
     lines: list[str] = []
 
     name = task.name
+
     summary = task.get_summary_line()
 
     max_left = taskcli.config.render_max_left_column_width
@@ -95,10 +95,13 @@ def smart_task_lines(task: Task, verbose: int) -> list[str]:
         max_left_if_no_summary = 130
         max_left = max_left_if_no_summary
 
-    line = format_colors(config.render_task_name, name=name)
+    format = config.render_task_name
+    if task.important:
+        format = config.render_format_important_tasks
+    line = format_colors(format, name=name)
 
     include_optional = False
-    include_defaults = True
+    include_defaults = False
 
     one_line_params = build_pretty_param_string(
         task, include_optional=include_optional, include_defaults=include_defaults
@@ -139,28 +142,33 @@ def format_colors(template: str, **kwargs: Any) -> str:
     if "name" in kwargs:
         kwargs["NAME"] = kwargs["name"].upper()
 
-    format = SafeFormatDict(clear_format=configuration.colors.end, **kwargs)
+    format = SafeFormatDict(clear=configuration.colors.end, **kwargs)
     colors = {color: value for color, value in configuration.colors.__dict__.items() if isinstance(value, str)}
     format.update(colors)
     return template.format(**format)
 
 
-def create_groups(tasks: list[Task], group_order: list[str]) -> dict[str, list[Task]]:
+def create_groups(tasks: list[Task], group_order: list[str]) -> list[Group]:
     """Return a dict of group_name -> list of tasks, ordered per group_order, group not listed there will be last."""
-    groups: dict[str, list[Task]] = {}
+    groups: list[Group] = []
     remaining_tasks: set[Task] = set()
-    for expected_group in group_order:
+
+    for expected_group_name in group_order:
         for task in tasks:
-            if task.group.name == expected_group:
-                if expected_group not in groups:
-                    groups[expected_group] = []
-                groups[expected_group].append(task)
+            already_present = task.group in groups
+
+            if task.group.name == expected_group_name and not already_present:
+                groups.append(task.group)
             else:
                 remaining_tasks.add(task)
+
     for task in remaining_tasks:
-        if task.group.name not in groups:
-            groups[task.group.name] = []
-        groups[task.group.name].append(task)
+        if task.group not in groups:
+            groups.append(task.group)
+
+    before = [group.name for group in groups]
+    after = list({group.name for group in groups})
+    assert sorted(before) == sorted(after), f"Duplicate groups found, {before} != {after}"
     return groups
 
 

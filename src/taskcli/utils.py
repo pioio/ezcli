@@ -33,6 +33,7 @@ def reset_tasks() -> None:
     """Clear the list of tasks."""
     # clear included tasks
     taskcli.utils.get_runtime().tasks = []
+    taskcli.group.DEFAULT_GROUP.tasks = []
 
     # clear tasks in each module
     for module in sys.modules.values():

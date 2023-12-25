@@ -52,6 +52,11 @@ unfixable = [
 
 [per-file-ignores]
 
+"tasks.py" = [
+    "D103",   # Missing docstring in public function
+    "T201",   # print
+]
+
 "tests/**.py" = [
     "D",      # Don't require docstrings for unit tests.
     "SLF001", # Don't complain about acessing private fields.

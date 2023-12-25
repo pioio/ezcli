@@ -1,8 +1,11 @@
 # `taskcli` - a library for pragmatic and powerful CLI tools
 
-A tool for turning Python functions into powerful CLI interfaces for real-life task automation.
+A tool for turning Python functions into powerful CLI interfaces for **fast** real-life task automation.
+
+The guiding design principle is to make running and navigating tasks fast -- with fewest keystrokes.
 
 It's like a Makefile, but in Python.
+
 
 ## Overview
 All projects revolve around performing small tasks.

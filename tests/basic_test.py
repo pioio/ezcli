@@ -4,7 +4,9 @@ import subprocess
 import pytest
 
 import taskcli
+from taskcli.group import Group
 from taskcli.parser import _extract_extra_args
+from taskcli.task import Task
 from taskcli.taskcli import TaskCLI
 
 
@@ -73,7 +75,7 @@ def test_basic2():
     lines = stdout.splitlines()
     lines = [line.strip() for line in lines]
     assert lines == [
-        "*** default",
+        "*** default  Default tasks",
         "* task4",
         "",
         "*** foobar",
@@ -107,3 +109,21 @@ def test_extracting_double_hyphen_args():
     taskcli.core.task_cli = task_cli
     assert taskcli.extra_args_list() == ["--baz", "--bar"]
     assert taskcli.extra_args() == "--baz --bar"
+
+
+def test_create_groups():
+    group = Group("foo")
+    group2 = Group("foo2")
+
+    groups = [group, group2]
+    assert group in groups
+
+    def x():
+        pass
+
+    t1 = Task(x, group=group)
+    t2 = Task(x, group=group)
+    t3 = Task(x, group=group2)
+
+    groups = taskcli.listing.create_groups([t1, t2, t3], group_order=["default", "foo"])
+    assert (len(groups)) == 2

@@ -7,6 +7,7 @@ from . import configuration, listing, utils
 from .annotations import Arg
 from .configuration import config
 from .core import extra_args, extra_args_list, include
+from .group import Group
 from .parameter import Parameter
 from .parser import dispatch
 from .task import task
@@ -57,4 +58,5 @@ __all__: Sequence[str] = [
     "dispatch",
     "listing",
     "Annotated",
+    "Group",
 ]

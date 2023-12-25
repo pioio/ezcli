@@ -71,7 +71,8 @@ class Config:
     render_color_group_name: str = colors.white
     render_extra_line_indent: str = "    "
 
-    render_task_name: str = "{white}* {green}{name}{clear_format}"
+    render_task_name: str = "{white}* {green}{name}{clear}"
+    render_format_important_tasks: str = "{red}* {green}{underline}{name}{clear}"
 
     # Always show these args in the task list, even if they are optional
     render_always_show_args: list[str] = dataclasses.field(default_factory=list)
@@ -84,11 +85,9 @@ class Config:
 
     render_hide_optional_args: list[str] = dataclasses.field(default_factory=list)
 
-    render_format_of_important_tasks: str = "{pink}{name}{clear_format}"
-
     # Prefix with "\n" to separate group names with a newline
     # use {NAME} instead of {name} to print group name in uppercase
-    render_format_of_group_name: str = "\n{white}{underline}{white}*** {name}{clear_format}"
+    render_format_of_group_name: str = "\n{white}{underline}{white}*** {name}{clear}  {dark_gray}{desc}{clear}"
 
     # The left column (with task name and args) will pref
     # Only rows with very long task names will be longer than this.
@@ -135,7 +134,7 @@ class Config:
 
     # Python string format for the separator line
     # justify name center
-    adv_render_separator_line_title: str = "{underline}{white}*** {underline}{name}{clear_format}"
+    adv_render_separator_line_title: str = "{underline}{white}*** {underline}{name}{clear}"
 
 
 config = Config()

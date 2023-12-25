@@ -1,10 +1,11 @@
 #!/usr/bin/env python
 
-from taskcli import dispatch, task
+from taskcli import dispatch, task, Group
 
+group = Group("foobar")
 
 def task_group(func, **kwargs):
-    return task(group="foobar", **kwargs)(func)
+    return task(group=group, **kwargs)(func)
 
 
 # order is mixed, as we want to test sortking

@@ -74,7 +74,8 @@ def test_groups_basic():
     def foobar1() -> None:
         pass
 
-    @task(group="magical tasks")
+    group  = taskcli.group.Group("magical tasks")
+    @task(group=group)
     def magic() -> None:
         pass
 
@@ -83,7 +84,7 @@ def test_groups_basic():
     assert tasks[1].group.name == "magical tasks"
     lines = list_tasks(tasks, verbose=0)
 
-    assert """*** default
+    assert """*** default  Default tasks
 * foobar1
 
 *** magical tasks

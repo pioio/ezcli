@@ -6,6 +6,7 @@ import sys
 
 import taskcli
 
+from .group import Group
 from .task import Task
 from .taskcli import TaskCLI
 from .types import Any, AnyFunction, Module
