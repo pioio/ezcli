@@ -1,4 +1,4 @@
-# `taskcli` - a library for pragmatic CLI tools
+# `taskcli` - a library for pragmatic and powerful CLI tools
 
 A Python `task` tool for creating powerful CLI interfaces for task automation out of simple Python function.
 
