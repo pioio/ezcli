@@ -58,6 +58,10 @@ with Group("Testing module"):
     def testing_foobar() -> int:
         print("testing foobar")
         return 42
+    @task
+    def print_cwd():
+        import os
+        print("cwd:", os.getcwd())
 
 
 with Group("Hidden Group", hidden=True):

@@ -158,8 +158,11 @@ def build_parser(tasks: list[Task]) -> argparse.ArgumentParser:
         "-l", "--list", action="count", default=0, help="List tasks, use -ll and -lll for more info"
     )
     root_parser.add_argument(
-        "-P", "--print-return-value", action="store_true", default=False,
-          help="advanced: print return value of task to stdout; useful when the task is a regular function which by itself does not print."
+        "-P",
+        "--print-return-value",
+        action="store_true",
+        default=False,
+        help="advanced: print return value of task to stdout; useful when the task is a regular function which by itself does not print.",
     )
     root_parser.add_argument(
         "-L",

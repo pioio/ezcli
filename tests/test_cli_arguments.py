@@ -11,6 +11,7 @@ from .utils import include_tasks, reset_context_before_each_test
 
 def test_print_return_value(capsys):
     """Test -P flag before the task name"""
+
     @task
     def foo() -> int:
         return 42
@@ -24,6 +25,7 @@ def test_print_return_value(capsys):
 @pytest.mark.skip("Not sure if needed")
 def test_print_return_value_after_task_ame(capsys):
     """Test -P flag after the task name"""
+
     @task
     def foo() -> int:
         return 42

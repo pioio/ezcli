@@ -17,6 +17,7 @@ TODO:
 - env vars should map to config
 - before/after to run a function only once
 - aliases
+- prevent running if env not set, --force to force it
 
 Features:
 - hidden tasks: _foobar: use "named" decorator?
@@ -25,6 +26,7 @@ Features:
 - color code the leading *
 - diaply arg help when -vvvv used
 - list of optional arg names to always hide from listing
+- make `from taskcli import task, taskcli` work, for one-line imports.
 
 Bugs:
     ARG1,ARG2=zzz,ARG3OPTIONAL=xxx,KW=3

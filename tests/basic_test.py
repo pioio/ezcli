@@ -194,7 +194,3 @@ def test_conversion_to_bool_works():
 
     include_tasks()
     dispatch(["foo", "true"])
-
-
-
-

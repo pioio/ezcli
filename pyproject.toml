@@ -7,4 +7,6 @@ build-backend = "setuptools.build_meta"
 version="0.0.5"
 name="taskcli"
 
-
+[project.scripts]
+taskcli = "taskcli.main:main"
+tt = "taskcli.main:main"

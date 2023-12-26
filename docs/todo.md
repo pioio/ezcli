@@ -7,7 +7,7 @@
 - [ ] hidden tasks
 - [ ] advanced tasks
 - [ ] TODO custom format
-- [ ] add auto conversion to int/float from string
+- [x] add auto conversion to int/float from string
 - [ ] task .dev   to list item in group, including hidden groups
 - [ ] groups having unique namespace
 - [ ] task op
