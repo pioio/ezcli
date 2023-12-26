@@ -36,6 +36,9 @@ class Group:
         _stack.pop()
 
 
+# Default group for new tasks
+NULL_GROUP = Group("null-group")
+
 DEFAULT_GROUP = Group("default", desc="Default tasks")
 
 _stack: list["Group"] = [DEFAULT_GROUP]

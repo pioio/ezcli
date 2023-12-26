@@ -22,6 +22,7 @@ this_module = sys.modules[__name__]
 @pytest.fixture(autouse=True)
 def prepare() -> None:
     taskcli.utils.reset_tasks()
+
     return None
 
 

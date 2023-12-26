@@ -10,6 +10,7 @@
   - [ ] always print group, but if ns is optional, print it dimmed out
 - [ ] allow one task to be in more than one group?
 - [ ] allow certain tasks in group to not be namespaced?
+- [ ] Make sure importing a module does not add its tasks to the global default group by default
 - [ ]
   - [ ] per module task list
   - [ ] include(child_tasks.child1)
@@ -29,6 +30,16 @@
 - [ ] FIXME: broken 'task ruff src'
 - [ ] Aliases
 - [ ] -L list all
+#### groups
+Task
+
+IncludedTask
+- Task
+- namespace
+- important
+- group
+
+
 - groups in the order they were defined
   - tasks in a group in the order in which they wer eadded
 - changing to task file dir also when invoking a function via python. But make it configurable.
