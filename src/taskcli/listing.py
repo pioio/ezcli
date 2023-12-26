@@ -109,6 +109,10 @@ def smart_task_lines(task: Task, verbose: int) -> list[str]:
     format = config.render_task_name
     if task.important:
         format = config.render_format_important_tasks
+
+    # if task.group.name != "default":
+    #     name = configuration.colors.dark_gray + task.group.name + configuration.colors.end + "." + name
+
     line = format_colors(format, name=name)
 
     include_optional = verbose >= 2

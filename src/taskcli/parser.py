@@ -64,13 +64,14 @@ def dispatch(argv: list[str] | None = None) -> None:  # noqa: C901
         sys.exit(0)
 
     def _dispatch(fun: AnyFunction):
-        signature = inspect.signature(task.func)
         kwargs = {}
-        for param in signature.parameters.values():
-            name = param.name.replace("_", "-")
-            kwargs[name] = getattr(argconfig, name)
-        return task.func(**kwargs)
+        for param in task.params:
+            name = param.get_argparse_names()[0].replace("-", "_")
+            value = getattr(argconfig, name)
+            value = _convert_from_argparse_to_function_type(task, param, value)
+            kwargs[name] = value
 
+        return task.func(**kwargs)
 
     if hasattr(argconfig, "task"):
         for task in tasks:
@@ -88,6 +89,26 @@ def dispatch(argv: list[str] | None = None) -> None:  # noqa: C901
         print_listed_tasks(tasks, verbose=1)
 
     return None
+
+
+def _convert_from_argparse_to_function_type(task: Task, param: Parameter, value: Any) -> Any:
+    if param.type is int:
+        value = int(value)
+    elif param.type is bool:
+        # TODO
+        raise Exception("Bool not implemented fully")
+
+    elif param.type is float:
+        value = float(value)
+
+    # list of int
+    # > elif param.type is list:
+    # >     if hasattr(param.type, "__args__"):
+    # >         if param.type.__args__[0] is int:
+    # >             value = [int(x) for x in value]
+    # >         else:
+    # >             raise Exception(f"Type {param.type} not implemented")
+    return value
 
 
 def print_listed_tasks(tasks: list[Task], verbose: int) -> None:

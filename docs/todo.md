@@ -3,6 +3,13 @@
 - [ ] include
 - [ ] task script
 - [ ] add auto conversion to int/float from string
+- [ ] task .dev   to list item in group
+- [ ] groups having unique namespace
+- [ ] task op
+- [ ] groups having namespacesby default, but optionally not  Group(ns=False)
+  - [ ] always print group, but if ns is optional, print it dimmed out
+- [ ] allow one task to be in more than one group?
+- [ ] allow certain tasks in group to not be namespaced?
 - [ ]
   - [ ] per module task list
   - [ ] include(child_tasks.child1)
@@ -22,17 +29,18 @@
 - [ ] FIXME: broken 'task ruff src'
 - [ ] Aliases
 - [ ] -L list all
+- groups in the order they were defined
+  - tasks in a group in the order in which they wer eadded
 - changing to task file dir also when invoking a function via python. But make it configurable.
 - add separattors to task list, or group
   @separator("dev tasks - use)
   def dev():
     fooo
-- JSON format
 - sort order
 - unit tests
-- make imports work properly
 - groups
-- auto-prefix task names with group prefix
+- auto-prefix task names with group prefix if ns=True
+- print group name on the same line as task, dimmed out, but don't require it
 - list important first
 - soft order
 - easy show hidden tasks (-H
@@ -53,7 +61,9 @@ Features:
 
 
 # Later
+- JSON format
 - Include Taskfile
+- converting list[int] from str to list of ints
 
 # FIXME
 - [ ] Text in help output broken - does include task name. We should modify parser's print-usage to include task name

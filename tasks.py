@@ -1,5 +1,8 @@
 #!/usr/bin/env python
 
+# iterate over all functions
+import inspect
+import sys
 from typing import Annotated, Type, TypeVar
 
 import taskcli
@@ -12,23 +15,21 @@ important = Group("Important", desc="Development tasks")
 
 
 with Group("dev", desc="Development tasks"):
+
     @task(aliases="t")
     def test():
         """Run unit tests."""
         run(f"pytest tests/ -vvv {taskcli.extra_args()}")
-
 
     @task()
     def nox():
         """Run extensive tests using nox."""
         run("nox")
 
-
     @task(hidden=True)
     def nox_special():
         """(test) Run specia tests using nox."""
         run("nox")
-
 
     @task()
     def nox_special2(mandatory_arg: str):
@@ -69,26 +70,22 @@ with Group("Hidden Group2", hidden=True):
 
 DEFAULT_LINT_PATH = "src/"
 
-# TODO: fixme
-# def xxx():
-#     pass
+# >  TODO: fixme
+# >  def xxx():
+# >      pass
+# >  include(xxx)
 
-# include(xxx)
 
-
-# iterate over all functions
-import inspect, sys
 for name, fun in inspect.getmembers(taskcli.utils, inspect.isfunction):
     include(fun)
-
-#include(taskcli.utils)
 
 
 def _get_lint_paths():
     return taskcli.extra_args() or "src/"
 
 
-with Group("lint", desc='Code cleanup tasks') as x:
+with Group("lint", desc="Code cleanup tasks") as x:
+
     @task(aliases="r")
     def ruff(paths: Paths, example_arg: str = "foobar", example_arg2: str = "foobar"):
         """Run ruff linter."""
@@ -116,6 +113,7 @@ with Group("lint", desc='Code cleanup tasks') as x:
         """Reorder imports, float them to top."""
         path_txt = " ".join(paths)
         run(f"isort {path_txt} --float-to-top")
+
 
 @task
 def rufftwice():

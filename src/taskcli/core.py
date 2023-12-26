@@ -27,6 +27,9 @@ def extra_args_list() -> list[str]:
 def include(module: Module | AnyFunction, **kwargs: Any) -> None:
     """Iterate over decorated @task functions in the module."""
     if isinstance(module, Module):
+        if not hasattr(module, "decorated_functions"):
+            module.decorated_functions = []
+
         for decorated_fun in module.decorated_functions:
             assert isinstance(decorated_fun, Task), f"Expected Task, got {type(decorated_fun)}"
             runtime = taskcli.get_runtime()

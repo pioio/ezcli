@@ -4,10 +4,13 @@ import subprocess
 import pytest
 
 import taskcli
+from taskcli import dispatch, task
 from taskcli.group import Group
 from taskcli.parser import _extract_extra_args
 from taskcli.task import Task
 from taskcli.taskcli import TaskCLI
+
+from .test_examples import prepare
 
 
 def test_foobar():
@@ -127,3 +130,67 @@ def test_create_groups():
 
     groups = taskcli.listing.create_groups([t1, t2, t3], group_order=["default", "foo"])
     assert (len(groups)) == 2
+
+
+def include_tasks() -> list[Task]:
+    """Goes through the usual process of including tasks."""
+    import sys
+
+    this_module = sys.modules[__name__]
+    taskcli.include(this_module)
+    return taskcli.get_runtime().tasks
+
+
+@pytest.mark.parametrize("value", ["1", "-12", "0", "-0"])
+def test_conversion_to_int_works(prepare, value):
+    @task
+    def foo(a: int):
+        assert isinstance(a, int)
+
+    include_tasks()
+    dispatch(["foo", value])
+
+
+@pytest.mark.parametrize("value", ["1", "1.9", "0", "-1", "-0.9", "23234234.23234234243"])
+def test_conversion_to_float_works(prepare, value):
+    @task
+    def foo(a: float):
+        assert isinstance(a, float)
+
+    include_tasks()
+    dispatch(["foo", value])
+
+
+@pytest.mark.parametrize("value", ["foobar"])
+def test_conversion_to_float_raises_(prepare, value):
+    @task
+    def foo(a: float):
+        assert isinstance(a, float)
+
+    include_tasks()
+    with pytest.raises(Exception, match="could not convert string to float"):
+        dispatch(["foo", value])
+
+
+@pytest.mark.skip()
+@pytest.mark.parametrize("values", [["1"]])
+def test_conversion_to_list_of_ints(prepare, values):
+    @task
+    def foo(args: list[int]):
+        for element in args:
+            assert isinstance(element, int), f"Expected int, got {type(element)}"
+
+    include_tasks()
+
+    dispatch(["foo", *values])
+
+
+# @pytest.mark.parametrize("value", ["1", "1.9", "0", "-1", "-0.9", "23234234.23234234243"])
+@pytest.mark.skip("TODO: disallow positional bool? or expect it to be a string?")
+def test_conversion_to_bool_works(prepare):
+    @task
+    def foo(a: bool):
+        assert isinstance(a, bool)
+
+    include_tasks()
+    dispatch(["foo", "true"])
