@@ -3,6 +3,7 @@ import logging
 import os
 
 from .envvar import EnvVar
+from .taskfiledev import go_task_project_name
 
 log = logging.getLogger(__name__)
 
@@ -29,7 +30,7 @@ TASKCLI_GOTASK_TASK_NAME_PREFIX = EnvVar(
 )
 
 TASKCLI_GOTASK_TASK_GROUP_NAME = EnvVar(
-    default_value="taskfile.dev", desc=("Name of the group to which tasks from 'task' binary should be added.")
+    default_value=go_task_project_name, desc=("Name of the group to which tasks from 'task' binary should be added.")
 )
 
 
