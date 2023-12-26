@@ -2,7 +2,7 @@
 
 import logging
 
-from taskcli import arg, run, task
+from taskcli import arg, runcommand, task
 
 log = logging.getLogger(__name__)
 logging = logging.basicConfig(level=logging.DEBUG)
@@ -29,4 +29,4 @@ def list_ints_with_arg(a: list[int]):
 
 
 if __name__ == "__main__":
-    run()
+    runcommand()

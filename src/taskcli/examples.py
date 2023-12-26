@@ -51,6 +51,8 @@ def get_examples() -> list[Example]:
 
     """
     HL = configuration.colors.yellow + configuration.colors.underline
+    BLUE = configuration.colors.blue
+    PINK = configuration.colors.pink
     END = configuration.colors.end
     return [
         Example(
@@ -74,15 +76,15 @@ def foo():
             text=f'''#
 
 @task
-def task1(age: int, name: str = "alice"):
-    """This task has two positional arguments, one of them optional."""
+def task1({BLUE}age{END}: int, {BLUE}name{END}: str = "alice"):
+    """This task has two {BLUE}positional{END} arguments, one of them optional."""
     pass
 
 @task
-def hello2(age: int=42, {HL}*{END}, name: str = "john"):
-    """This task has one position, and one named argument. Args after the "{HL}*{END}" are named only.
+def hello2({BLUE}height{END}: int=42, {HL}*{END}, {PINK}person{END}: str = "john"):
+    """This task has one {BLUE}positional{END}, and one {PINK}named{END} argument. Args after the "{HL}*{END}" are named only.
 
-    call with: taskcli hello2 25 --name john"""
+    call with: taskcli hello2 {BLUE}25{END} {PINK}--name john{END}"""
     pass
     ''',
         ),

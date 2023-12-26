@@ -2,7 +2,7 @@
 
 import logging
 
-from taskcli import arg, run, task
+from taskcli import arg, runcommand, task
 
 log = logging.getLogger(__name__)
 logging = logging.basicConfig(level=logging.DEBUG)
@@ -50,4 +50,4 @@ def add_with_def(a: int, b: int = 1):
 
 
 if __name__ == "__main__":
-    run()
+    runcommand()
