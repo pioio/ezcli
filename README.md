@@ -50,6 +50,12 @@ You can always include `t -L` to view all the info for all the groups. But note 
 this can result in a lot of output
 
 
+## Main features
+
+
+## Other features
+- expose regular python function into a task, print their output to stdout  (`-P` flag.)
+
 
 ## Customisation
 `taskcli` comes with sane defaults out of the box, but it can be
