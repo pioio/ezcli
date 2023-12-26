@@ -1,7 +1,7 @@
 import argparse
 import sys
-import pytest
 
+import pytest
 
 import taskcli
 from taskcli import Task, task

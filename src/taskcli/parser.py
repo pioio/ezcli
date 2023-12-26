@@ -7,6 +7,7 @@ from typing import Any
 
 import taskcli
 
+from . import envvars
 from .listing import list_tasks
 from .parameter import Parameter
 from .task import Task
@@ -23,7 +24,11 @@ TODO:
 GROUP_SUFFIX = "[group]"  # TODO: change this later
 
 log = logging.getLogger(__name__)
-logging.basicConfig(level=logging.DEBUG, format="%(asctime)s %(levelname)s|  %(message)s")
+
+if "-v" in sys.argv or "--verbose" in sys.argv:
+    logging.basicConfig(level=logging.DEBUG, format="%(asctime)s %(levelname)s|  %(message)s")
+else:
+    logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s|  %(message)s")
 
 
 def _extract_extra_args(argv: list[str], task_cli: TaskCLI) -> list[str]:
@@ -80,7 +85,7 @@ def dispatch(argv: list[str] | None = None) -> Any:  # noqa: C901
 
         ret_value = task.func(**kwargs)
         if argconfig.print_return_value:
-            print(ret_value)
+            print(ret_value)  # noqa: T201
         return ret_value
 
     ready_verbose = argconfig.ready
@@ -145,6 +150,9 @@ def print_listed_tasks(tasks: list[Task], verbose: int, ready_verbose: int) -> N
         print(line)  # noqa: T201
 
 
+ARG_NO_GO_TASK = "--no-go-task"
+
+
 def build_parser(tasks: list[Task]) -> argparse.ArgumentParser:
     """Build the parser."""
     root_parser = argparse.ArgumentParser()
@@ -158,11 +166,24 @@ def build_parser(tasks: list[Task]) -> argparse.ArgumentParser:
         "-l", "--list", action="count", default=0, help="List tasks, use -ll and -lll for more info"
     )
     root_parser.add_argument(
+        ARG_NO_GO_TASK,
+        action="store_true",
+        default=False,
+        help=(
+            "Disable automatic inclusion of tasks from 'task' binary. "
+            "Note, for the automaic inclusion to work, "
+            f"{envvars.TASKCLI_GOTASK_TASK_BINARY_FILEPATH.name} must first be set."
+        ),
+    )
+    root_parser.add_argument(
         "-P",
         "--print-return-value",
         action="store_true",
         default=False,
-        help="advanced: print return value of task to stdout; useful when the task is a regular function which by itself does not print.",
+        help=(
+            "advanced: print return value of task to stdout; useful when the task "
+            "is a regular function which by itself does not print."
+        ),
     )
     root_parser.add_argument(
         "-L",

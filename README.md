@@ -54,8 +54,9 @@ this can result in a lot of output
 
 
 ## Other features
-- expose regular python function into a task, print their output to stdout  (`-P` flag.)
+- Expose regular python function into a task, print their output to stdout  (`-P` flag.)
 
+- Integration with go-task (http://taskfile.dev).  If `TASKCLI_GOTASK_TASK_BINARY_FILEPATH` is set, any local Taskfile.yaml files are loaded automatically.
 
 ## Customisation
 `taskcli` comes with sane defaults out of the box, but it can be

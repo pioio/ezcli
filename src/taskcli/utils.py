@@ -26,6 +26,13 @@ def print_err(text: str) -> None:
     print(text, file=sys.stderr, flush=True)  # noqa: T201
 
 
+def print_warning(text: str) -> None:
+    """Print yellow text to stderr."""
+    YELLOW = configuration.colors.yellow
+    text = f"{YELLOW}{text}{ENDC}"
+    print(text, file=sys.stderr, flush=True)  # noqa: T201
+
+
 @contextlib.contextmanager
 def change_dir(path: str) -> typing.Iterator[None]:
     """Context manager to change the current working directory."""

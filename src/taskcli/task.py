@@ -50,6 +50,8 @@ class Task:
     def __init__(
         self,
         func: AnyFunction,
+        custom_name: str = "",
+        custom_desc: str = "",
         group: Group | None = None,
         hidden: bool = False,
         aliases: Iterable[str] | None = None,
@@ -64,6 +66,8 @@ class Task:
         hidden: If True, the task will not be listed in the help by default.
         important: If True, the task will be listed in the help in a way which stands out. See config for details.
         """
+        self.custom_name = custom_name  # entirely optional
+        self.custom_desc = custom_desc  # entirely optional
         self.func = func
         self.aliases = aliases or []
         self.env = env or []
@@ -89,6 +93,8 @@ class Task:
 
     def get_full_task_name(self) -> str:
         """Return the full name of the task, including the group."""
+        if self.custom_name:
+            return self.custom_name
         out = self.func.__name__.replace("_", "-")
         out.lstrip("-")  # for _private functions
 
@@ -100,6 +106,8 @@ class Task:
 
     def get_summary_line(self) -> str:
         """Return the first line of docstring, or empty string if no docstring."""
+        if self.custom_desc:
+            return self.custom_desc.split("\n")[0]
         if self.func.__doc__ is None:
             return ""
         return self.func.__doc__.split("\n")[0]
