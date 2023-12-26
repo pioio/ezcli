@@ -3,7 +3,7 @@ import logging
 import os
 
 from .envvar import EnvVar
-from .taskfiledev import go_task_project_name
+#from .taskfiledev import go_task_project_name
 
 log = logging.getLogger(__name__)
 
@@ -30,7 +30,13 @@ TASKCLI_GOTASK_TASK_NAME_PREFIX = EnvVar(
 )
 
 TASKCLI_GOTASK_TASK_GROUP_NAME = EnvVar(
-    default_value=go_task_project_name, desc=("Name of the group to which tasks from 'task' binary should be added.")
+    default_value="Taskfile.dev", desc=("Name of the group to which tasks from 'task' binary should be added.")
+)
+
+# Various advanced settings. You typically don't need to change these.
+TASKCLI_ADV_OVERRIDE_FORMATTING = EnvVar(
+    default_value="false", desc=("If set to true, overrides formatting options to make the listing output simpler. "
+                                 "Added for use with unit tests.")
 )
 
 

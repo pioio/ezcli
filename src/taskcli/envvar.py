@@ -20,3 +20,11 @@ class EnvVar:
     def value(self) -> str:
         """Return the value of the environment variable."""
         return os.getenv(self.name, self.default_value)
+
+
+    def is_true(self) -> bool:
+        """Return true if of the value environment variable is truthy."""
+        val = self.value.lower()
+        if val in ("true", "1", "yes"):
+            return True
+        return False
