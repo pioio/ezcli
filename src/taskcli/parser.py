@@ -81,9 +81,13 @@ def dispatch(argv: list[str] | None = None) -> None:  # noqa: C901
             tasks_in_group = [
                 task for task in tasks if task.group.get_name_for_cli() == argconfig.task[: -len(GROUP_SUFFIX)]
             ]
+
+            group_name = tasks_in_group[0].group.name
             num_tasks = len(tasks_in_group)
-            taskcli.utils.print_err(f"Tasks in group ({num_tasks})")
-            print_listed_tasks(tasks_in_group, verbose=argconfig.list)
+            hidden_tasks = len([x for x in tasks_in_group if x.hidden])
+            hidden_tasks_str = f" ({hidden_tasks} hidden)" if hidden_tasks > 0 else ""
+            taskcli.utils.print_err(f"Tasks in group {group_name} ({num_tasks}) {hidden_tasks_str}")
+            print_listed_tasks(tasks_in_group, verbose=4)
             sys.exit(1)
         else:
             for task in tasks:
