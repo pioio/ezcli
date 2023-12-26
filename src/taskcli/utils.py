@@ -18,6 +18,14 @@ ENDC = configuration.get_end_color()
 UNDERLINE = configuration.get_underline()
 
 
+def print_err(text: str) -> None:
+    """Print to stderr."""
+    GREEN = configuration.colors.green
+    text = f"{GREEN}{text}{ENDC}"
+
+    print(text, file=sys.stderr, flush=True)  # noqa: T201
+
+
 @contextlib.contextmanager
 def change_dir(path: str) -> typing.Iterator[None]:
     """Context manager to change the current working directory."""

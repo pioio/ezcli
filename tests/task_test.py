@@ -1,22 +1,22 @@
 import taskcli
-from taskcli import Task, Group, task
-from .fixtures.groups import task2
+from taskcli import Group, Task, task
 
 from .basic_test import prepare
+from .fixtures.groups import task2
 
 
 def include_tasks() -> list[Task]:
     """Goes through the usual process of including tasks."""
     import sys
+
     taskcli.include(sys.modules[__name__])
     return taskcli.get_runtime().tasks
 
 
 def test_copy(prepare):
-
     group = Group("foo")
 
-    @task(important=True, aliases=['foo'], group=group)
+    @task(important=True, aliases=["foo"], group=group)
     def foobar():
         pass
 
@@ -31,4 +31,3 @@ def test_copy(prepare):
     assert task1.important == task2.important
     assert task1.hidden == task2.hidden
     assert task1.aliases == task2.aliases
-

@@ -35,6 +35,9 @@ class Group:
         global _stack
         _stack.pop()
 
+    def get_name_for_cli(self):
+        return self.name.replace(" ", "-").lower()
+
 
 # Default group for new tasks
 NULL_GROUP = Group("null-group")

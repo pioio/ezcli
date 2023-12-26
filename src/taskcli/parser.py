@@ -20,6 +20,8 @@ TODO:
 
 """
 
+GROUP_SUFFIX = "[group]"  # TODO: change this later
+
 log = logging.getLogger(__name__)
 logging.basicConfig(level=logging.DEBUG, format="%(asctime)s %(levelname)s|  %(message)s")
 
@@ -73,18 +75,28 @@ def dispatch(argv: list[str] | None = None) -> None:  # noqa: C901
 
         return task.func(**kwargs)
 
+    # raise Exception("This should not happen")
     if hasattr(argconfig, "task"):
-        for task in tasks:
-            if task.get_full_task_name() == argconfig.task:
-                return _dispatch(task.func)
+        if argconfig.task.endswith(GROUP_SUFFIX):
+            tasks_in_group = [
+                task for task in tasks if task.group.get_name_for_cli() == argconfig.task[: -len(GROUP_SUFFIX)]
+            ]
+            num_tasks = len(tasks_in_group)
+            taskcli.utils.print_err(f"Tasks in group ({num_tasks})")
+            print_listed_tasks(tasks_in_group, verbose=argconfig.list)
+            sys.exit(1)
+        else:
+            for task in tasks:
+                if task.get_full_task_name() == argconfig.task:
+                    return _dispatch(task.func)
 
-        # Not found, search aliases
-        for task in tasks:
-            if argconfig.task in task.aliases:
-                return _dispatch(task.func)
+            # Not found, search aliases
+            for task in tasks:
+                if argconfig.task in task.aliases:
+                    return _dispatch(task.func)
 
-        print(f"Task {argconfig.task} not found")  # noqa: T201
-        sys.exit(1)
+            print(f"Task {argconfig.task} not found")  # noqa: T201
+            sys.exit(1)
     else:
         print_listed_tasks(tasks, verbose=1)
 
@@ -131,7 +143,20 @@ def build_parser(tasks: list[Task]) -> argparse.ArgumentParser:
 
     subparsers = root_parser.add_subparsers(help="Task to run")
 
+    groups = []
     for task in tasks:
+        # add group names
+
+        group_name = task.group.name.replace(" ", "-").lower()
+        if task.group not in groups:
+            groups.append(task.group)
+            subparser = subparsers.add_parser(group_name + GROUP_SUFFIX)
+            subparser.set_defaults(task=group_name + GROUP_SUFFIX)
+
+        # groupandtask = "." + group_name + "." + task.name
+        # subparser = subparsers.add_parser(groupandtask)
+        # subparser.set_defaults(task=task.name)
+
         all_names_of_task = task.get_all_task_names()
 
         for name in all_names_of_task:

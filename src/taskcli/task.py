@@ -28,17 +28,18 @@ def task(*args: Any, **kwargs: Any) -> AnyFunction:
 class Task:
     """A decorated function."""
 
-    def copy(self, group:Group) -> "Task":
+    def copy(self, group: Group) -> "Task":
         """Return a copy of the task."""
-        new_task =  Task(
+        new_task = Task(
             func=self.func,
             group=group,
         )
         for prop in self.__dict__:  # type: ignore[attr-defined]
-            props_to_skip = ["func", # passed to constructor
-                              "params" # created from func in constructor
-                              "group", # passed to constructor
-                              ]
+            props_to_skip = [
+                "func",  # passed to constructor
+                "params"  # created from func in constructor
+                "group",  # passed to constructor
+            ]
             if prop in props_to_skip:
                 continue
 
@@ -79,7 +80,6 @@ class Task:
     def name(self) -> str:
         """Return the name of the task."""
         return self.get_full_task_name()
-
 
     def get_full_task_name(self) -> str:
         """Return the full name of the task, including the group."""
