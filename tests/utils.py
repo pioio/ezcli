@@ -1,8 +1,11 @@
 """Various tools for unit tests"""
-import taskcli
-from taskcli import task, Task
 import sys
+
 import pytest
+
+import taskcli
+from taskcli import Task, task
+
 
 # as long as this one is imported to a test module, it will be used before each test
 @pytest.fixture(autouse=True)
@@ -12,6 +15,7 @@ def reset_context_before_each_test() -> None:
     taskcli.utils.reset_tasks()
     return None
 
+
 def include_tasks() -> list[Task]:
     """Goes through the usual process of including tasks.
 
@@ -19,6 +23,7 @@ def include_tasks() -> list[Task]:
     """
 
     import inspect
+
     previous_frame = inspect.currentframe().f_back
     module_from_which_this_function_was_called = inspect.getmodule(previous_frame)
 

@@ -75,8 +75,6 @@ def dispatch(argv: list[str] | None = None) -> None:  # noqa: C901
             value = _convert_types_from_str_to_function_type(task, param, value)
             kwargs[name] = value
 
-
-
         return task.func(**kwargs)
 
     ready_verbose = argconfig.ready

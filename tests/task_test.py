@@ -13,7 +13,7 @@ def include_tasks() -> list[Task]:
     return taskcli.get_runtime().tasks
 
 
-def test_copy(prepare):
+def test_copy():
     group = Group("foo")
 
     @task(important=True, aliases=["foo"], group=group)

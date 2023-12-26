@@ -2,8 +2,7 @@ import functools
 import inspect
 import os
 import sys
-from typing import Iterable, Callable
-
+from typing import Callable, Iterable
 
 from . import utils
 from .configuration import config
@@ -39,8 +38,7 @@ class Task:
         for prop in self.__dict__:  # type: ignore[attr-defined]
             props_to_skip = [
                 "func",  # passed to constructor
-                "params"  # created from func in constructor
-                "group",  # passed to constructor
+                "params" "group",  # created from func in constructor  # passed to constructor
             ]
             if prop in props_to_skip:
                 continue
@@ -58,7 +56,7 @@ class Task:
         important: bool = False,
         env: list[str] | None = None,
         format: str = "{name}",
-        customize_parser:Callable[[Any],None]|None = None,
+        customize_parser: Callable[[Any], None] | None = None,
     ):
         """Create a new Task.
 
@@ -246,14 +244,5 @@ def _get_wrapper(
         runtime = utils.get_runtime()
         runtime.tasks.append(task)
 
-        # return func(*args, **kwargs)
-
-    # # change dir
-    # if change_dir:
-    #     pare
-    #     @functools.wraps(wrapper)
-    #     def wrapper2(*args: list[Any], **kwargs: dict[str, Any]) -> Any:
-    #         with utils.change_dir():
-    #             return func(*args, **kwargs)
 
     return wrapper

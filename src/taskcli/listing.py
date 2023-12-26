@@ -25,6 +25,7 @@ class SafeFormatDict(dict[str, str]):
     def __missing__(self, key: str) -> str:
         return "{" + key + "}"  # Return the key as is
 
+
 def format_colors(template: str, **kwargs: Any) -> str:
     """Apply colors to a template string of e.g. '{red}foobar{pink}bar."""
     if "name" in kwargs:
@@ -108,7 +109,6 @@ def smart_task_lines(task: Task, verbose: int, env_verbose: int = 0) -> list[str
     name = task.name
     name = format_colors(task.name_format, name=name)
 
-
     param_line_prefix = "  "
     summary = task.get_summary_line()
     aliases = ", ".join(task.aliases)
@@ -184,7 +184,6 @@ def smart_task_lines(task: Task, verbose: int, env_verbose: int = 0) -> list[str
 
     lines += not_ready_lines
     return lines
-
 
 
 def create_groups(tasks: list[Task], group_order: list[str]) -> list[Group]:

@@ -36,6 +36,7 @@ class Group:
         _stack.pop()
 
     def get_name_for_cli(self):
+        """Return the name of the group suitable for CLI completion."""
         return self.name.replace(" ", "-").lower()
 
     def render_num_shown_hidden_tasks(self):
@@ -45,10 +46,6 @@ class Group:
             return f"{num_shown}"
         else:
             from . import configuration
-
-            BLUE = configuration.colors.blue
-            ENDC = configuration.get_end_color()
-            # return f"{BLUE}{num_shown}/{num_shown+num_hidden}{ENDC}"
             return f"{num_shown}/{num_shown+num_hidden}"
 
 
