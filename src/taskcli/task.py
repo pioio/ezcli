@@ -244,5 +244,4 @@ def _get_wrapper(
         runtime = utils.get_runtime()
         runtime.tasks.append(task)
 
-
     return wrapper

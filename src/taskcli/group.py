@@ -46,6 +46,7 @@ class Group:
             return f"{num_shown}"
         else:
             from . import configuration
+
             return f"{num_shown}/{num_shown+num_hidden}"
 
 

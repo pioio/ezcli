@@ -102,7 +102,7 @@ def list_tasks(tasks: list[Task], verbose: int, env_verbose: int = 0) -> list[st
     return lines
 
 
-def smart_task_lines(task: Task, verbose: int, env_verbose: int = 0) -> list[str]:
+def smart_task_lines(task: Task, verbose: int, env_verbose: int = 0) -> list[str]: # noqa: C901
     """Render a single task into a list of lines, scale formatting to the amount of content."""
     lines: list[str] = []
 

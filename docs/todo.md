@@ -36,6 +36,7 @@
 - [ ] FIXME: broken 'task ruff src'
 - [ ] Aliases
 - [ ] -L list all
+- [ ] task --init <filename> to create a stub task file
 #### groups
 
 Each task has one namespace,

@@ -92,7 +92,7 @@ class Config:
     # use {NAME} instead of {name} to print group name in uppercase
     render_format_of_group_name: str = "\n{white}{underline}{white}*** {name:<14}  {white}{desc:<60}{clear}"
     # Some other example
-    #>    render_format_of_group_name: str = "==================================================\n{white}{blue}> {NAME} ({num_tasks}) {desc}"  # uppercase group name # noqa: E501
+    # >    render_format_of_group_name: str = "==================================================\n{white}{blue}> {NAME} ({num_tasks}) {desc}"  # uppercase group name # noqa: E501
 
     # The left column (with task name and args) will pref
     # Only rows with very long task names will be longer than this.

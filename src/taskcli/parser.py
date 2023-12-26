@@ -75,7 +75,7 @@ def dispatch(argv: list[str] | None = None) -> None:  # noqa: C901
         for param in task.params:
             name = param.get_argparse_names()[0].replace("-", "_")
             value = getattr(argconfig, name)
-            value = _convert_types_from_str_to_function_type(task, param, value)
+            value = _convert_types_from_str_to_function_type(param, value)
             kwargs[name] = value
 
         return task.func(**kwargs)
@@ -114,12 +114,13 @@ def dispatch(argv: list[str] | None = None) -> None:  # noqa: C901
     return None
 
 
-def _convert_types_from_str_to_function_type(task: Task, param: Parameter, value: Any) -> Any:
+def _convert_types_from_str_to_function_type(param: Parameter, value: Any) -> Any:
     if param.type is int:
         value = int(value)
     elif param.type is bool:
         # TODO
-        raise Exception("Bool not implemented fully")
+        msg = "Bool not implemented fully"
+        raise Exception(msg)
 
     elif param.type is float:
         value = float(value)
@@ -154,8 +155,11 @@ def build_parser(tasks: list[Task]) -> argparse.ArgumentParser:
         "-l", "--list", action="count", default=0, help="List tasks, use -ll and -lll for more info"
     )
     root_parser.add_argument(
-        "-L", "--list-all", action="store_true", default=False,
-        help="List everything, hidden tasks, hidden group, with max verbosity."
+        "-L",
+        "--list-all",
+        action="store_true",
+        default=False,
+        help="List everything, hidden tasks, hidden group, with max verbosity.",
     )
     root_parser.add_argument("--show-hidden", "-H", action="store_true", default=False)
 
