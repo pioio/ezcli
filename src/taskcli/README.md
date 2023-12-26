@@ -5,6 +5,7 @@ TODO:
   def dev():
     fooo
 - JSON format
+- task --init template
 - sort order
 - unit tests
 - make imports work properly

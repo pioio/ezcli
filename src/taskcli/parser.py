@@ -7,7 +7,7 @@ from typing import Any
 
 import taskcli
 
-from . import envvars
+from . import envvars, examples
 from .listing import list_tasks
 from .parameter import Parameter
 from .task import Task
@@ -20,6 +20,7 @@ TODO:
   auto-aliases for commands
 
 """
+
 
 GROUP_SUFFIX = "[group]"  # TODO: change this later
 
@@ -72,6 +73,9 @@ def dispatch(argv: list[str] | None = None) -> Any:  # noqa: C901
         return
     if argconfig.list_all:
         print_listed_tasks(tasks, verbose=999, ready_verbose=999)
+        return
+    if argconfig.examples:
+        examples.print_examples()
         return
 
     def _dispatch(task: Task) -> Any:
@@ -164,6 +168,9 @@ def build_parser(tasks: list[Task]) -> argparse.ArgumentParser:
     )
     root_parser.add_argument(
         "-l", "--list", action="count", default=0, help="List tasks, use -ll and -lll for more info"
+    )
+    root_parser.add_argument(
+        "--examples", action="store_true", default=False, help="Show code examples of how to use taskcli."
     )
     root_parser.add_argument(
         ARG_NO_GO_TASK,

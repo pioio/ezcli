@@ -27,6 +27,7 @@
   - [ ] include(group.task, new-task-name-in-current-group)
   - [ ] include not decorated function
   - [ ] A includes B, B includes A
+  - [ ] detect duplicates
   - [ ] task ... task --foo
   - [ ] include in tasks.py still broken
     - [ ] def xxx():
@@ -34,8 +35,8 @@
 
         include(xxx)
 - [ ] FIXME: broken 'task ruff src'
-- [ ] Aliases
-- [ ] -L list all
+- [x] Aliases
+- [x] -L list all
 - [ ] task --init <filename> to create a stub task file
 #### groups
 
