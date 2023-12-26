@@ -54,6 +54,10 @@ this can result in a lot of output
 ## Customisation
 `taskcli` comes with sane defaults out of the box, but it can be
 
+### Customize Argparse parser
+TODO: see cookbook
+
+
 ### Make certain tasks stand out by marking them as important
 ```
 @task(important=True)
