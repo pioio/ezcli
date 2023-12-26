@@ -4,6 +4,7 @@ import os
 import sys
 from typing import Iterable
 
+
 from . import utils
 from .configuration import config
 from .group import DEFAULT_GROUP, Group
@@ -56,6 +57,7 @@ class Task:
         aliases: Iterable[str] | None = None,
         important: bool = False,
         env: list[str] | None = None,
+        format: str = "{name}",
     ):
         """Create a new Task.
 
@@ -69,6 +71,7 @@ class Task:
         self.hidden = hidden
         self.important = important
         self.params = [Parameter(param) for param in inspect.signature(func).parameters.values()]
+        self.name_format = format
 
         self.group: Group = group or DEFAULT_GROUP
 
@@ -83,6 +86,9 @@ class Task:
     def name(self) -> str:
         """Return the name of the task."""
         return self.get_full_task_name()
+
+    # def name_for_listing(self) -> str:
+    #     return format_colors(self.name_format, name=self.name)
 
     def get_full_task_name(self) -> str:
         """Return the full name of the task, including the group."""
@@ -170,6 +176,7 @@ def _get_wrapper(
     aliases: Iterable[str] | None = None,
     change_dir: bool = True,
     env: list[str] | None = None,
+    **other_kwargs: Any,
 ) -> AnyFunction:
     # TODo: allow defining groups via string at task-creationg time
     # >  if isinstance(group, str):
@@ -186,7 +193,8 @@ def _get_wrapper(
     if prefix:
         func.__name__ = prefix + "_" + func.__name__
 
-    kwargs = locals()
+    kwargs = locals() | other_kwargs
+    del kwargs["other_kwargs"]
     del kwargs["func"]
     del kwargs["prefix"]
     del kwargs["change_dir"]

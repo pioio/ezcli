@@ -40,6 +40,41 @@ You can create custom groups.
 Each task has a namespace.
 TODO: explain
 
+## Typical usage
+- run `t` to list all the (not hidden) tasks in local `./tasks.py` file. Some info is hidden from this overview.
+- run `t <task_name>` to run a task.
+- run `t <group_name>` to list only tasks in that group. Includes more detailed info than the full listing.
+
+
+
+## Customisation
+`taskcli` comes with sane defaults out of the box, but it can be
+
+### Make certain tasks stand out by marking them as important
+```
+@task(important=True)
+def do_something():
+    ...
+```
+
+### Hide tasks from default listing
+```
+@task(hidden=True)
+def do_something():
+    ...
+```
+
+### Customize the way tasks are listed, e.g. add a red "prod!" suffix to some
+```
+prod_warning = "name {red}(production!){clear}"
+@task(format=prod_warning)
+def do_something():
+    pass
+```
+
+### other
+- customize default formatting string
+- ...
 
 ## Design consideration
 - `taskcli` shows if your env is ready to run a task. Many tasks need special env variables set.

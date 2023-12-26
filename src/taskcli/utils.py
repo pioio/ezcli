@@ -39,7 +39,9 @@ def change_dir(path: str) -> typing.Iterator[None]:
 
 def strip_escape_codes(s: str) -> str:
     """Remove ANSI escape codes from a string. So, removes colors, underlines, etc."""
-    return re.sub(r"\033\[[0-9;]*m", "", s).replace(ENDC, "").replace(UNDERLINE, "")
+    out = re.sub(r"\033\[[0-9;]*m", "", s).replace(ENDC, "").replace(UNDERLINE, "")
+
+    return out
 
 
 def param_to_cli_option(arg: str) -> str:

@@ -21,7 +21,7 @@ with Group("dev", desc="Development tasks"):
         """Run unit tests."""
         run(f"pytest tests/ -vvv {taskcli.extra_args()}")
 
-    @task(important=True)
+    @task(important=True, format="{name} {clear}{red}(PROD!)")
     def nox():
         """Run extensive tests using nox."""
         run("nox")
