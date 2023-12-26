@@ -3,7 +3,7 @@
 - [ ] include
 - [ ] task script
 - [ ] add auto conversion to int/float from string
-- [ ] task .dev   to list item in group
+- [ ] task .dev   to list item in group, including hidden groups
 - [ ] groups having unique namespace
 - [ ] task op
 - [ ] groups having namespacesby default, but optionally not  Group(ns=False)

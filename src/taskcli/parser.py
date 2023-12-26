@@ -118,7 +118,7 @@ def print_listed_tasks(tasks: list[Task], verbose: int) -> None:
         print(line)  # noqa: T201
 
 
-def build_parser(decorated_function: list[Task]) -> argparse.ArgumentParser:
+def build_parser(tasks: list[Task]) -> argparse.ArgumentParser:
     """Build the parser."""
     root_parser = argparse.ArgumentParser()
 
@@ -131,14 +131,14 @@ def build_parser(decorated_function: list[Task]) -> argparse.ArgumentParser:
 
     subparsers = root_parser.add_subparsers(help="Task to run")
 
-    for dfunc in decorated_function:
-        all_names_of_task = dfunc.get_all_task_names()
+    for task in tasks:
+        all_names_of_task = task.get_all_task_names()
 
         for name in all_names_of_task:
             subparser = subparsers.add_parser(name)
             subparser.set_defaults(task=name)
 
-            for param in dfunc.params:
+            for param in task.params:
                 _add_param_to_subparser(param, subparser)
 
     return root_parser
