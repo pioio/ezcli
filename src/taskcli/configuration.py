@@ -78,6 +78,12 @@ class Config:
     render_format_not_ready: str = "{red}* {green}{name}{clear}"
     render_format_included_taskfile_dev_task: str = "{blue}* {green}{name}{clear}"
 
+    # render_format_important_tasks: str = "{green}{underline}{name}{clear}"
+    # render_task_name: str = "{green}{name}{clear}"
+    # render_format_hidden_tasks: str = "{dark_gray}{name}{clear}"
+    # render_format_not_ready: str = "{green}{name}{clear}"
+    # render_format_included_taskfile_dev_task: str = "{green}{name}{clear}"
+
     # Always show these args in the task list, even if they are optional
     render_always_show_args: list[str] = dataclasses.field(default_factory=list)
 
@@ -106,7 +112,7 @@ class Config:
 
     # The left column will never be smaller than this, even with short task names
     # Increaase it if you prefer your summaries to be more to the right.
-    render_min_left_column_width: int = 20
+    render_min_left_column_width: int = 22
 
     # The column with the task name will never be shorter than this
     # Increasing this will the start of arg listing to the right.

@@ -1,6 +1,12 @@
 #TODO:
 - [x] add `taskcli.extra_args` to get `-- args`
 - [x] add "-f" to specify the file
+- [ ] Fix unit tests
+- [ ] add TASKCLI_SIMPLE_FORMATTING=1
+- [ ] Make unit test use standard formatting for listing.
+- [ ] show again number of tasks in group (not shown now)
+- [ ] mark hidden gorups as (hidden)
+- [ ] groups and tasks with tags  task -t op, also --show-tags
 - [ ] using -f to specify file in other dir still make taskfile be loaded locally
 - [ ] include
 - [ ] task script

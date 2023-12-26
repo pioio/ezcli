@@ -42,30 +42,10 @@ def _extract_extra_args(argv: list[str], task_cli: TaskCLI) -> list[str]:
         return argv[:first_double_hyphen]
 
 
-def dispatch(argv: list[str] | None = None) -> Any:  # noqa: C901
+def dispatch(argv: list[str] | None = None, tasks_found:bool=True) -> Any:  # noqa: C901
     """Dispatch the command line arguments to the correct function."""
     # Initial parser, only used to find the tasks file
-    parser = build_initial_parser()
-    argconfig, _ = parser.parse_known_args(argv or sys.argv[1:])
 
-    tasks_found = False
-    for filename in argconfig.file.split(","):
-        filename = filename.strip()
-        if os.path.exists(filename):
-            dir = os.path.dirname(filename)
-            sys.path.append(dir)
-            # import module by name
-            basename = os.path.basename(filename)
-            sometasks = __import__(basename.replace(".py", "").replace("-", "_"))
-
-            log.debug(f"Including tasks from {filename}")
-            taskcli.include(sometasks)
-            tasks_found = True
-
-    if taskfiledev.should_include_taskfile_dev():
-        tasks_were_included = taskfiledev.include_tasks()
-        if tasks_were_included:
-            tasks_found = True
 
     tasks: list[Task] = taskcli.get_runtime().tasks
     parser = build_parser(tasks)
