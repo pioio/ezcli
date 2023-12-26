@@ -55,8 +55,9 @@ with Group("Testing module"):
     taskcli.include(testing)
 
     @task
-    def testing_foobar():
+    def testing_foobar() -> int:
         print("testing foobar")
+        return 42
 
 
 with Group("Hidden Group", hidden=True):

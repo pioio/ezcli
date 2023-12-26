@@ -78,7 +78,10 @@ def dispatch(argv: list[str] | None = None) -> Any:  # noqa: C901
             value = _convert_types_from_str_to_function_type(param, value)
             kwargs[name] = value
 
-        return task.func(**kwargs)
+        ret_value = task.func(**kwargs)
+        if argconfig.print_return_value:
+            print(ret_value)
+        return ret_value
 
     ready_verbose = argconfig.ready
 
@@ -153,6 +156,10 @@ def build_parser(tasks: list[Task]) -> argparse.ArgumentParser:
     )
     root_parser.add_argument(
         "-l", "--list", action="count", default=0, help="List tasks, use -ll and -lll for more info"
+    )
+    root_parser.add_argument(
+        "-P", "--print-return-value", action="store_true", default=False,
+          help="advanced: print return value of task to stdout; useful when the task is a regular function which by itself does not print."
     )
     root_parser.add_argument(
         "-L",
