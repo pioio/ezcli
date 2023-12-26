@@ -76,6 +76,7 @@ class Config:
     render_task_name: str = "{white}* {green}{name}{clear}"
     render_format_hidden_tasks: str = "{white}* {dark_gray}{name}{clear}"
     render_format_not_ready: str = "{red}* {green}{name}{clear}"
+    render_format_included_taskfile_dev_task: str = "{blue}* {green}{name}{clear}"
 
     # Always show these args in the task list, even if they are optional
     render_always_show_args: list[str] = dataclasses.field(default_factory=list)

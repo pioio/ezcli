@@ -59,6 +59,7 @@ class Task:
         env: list[str] | None = None,
         format: str = "{name}",
         customize_parser: Callable[[Any], None] | None = None,
+        is_go_task: bool = False,
     ):
         """Create a new Task.
 
@@ -76,6 +77,7 @@ class Task:
         self.params = [Parameter(param) for param in inspect.signature(func).parameters.values()]
         self.name_format = format
         self.customize_parser = customize_parser
+        self.is_go_task: bool = is_go_task
 
         self.group: Group = group or DEFAULT_GROUP
 

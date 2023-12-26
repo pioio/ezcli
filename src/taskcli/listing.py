@@ -127,6 +127,8 @@ def smart_task_lines(task: Task, verbose: int, env_verbose: int = 0) -> list[str
         format = config.render_format_important_tasks
     if task.hidden:
         format = config.render_format_hidden_tasks
+    if task.is_go_task:
+        format = config.render_format_included_taskfile_dev_task
     if not task.is_ready():
         format = config.render_format_not_ready
 

@@ -114,6 +114,7 @@ def _include_tasks_json(cmd: str, json_string: str, dir: str = ".") -> bool:
             group=group,
             custom_name=prefix + name,
             custom_desc=desc,
+            is_go_task=True,
         )(run_task)
 
         log.debug(f"Included task: {prefix + name}")
