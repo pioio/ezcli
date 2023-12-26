@@ -68,10 +68,7 @@ class Config:
     render_color_optional_arg: str = colors.dark_gray
     render_color_optional_and_important_arg: str = ""
     render_color_default_arg = colors.dark_gray + colors.underline
-    render_color_task_name: str = colors.green
     render_color_summary: str = colors.white
-    render_color_namespace: str = colors.none
-    render_color_group_name: str = colors.white
     render_extra_line_indent: str = "    "
 
     render_format_important_tasks: str = "{white}* {green}{underline}{name}{clear}"
