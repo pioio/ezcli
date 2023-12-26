@@ -2,9 +2,16 @@
 - [x] add `taskcli.extra_args` to get `-- args`
 - [x] add "-f" to specify the file
 - [ ] Fix unit tests
+- [ ] show by tag
 - [ ] add TASKCLI_SIMPLE_FORMATTING=1
 - [ ] Make unit test use standard formatting for listing.
 - [ ] show again number of tasks in group (not shown now)
+- [ ] list hidden group in one line at the end
+- [ ] denote included tasks, somehow, e.g. with a star suffix, or "^ prefix in summary
+- [ ] if hidden tasks, print them at the end of task list? (3 hidden)
+- [ ] allow imported function to chdir to the local dir?
+- [ ] unit-tests should reset config on prepare, as i might start modifying it
+- [ ] run task binary regardless of taskfile being found or not
 - [ ] mark hidden gorups as (hidden)
 - [ ] groups and tasks with tags  task -t op, also --show-tags
 - [ ] using -f to specify file in other dir still make taskfile be loaded locally

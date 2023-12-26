@@ -3,7 +3,8 @@ import logging
 import os
 
 from .envvar import EnvVar
-#from .taskfiledev import go_task_project_name
+
+# from .taskfiledev import go_task_project_name
 
 log = logging.getLogger(__name__)
 
@@ -35,8 +36,11 @@ TASKCLI_GOTASK_TASK_GROUP_NAME = EnvVar(
 
 # Various advanced settings. You typically don't need to change these.
 TASKCLI_ADV_OVERRIDE_FORMATTING = EnvVar(
-    default_value="false", desc=("If set to true, overrides formatting options to make the listing output simpler. "
-                                 "Added for use with unit tests.")
+    default_value="false",
+    desc=(
+        "If set to true, overrides formatting options to make the listing output simpler. "
+        "Added for use with unit tests."
+    ),
 )
 
 

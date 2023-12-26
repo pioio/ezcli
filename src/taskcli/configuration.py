@@ -4,6 +4,8 @@
 import dataclasses
 import sys
 
+from . import envvars
+
 LIST_DETAILS_LOW = 0
 
 # Name   desc  mandatory args
@@ -150,9 +152,9 @@ class Config:
     # justify name center
     adv_render_separator_line_title: str = "{underline}{white}*** {underline}{name}{clear}"
 
+
 config = Config()
 
-from . import envvars
 if envvars.TASKCLI_ADV_OVERRIDE_FORMATTING.is_true():
     config.render_format_important_tasks = "{name}"
     config.render_task_name = "{name}"
@@ -160,6 +162,7 @@ if envvars.TASKCLI_ADV_OVERRIDE_FORMATTING.is_true():
     config.render_format_not_ready = "{name}"
     config.render_format_included_taskfile_dev_task = "{name}"
     config.render_format_of_group_name = "{name}"
+
 
 def get_end_color() -> str:
     """Return the escape code to reset the terminal color."""

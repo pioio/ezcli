@@ -6,9 +6,10 @@ import os
 import sys
 
 from . import envvars, taskfiledev
+from .parser import build_initial_parser
 
 log = logging.getLogger(__name__)
-from .parser import build_initial_parser
+
 
 def main() -> None:
     """Entrypoint for the 'taskcli' command."""

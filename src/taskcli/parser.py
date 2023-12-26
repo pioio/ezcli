@@ -42,10 +42,9 @@ def _extract_extra_args(argv: list[str], task_cli: TaskCLI) -> list[str]:
         return argv[:first_double_hyphen]
 
 
-def dispatch(argv: list[str] | None = None, tasks_found:bool=True) -> Any:  # noqa: C901
+def dispatch(argv: list[str] | None = None, tasks_found: bool = True) -> Any:  # noqa: C901
     """Dispatch the command line arguments to the correct function."""
     # Initial parser, only used to find the tasks file
-
 
     tasks: list[Task] = taskcli.get_runtime().tasks
     parser = build_parser(tasks)
