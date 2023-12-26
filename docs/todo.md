@@ -9,6 +9,7 @@
 - [ ] task .dev   to list item in group, including hidden groups
 - [ ] groups having unique namespace
 - [ ] task op
+- [ ] extend with a c
 - [ ] groups having namespacesby default, but optionally not  Group(ns=False)
   - [ ] always print group, but if ns is optional, print it dimmed out
 - [ ] allow one task to be in more than one group?
@@ -80,6 +81,9 @@ Features:
 
 
 # Later
+- ability to customize the parser with custom flags
+  - @task(customize_parser=lambda parser: parser.add_argument('--foo')
+    then taskcli.get_args() would return the parsed argparse namespace
 - show missing env vars in task list
 - JSON format
 - Include Taskfile

@@ -43,7 +43,11 @@ TODO: explain
 ## Typical usage
 - run `t` to list all the (not hidden) tasks in local `./tasks.py` file. Some info is hidden from this overview.
 - run `t <task_name>` to run a task.
-- run `t <group_name>` to list only tasks in that group. Includes more detailed info than the full listing.
+- run `t <group_name>` to list only tasks in that group. This view includes more detailed info than the full listing.
+
+The goal of `t` is to get a quick overview of all the tasks.
+You can always include `t -L` to view all the info for all the groups. But note that for large projects
+this can result in a lot of output
 
 
 

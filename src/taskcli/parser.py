@@ -53,6 +53,7 @@ def dispatch(argv: list[str] | None = None) -> None:  # noqa: C901
     argv = _extract_extra_args(argv, taskcli.get_runtime())
 
     argconfig = parser.parse_args(argv)
+    taskcli.get_runtime().parsed_args = argconfig
 
     if argconfig.version:
         print("version info...")  # noqa: T201
@@ -65,13 +66,16 @@ def dispatch(argv: list[str] | None = None) -> None:  # noqa: C901
         print_listed_tasks(tasks, verbose=argconfig.list, ready_verbose=argconfig.ready)
         sys.exit(0)
 
-    def _dispatch(fun: AnyFunction):
+    def _dispatch(task: Task):
         kwargs = {}
+
         for param in task.params:
             name = param.get_argparse_names()[0].replace("-", "_")
             value = getattr(argconfig, name)
-            value = _convert_from_argparse_to_function_type(task, param, value)
+            value = _convert_types_from_str_to_function_type(task, param, value)
             kwargs[name] = value
+
+
 
         return task.func(**kwargs)
 
@@ -94,12 +98,12 @@ def dispatch(argv: list[str] | None = None) -> None:  # noqa: C901
         else:
             for task in tasks:
                 if task.get_full_task_name() == argconfig.task:
-                    return _dispatch(task.func)
+                    return _dispatch(task)
 
             # Not found, search aliases
             for task in tasks:
                 if argconfig.task in task.aliases:
-                    return _dispatch(task.func)
+                    return _dispatch(task)
 
             print(f"Task {argconfig.task} not found")  # noqa: T201
             sys.exit(1)
@@ -109,7 +113,7 @@ def dispatch(argv: list[str] | None = None) -> None:  # noqa: C901
     return None
 
 
-def _convert_from_argparse_to_function_type(task: Task, param: Parameter, value: Any) -> Any:
+def _convert_types_from_str_to_function_type(task: Task, param: Parameter, value: Any) -> Any:
     if param.type is int:
         value = int(value)
     elif param.type is bool:
@@ -148,6 +152,9 @@ def build_parser(tasks: list[Task]) -> argparse.ArgumentParser:
     root_parser.add_argument(
         "-l", "--list", action="count", default=0, help="List tasks, use -ll and -lll for more info"
     )
+    root_parser.add_argument(
+        "-L", action="store_true", default=False, help="List tasks, use -ll and -lll for more info"
+    )
     root_parser.add_argument("--show-hidden", "-H", action="store_true", default=False)
 
     subparsers = root_parser.add_subparsers(help="Task to run")
@@ -171,6 +178,9 @@ def build_parser(tasks: list[Task]) -> argparse.ArgumentParser:
         for name in all_names_of_task:
             subparser = subparsers.add_parser(name)
             subparser.set_defaults(task=name)
+
+            if task.customize_parser:
+                task.customize_parser(subparser)
 
             for param in task.params:
                 _add_param_to_subparser(param, subparser)

@@ -2,7 +2,7 @@ import functools
 import inspect
 import os
 import sys
-from typing import Iterable
+from typing import Iterable, Callable
 
 
 from . import utils
@@ -58,6 +58,7 @@ class Task:
         important: bool = False,
         env: list[str] | None = None,
         format: str = "{name}",
+        customize_parser:Callable[[Any],None]|None = None,
     ):
         """Create a new Task.
 
@@ -72,6 +73,7 @@ class Task:
         self.important = important
         self.params = [Parameter(param) for param in inspect.signature(func).parameters.values()]
         self.name_format = format
+        self.customize_parser = customize_parser
 
         self.group: Group = group or DEFAULT_GROUP
 
