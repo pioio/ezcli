@@ -47,7 +47,7 @@ def _sort_tasks(tasks: list[Task], sort: str, sort_important_first: bool) -> lis
     return tasks
 
 
-def list_tasks(tasks: list[Task], verbose: int) -> list[str]:
+def list_tasks(tasks: list[Task], verbose: int, env_verbose: int = 0) -> list[str]:
     """Return a list of lines to be printed to the console."""
     assert len(tasks) > 0, "No tasks found"
 
@@ -68,7 +68,10 @@ def list_tasks(tasks: list[Task], verbose: int) -> list[str]:
             continue
 
         if num_visible_groups > 1:
-            group_name_rendered = format_colors(config.render_format_of_group_name, name=group.name, desc=group.desc)
+            num_tasks = group.render_num_shown_hidden_tasks()
+            group_name_rendered = format_colors(
+                config.render_format_of_group_name, name=group.name, desc=group.desc, num_tasks=num_tasks
+            )
             lines += [group_name_rendered]
 
         tasks = _sort_tasks(group.tasks, sort=config.sort, sort_important_first=config.sort_important_first)
@@ -77,7 +80,7 @@ def list_tasks(tasks: list[Task], verbose: int) -> list[str]:
         for task in tasks:
             if task.is_hidden() and not show_hidden_tasks:
                 continue
-            lines.extend(smart_task_lines(task, verbose=verbose))
+            lines.extend(smart_task_lines(task, verbose=verbose, env_verbose=env_verbose))
     lines = [line.rstrip() for line in lines]
 
     FIRST_LINE_STARTS_WITH_NEW_LINE = lines and lines[0] and lines[0][0] == "\n"
@@ -88,12 +91,12 @@ def list_tasks(tasks: list[Task], verbose: int) -> list[str]:
     return lines
 
 
-def smart_task_lines(task: Task, verbose: int) -> list[str]:
+def smart_task_lines(task: Task, verbose: int, env_verbose: int = 0) -> list[str]:
     """Render a single task into a list of lines, scale formatting to the amount of content."""
     lines: list[str] = []
 
     name = task.name
-
+    param_line_prefix = "  "
     summary = task.get_summary_line()
     aliases = ", ".join(task.aliases)
     aliases_color = configuration.colors.pink
@@ -109,6 +112,10 @@ def smart_task_lines(task: Task, verbose: int) -> list[str]:
     format = config.render_task_name
     if task.important:
         format = config.render_format_important_tasks
+    if task.hidden:
+        format = config.render_format_hidden_tasks
+    if not task.is_ready():
+        format = config.render_format_not_ready
 
     # if task.group.name != "default":
     #     name = configuration.colors.dark_gray + task.group.name + configuration.colors.end + "." + name
@@ -121,6 +128,19 @@ def smart_task_lines(task: Task, verbose: int) -> list[str]:
     one_line_params = build_pretty_param_string(
         task, include_optional=include_optional, include_defaults=include_defaults
     )
+
+    not_ready_lines = []
+    # Check if env is ok
+    if not task.is_ready():
+        if env_verbose == 0:
+            not_ready_reason = task.get_not_ready_reason_short()
+            one_line_params += f" {configuration.colors.red}{not_ready_reason}{configuration.colors.end}"
+        else:
+            not_ready_lines = task.get_not_ready_reason_long()
+            not_ready_lines = [
+                f"{param_line_prefix}{configuration.colors.red}{line}{configuration.colors.end}"
+                for line in not_ready_lines
+            ]
 
     potential_line = line + " " + one_line_params
     if len(utils.strip_escape_codes(potential_line)) < max_left:
@@ -136,7 +156,6 @@ def smart_task_lines(task: Task, verbose: int) -> list[str]:
     lines.append(line)
 
     if one_line_params:
-        param_line_prefix = "  "
         num_params = len(
             build_pretty_param_list(task, include_optional=include_optional, include_defaults=include_defaults)
         )
@@ -149,6 +168,8 @@ def smart_task_lines(task: Task, verbose: int) -> list[str]:
                 lines.append(param_line_prefix + param)
         else:
             lines.append(param_line_prefix + one_line_params)
+
+    lines += not_ready_lines
     return lines
 
 

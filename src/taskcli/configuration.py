@@ -72,8 +72,10 @@ class Config:
     render_color_group_name: str = colors.white
     render_extra_line_indent: str = "    "
 
+    render_format_important_tasks: str = "{white}* {green}{underline}{name}{clear}"
     render_task_name: str = "{white}* {green}{name}{clear}"
-    render_format_important_tasks: str = "{red}* {green}{underline}{name}{clear}"
+    render_format_hidden_tasks: str = "{white}* {dark_gray}{name}{clear}"
+    render_format_not_ready: str = "{red}* {green}{name}{clear}"
 
     # Always show these args in the task list, even if they are optional
     render_always_show_args: list[str] = dataclasses.field(default_factory=list)
@@ -88,7 +90,9 @@ class Config:
 
     # Prefix with "\n" to separate group names with a newline
     # use {NAME} instead of {name} to print group name in uppercase
-    render_format_of_group_name: str = "\n{white}{underline}{white}*** {name:<14}{clear}  {dark_gray}{desc}{clear}"
+    render_format_of_group_name: str = "\n{white}{underline}{white}*** {name:<14}  {white}{desc}{clear}"
+    # Some other example
+#    render_format_of_group_name: str = "==================================================\n{white}{blue}> {NAME} ({num_tasks}) {desc}"  # uppercase group name
 
     # The left column (with task name and args) will pref
     # Only rows with very long task names will be longer than this.

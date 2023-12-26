@@ -62,7 +62,7 @@ def dispatch(argv: list[str] | None = None) -> None:  # noqa: C901
         taskcli.config.show_hidden_groups = True
 
     if argconfig.list:
-        print_listed_tasks(tasks, verbose=argconfig.list)
+        print_listed_tasks(tasks, verbose=argconfig.list, ready_verbose=argconfig.ready)
         sys.exit(0)
 
     def _dispatch(fun: AnyFunction):
@@ -75,6 +75,7 @@ def dispatch(argv: list[str] | None = None) -> None:  # noqa: C901
 
         return task.func(**kwargs)
 
+    ready_verbose = argconfig.ready
     # raise Exception("This should not happen")
     if hasattr(argconfig, "task"):
         if argconfig.task.endswith(GROUP_SUFFIX):
@@ -87,7 +88,8 @@ def dispatch(argv: list[str] | None = None) -> None:  # noqa: C901
             hidden_tasks = len([x for x in tasks_in_group if x.hidden])
             hidden_tasks_str = f" ({hidden_tasks} hidden)" if hidden_tasks > 0 else ""
             taskcli.utils.print_err(f"Tasks in group {group_name} ({num_tasks}) {hidden_tasks_str}")
-            print_listed_tasks(tasks_in_group, verbose=4)
+            # print_listed_tasks(tasks_in_group, verbose=4,ready_verbose=argconfig.ready)
+            print_listed_tasks(tasks_in_group, verbose=4, ready_verbose=999)
             sys.exit(1)
         else:
             for task in tasks:
@@ -102,7 +104,7 @@ def dispatch(argv: list[str] | None = None) -> None:  # noqa: C901
             print(f"Task {argconfig.task} not found")  # noqa: T201
             sys.exit(1)
     else:
-        print_listed_tasks(tasks, verbose=1)
+        print_listed_tasks(tasks, verbose=1, ready_verbose=ready_verbose)
 
     return None
 
@@ -127,9 +129,9 @@ def _convert_from_argparse_to_function_type(task: Task, param: Parameter, value:
     return value
 
 
-def print_listed_tasks(tasks: list[Task], verbose: int) -> None:
+def print_listed_tasks(tasks: list[Task], verbose: int, ready_verbose: int) -> None:
     """Print the listed tasks."""
-    lines = list_tasks(tasks, verbose=verbose)
+    lines = list_tasks(tasks, verbose=verbose, env_verbose=ready_verbose)
     for line in lines:
         print(line)  # noqa: T201
 
@@ -140,6 +142,9 @@ def build_parser(tasks: list[Task]) -> argparse.ArgumentParser:
 
     # Main parsers
     root_parser.add_argument("--version", action="store_true")
+    root_parser.add_argument(
+        "-r", "--ready", help="Show detailed info about task being ready", action="count", default=0
+    )
     root_parser.add_argument(
         "-l", "--list", action="count", default=0, help="List tasks, use -ll and -lll for more info"
     )

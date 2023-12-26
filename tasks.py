@@ -16,13 +16,18 @@ important = Group("Important", desc="Development tasks")
 
 with Group("dev", desc="Development tasks"):
 
-    @task(aliases="t")
+    @task(aliases="t", env=["FOOBAR"])
     def test():
         """Run unit tests."""
         run(f"pytest tests/ -vvv {taskcli.extra_args()}")
 
-    @task()
+    @task(important=True)
     def nox():
+        """Run extensive tests using nox."""
+        run("nox")
+
+    @task(important=True)
+    def zox():
         """Run extensive tests using nox."""
         run("nox")
 
@@ -31,7 +36,7 @@ with Group("dev", desc="Development tasks"):
         """(test) Run specia tests using nox."""
         run("nox")
 
-    @task()
+    @task(env=["foooo_username", "foooo_password"])
     def nox_special2(mandatory_arg: str):
         del mandatory_arg
         """(test) Run even more special tests using nox."""

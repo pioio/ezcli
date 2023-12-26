@@ -2,6 +2,9 @@
 - [x] add `taskcli.extra_args` to get `-- args`
 - [ ] include
 - [ ] task script
+- [ ] show num of hidden groups
+- [ ] task -L should show ALL info
+- [ ] TODO custom format
 - [ ] add auto conversion to int/float from string
 - [ ] task .dev   to list item in group, including hidden groups
 - [ ] groups having unique namespace
@@ -31,13 +34,18 @@
 - [ ] Aliases
 - [ ] -L list all
 #### groups
-Task
 
-IncludedTask
-- Task
-- namespace
-- important
-- group
+Each task has one namespace,
+foo.bar.ns.task
+Typing namespace can be optional
+
+Each task has tags
+
+task groupped based on tags
+
+group desc should say how many hidden tasks there are
+
+
 
 
 - groups in the order they were defined
@@ -72,9 +80,11 @@ Features:
 
 
 # Later
+- show missing env vars in task list
 - JSON format
 - Include Taskfile
 - converting list[int] from str to list of ints
+- add to groups based on tags?
 
 # FIXME
 - [ ] Text in help output broken - does include task name. We should modify parser's print-usage to include task name

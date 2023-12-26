@@ -1,5 +1,6 @@
 import functools
 import inspect
+import os
 import sys
 from typing import Iterable
 
@@ -54,6 +55,7 @@ class Task:
         hidden: bool = False,
         aliases: Iterable[str] | None = None,
         important: bool = False,
+        env: list[str] | None = None,
     ):
         """Create a new Task.
 
@@ -63,6 +65,7 @@ class Task:
         """
         self.func = func
         self.aliases = aliases or []
+        self.env = env or []
         self.hidden = hidden
         self.important = important
         self.params = [Parameter(param) for param in inspect.signature(func).parameters.values()]
@@ -86,8 +89,8 @@ class Task:
         out = self.func.__name__.replace("_", "-")
         out.lstrip("-")  # for _private functions
 
-        if self.hidden:
-            out = "_" + out
+        # if self.hidden:
+        #     out = "_" + out
         return out
 
     def get_all_task_names(self) -> list[str]:
@@ -113,6 +116,50 @@ class Task:
         dirpath = os.path.dirname(filepath)
         return dirpath
 
+    def is_ready(self) -> bool:
+        """Return the directory in which the task was define."""
+        import os
+
+        if not self.env_is_ready():
+            return False
+        return True
+
+    def get_not_ready_reason_short(self) -> str:
+        """Get a short string explaining why the task is not ready to run."""
+        reasons = []
+        if not self.env_is_ready():
+            reasons.append("env!")
+        # TODO: add custom function
+        # > if not self.fun_is_ready():
+        # >     reasons.append("check!")
+        return ", ".join(reasons)
+
+    def get_not_ready_reason_long(self) -> list[str]:
+        """Get a detailed list of reasons why the task is not ready to run."""
+        reasons = []
+        for env in self.env:
+            if env not in os.environ:
+                reasons.append(f"Env var {env} is not set.")
+            elif os.environ[env] == "":
+                reasons.append(f"Env var {env} is set but is empty.")
+        return reasons
+
+    def env_is_ready(self):
+        for env in self.env:
+            if env not in os.environ or os.environ[env] == "":
+                return False
+        return True
+
+    def get_missing_env(self) -> list[str]:
+        """Return the directory in which the task was define."""
+        import os
+
+        missing = []
+        for env in self.env:
+            if env not in os.environ or os.environ[env] == "":
+                missing.append(env)
+        return missing
+
 
 def _get_wrapper(
     func: AnyFunction,
@@ -122,6 +169,7 @@ def _get_wrapper(
     important: bool = False,
     aliases: Iterable[str] | None = None,
     change_dir: bool = True,
+    env: list[str] | None = None,
 ) -> AnyFunction:
     # TODo: allow defining groups via string at task-creationg time
     # >  if isinstance(group, str):
@@ -130,6 +178,7 @@ def _get_wrapper(
     # >      else:
     # >          group = Group(name=group)
     aliases = aliases or []
+    env = env or []
 
     if config.adv_auto_hide_private_tasks and (func.__name__.startswith("_") and not hidden):
         func.__name__ = func.__name__.lstrip("_")
@@ -167,7 +216,8 @@ def _get_wrapper(
 
     del kwargs["group"]
     del kwargs["aliases"]
-    task = Task(wrapper, group=group, aliases=aliases, **kwargs)
+    del kwargs["env"]
+    task = Task(wrapper, env=env, group=group, aliases=aliases, **kwargs)
 
     if not hasattr(module_which_defines_task, "decorated_functions"):
         module_which_defines_task.decorated_functions = []  # type: ignore[attr-defined]

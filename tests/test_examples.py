@@ -165,7 +165,7 @@ def test_list_hidden_tasks_dont_show_up_by_default():
     lines = list_tasks(tasks, verbose=0)
 
     task_names = [task.name for task in tasks]
-    assert "_hidden-task" in task_names, "Hidden task should be in the list of tasks, but it is not"
+    assert "hidden-task" in task_names, "Hidden task should be in the list of tasks, but it is not"
 
     for line in lines:
         assert (

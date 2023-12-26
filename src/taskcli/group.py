@@ -38,6 +38,19 @@ class Group:
     def get_name_for_cli(self):
         return self.name.replace(" ", "-").lower()
 
+    def render_num_shown_hidden_tasks(self):
+        num_hidden = len([task for task in self.tasks if task.hidden])
+        num_shown = len([task for task in self.tasks if not task.hidden])
+        if num_hidden == 0:
+            return f"{num_shown}"
+        else:
+            from . import configuration
+
+            BLUE = configuration.colors.blue
+            ENDC = configuration.get_end_color()
+            # return f"{BLUE}{num_shown}/{num_shown+num_hidden}{ENDC}"
+            return f"{num_shown}/{num_shown+num_hidden}"
+
 
 # Default group for new tasks
 NULL_GROUP = Group("null-group")

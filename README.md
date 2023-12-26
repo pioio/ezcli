@@ -17,6 +17,39 @@ This library aims to solve this problem by providing means of not only easily cr
 but also easily navigating them later on.
 You can group tasks, highlight the important ones, combine tasks from many files and directories.
 
+
+### Tasks
+A task can be important, hidden, both, or neither
+
+Important tasks
+
+Hidden tasks are not listed by default. Those are tasks that are meant to be ran relatiely inferequently.
+Hidden tasks can be listed either by
+- with `--show-hidden|-H` flag, or with `--list-all|-L` flag
+- or by listing all tasks in specific group.
+
+Important tasks are just that, important.
+The reason depends on the cotext.
+Important tasks have a special formatting (customizable)
+
+### Tasks and groups
+Each task is always in one specific group.
+By defaylt, thats the default group.
+You can create custom groups.
+
+Each task has a namespace.
+TODO: explain
+
+
+## Design consideration
+- `taskcli` shows if your env is ready to run a task. Many tasks need special env variables set.
+   It's useful to see at a glance which tasks are ready to run, and which are not.
+   Specify either env var names, or  for advanced cases, a function that returns a string.
+
+## Readmap
+Custom env validation functions
+
+
 ## Disclaimer
 This library is still in early development and API will continue to change.
 If you need a more mature solution, consider using [pyinvoke](https://www.pyinvoke.org/) or Taskfile.dev.
