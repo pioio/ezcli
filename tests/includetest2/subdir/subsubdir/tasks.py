@@ -9,7 +9,7 @@ from taskcli import dispatch, include, task
 
 sys.path.append(os.path.join(os.path.dirname(__file__), "..", ".."))
 
-import root as root_tasks  # isort:skip
+import root as root_tasks  # isort:skip # noqa: E402
 
 include(root_tasks)
 

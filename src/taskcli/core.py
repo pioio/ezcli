@@ -28,7 +28,7 @@ def include(module: Module | AnyFunction, **kwargs: Any) -> None:
     """Iterate over decorated @task functions in the module."""
     if isinstance(module, Module):
         if not hasattr(module, "decorated_functions"):
-            module.decorated_functions = []
+            module.decorated_functions = []  # type: ignore[attr-defined]
 
         for decorated_fun in module.decorated_functions:
             assert isinstance(decorated_fun, Task), f"Expected Task, got {type(decorated_fun)}"
@@ -39,7 +39,7 @@ def include(module: Module | AnyFunction, **kwargs: Any) -> None:
 
         module_of_fun = sys.modules[fun.__module__]
         if not hasattr(module_of_fun, "decorated_functions"):
-            module_of_fun.decorated_functions = []
+            module_of_fun.decorated_functions = []  # type: ignore[attr-defined]
 
         found = False
         for atask in module_of_fun.decorated_functions:

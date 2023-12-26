@@ -35,7 +35,7 @@ class Task:
             func=self.func,
             group=group,
         )
-        for prop in self.__dict__:  # type: ignore[attr-defined]
+        for prop in self.__dict__:
             props_to_skip = [
                 "func",  # passed to constructor
                 "params" "group",  # created from func in constructor  # passed to constructor
@@ -87,16 +87,11 @@ class Task:
         """Return the name of the task."""
         return self.get_full_task_name()
 
-    # def name_for_listing(self) -> str:
-    #     return format_colors(self.name_format, name=self.name)
-
     def get_full_task_name(self) -> str:
         """Return the full name of the task, including the group."""
         out = self.func.__name__.replace("_", "-")
         out.lstrip("-")  # for _private functions
 
-        # if self.hidden:
-        #     out = "_" + out
         return out
 
     def get_all_task_names(self) -> list[str]:
@@ -118,7 +113,7 @@ class Task:
 
         module = inspect.getmodule(func)
 
-        filepath = inspect.getfile(module)
+        filepath = inspect.getfile(module)  # type: ignore[arg-type]
         dirpath = os.path.dirname(filepath)
         return dirpath
 
@@ -150,7 +145,8 @@ class Task:
                 reasons.append(f"Env var {env} is set but is empty.")
         return reasons
 
-    def env_is_ready(self):
+    def env_is_ready(self) -> bool:
+        """Return true if the env variables required by the task are set."""
         for env in self.env:
             if env not in os.environ or os.environ[env] == "":
                 return False
@@ -167,7 +163,7 @@ class Task:
         return missing
 
 
-def _get_wrapper(
+def _get_wrapper(  # noqa: C901
     func: AnyFunction,
     group: Group | None = None,
     hidden: bool = False,
@@ -215,9 +211,9 @@ def _get_wrapper(
 
     # DecoratedFunction
     @functools.wraps(func)
-    def wrapper(*args: list[Any], **kwargs: dict[str, Any]) -> Any:
+    def wrapper_for_changing_directory(*args: list[Any], **kwargs: dict[str, Any]) -> Any:
         if change_dir:
-            with utils.change_dir(task.get_taskfile_dir()):
+            with utils.change_dir(task.get_taskfile_dir()):  # type: ignore[attr-defined]
                 return func(*args, **kwargs)
         else:
             return func(*args, **kwargs)
@@ -225,7 +221,7 @@ def _get_wrapper(
     del kwargs["group"]
     del kwargs["aliases"]
     del kwargs["env"]
-    task = Task(wrapper, env=env, group=group, aliases=aliases, **kwargs)
+    task = Task(wrapper_for_changing_directory, env=env, group=group, aliases=aliases, **kwargs)
 
     if not hasattr(module_which_defines_task, "decorated_functions"):
         module_which_defines_task.decorated_functions = []  # type: ignore[attr-defined]
@@ -244,4 +240,4 @@ def _get_wrapper(
         runtime = utils.get_runtime()
         runtime.tasks.append(task)
 
-    return wrapper
+    return wrapper_for_changing_directory

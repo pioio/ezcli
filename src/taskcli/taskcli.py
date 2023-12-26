@@ -1,7 +1,8 @@
-import argparse
 import typing
 
 if typing.TYPE_CHECKING:
+    import argparse
+
     from .task import Task
 
 

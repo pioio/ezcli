@@ -35,18 +35,17 @@ class Group:
         global _stack
         _stack.pop()
 
-    def get_name_for_cli(self):
+    def get_name_for_cli(self) -> str:
         """Return the name of the group suitable for CLI completion."""
         return self.name.replace(" ", "-").lower()
 
-    def render_num_shown_hidden_tasks(self):
+    def render_num_shown_hidden_tasks(self) -> str:
+        """Return a string showing the number of shown and hidden tasks."""
         num_hidden = len([task for task in self.tasks if task.hidden])
         num_shown = len([task for task in self.tasks if not task.hidden])
         if num_hidden == 0:
             return f"{num_shown}"
         else:
-            from . import configuration
-
             return f"{num_shown}/{num_shown+num_hidden}"
 
 

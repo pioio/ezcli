@@ -1,8 +1,7 @@
 import taskcli
 from taskcli import Group, Task, task
 
-from .basic_test import prepare
-from .fixtures.groups import task2
+from .utils import reset_context_before_each_test
 
 
 def include_tasks() -> list[Task]:

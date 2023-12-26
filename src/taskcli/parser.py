@@ -35,7 +35,7 @@ def _extract_extra_args(argv: list[str], task_cli: TaskCLI) -> list[str]:
         return argv[:first_double_hyphen]
 
 
-def dispatch(argv: list[str] | None = None) -> None:  # noqa: C901
+def dispatch(argv: list[str] | None = None) -> Any:  # noqa: C901
     """Dispatch the command line arguments to the correct function."""
     tasks: list[Task] = taskcli.get_runtime().tasks
 
@@ -69,7 +69,7 @@ def dispatch(argv: list[str] | None = None) -> None:  # noqa: C901
         print_listed_tasks(tasks, verbose=999, ready_verbose=999)
         return
 
-    def _dispatch(task: Task):
+    def _dispatch(task: Task) -> Any:
         kwargs = {}
 
         for param in task.params:
@@ -175,9 +175,9 @@ def build_parser(tasks: list[Task]) -> argparse.ArgumentParser:
             subparser = subparsers.add_parser(group_name + GROUP_SUFFIX)
             subparser.set_defaults(task=group_name + GROUP_SUFFIX)
 
-        # groupandtask = "." + group_name + "." + task.name
-        # subparser = subparsers.add_parser(groupandtask)
-        # subparser.set_defaults(task=task.name)
+        # > groupandtask = "." + group_name + "." + task.name
+        # > subparser = subparsers.add_parser(groupandtask)
+        # > subparser.set_defaults(task=task.name)
 
         all_names_of_task = task.get_all_task_names()
 

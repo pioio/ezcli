@@ -81,7 +81,7 @@ DEFAULT_LINT_PATH = "src/"
 # >  include(xxx)
 
 
-for name, fun in inspect.getmembers(taskcli.utils, inspect.isfunction):
+for _, fun in inspect.getmembers(taskcli.utils, inspect.isfunction):
     include(fun)
 
 
@@ -95,6 +95,7 @@ with Group("lint", desc="Code cleanup tasks") as x:
     def ruff(paths: Paths, example_arg: str = "foobar", example_arg2: str = "foobar"):
         """Run ruff linter."""
         del example_arg
+        del example_arg2
         path_txt = " ".join(paths)
         run(f"ruff format {path_txt}")
         run(f"ruff check {path_txt} --fix")
@@ -110,6 +111,7 @@ with Group("lint", desc="Code cleanup tasks") as x:
     def mypy(paths: Paths):
         """Detect code issues."""
         paths.pop(paths.index("tasks.py"))
+        paths.pop(paths.index("tests"))
         path_txt = " ".join(paths)
         run(f"mypy {path_txt} --strict")
 

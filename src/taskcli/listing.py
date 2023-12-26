@@ -102,7 +102,7 @@ def list_tasks(tasks: list[Task], verbose: int, env_verbose: int = 0) -> list[st
     return lines
 
 
-def smart_task_lines(task: Task, verbose: int, env_verbose: int = 0) -> list[str]: # noqa: C901
+def smart_task_lines(task: Task, verbose: int, env_verbose: int = 0) -> list[str]:  # noqa: C901
     """Render a single task into a list of lines, scale formatting to the amount of content."""
     lines: list[str] = []
 
@@ -129,9 +129,6 @@ def smart_task_lines(task: Task, verbose: int, env_verbose: int = 0) -> list[str
         format = config.render_format_hidden_tasks
     if not task.is_ready():
         format = config.render_format_not_ready
-
-    # if task.group.name != "default":
-    #     name = configuration.colors.dark_gray + task.group.name + configuration.colors.end + "." + name
 
     line = format_colors(format, name=name)
 

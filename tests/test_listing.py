@@ -40,9 +40,9 @@ def test_alphanumeric_order():
     tasks = include_tasks()
     show_hidden_tasks = 3
     lines = taskcli.listing.list_tasks(tasks, verbose=show_hidden_tasks)
-    lines = "\n".join(lines)
+    linestxt = "\n".join(lines)
     assert (
-        lines
+        linestxt
         == """* a-imporant1
 * z-imporant2
 * a-regular1

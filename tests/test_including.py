@@ -8,7 +8,7 @@ from .basic_test import run_tasks
 from .test_examples import prepare
 
 
-def test_get_taskfile_dir(prepare):
+def test_get_taskfile_dir():
     @task
     def foob() -> None:
         pass
@@ -93,7 +93,7 @@ def test_include_from_subsubdir_works():
     assert stdout.strip() == """* subsubchild"""
 
 
-def test_including_not_decorated_function(prepare):
+def test_including_not_decorated_function():
     done = 0
 
     def somefun2():
@@ -107,7 +107,7 @@ def test_including_not_decorated_function(prepare):
 
 
 @pytest.mark.skip()
-def test_including_not_decorated_function_name_change(prepare):
+def test_including_not_decorated_function_name_change():
     done = 0
 
     def somefun():
@@ -120,7 +120,7 @@ def test_including_not_decorated_function_name_change(prepare):
     assert done == 42
 
 
-def test_including_decorated_function(prepare):
+def test_including_decorated_function():
     done = 0
 
     @task
@@ -134,7 +134,7 @@ def test_including_decorated_function(prepare):
     assert done == 42
 
 
-def test_double_task_decorator_failes(prepare):
+def test_double_task_decorator_failes():
     done = 0
 
     with pytest.raises(ValueError, match="already decorated"):

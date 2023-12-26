@@ -64,4 +64,5 @@ unfixable = [
     "T201",   # Don't complain about print being used.
     "ARG001", # Don't complain about unused function arguments.
     "F841",   # Don't complain about local var being assigned and not used
+    "INP001", # Don't complain about missing __init__.py
    ]

@@ -11,7 +11,7 @@ from taskcli import Task, task
 @pytest.fixture(autouse=True)
 def reset_context_before_each_test() -> None:
     """Reset the entire context of taskcli, run this before each test"""
-    print("Resetting tasks")  # noqa: T201
+    print("Resetting tasks")
     taskcli.utils.reset_tasks()
     return None
 

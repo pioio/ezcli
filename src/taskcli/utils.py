@@ -80,5 +80,6 @@ def get_runtime() -> "TaskCLI":
     return taskcli.core.task_cli
 
 
-def some_test_function(a: int, b: int):
-    print("Hello from inside taskcli:", str(a + b))
+def some_test_function(a: int, b: int) -> None:
+    """Test function, ignore it."""
+    print("Hello from inside taskcli:", str(a + b))  # noqa: T201
