@@ -2,7 +2,8 @@ import argparse
 import sys
 
 import taskcli
-from taskcli import Task, task
+from taskcli import Task, task, Group
+from .test_including import clean_stdout
 
 from .utils import include_tasks, reset_context_before_each_test
 
@@ -48,3 +49,30 @@ def test_alphanumeric_order():
 * b-hidden1
 * c-regular2
 * d-hidden2""", "important tasks should be first, the rest should come in alphanumeric order"
+
+
+
+def test_list_everything_works(capsys):
+
+    hidden_group = Group("hidden-group", hidden=True)
+
+    @task(hidden=True)
+    def hidden_task():
+        pass
+
+    @task(group=hidden_group)
+    def task_in_hidden_group():
+        pass
+
+    tasks = include_tasks()
+
+    taskcli.dispatch(["-L"])
+
+    stdout = capsys.readouterr().out
+    clean_stdout(stdout)
+    assert stdout == """*** default         Default tasks
+* hidden-task
+
+*** hidden-group
+* task-in-hidden-group
+"""

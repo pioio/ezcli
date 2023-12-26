@@ -4,6 +4,8 @@
 - [ ] task script
 - [ ] show num of hidden groups
 - [ ] task -L should show ALL info
+- [ ] hidden tasks
+- [ ] advanced tasks
 - [ ] TODO custom format
 - [ ] add auto conversion to int/float from string
 - [ ] task .dev   to list item in group, including hidden groups
