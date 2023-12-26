@@ -1,5 +1,5 @@
 import inspect
-from typing import Any
+from typing import Any, final
 
 import taskcli
 
@@ -72,10 +72,13 @@ def list_tasks(tasks: list[Task], verbose: int, env_verbose: int = 0) -> list[st
 
     num_visible_groups = len([group.name for group in groups if group.name not in taskcli.get_runtime().hidden_groups])
 
+    num_hidden_groups = 0
+    num_hidden_tasks = 0
     for group in groups:
         GROUP_IS_HIDDEN = group.hidden or group.name in taskcli.get_runtime().hidden_groups
 
         if not show_hidden_groups and GROUP_IS_HIDDEN:
+            num_hidden_groups += 1
             continue
 
         if num_visible_groups > 1:
@@ -90,6 +93,7 @@ def list_tasks(tasks: list[Task], verbose: int, env_verbose: int = 0) -> list[st
         show_hidden_tasks = verbose >= 3 or configuration.config.show_hidden_tasks
         for task in tasks:
             if task.is_hidden() and not show_hidden_tasks:
+                num_hidden_tasks += 1
                 continue
             lines.extend(smart_task_lines(task, verbose=verbose, env_verbose=env_verbose))
     lines = [line.rstrip() for line in lines]
@@ -99,6 +103,17 @@ def list_tasks(tasks: list[Task], verbose: int, env_verbose: int = 0) -> list[st
         # This can happen if user prefixes the custom group format with a "\n" to separate groups with whitesapce
         lines[0] = lines[0][1:]
 
+    from . import parser
+    final_line = []
+    if num_hidden_groups or num_hidden_tasks:
+        if num_hidden_groups:
+            final_line.append(f"{num_hidden_groups} hidden groups")
+        if num_hidden_tasks:
+            final_line.append(f"{num_hidden_tasks} hidden tasks")
+        final_line.append(f"use {parser.ARG_SHOW_HIDDEN_SHORT} to show")
+    if final_line:
+        line = f"{configuration.colors.dark_gray}{', '.join(final_line)}{configuration.colors.end}"
+        lines.append(line)
     return lines
 
 

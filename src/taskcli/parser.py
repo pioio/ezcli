@@ -185,6 +185,7 @@ def print_listed_tasks(tasks: list[Task], verbose: int, ready_verbose: int) -> N
         print(line)  # noqa: T201
 
 
+ARG_SHOW_HIDDEN_SHORT = "-H"
 ARG_NO_GO_TASK = "--no-go-task"
 DEFAULT_TASK_PY = envvars.TASKCLI_TASKS_PY_FILENAMES.value
 
@@ -253,7 +254,7 @@ def build_parser(tasks: list[Task]) -> argparse.ArgumentParser:
         default=False,
         help="List everything, hidden tasks, hidden group, with max verbosity.",
     )
-    root_parser.add_argument("--show-hidden", "-H", action="store_true", default=False)
+    root_parser.add_argument("--show-hidden", ARG_SHOW_HIDDEN_SHORT, action="store_true", default=False)
 
     subparsers = root_parser.add_subparsers(help="Task to run")
 
