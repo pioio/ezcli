@@ -3,13 +3,14 @@ from typing import Annotated, Any, Iterable, Sequence, TypeVar
 
 import taskcli
 
-from . import configuration, listing, utils
+from . import configuration, examples, listing, utils
 from .annotations import Arg
 from .configuration import config
 from .core import extra_args, extra_args_list, include
 from .group import Group
 from .parameter import Parameter
 from .parser import dispatch
+from .runcommand import run
 from .task import Task, task
 from .utils import get_runtime
 
@@ -60,4 +61,5 @@ __all__: Sequence[str] = [
     "Annotated",
     "Group",
     "Task",
+    "run",
 ]

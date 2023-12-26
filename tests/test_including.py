@@ -5,7 +5,7 @@ import taskcli
 from taskcli import Task, dispatch, include, task
 
 from .basic_test import run_tasks
-from .test_examples import prepare
+from .test_examples2 import prepare
 
 
 def test_get_taskfile_dir():

@@ -45,7 +45,11 @@ class Example:
 
 
 def get_examples() -> list[Example]:
-    """Get all examples."""
+    """Get all examples.
+
+    All examples are unit tested for basic functionality.
+
+    """
     HL = configuration.colors.yellow + configuration.colors.underline
     END = configuration.colors.end
     return [
@@ -69,12 +73,12 @@ def foo():
             title="arguments",
             text=f'''#
 
-@task(aliases="bar")
+@task
 def task1(age: int, name: str = "alice"):
     """This task has two positional arguments, one of them optional."""
     pass
 
-@task(aliases=("bar","t"))
+@task
 def hello2(age: int=42, {HL}*{END}, name: str = "john"):
     """This task has one position, and one named argument. Args after the "{HL}*{END}" are named only.
 
@@ -86,12 +90,12 @@ def hello2(age: int=42, {HL}*{END}, name: str = "john"):
             title="aliases",
             text=f"""# Aliases can be defined as strings, or iterable of strings
 
-@task({HL}aliases="bar"{END})
-def task1()
+@task({HL}aliases="t1"{END})
+def task1():
     pass
 
-@task({HL}aliases=("bar","t"){END})
-def task1()
+@task({HL}aliases=("t2","foobar"){END})
+def task2():
     pass
 """,
         ),

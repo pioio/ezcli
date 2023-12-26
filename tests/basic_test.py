@@ -10,7 +10,7 @@ from taskcli.parser import _extract_extra_args
 from taskcli.task import Task
 from taskcli.taskcli import TaskCLI
 
-from .test_examples import prepare
+from .test_examples2 import prepare
 
 
 def test_foobar():
