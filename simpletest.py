@@ -8,7 +8,3 @@ from typing import Annotated
 def foobar(name:str="xxx"):
     print(name)
     pass
-
-taskcli.dispatch()
-#tasks = taskcli.utils.get_tasks()
-#print(tasks)
