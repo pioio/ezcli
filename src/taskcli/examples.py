@@ -82,8 +82,8 @@ def task1({BLUE}age{END}: int, {BLUE}name{END}: str = "alice"):
 
 @task
 def hello2({BLUE}height{END}: int=42, {HL}*{END}, {PINK}person{END}: str = "john"):
-    """This task has one {BLUE}positional{END}, and one {PINK}named{END} argument. Args after the "{HL}*{END}" are named only.
-
+    """This task has one {BLUE}positional{END}, and one {PINK}named{END} argument.
+    Args after the "{HL}*{END}" are named only.
     call with: taskcli hello2 {BLUE}25{END} {PINK}--name john{END}"""
     pass
     ''',

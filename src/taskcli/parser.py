@@ -7,7 +7,8 @@ from typing import Any
 
 import taskcli
 
-from . import envvars, examples
+from . import envvars, examples, taskfiledev
+from .init import create_tasks_file
 from .listing import list_tasks
 from .parameter import Parameter
 from .task import Task
@@ -43,8 +44,30 @@ def _extract_extra_args(argv: list[str], task_cli: TaskCLI) -> list[str]:
 
 def dispatch(argv: list[str] | None = None) -> Any:  # noqa: C901
     """Dispatch the command line arguments to the correct function."""
-    tasks: list[Task] = taskcli.get_runtime().tasks
+    # Initial parser, only used to find the tasks file
+    parser = build_initial_parser()
+    argconfig, _ = parser.parse_known_args(argv or sys.argv[1:])
 
+    tasks_found = False
+    for filename in argconfig.file.split(","):
+        filename = filename.strip()
+        if os.path.exists(filename):
+            dir = os.path.dirname(filename)
+            sys.path.append(dir)
+            # import module by name
+            basename = os.path.basename(filename)
+            sometasks = __import__(basename.replace(".py", "").replace("-", "_"))
+
+            log.debug(f"Including tasks from {filename}")
+            taskcli.include(sometasks)
+            tasks_found = True
+
+    if taskfiledev.should_include_taskfile_dev():
+        tasks_were_included = taskfiledev.include_tasks()
+        if tasks_were_included:
+            tasks_found = True
+
+    tasks: list[Task] = taskcli.get_runtime().tasks
     parser = build_parser(tasks)
 
     if "_ARGCOMPLETE" in os.environ:
@@ -61,9 +84,18 @@ def dispatch(argv: list[str] | None = None) -> Any:  # noqa: C901
     argconfig = parser.parse_args(argv)
     taskcli.get_runtime().parsed_args = argconfig
 
+    if argconfig.init:
+        create_tasks_file("tasks.py")
+        return
+
     if argconfig.version:
         print("version info...")  # noqa: T201
         sys.exit(0)
+
+    if not tasks_found:
+        print_task_not_found_error()
+        sys.exit(1)
+
     if argconfig.show_hidden:
         taskcli.config.show_hidden_tasks = True
         taskcli.config.show_hidden_groups = True
@@ -126,6 +158,26 @@ def dispatch(argv: list[str] | None = None) -> Any:  # noqa: C901
     return None
 
 
+def print_task_not_found_error() -> None:
+    """Print the error message when no tasks are found."""
+    # TODO, check upper dirs
+    print(  # noqa: T201
+        "taskcli: No tasks file found in current directory, "
+        f"looked for: {envvars.TASKCLI_TASKS_PY_FILENAMES.value}. "
+        f"Set the environment variable {envvars.TASKCLI_TASKS_PY_FILENAMES.name} to a comma separated "
+        "list of filename to change the "
+        "list of filenames to look for. See docs for details."
+    )
+    local_taskfile = taskfiledev.has_taskfile_dev()
+
+    if taskfiledev.has_taskfile_dev() and not taskfiledev.should_include_taskfile_dev():
+        print(  # noqa: T201
+            f"taskcli: Note: found a {local_taskfile} file. "
+            "See the docs on how to include and list its tasks automatically."
+        )
+    sys.exit(1)
+
+
 def _convert_types_from_str_to_function_type(param: Parameter, value: Any) -> Any:
     if param.type is int:
         value = int(value)
@@ -155,6 +207,24 @@ def print_listed_tasks(tasks: list[Task], verbose: int, ready_verbose: int) -> N
 
 
 ARG_NO_GO_TASK = "--no-go-task"
+DEFAULT_TASK_PY = envvars.TASKCLI_TASKS_PY_FILENAMES.value
+
+
+def build_initial_parser() -> argparse.ArgumentParser:
+    """Build the parser."""
+    root_parser = argparse.ArgumentParser(add_help=False)
+    _add_initial_tasks_to_parser(root_parser)
+    return root_parser
+
+
+def _add_initial_tasks_to_parser(parser: argparse.ArgumentParser) -> None:
+    parser.add_argument(
+        "-f",
+        "--file",
+        required=False,
+        default=DEFAULT_TASK_PY,
+        help=f"Which tasks file(s) to use, comma separate, first one found is used. default is '{DEFAULT_TASK_PY}'",
+    )
 
 
 def build_parser(tasks: list[Task]) -> argparse.ArgumentParser:
@@ -163,12 +233,17 @@ def build_parser(tasks: list[Task]) -> argparse.ArgumentParser:
 
     # Main parsers
     root_parser.add_argument("--version", action="store_true")
+    root_parser.add_argument("-v", "--verbose", action="store_true")
     root_parser.add_argument(
         "-r", "--ready", help="Show detailed info about task being ready", action="count", default=0
     )
     root_parser.add_argument(
         "-l", "--list", action="count", default=0, help="List tasks, use -ll and -lll for more info"
     )
+    root_parser.add_argument(
+        "--init", action="store_true", default=False, help="Create a new tasks.py file in the current directory"
+    )
+    _add_initial_tasks_to_parser(root_parser)
     root_parser.add_argument(
         "--examples", action="store_true", default=False, help="Show code examples of how to use taskcli."
     )

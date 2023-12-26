@@ -1,5 +1,7 @@
 #TODO:
 - [x] add `taskcli.extra_args` to get `-- args`
+- [x] add "-f" to specify the file
+- [ ] using -f to specify file in other dir still make taskfile be loaded locally
 - [ ] include
 - [ ] task script
 - [ ] show num of hidden groups

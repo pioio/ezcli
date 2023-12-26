@@ -109,13 +109,14 @@ def smart_task_lines(task: Task, verbose: int, env_verbose: int = 0) -> list[str
     name = task.name
     name = format_colors(task.name_format, name=name)
 
-    param_line_prefix = "  "
-    summary = task.get_summary_line()
-    aliases = ", ".join(task.aliases)
+    aliases = ",".join(task.aliases)
     aliases_color = configuration.colors.pink
     clear = configuration.colors.end
     if aliases:
-        summary = f"{aliases_color}({aliases}){clear} " + summary
+        name += f" {clear}{aliases_color}{aliases}{clear}"
+
+    param_line_prefix = "  "
+    summary = task.get_summary_line()
 
     max_left = taskcli.config.render_max_left_column_width
     if not summary:
