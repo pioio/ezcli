@@ -104,6 +104,7 @@ def list_tasks(tasks: list[Task], verbose: int, env_verbose: int = 0) -> list[st
         lines[0] = lines[0][1:]
 
     from . import parser
+
     final_line = []
     if num_hidden_groups or num_hidden_tasks:
         if num_hidden_groups:

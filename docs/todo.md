@@ -8,7 +8,7 @@
 - [ ] Make unit test use standard formatting for listing.
 - [ ] show again number of tasks in group (not shown now)
 - [ ] left-align first argument
-- [ ] show
+- [ ] show which group has hidden tasks
 - [ ] list hidden group in one line at the end
 - [ ] denote included tasks, somehow, e.g. with a star suffix, or "^ prefix in summary
 - [ ] if hidden tasks, print them at the end of task list? (3 hidden)
