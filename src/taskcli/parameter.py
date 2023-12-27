@@ -26,7 +26,11 @@ class Parameter:
     VAR_KEYWORD = inspect.Parameter.VAR_KEYWORD
 
     def has_supported_type(self) -> bool:
-        """Return True if the type of the parameter is supported by taskcli (in the context of adding it to argparse)."""
+        """Return True if the type of the parameter is supported by taskcli (in the context of adding it to argparse).
+
+        If param has unsupported type, but a default value, the task can be still be run,
+        but the parameter will not be added to argparse.
+        """
         if self.type is Parameter.Empty:
             # no type annotation, will assume it's a string
             return True

@@ -15,13 +15,22 @@ def assert_is_list_of(obj, typevar):
         assert isinstance(item, typevar)
 
 
-def test_1():
+def test_simple_task_is_called():
+    @task
+    def foo():
+        return "ok"
+
+    assert tools.include_task().dispatch() == "ok"
+
+
+def test_simple_task_raises_when_extra_args_specified():
     @task
     def foo():
         pass
 
-    tools.include_task().dispatch()
-    assert result == []
+    t = tools.include_task()
+    with pytest.raises(SystemExit, match="2"):
+        t.dispatch("some-arg")
 
 
 def test_positional_lists_default_in_annotation_does_not_require_passing_anything():
@@ -32,7 +41,7 @@ def test_positional_lists_default_in_annotation_does_not_require_passing_anythin
         return paths
 
     t = tools.include_task()
-    assert t.dispatch() == [".", "src"]
+    assert t.dispatch() == [".", "src"] # default value should be used
     assert t.dispatch(["path"]) == ["path"]
     assert t.dispatch(["1", "2"]) == ["1", "2"]
 
@@ -45,11 +54,11 @@ def test_positional_lists_with_default_in_signature_does_not_require_passing_any
         return paths
 
     t = tools.include_task()
-    assert t.dispatch() == [".", "src"]
+    assert t.dispatch() == [".", "src"]  # default value should be used
     assert t.dispatch(["path"]) == ["path"]
 
 
-def test_positional_list_with_no_defaults_requires_passing_at_least_one(capsys):
+def test_positional_list_with_no_defaults_requires_passing_at_least_one_arg(capsys):
     """The list has no default values, so providing at least one element is mandatory"""
     Paths = tt.arg(list[str])
 
@@ -132,7 +141,7 @@ def test_list_or_none(capsys):
 
 
 def test_list_int_or_none(capsys):
-    """The list has no default value, so providing at least one element is mandatory"""
+    """The list has no default value, so providing at least one element is mandatory."""
 
     @task
     def foo(paths:list[int]|None):
@@ -147,6 +156,31 @@ def test_list_int_or_none(capsys):
         t.dispatch()
 
     assert capsys.readouterr().err.endswith("error: the following arguments are required: paths\n")
+
+def test_list_int_or_none_default_none():
+    """The list has a default value, so providing at least one element is not mandatory."""
+
+    @task
+    def foo(paths:list[int]|None=None):
+        return paths
+
+    t = tools.include_task()
+
+    assert t.dispatch() is None
+    assert t.dispatch(["path"]) == ["path"]
+    assert t.dispatch(["path1", "path2", "path3", "path4"]) == ["path1", "path2", "path3", "path4"]
+
+def test_list_int_or_none_default_none_kw_arg():
+    """The list has a default value, so providing at least one element is not mandatory."""
+
+    @task
+    def foo(*, paths:list[int]|None=None):
+        return paths
+
+    t = tools.include_task()
+
+    assert t.dispatch() is None
+    assert t.dispatch(["--paths", "path"]) == ["path"]
 
 
 def test_list_simple(capsys):
@@ -202,3 +236,20 @@ def test_unsupported_param_types_with_defaults_work_but_emit_warning(capsys):
 
     hint = "Add `suppress_warnings=True`"
     assert hint in err
+
+
+
+def test_complex_argument_example():
+    Paths = tt.arg(list[str], default=[".", "src"])
+    Sizes = tt.arg(list[int])
+    @task
+    def foo(paths:Paths, *, kwpaths:Paths, kwsizes:Sizes=[1,2], force:bool=False):
+        return paths, kwpaths, kwsizes, force
+
+    t = tools.include_task()
+    paths, kwpaths, kwsizes, force = t.dispatch([ "--kwpaths", "foobar"])
+
+    assert paths == [".", "src"]
+    assert kwpaths == ["foobar"]
+    assert kwsizes == [1,2]
+    assert force == False

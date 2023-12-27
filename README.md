@@ -82,6 +82,8 @@ this can result in a lot of output
 
 - Integration with go-task (http://taskfile.dev).  If `TASKCLI_GOTASK_TASK_BINARY_FILEPATH` is set, any local Taskfile.yaml files are loaded automatically.
 
+- Support for exotic parameters types. Parameters with types which cannot be converted from argparse will be gracefully ignores (so long as they have a deafult value). Future work: support for custom conversion functions.
+
 ## Customisation
 `taskcli` comes with sane defaults out of the box, but it can be
 

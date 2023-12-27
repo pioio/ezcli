@@ -99,7 +99,6 @@ def _include_tasks_json(cmd: str, json_string: str, dir: str = ".") -> bool:
         desc = ""
         if "desc" in task:
             desc = task["desc"]
-        desc += f" (included from {go_task_project_name})"
 
         prefix = envvars.TASKCLI_GOTASK_TASK_NAME_PREFIX.value
         taskfiledev = envvars.TASKCLI_GOTASK_TASK_BINARY_FILEPATH.value

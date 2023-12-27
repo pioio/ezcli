@@ -357,6 +357,14 @@ def _convert_types_from_str_to_function_type(param: Parameter, value: Any) -> An
     elif param.is_union_list_none():
         if value is None:
             return None
+
+        # special case for test_list_int_or_none_default_none
+        # the type is 'param:list[int]|None=None', when no params are specieid argpasrse offers []
+        # But it makes sense to override this and return 'None' instead, as that's the default value specified
+        # by the user
+        if value == [] and param.has_default() and param.default is None:
+            return None
+
         return value
 
     elif param.type is float:

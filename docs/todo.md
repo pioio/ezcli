@@ -3,9 +3,10 @@ Required TODO:
 - [x] add "-f" to specify the file
 - [ ] add "--no-*" version of bool flags.
 - [ ] Fix lists
+- [ ] list[bool]  ? list[other-type]
 - [ ] tuples
-- [ ] list with no types
-- [ ] list|None
+- [x] list with no types
+- [x] list|None
 
 - [ ] Make unit test use standard formatting for listing.
 - [ ] show again number of tasks in group (not shown now)
