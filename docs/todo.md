@@ -2,8 +2,8 @@ Required TODO:
 - [x] add `taskcli.extra_args` to get `-- args`
 - [x] add "-f" to specify the file
 - [ ] add "--no-*" version of bool flags.
-- [ ] list[bool]  ? list[other-type]
-- [ ] tuples
+- [x] list[bool]  ? list[other-type]
+- [x] tuples
 - [x] list with no types
 - [x] list|None
 
