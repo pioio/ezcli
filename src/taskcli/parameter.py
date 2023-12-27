@@ -123,7 +123,13 @@ class Parameter:
             return True
 
         if self.is_list():
-            return True
+            type_of_list = self.get_list_type_args()
+            if type_of_list in [int, float, str]:
+                return True
+            elif type_of_list is None:
+                return True
+            else:
+                return False
 
         if self.type in [int, float, str, bool]:
             return True

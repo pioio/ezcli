@@ -221,8 +221,6 @@ def test_list_simple(capsys):
 
 
 
-
-
 def test_unsupported_param_types_with_no_defaults_cause_error(capsys):
     """The list has no default value, so providing at least one element is mandatory"""
 
@@ -257,6 +255,27 @@ def test_unsupported_param_types_with_defaults_work_but_emit_warning(capsys):
 
     hint = "Add `suppress_warnings=True`"
     assert hint in err
+
+
+# def test_unsupported_list_type(capsys):
+#     """The list has no default value, so providing at least one element is mandatory"""
+
+#     @task
+#     def foo(paths:list[bool]=[True]):
+#         return paths
+
+#     t = tools.include_task()
+
+
+#     assert t.dispatch() == [True]
+
+#     error = "Warning: Task 'foo' has a parameter 'paths' which has an unsupported"
+#     err =  capsys.readouterr().err
+#     assert error in  err
+
+#     hint = "Add `suppress_warnings=True`"
+#     assert hint in err
+
 
 
 
