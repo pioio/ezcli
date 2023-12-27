@@ -17,5 +17,7 @@ class TaskCLI:
         # Gets set right before dispatching the function
         self.parsed_args: argparse.Namespace | None = None
 
+        self.overview:str = ""
+
     # Any extra arguments passed to the script after a "--"
     # They can be retrieved later to easily inject them to commands being run.

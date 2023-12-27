@@ -2,9 +2,11 @@ Required TODO:
 - [x] add `taskcli.extra_args` to get `-- args`
 - [x] add "-f" to specify the file
 - [ ] add "--no-*" version of bool flags.
+
 - [ ] Make unit test use standard formatting for listing.
 - [ ] show again number of tasks in group (not shown now)
 - [ ] left-align first argument
+- [ ] add tests that invoke tasks with arguments
 - [ ] show which group has hidden tasks
 - [ ] list hidden group in one line at the end
 - [ ] denote included tasks, somehow, e.g. with a star suffix, or "^ prefix in summary
@@ -101,6 +103,7 @@ Features:
 
 
 # Later
+- [ ] tt.set_overview, this will require storing overview on per-module basis (or storing it only for current one), and loading
 - ability to customize the parser with custom flags
   - @task(customize_parser=lambda parser: parser.add_argument('--foo')
     then taskcli.get_args() would return the parsed argparse namespace
