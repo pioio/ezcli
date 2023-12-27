@@ -13,11 +13,12 @@ def create_tasks_file(filepath: str) -> None:
 
 
 content = """#!/usr/bin/env python
-from taskcli import task, tt
+from taskcli import task, run, tt
 
 @task
 def hello_world() -> None:
-    print("Hello, World!")
+    print("Hello, World! Today is:")
+    run("date")
 
 @task
 def say_hello(name:str, *, repeat:int=1) -> None:

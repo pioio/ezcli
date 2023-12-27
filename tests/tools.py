@@ -2,7 +2,7 @@
 import contextlib
 import os
 import sys
-
+import subprocess
 import pytest
 
 import taskcli
@@ -99,10 +99,12 @@ def _changed_config(fun, **kwargs):
         setattr(old_config, k, v)
 
 
-import subprocess
-def run_tasks(path: str) -> tuple[str, str]:
+
+
+def run_tasks(cmd: str) -> tuple[str, str]:
+    print(f"run_tasks: {cmd}")
     process = subprocess.Popen(
-        [path],
+        [cmd],
         env=os.environ,
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE,

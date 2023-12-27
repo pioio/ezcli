@@ -25,10 +25,17 @@ def print_err(text: str) -> None:
     print(text, file=sys.stderr, flush=True)  # noqa: T201
 
 
+def print_error(text: str) -> None:
+    """Print error to stderr."""
+    RED = configuration.colors.red
+    text = f"{RED}taskcli: Error: {text}{ENDC}"
+
+    print(text, file=sys.stderr, flush=True)  # noqa: T201
+
 def print_warning(text: str) -> None:
     """Print yellow text to stderr."""
     YELLOW = configuration.colors.yellow
-    text = f"{YELLOW}{text}{ENDC}"
+    text = f"{YELLOW}taskcli: Warning: {text}{ENDC}"
     print(text, file=sys.stderr, flush=True)  # noqa: T201
 
 

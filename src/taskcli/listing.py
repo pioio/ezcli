@@ -135,6 +135,9 @@ def smart_task_lines(task: Task, verbose: int, env_verbose: int = 0) -> list[str
     param_line_prefix = "  "
     summary = task.get_summary_line()
 
+    if not task.is_valid():
+        summary = "(DISABLED) " + summary
+
     max_left = taskcli.config.render_max_left_column_width
     if not summary:
         max_left_if_no_summary = 130

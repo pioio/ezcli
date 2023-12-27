@@ -7,6 +7,7 @@ from typing import Any
 
 import taskcli
 import taskcli.core
+from taskcli.task import UserError
 
 from . import configuration, envvars, examples, taskfiledev
 from .init import create_tasks_file
@@ -16,7 +17,7 @@ from .task import Task
 from .taskcli import TaskCLI
 from .types import AnyFunction
 from .utils import param_to_cli_option
-
+from . import utils
 """"
 TODO:
   auto-aliases for commands
@@ -43,10 +44,18 @@ def _extract_extra_args(argv: list[str], task_cli: TaskCLI) -> list[str]:
         return argv[:first_double_hyphen]
 
 
-def dispatch(argv: list[str] | None = None, tasks_found: bool = True) -> Any:  # noqa: C901
+def dispatch(argv: list[str] | None = None, tasks_found: bool = True) -> Any:
     """Dispatch the command line arguments to the correct function."""
     # Initial parser, only used to find the tasks file
+    try:
+        _dispatch_unsafe(argv, tasks_found)
+    except UserError as e:
+        utils.print_error(f"Error: {e}")
+        sys.exit(1)
 
+
+
+def _dispatch_unsafe(argv: list[str] | None = None, tasks_found: bool = True) -> Any:  # noqa: C901
     tasks: list[Task] = taskcli.core.get_runtime().tasks
     parser = build_parser(tasks)
 
@@ -92,6 +101,10 @@ def dispatch(argv: list[str] | None = None, tasks_found: bool = True) -> Any:  #
 
     def _dispatch(task: Task) -> Any:
         kwargs = {}
+        if not task.is_valid():
+            # They should have been printed already during loading of the file
+            msg = "Refusing to run task due to validation errors."
+            raise UserError(msg)
 
         for param in task.params:
             name = param.name
@@ -164,7 +177,8 @@ def _convert_types_from_str_to_function_type(param: Parameter, value: Any) -> An
     elif param.type is bool:
         # TODO
         msg = "Bool not implemented fully"
-        raise Exception(msg)
+    #    raise Exception(msg)
+
 
     elif param.type is float:
         value = float(value)

@@ -12,6 +12,11 @@ from .group import DEFAULT_GROUP, Group
 from .parameter import Parameter
 from .types import Any, AnyFunction
 
+class UserError(Exception):
+    """Print nice error to the user."""
+
+    pass
+
 
 def task(*args: Any, **kwargs: Any) -> AnyFunction:
     """Decorate a function as a task."""
@@ -85,6 +90,19 @@ class Task:
 
         if self not in self.group.tasks:
             self.group.tasks.append(self)
+
+        self.soft_validate_task()
+
+    def is_valid(self) -> bool:
+        """Return True if the task is valid."""
+        return get_validation_errors(self) is None
+
+    def soft_validate_task(self) -> None:
+        """Print a warning if the task is not valid, but don't fail."""
+        error = get_validation_errors(self)
+        if error is not None:
+            error += " Attempting to run this task fill fail."
+            utils.print_warning(error)
 
     def is_hidden(self) -> bool:
         """Return True if the task is hidden."""
@@ -253,3 +271,31 @@ def _get_wrapper(  # noqa: C901
         runtime.tasks.append(task)
 
     return wrapper_for_changing_directory
+
+
+# def validate_tasks(tasks:list[Task], fail=False) -> None:
+#     errors = []
+#     for task in tasks:
+#         err = get_validation_errors(task)
+#         if err is not None:
+#             errors.extend(err)
+
+#     if fail:
+#         for error in errors:
+#             utils.print_error(error)
+#         sys.exit(1)
+#     else:
+#         for error in errors:
+#             utils.print_error(error)
+
+
+def get_validation_errors(task:Task) -> str|None:
+    # validate params
+    for param in task.params:
+        if param.type == bool and param.kind not in [Parameter.KEYWORD_ONLY]:
+            msg = (f"Task '{task.name}' has a boolean parameter '{param.name}' which is not keyword-only. "
+            f"Either make the boolean parameter explicitly a keyword-only parameter by adding `*,` in the param list "
+            "anywhere before the bool parameter, or use a different type.")
+            return msg
+
+    return None
