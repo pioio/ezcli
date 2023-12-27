@@ -7,6 +7,7 @@ from .test_including import clean_stdout
 
 
 def test_init_new_file():
+    """Test that the file written with --init has a working format."""
     examples = taskcli.examples.get_examples()
 
     import os

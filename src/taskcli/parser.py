@@ -7,7 +7,7 @@ from typing import Any
 
 import taskcli
 
-from . import envvars, examples, taskfiledev
+from . import configuration, envvars, examples, taskfiledev
 from .init import create_tasks_file
 from .listing import list_tasks
 from .parameter import Parameter

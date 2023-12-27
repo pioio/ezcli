@@ -152,13 +152,29 @@ class Config:
 
 config = Config()
 
-if envvars.TASKCLI_ADV_OVERRIDE_FORMATTING.is_true():
+
+def apply_simple_formatting():
+    """Change the formatting to make the output simpler."""
     config.render_format_important_tasks = "{name}"
     config.render_task_name = "{name}"
     config.render_format_hidden_tasks = "{name}"
     config.render_format_not_ready = "{name}"
     config.render_format_included_taskfile_dev_task = "{name}"
-    config.render_format_of_group_name = "{name}"
+    config.render_format_of_group_name = "# {name}"
+
+
+def apply_simple_coded_formatting():
+    """Change the formatting to make the output simpler."""
+    config.render_format_important_tasks = "{name} IMPORTANT"
+    config.render_task_name = "{name}"
+    config.render_format_hidden_tasks = "{name} HIDDEN"
+    config.render_format_not_ready = "{name} NOT-READY"
+    config.render_format_included_taskfile_dev_task = "{name} FROM-TASKFILE"
+    config.render_format_of_group_name = "# {name}"
+
+
+if envvars.TASKCLI_ADV_OVERRIDE_FORMATTING.is_true():
+    apply_simple_formatting()
 
 
 def get_end_color() -> str:
