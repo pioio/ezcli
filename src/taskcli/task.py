@@ -1,5 +1,7 @@
+from dataclasses import dataclass
 import functools
 import inspect
+from logging import fatal
 import os
 import sys
 from typing import Callable, Iterable
@@ -67,6 +69,7 @@ class Task:
         format: str = "{name}",
         customize_parser: Callable[[Any], None] | None = None,
         is_go_task: bool = False,
+        suppress_warnings:bool = False
     ):
         """Create a new Task.
 
@@ -85,6 +88,7 @@ class Task:
         self.name_format = format
         self.customize_parser = customize_parser
         self.is_go_task: bool = is_go_task
+        self.suppress_warnings:bool = suppress_warnings
 
         self.group: Group = group or DEFAULT_GROUP
 
@@ -95,14 +99,24 @@ class Task:
 
     def is_valid(self) -> bool:
         """Return True if the task is valid."""
-        return get_validation_errors(self) is None
+        num_fatal_errors = len([err for err in get_validation_errors(self) if err.fatal])
+        return num_fatal_errors == 0
 
     def soft_validate_task(self) -> None:
-        """Print a warning if the task is not valid, but don't fail."""
-        error = get_validation_errors(self)
-        if error is not None:
-            error += " Attempting to run this task fill fail."
-            utils.print_warning(error)
+        """Print a warning if the task is not valid, but don't fail. a Pre-validation.
+
+        The idea here is that we don't want to prevent listing tasks due to issues with only one tasks.
+        That would be annoying. Instead, we want to print a warning, and then fail only
+        if the user tries to actually run the affected task.
+        """
+        if self.suppress_warnings:
+            return
+        errors = get_validation_errors(self)
+        for error in errors:
+            text = error.msg
+            if error.fatal:
+                text += " Attempting to run this task fill fail."
+            utils.print_warning(text)
 
     def is_hidden(self) -> bool:
         """Return True if the task is hidden."""
@@ -283,29 +297,34 @@ def _get_wrapper(  # noqa: C901
     return wrapper_for_changing_directory
 
 
-# def validate_tasks(tasks:list[Task], fail=False) -> None:
-#     errors = []
-#     for task in tasks:
-#         err = get_validation_errors(task)
-#         if err is not None:
-#             errors.extend(err)
+@dataclass
+class ValidationResult:
+    msg:str = ""
+    fatal:bool = False
 
-#     if fail:
-#         for error in errors:
-#             utils.print_error(error)
-#         sys.exit(1)
-#     else:
-#         for error in errors:
-#             utils.print_error(error)
-
-
-def get_validation_errors(task:Task) -> str|None:
+def get_validation_errors(task:Task) -> list[ValidationResult]:
     # validate params
+    out:list[ValidationResult] = []
+    suppress_hint = "Add `suppress_warnings=True` to the task decorator to suppress this warning."
     for param in task.params:
         if param.type == bool and param.kind not in [Parameter.KEYWORD_ONLY]:
             msg = (f"Task '{task.name}' has a boolean parameter '{param.name}' which is not keyword-only. "
+            "This is not supported. "
             f"Either make the boolean parameter explicitly a keyword-only parameter by adding `*,` in the param list "
-            "anywhere before the bool parameter, or use a different type.")
-            return msg
+            "anywhere before the bool parameter (e.g. def foobar(*, param:bool) ), or use a different type.")
+            out += [ValidationResult(msg, fatal=True)]
+        if not param.has_supported_type():
+            msg = f"Task '{task.name}' has a parameter '{param.name}' which has an unsupported type {param.type}. "
+            if param.has_default():
+                msg += ("It will not be possible to specify this parameter from the CLI. "
+                        "When invoking the task the param default value will be used.")
+                msg += " " + suppress_hint
+                fatal = False
+            else :
+                msg += "The parameter does not have a default value set, so taskcli cannot skip adding it to argparse."
+                msg += "Either add a default value to this parameter, or change the type to a supported type."
+                fatal = True
+            out += [ValidationResult(msg, fatal=fatal)]
 
-    return None
+
+    return out

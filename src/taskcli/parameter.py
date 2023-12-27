@@ -25,6 +25,23 @@ class Parameter:
     VAR_POSITIONAL = inspect.Parameter.VAR_POSITIONAL
     VAR_KEYWORD = inspect.Parameter.VAR_KEYWORD
 
+    def has_supported_type(self) -> bool:
+        """Return True if the type of the parameter is supported by taskcli (in the context of adding it to argparse)."""
+        if self.type is Parameter.Empty:
+            # no type annotation, will assume it's a string
+            return True
+
+        if self.is_union_list_none():
+            return True
+
+        if self.is_list():
+            return True
+
+        if self.type in [int, float, str, bool]:
+            return True
+
+        return False
+
     def is_union_list_none(self) -> bool:
         if self.type is inspect.Parameter.empty:
             return False

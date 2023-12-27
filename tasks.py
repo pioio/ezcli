@@ -122,6 +122,12 @@ with tt.Group("lint", desc="Code cleanup tasks") as x:
         path_txt = " ".join(paths)
         run(f"isort {path_txt} --float-to-top")
 
+    @task
+    def dicttest(paths: Paths):
+        """Reorder imports, float them to top."""
+        path_txt = " ".join(paths)
+        run(f"isort {path_txt} --float-to-top")
+
 
 @task
 def rufftwice():

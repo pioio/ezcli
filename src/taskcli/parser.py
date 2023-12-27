@@ -107,6 +107,10 @@ def _dispatch_unsafe(argv: list[str] | None = None, tasks_found: bool = True) ->
             raise UserError(msg)
 
         for param in task.params:
+            if not param.has_supported_type():
+                # Skip it
+                assert param.has_default(), f"Param {param.name} does not have a default, dispatch should have never been called"
+                continue
             name = param.name
             value = getattr(argconfig, name)
             value = _convert_types_from_str_to_function_type(param, value)
@@ -282,7 +286,6 @@ def build_parser(tasks: list[Task]) -> argparse.ArgumentParser:
 
 
 
-
 def _add_param_to_subparser(param: Parameter, subparser: argparse.ArgumentParser) -> None:
     args = param.get_argparse_names()
     kwargs: dict[str, Any] = {}
@@ -318,8 +321,14 @@ def _add_param_to_subparser(param: Parameter, subparser: argparse.ArgumentParser
             kwargs["default"] = param.default
         else:
             kwargs["nargs"] = "+"
-            #kwargs["default"] = None
-
+    elif param.type in [int, float, str]:
+        pass
+    elif param.type == taskcli.parameter.Parameter.Empty:
+        pass
+    else:
+        # Assuming here that error will be printed when we try to run the task
+        log.debug("Unsupported type %s, not adding to parser", param.type)
+        return
 
     if param.help:
         kwargs["help"] = param.help

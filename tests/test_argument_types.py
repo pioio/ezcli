@@ -110,6 +110,9 @@ def test_keyword_list_with_no_defaults_requires_passing_at_least_one_arg(capsys)
     assert capsys.readouterr().err.endswith("error: the following arguments are required: --paths\n")
 
 
+##########################################################################################
+# or none
+
 def test_list_or_none(capsys):
     """The list has no default value, so providing at least one element is mandatory"""
 
@@ -162,3 +165,40 @@ def test_list_simple(capsys):
         t.dispatch()
 
     assert capsys.readouterr().err.endswith("error: the following arguments are required: paths\n")
+
+
+
+def test_unsupported_param_types_with_no_defaults_cause_error(capsys):
+    """The list has no default value, so providing at least one element is mandatory"""
+
+    @task
+    def foo(paths:dict):
+        return paths
+
+    t = tools.include_task()
+
+    with pytest.raises(SystemExit, match="1"):
+        t.dispatch()
+
+    error = "The parameter does not have a default value set, so taskcli cannot skip adding it to argparse."
+    assert error in  capsys.readouterr().err
+
+
+def test_unsupported_param_types_with_defaults_work_but_emit_warning(capsys):
+    """The list has no default value, so providing at least one element is mandatory"""
+
+    @task
+    def foo(paths:dict={}):
+        return paths
+
+    t = tools.include_task()
+
+
+    assert t.dispatch() == {}
+
+    error = "Warning: Task 'foo' has a parameter 'paths' which has an unsupported"
+    err =  capsys.readouterr().err
+    assert error in  err
+
+    hint = "Add `suppress_warnings=True`"
+    assert hint in err
