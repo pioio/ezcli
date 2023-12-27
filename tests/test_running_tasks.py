@@ -47,6 +47,10 @@ def test_sort_important():
     ["task3", "arg1 --arg2=arg2", "arg1 arg2"],
     ["task4", "arg1 --arg2=444", "arg1 444"],
     ["task5", "4.4 --arg2=444", "4.4 444"],
+
+    ["task-list1-a", "--arg1 1 1", """[1.0, 1.0]"""],
+    ["task-list1-b", "1 1", """[1.0, 1.0]"""],
+
     ["task-bool1", "--arg1", "True"],
     ["task-bool2", "--arg1 --arg2 44", "True 44"],
     ["task-complex1", "11 --arg3 --arg4 44", "11 3.0 True 44"], # using optional positional arg

@@ -2,6 +2,7 @@ Required TODO:
 - [x] add `taskcli.extra_args` to get `-- args`
 - [x] add "-f" to specify the file
 - [ ] add "--no-*" version of bool flags.
+- [ ] Fix lists
 
 - [ ] Make unit test use standard formatting for listing.
 - [ ] show again number of tasks in group (not shown now)

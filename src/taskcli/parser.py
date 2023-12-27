@@ -172,13 +172,20 @@ def print_task_not_found_error() -> None:
 
 
 def _convert_types_from_str_to_function_type(param: Parameter, value: Any) -> Any:
+
     if param.type is int:
         value = int(value)
     elif param.type is bool:
         # TODO
         msg = "Bool not implemented fully"
     #    raise Exception(msg)
-
+    elif param.is_list():
+        out = []
+        for item in value:
+            thetype = param.get_list_type()
+            if thetype is not None:
+                out += [thetype(item)]
+        value = out
 
     elif param.type is float:
         value = float(value)
@@ -320,8 +327,16 @@ def _add_param_to_subparser(param: Parameter, subparser: argparse.ArgumentParser
         else:
             kwargs["action"] = "store_true"
 
+    if param.is_list():
+        #print(param.get_list_type())
+        kwargs["nargs"] = "*"
+        kwargs["default"] = None
+#        kwargs["action"] = "append"
+
     if param.help:
         kwargs["help"] = param.help
+
+
 
     subparser.add_argument(*args, **kwargs)
 

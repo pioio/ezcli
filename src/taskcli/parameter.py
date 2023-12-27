@@ -1,4 +1,5 @@
 import inspect
+from math import e
 from typing import Any, TypeVar
 
 from . import annotations
@@ -19,6 +20,16 @@ class Parameter:
     KEYWORD_ONLY = inspect.Parameter.KEYWORD_ONLY
     VAR_POSITIONAL = inspect.Parameter.VAR_POSITIONAL
     VAR_KEYWORD = inspect.Parameter.VAR_KEYWORD
+
+    def is_list(self) -> bool:
+        # TODO: improve this
+        return str(self.type).startswith("list")
+
+    def get_list_type(self) -> Any:
+        if self.type.__args__:
+            return self.type.__args__[0]
+        else:
+            None
 
     def __init__(self, param: inspect.Parameter):
         """Read the parameter and stores the information in this class for easier access."""

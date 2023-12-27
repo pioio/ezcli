@@ -33,6 +33,29 @@ def task5(arg1: float,*, arg2: int) -> None:
     assert isinstance(arg2, int)
     print(arg1, arg2)
 
+#######################################################################################################################
+# Lists
+@task
+def task_list1_a(*, arg1: list[float]=["foo"]) -> None: # positional list
+    #print(arg1)
+    assert isinstance(arg1, list), f"arg1 is not a list, but a {type(arg1)}"
+    for item in arg1:
+        assert isinstance(item, float), f"item is not a float, but a {type(item)}"
+
+    print(arg1)
+
+
+@task
+def task_list1_b(arg1: list[float]) -> None: # optional list
+    assert isinstance(arg1, list), f"arg1 is not a list, but a {type(arg1)}"
+    for item in arg1:
+        assert isinstance(item, float), f"item is not a float, but a {type(item)}"
+
+    print(arg1)
+
+
+########################################################################################################################
+# bools
 @task
 def task_bool1(*, arg1: bool) -> None:
     assert isinstance(arg1, bool)
