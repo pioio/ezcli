@@ -1,7 +1,6 @@
 """Various tools for unit tests."""
 import contextlib
 import os
-from sqlite3 import ProgrammingError
 import sys
 
 import pytest
@@ -45,11 +44,13 @@ def include_tasks() -> list[Task]:
     previous_frame = inspect.currentframe().f_back
     module_from_which_this_function_was_called = inspect.getmodule(previous_frame)
 
-    expected_fixture = reset_context_before_each_test.__name__
+    expected_fixture = "reset_context_before_each_test"
     if expected_fixture not in module_from_which_this_function_was_called.__dict__:
         msg = (f"The module which uses include_tasks() must also import {expected_fixture} "
             "to reset the list of tasks between each test.")
-        raise ProgrammingError(msg)
+        print("found: " + str(module_from_which_this_function_was_called.__dict__.keys()))
+        print(module_from_which_this_function_was_called.__name__)
+        raise Exception(msg)
 
     taskcli.include(module_from_which_this_function_was_called)
     return taskcli.core.get_runtime().tasks
