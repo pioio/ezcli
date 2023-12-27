@@ -9,7 +9,7 @@ sideeffect = 0
 
 
 def test_alphanumeric_order():
-    """Test by default important tasks come first, all within alphanumeric order."""
+    """Test that by default important tasks come first, all within alphanumeric order."""
 
     @task(hidden=True)
     def d_hidden2():
@@ -56,6 +56,10 @@ def test_list_everything_works(capsys):
 
     hidden_group = Group("hidden-group", hidden=True)
 
+    @task()
+    def not_hidden_task():
+        pass
+
     @task(hidden=True)
     def hidden_task():
         pass
@@ -75,6 +79,7 @@ def test_list_everything_works(capsys):
         stdout
         == """# default
 hidden-task
+not-hidden-task
 # hidden-group
 task-in-hidden-group
 """
