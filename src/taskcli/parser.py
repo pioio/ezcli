@@ -171,34 +171,6 @@ def print_task_not_found_error() -> None:
     sys.exit(1)
 
 
-def _convert_types_from_str_to_function_type(param: Parameter, value: Any) -> Any:
-
-    if param.type is int:
-        value = int(value)
-    elif param.type is bool:
-        # TODO
-        msg = "Bool not implemented fully"
-    #    raise Exception(msg)
-    elif param.is_list():
-        out = []
-        for item in value:
-            thetype = param.get_list_type()
-            if thetype is not None:
-                out += [thetype(item)]
-        value = out
-
-    elif param.type is float:
-        value = float(value)
-
-    # list of int
-    # > elif param.type is list:
-    # >     if hasattr(param.type, "__args__"):
-    # >         if param.type.__args__[0] is int:
-    # >             value = [int(x) for x in value]
-    # >         else:
-    # >             raise Exception(f"Type {param.type} not implemented")
-    return value
-
 
 def print_listed_tasks(tasks: list[Task], verbose: int, ready_verbose: int) -> None:
     """Print the listed tasks."""
@@ -309,6 +281,8 @@ def build_parser(tasks: list[Task]) -> argparse.ArgumentParser:
     return root_parser
 
 
+
+
 def _add_param_to_subparser(param: Parameter, subparser: argparse.ArgumentParser) -> None:
     args = param.get_argparse_names()
     kwargs: dict[str, Any] = {}
@@ -327,11 +301,12 @@ def _add_param_to_subparser(param: Parameter, subparser: argparse.ArgumentParser
         else:
             kwargs["action"] = "store_true"
 
+    ### print(param.name, param.type, param.is_list())
     if param.is_list():
-        #print(param.get_list_type())
         kwargs["nargs"] = "*"
         kwargs["default"] = None
-#        kwargs["action"] = "append"
+        if param.default is not Parameter.Empty:
+            kwargs["default"] = param.default
 
     if param.help:
         kwargs["help"] = param.help
@@ -339,6 +314,37 @@ def _add_param_to_subparser(param: Parameter, subparser: argparse.ArgumentParser
 
 
     subparser.add_argument(*args, **kwargs)
+
+
+def _convert_types_from_str_to_function_type(param: Parameter, value: Any) -> Any:
+
+    if param.type is int:
+        value = int(value)
+    elif param.type is bool:
+        # TODO
+        pass
+
+    elif param.is_list():
+        out = []
+        for item in value:
+            thetype = param.get_list_type()
+            if thetype is not None:
+                out += [thetype(item)]
+            else:
+                out += [item]
+        value = out
+
+    elif param.type is float:
+        value = float(value)
+
+    # list of int
+    # > elif param.type is list:
+    # >     if hasattr(param.type, "__args__"):
+    # >         if param.type.__args__[0] is int:
+    # >             value = [int(x) for x in value]
+    # >         else:
+    # >             raise Exception(f"Type {param.type} not implemented")
+    return value
 
 
 def _build_parser_name(param: inspect.Parameter) -> str:

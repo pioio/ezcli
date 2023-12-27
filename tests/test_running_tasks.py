@@ -49,8 +49,12 @@ def test_sort_important():
     ["task5", "4.4 --arg2=444", "4.4 444"],
 
     ["task-list1-a", "--arg1 1 1", """[1.0, 1.0]"""],
+    ["task-list1-a-default", "", """[1.0]"""], # should also be converted from 1 to 1.0
+
     ["task-list1-b", "1 1", """[1.0, 1.0]"""],
+    ["task-list1-b-default", "", """[444.0]"""],
     ["task-list1-c", "1 xx", """['1', 'xx']"""],
+    ["task-list1-c-default", "", """['def1', 'def2']"""], # should use default value
 
     ["task-bool1", "--arg1", "True"],
     ["task-bool2", "--arg1 --arg2 44", "True 44"],

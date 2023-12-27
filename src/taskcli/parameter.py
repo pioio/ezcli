@@ -23,10 +23,16 @@ class Parameter:
 
     def is_list(self) -> bool:
         # TODO: improve this
-        return str(self.type).startswith("list")
+        if isinstance(self.type, list): # ??? not needed?
+            return True
+        if self.type is list: # for    'foo: list'
+            return True
+        if str(self.type).startswith("list["):  # for   'foo: list'
+            return True
+        return False
 
     def get_list_type(self) -> Any:
-        if self.type.__args__:
+        if str(self.type).startswith("list[") and self.type.__args__:
             return self.type.__args__[0]
         else:
             None
