@@ -6,6 +6,7 @@ import sys
 from typing import Any
 
 import taskcli
+import taskcli.core
 
 from . import configuration, envvars, examples, taskfiledev
 from .init import create_tasks_file
@@ -46,7 +47,7 @@ def dispatch(argv: list[str] | None = None, tasks_found: bool = True) -> Any:  #
     """Dispatch the command line arguments to the correct function."""
     # Initial parser, only used to find the tasks file
 
-    tasks: list[Task] = taskcli.get_runtime().tasks
+    tasks: list[Task] = taskcli.core.get_runtime().tasks
     parser = build_parser(tasks)
 
     if "_ARGCOMPLETE" in os.environ:
@@ -58,10 +59,10 @@ def dispatch(argv: list[str] | None = None, tasks_found: bool = True) -> Any:  #
 
     argv = argv or sys.argv[1:]
 
-    argv = _extract_extra_args(argv, taskcli.get_runtime())
+    argv = _extract_extra_args(argv, taskcli.core.get_runtime())
 
     argconfig = parser.parse_args(argv)
-    taskcli.get_runtime().parsed_args = argconfig
+    taskcli.core.get_runtime().parsed_args = argconfig
 
     if argconfig.init:
         create_tasks_file("tasks.py")

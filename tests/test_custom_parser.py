@@ -3,8 +3,9 @@ import sys
 
 import taskcli
 from taskcli import Task, task
+import taskcli.core
 
-from .utils import include_tasks, reset_context_before_each_test
+from .tools import include_tasks, reset_context_before_each_test
 
 sideeffect = 0
 
@@ -23,7 +24,7 @@ def test_parser_customization():
     def run():
         """Run the taskcli."""
 
-        parsed_args = taskcli.get_runtime().parsed_args
+        parsed_args = taskcli.core.get_runtime().parsed_args
         assert parsed_args is not None
         assert hasattr(parsed_args, "custom_arg")
         assert parsed_args.custom_arg == "999"

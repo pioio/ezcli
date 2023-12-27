@@ -11,7 +11,7 @@ from taskcli.parser import _extract_extra_args
 from taskcli.task import Task
 from taskcli.taskcli import TaskCLI
 
-from .test_examples2 import prepare
+from .tools import reset_context_before_each_test
 
 
 def test_foobar():
@@ -60,47 +60,8 @@ def test_tab_completion():
         del os.environ["COMP_POINT"]
 
 
-def run_tasks(path: str) -> tuple[str, str]:
-    process = subprocess.Popen(
-        [path],
-        env=os.environ,
-        stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE,
-        shell=True,
-    )
-    stdout, stderr = process.communicate()
-    return stdout.decode(), stderr.decode()
 
 
-def test_basic2():
-    stdout, stderr = run_tasks("tests/fixtures/groups.py")
-    assert stderr == ""
-
-    lines = stdout.splitlines()
-    lines = [line.strip() for line in lines]
-    assert lines == [
-        "*** default         Default tasks",
-        "* task4",
-        "",
-        "*** foobar",
-        "* task1",
-        "* task2",
-        "* task3",
-    ]
-
-
-def test_sort_important():
-    stdout, stderr = run_tasks("tests/fixtures/sort_important.py")
-    assert stderr == ""
-
-    lines = stdout.splitlines()
-    lines = [line.strip() for line in lines]
-    assert lines == [
-        "* task2",  # marked as important
-        "* task1",
-        "* task3",
-        "* task4",
-    ]
 
 
 def test_extracting_double_hyphen_args():

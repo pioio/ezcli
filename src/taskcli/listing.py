@@ -2,6 +2,7 @@ import inspect
 from typing import Any, final
 
 import taskcli
+import taskcli.core
 
 from . import configuration, utils
 from .configuration import config
@@ -70,12 +71,12 @@ def list_tasks(tasks: list[Task], verbose: int, env_verbose: int = 0) -> list[st
     # first, prepare rows, row can how more than one line
     lines: list[str] = []
 
-    num_visible_groups = len([group.name for group in groups if group.name not in taskcli.get_runtime().hidden_groups])
+    num_visible_groups = len([group.name for group in groups if group.name not in taskcli.core.get_runtime().hidden_groups])
 
     num_hidden_groups = 0
     num_hidden_tasks = 0
     for group in groups:
-        GROUP_IS_HIDDEN = group.hidden or group.name in taskcli.get_runtime().hidden_groups
+        GROUP_IS_HIDDEN = group.hidden or group.name in taskcli.core.get_runtime().hidden_groups
 
         if not show_hidden_groups and GROUP_IS_HIDDEN:
             num_hidden_groups += 1

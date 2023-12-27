@@ -6,7 +6,7 @@ import pytest
 import taskcli
 from taskcli import Task, task
 
-from .utils import include_tasks, reset_context_before_each_test
+from .tools import include_tasks, reset_context_before_each_test
 
 
 def test_print_return_value(capsys):

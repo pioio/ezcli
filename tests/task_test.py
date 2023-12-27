@@ -1,7 +1,8 @@
 import taskcli
 from taskcli import Group, Task, task
+import taskcli.core
 
-from .utils import reset_context_before_each_test
+from .tools import reset_context_before_each_test
 
 
 def include_tasks() -> list[Task]:
@@ -9,7 +10,7 @@ def include_tasks() -> list[Task]:
     import sys
 
     taskcli.include(sys.modules[__name__])
-    return taskcli.get_runtime().tasks
+    return taskcli.core.get_runtime().tasks
 
 
 def test_copy():

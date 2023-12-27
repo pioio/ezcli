@@ -1,9 +1,9 @@
 import taskcli
 from taskcli import Group, Task, task
 
-from . import utils
+from . import tools
 from .test_including import clean_stdout
-from .utils import include_tasks, reset_context_before_each_test
+from .tools import include_tasks, reset_context_before_each_test
 
 sideeffect = 0
 
@@ -37,7 +37,7 @@ def test_alphanumeric_order():
 
     tasks = include_tasks()
     show_hidden_tasks = 3
-    with utils.simple_list_format():
+    with tools.simple_list_format():
         lines = taskcli.listing.list_tasks(tasks, verbose=show_hidden_tasks)
     linestxt = "\n".join(lines)
     assert (
@@ -68,9 +68,9 @@ def test_list_everything_works(capsys):
     def task_in_hidden_group():
         pass
 
-    tasks = include_tasks()
+    include_tasks()
 
-    with utils.simple_list_format():
+    with tools.simple_list_format():
         taskcli.dispatch(["-L"])
 
     stdout = capsys.readouterr().out

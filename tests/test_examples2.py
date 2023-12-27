@@ -13,23 +13,19 @@ import pytest
 
 import taskcli
 from taskcli import Group, arg, task
+import taskcli.core
 from taskcli.listing import list_tasks
 from taskcli.task import Task
 
 this_module = sys.modules[__name__]
 
-
-@pytest.fixture(autouse=True)
-def prepare() -> None:
-    taskcli.utils.reset_tasks()
-
-    return None
+from .tools import reset_context_before_each_test
 
 
 def include_tasks() -> list[Task]:
     """Goes through the usual process of including tasks."""
     taskcli.include(this_module)
-    return taskcli.get_runtime().tasks
+    return taskcli.core.get_runtime().tasks
 
 
 def test_basic():
