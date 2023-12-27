@@ -20,13 +20,14 @@ def test_groups_basic():
     tasks = tools.include_tasks()
     assert tasks[0].group.name == "default"
     assert tasks[1].group.name == "magical tasks"
-    lines = list_tasks(tasks, verbose=0)
 
-    assert """*** default         Default tasks
-* foobar1
+    with tools.simple_list_format():
+        lines = list_tasks(tasks, verbose=0)
 
-*** magical tasks
-* magic""" in "\n".join(lines)
+    assert """# default
+foobar1
+# magical tasks
+magic""" in "\n".join(lines)
 
 
 

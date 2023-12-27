@@ -5,6 +5,7 @@ import taskcli
 from taskcli import Task, dispatch, include, task
 
 from .tools import reset_context_before_each_test, run_tasks
+from tests import tools
 
 
 def test_get_taskfile_dir():
@@ -25,16 +26,17 @@ def clean_stdout(stdout):
 
 
 def test_include_basic():
-    stdout, _ = run_tasks("tests/includetest1/parent_test_1.py")
+    with tools.simple_list_format():
+        stdout, _ = run_tasks("tests/includetest1/parent_test_1.py")
     stdout = clean_stdout(stdout)
 
     assert (
         stdout
-        == """* child1
-* child1-via-parent
-* child2
-* child2-via-parent
-* parent"""
+        == """child1
+child1-via-parent
+child2
+child2-via-parent
+parent"""
     )
 
 
@@ -87,9 +89,10 @@ def test_include_cwd_change_child2_via_parent():
 ########################################################################################################################
 def test_include_from_subsubdir_works():
     """Test that including a task from a sub-subdir, which is not a python module, works."""
-    stdout, _ = run_tasks("tests/includetest1/parent_test_2.py")
+    with tools.simple_list_format():
+        stdout, _ = run_tasks("tests/includetest1/parent_test_2.py")
 
-    assert stdout.strip() == """* subsubchild"""
+    assert stdout.strip() == """subsubchild"""
 
 
 def test_including_not_decorated_function():

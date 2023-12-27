@@ -77,11 +77,11 @@ class Config:
     render_format_not_ready: str = "{red}* {green}{name}{clear}"
     render_format_included_taskfile_dev_task: str = "{blue}* {green}{name}{clear}"
 
-    # render_format_important_tasks: str = "{green}{underline}{name}{clear}"
-    # render_task_name: str = "{green}{name}{clear}"
-    # render_format_hidden_tasks: str = "{dark_gray}{name}{clear}"
-    # render_format_not_ready: str = "{green}{name}{clear}"
-    # render_format_included_taskfile_dev_task: str = "{green}{name}{clear}"
+    render_format_important_tasks: str = "{green}{underline}{name}{clear}"
+    render_task_name: str = "{green}{name}{clear}"
+    render_format_hidden_tasks: str = "{dark_gray}{name}{clear}"
+    render_format_not_ready: str = "{green}{name}{clear}"
+    render_format_included_taskfile_dev_task: str = "{green}{name}{clear}"
 
     # Always show these args in the task list, even if they are optional
     render_always_show_args: list[str] = dataclasses.field(default_factory=list)
@@ -96,7 +96,7 @@ class Config:
 
     # Prefix with "\n" to separate group names with a newline
     # use {NAME} instead of {name} to print group name in uppercase
-    render_format_of_group_name: str = "\n{white}{underline}{white}*** {name:<14}  {white}{desc:<60}{clear}"
+    render_format_of_group_name: str = "\n{white}{underline}{white}{name:<22}{white}{desc:<40}{clear}"
     # Some other example
     # >    render_format_of_group_name: str = "==================================================\n{white}{blue}> {NAME} ({num_tasks}) {desc}"  # uppercase group name # noqa: E501
 
