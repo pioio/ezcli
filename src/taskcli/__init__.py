@@ -2,47 +2,26 @@
 from typing import Annotated, Any, Iterable, Sequence, TypeVar
 
 import taskcli
+import taskcli.core
 
 from . import configuration, examples, listing, utils
 from .annotations import Arg
+from .arg import arg
 from .configuration import config
-from .core import extra_args, extra_args_list, include
+from .core import get_extra_args, get_extra_args_list, include
 from .group import Group
 from .parameter import Parameter
 from .parser import dispatch
 from .runcommand import run
 from .task import Task, task
-from .utils import get_runtime
+from .core import get_runtime
 
 from typing import Annotated as ann  # noqa: N813 # isort: skip
 
 
 def hide_group(group: str) -> None:
     """Hide a group from the help message."""
-    utils.get_runtime().hidden_groups.append(group)
-
-
-T = TypeVar("T")
-
-
-def arg(
-    typevar: T,
-    help: str | None = None,
-    /,
-    # Specific to taskcli
-    important: bool = False,
-    # forwarded to argparse
-    action: str | None = None,
-    choices: Iterable[Any] | None = None,
-    metavar: str | None = None,
-    nargs: str | int | None = None,
-    default: Any = Parameter.Empty,
-) -> Annotated[T, str, Arg]:
-    kwargs = locals()
-
-    del kwargs["help"]
-    del kwargs["typevar"]
-    return Annotated[typevar, help, Arg(**kwargs)]  # type: ignore # noqa: PGH003
+    taskcli.core.get_runtime().hidden_groups.append(group)
 
 
 __all__: Sequence[str] = [
@@ -51,8 +30,8 @@ __all__: Sequence[str] = [
     "utils",
     "configuration",
     "config",
-    "extra_args",
-    "extra_args_list",
+    "get_extra_args",
+    "get_extra_args_list",
     "Arg",
     "ann",
     "get_runtime",
@@ -62,4 +41,5 @@ __all__: Sequence[str] = [
     "Group",
     "Task",
     "run",
+    "tt",
 ]

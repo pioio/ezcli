@@ -4,6 +4,8 @@ import os
 import sys
 from typing import Callable, Iterable
 
+import taskcli.core
+
 from . import utils
 from .configuration import config
 from .group import DEFAULT_GROUP, Group
@@ -247,7 +249,7 @@ def _get_wrapper(  # noqa: C901
     if module_which_defines_task_name == "__main__":
         # Auto-include to the runtime if the module defining the tasks is the one we started (./tasks.py)
         # everything else needs to be explicitly included
-        runtime = utils.get_runtime()
+        runtime = taskcli.core.get_runtime()
         runtime.tasks.append(task)
 
     return wrapper_for_changing_directory

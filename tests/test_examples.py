@@ -5,6 +5,10 @@ import taskcli
 
 
 def test_all_example():
+    """Test that examples listed with --examples do not have any obvious typos/errors in them.
+
+    This does NOT test if the examples actually do what they promised.
+    """
     examples = taskcli.examples.get_examples()
 
     for example in examples:

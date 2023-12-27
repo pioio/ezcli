@@ -6,12 +6,11 @@ import typing
 
 import taskcli
 
+
 from . import configuration
 
-if typing.TYPE_CHECKING:
-    from taskcli.taskcli import TaskCLI
 
-    from .task import Task
+
 
 
 ENDC = configuration.get_end_color()
@@ -62,7 +61,8 @@ def param_to_cli_option(arg: str) -> str:
 def reset_tasks() -> None:
     """Clear the list of tasks."""
     # clear included tasks
-    taskcli.utils.get_runtime().tasks = []
+    from . import core
+    core.get_runtime().tasks = []
     taskcli.group.DEFAULT_GROUP.tasks = []
     taskcli.group.created.clear()
 
@@ -72,19 +72,9 @@ def reset_tasks() -> None:
             module.decorated_functions = []  # type: ignore[attr-defined]
 
 
-def get_tasks() -> list["Task"]:
-    """Return the list of tasks."""
-    return taskcli.utils.get_runtime().tasks
-
-
 def get_root_module() -> str:
     """Return the name of the module of the runtime."""
     return sys.modules["__main__"].__name__
-
-
-def get_runtime() -> "TaskCLI":
-    """Return the TaskCLI runtime."""
-    return taskcli.core.task_cli
 
 
 def some_test_function(a: int, b: int) -> None:

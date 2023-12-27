@@ -17,7 +17,7 @@ def customize_parser(parser):
 
 
 def test_parser_customization():
-    """Test customizing the parser."""
+    """Test customizing the argparse parser."""
 
     @task(customize_parser=customize_parser)
     def run():

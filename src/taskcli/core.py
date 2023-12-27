@@ -5,87 +5,49 @@ import os
 import sys
 
 import taskcli
+import argparse
 
+from .task import Task
 from .group import Group
 from .task import Task, task
 from .taskcli import TaskCLI
 from .types import Any, AnyFunction, Module
+from .include import include_module, include_function
 
 task_cli = TaskCLI()
 
 
-def extra_args() -> str:
-    """Get args passed to the script after "--".  See also extra_args_list()."""
-    return " ".join(extra_args_list())
+def get_extra_args() -> str:
+    """Get args passed to the script after "--". Returns a string. See also extra_args_list()."""
+    return " ".join(get_extra_args_list())
 
 
-def extra_args_list() -> list[str]:
-    """Get args passed to the script after "--".  See also extra_args()."""
+def get_extra_args_list() -> list[str]:
+    """Get args passed to the script after "--". Returns a list of string. See also extra_args()."""
     return task_cli.extra_args_list
 
 
-def include(module: Module | AnyFunction, **kwargs: Any) -> None:
-    """Iterate over decorated @task functions in the module."""
-    if isinstance(module, Module):
-        if not hasattr(module, "decorated_functions"):
-            module.decorated_functions = []  # type: ignore[attr-defined]
-
-        for decorated_fun in module.decorated_functions:
-            assert isinstance(decorated_fun, Task), f"Expected Task, got {type(decorated_fun)}"
-            runtime = taskcli.get_runtime()
-            runtime.tasks.append(decorated_fun)
-    elif inspect.isfunction(module):
-        fun = module
-
-        module_of_fun = sys.modules[fun.__module__]
-        if not hasattr(module_of_fun, "decorated_functions"):
-            module_of_fun.decorated_functions = []  # type: ignore[attr-defined]
-
-        found = False
-        for atask in module_of_fun.decorated_functions:
-            if atask.func == fun:
-                found = True
-                break
-        if not found:
-            # function has not been decorated with @task yet, decore it, so that we can include it
-            task(fun, **kwargs)
-        thetask = module_of_fun.decorated_functions[-1]
-
-        runtime = taskcli.get_runtime()
-        runtime.tasks.append(thetask)
-        return
+def get_parsed_args() -> argparse.Namespace:
+    """Get the result of 'parse_args()' of argparse. Useful for accessing custom arguments if parser was modified."""
+    if task_cli.parsed_args is None:
+        msg = "Parsed args are available yet. You might be calling this function too early. Did you call dispatch()?"
+        raise RuntimeError(msg)
+    return task_cli.parsed_args
 
 
-def includeold(module: Module, change_dir: bool = True, cwd: str = "") -> None:
-    """Iterate over functions, functions with decorate @task should be."""
+def include(object: Module | AnyFunction, **kwargs: Any) -> None:
+    """Include tasks from the specified object."""
+    if isinstance(object, Module):
+        include_module(object, **kwargs)
+    elif inspect.isfunction(object):
+        include_function(object, **kwargs)
 
-    def change_working_directory(func: AnyFunction, new_cwd: str) -> Any:
-        """Change working directory to the directory of the module which defines the task, and then change back.
 
-        A decorator.
-        TODO: assign to each task during task creation, not only included tasks.
-        """
+def get_runtime() -> "TaskCLI":
+    """Return the TaskCLI runtime. It contains the context of the current execution."""
+    return taskcli.core.task_cli
 
-        @functools.wraps(func)
-        def wrapper(*args: Any, **kwargs: Any) -> Any:
-            cwd = os.getcwd()
-            os.chdir(new_cwd)
-            try:
-                return func(*args, **kwargs)
-            finally:
-                os.chdir(cwd)
 
-        return wrapper
-
-    for decorated_fun in module.decorated_functions:
-        assert isinstance(decorated_fun, Task), f"Expected DecoratedFunction, got {type(decorated_fun)}"
-        # Decorate with CWD change
-        if change_dir or cwd:
-            if not cwd:
-                module_which_defines_task_name = decorated_fun.func.__module__
-                module_which_defines_task = sys.modules[module_which_defines_task_name]
-                cwd = os.path.dirname(inspect.getfile(module_which_defines_task))
-            decorated_fun.func = change_working_directory(decorated_fun.func, new_cwd=cwd)
-
-        runtime = taskcli.get_runtime()
-        runtime.tasks.append(decorated_fun)
+def get_tasks() -> list["Task"]:
+    """Return the list of all included (known) tasks."""
+    return get_runtime().tasks

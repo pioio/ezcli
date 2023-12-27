@@ -5,21 +5,19 @@ import inspect
 import sys
 from typing import Annotated, Type, TypeVar
 
-import taskcli
 import testing
 from run import run
-from taskcli import Arg, Group, ann, arg, include, task
+from taskcli import run, task, tt
 from tests.includetest2.subdir.subsubdir import tasks as subsubtasks
 
-important = Group("Important", desc="Development tasks")
+important = tt.Group("Important", desc="Development tasks")
 
 
-with Group("dev", desc="Development tasks"):
-
+with tt.Group("dev", desc="Development tasks"):
     @task(aliases="t", env=["FOOBAR"])
     def test():
         """Run unit tests."""
-        run(f"pytest tests/ -vvv {taskcli.extra_args()}")
+        run(f"pytest tests/ -vvv {tt.get_extra_args()}")
 
     @task(important=True, format="{name} {clear}{red}(PROD!)")
     def nox():
@@ -48,11 +46,11 @@ with Group("dev", desc="Development tasks"):
 
 
 # TODO: instead of important, use a not-important, and hide them explicitly instead
-Paths = arg(list[str], "The paths to lint", default=["src", "tests", "tasks.py"], important=True)
+Paths = tt.arg(list[str], "The paths to lint", default=["src", "tests", "tasks.py"], important=True)
 
 
-with Group("Testing module"):
-    taskcli.include(testing)
+with tt.Group("Testing module"):
+    tt.include(testing)
 
     @task
     def testing_foobar() -> int:
@@ -66,14 +64,14 @@ with Group("Testing module"):
         print("cwd:", os.getcwd())
 
 
-with Group("Hidden Group", hidden=True):
+with tt.Group("Hidden Group", hidden=True):
 
     @task
     def task_in_hidden_group():
         print("hello")
 
 
-with Group("Hidden Group2", hidden=True):
+with tt.Group("Hidden Group2", hidden=True):
 
     @task
     def run_hidden():
@@ -88,15 +86,11 @@ DEFAULT_LINT_PATH = "src/"
 # >  include(xxx)
 
 
-for _, fun in inspect.getmembers(taskcli.utils, inspect.isfunction):
-    include(fun)
-
-
 def _get_lint_paths():
-    return taskcli.extra_args() or "src/"
+    return tt.get_extra_args() or "src/"
 
 
-with Group("lint", desc="Code cleanup tasks") as x:
+with tt.Group("lint", desc="Code cleanup tasks") as x:
 
     @task(aliases="r")
     def ruff(paths: Paths, example_arg: str = "foobar", example_arg2: str = "foobar"):
@@ -135,7 +129,7 @@ def rufftwice():
     ruff()
 
 
-include(subsubtasks)
+tt.include(subsubtasks)
 
 
 @task
@@ -155,4 +149,4 @@ def pc():
 
 
 if __name__ == "__main__":
-    taskcli.dispatch()
+    tt.dispatch()

@@ -5,6 +5,7 @@ import pytest
 
 import taskcli
 from taskcli import dispatch, task
+import taskcli.core
 from taskcli.group import Group
 from taskcli.parser import _extract_extra_args
 from taskcli.task import Task
@@ -110,8 +111,8 @@ def test_extracting_double_hyphen_args():
     assert task_cli.extra_args_list == ["--baz", "--bar"]
 
     taskcli.core.task_cli = task_cli
-    assert taskcli.extra_args_list() == ["--baz", "--bar"]
-    assert taskcli.extra_args() == "--baz --bar"
+    assert taskcli.get_extra_args_list() == ["--baz", "--bar"]
+    assert taskcli.get_extra_args() == "--baz --bar"
 
 
 def test_create_groups():
@@ -138,7 +139,7 @@ def include_tasks() -> list[Task]:
 
     this_module = sys.modules[__name__]
     taskcli.include(this_module)
-    return taskcli.get_runtime().tasks
+    return taskcli.core.get_runtime().tasks
 
 
 @pytest.mark.parametrize("value", ["1", "-12", "0", "-0"])
