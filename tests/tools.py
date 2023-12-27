@@ -28,19 +28,26 @@ def reset_context_before_each_test() -> None:
 # Other
 
 def include_tasks() -> list[Task]:
-    """Goes through the usual process of including tasks. Includes the tasks from the module from which it was called.
+    """Include the tasks from the current module, and return them. Use alongside reset_context_before_each_test .
 
     This function must be called directly from the module from which we want to include the tasks.
     As it includes the modules from one stack frame up.
 
-    The module which uses this function should also import reset_context_before_each_test
-    so that the tasks are reset before each test.
+    The module which uses this function MUST also import reset_context_before_each_test
+    so that the tasks are reset before each test. Otherwise rerunning this function will just keep addings tasks,
+    breaking unit tests.
     """
 
     import inspect
 
+
     previous_frame = inspect.currentframe().f_back
     module_from_which_this_function_was_called = inspect.getmodule(previous_frame)
+
+    assert "reset_context_before_each_test" in module_from_which_this_function_was_called.__dict__, (
+        "The module which uses include_tasks() must also import reset_context_before_each_test "
+        "to reset the list of tasks between each test."
+    )
 
     taskcli.include(module_from_which_this_function_was_called)
     return taskcli.core.get_runtime().tasks

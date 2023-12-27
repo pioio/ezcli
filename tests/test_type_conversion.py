@@ -65,5 +65,5 @@ def test_conversion_to_bool_works():
     def foo(a: bool):
         assert isinstance(a, bool)
 
-    include_tasks()
+    tools.include_tasks()
     dispatch(["foo", "true"])
