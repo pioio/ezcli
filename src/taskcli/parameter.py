@@ -101,7 +101,7 @@ class Parameter:
     def get_argparse_names(self) -> list[str]:
         """Return the names for argparse, in order of precedence."""
         # TODO: return single flag params also
-        if self.kind == inspect.Parameter.POSITIONAL_OR_KEYWORD:
+        if self.is_positional():
             name = self.name.replace("_", "-")
         else:
             name = param_to_cli_option(self.name)

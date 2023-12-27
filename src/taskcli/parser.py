@@ -300,6 +300,9 @@ def _add_param_to_subparser(param: Parameter, subparser: argparse.ArgumentParser
             kwargs["nargs"] = "?"
 
     if param.type is bool:
+
+
+
         if param.has_default():
             if param.default:
                 kwargs["action"] = "store_false"
