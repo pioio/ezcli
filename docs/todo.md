@@ -34,6 +34,9 @@
 - [ ] allow one task to be in more than one group?
 - [ ] allow certain tasks in group to not be namespaced?
 - [ ] Make sure importing a module does not add its tasks to the global default group by default
+- [ ] Tags
+  - [ ] auto add tags based on argument nam or task regex, or envvars
+  - [ ] decorate tags based on tags
 - [ ]
   - [ ] per module task list
   - [ ] include(child_tasks.child1)
