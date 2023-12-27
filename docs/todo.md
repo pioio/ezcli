@@ -1,9 +1,7 @@
-#TODO:
+Required TODO:
 - [x] add `taskcli.extra_args` to get `-- args`
 - [x] add "-f" to specify the file
-- [ ] show by tag
-- [ ] a single line listing all hidden tasks and hidden groups, and tasks in hidden groups, and -H
-- [ ] add TASKCLI_SIMPLE_FORMATTING=1
+- [ ] add "--no-*" version of bool flags.
 - [ ] Make unit test use standard formatting for listing.
 - [ ] show again number of tasks in group (not shown now)
 - [ ] left-align first argument
@@ -34,9 +32,7 @@
 - [ ] allow one task to be in more than one group?
 - [ ] allow certain tasks in group to not be namespaced?
 - [ ] Make sure importing a module does not add its tasks to the global default group by default
-- [ ] Tags
-  - [ ] auto add tags based on argument nam or task regex, or envvars
-  - [ ] decorate tags based on tags
+
 - [ ]
   - [ ] per module task list
   - [ ] include(child_tasks.child1)
@@ -113,20 +109,21 @@ Features:
 - Include Taskfile
 - converting list[int] from str to list of ints
 - add to groups based on tags?
+- [ ] Tags
+  - [ ] list tasks based on tags
+  - [ ] auto add tags based on argument nam or task regex, or envvars
+  - [ ] decorate tags based on tags
 
 # FIXME
 - [ ] Text in help output broken - does include task name. We should modify parser's print-usage to include task name
 
 # TODOs
+
 - [ ] also print env vars in help
 - [ ] add -v to help
 - [ ] support 'help' syntax
 - [ ] add auto short flags
-- [ ] add "--no-*" versino of bool flags.
 - [ ] add default subtask
-- [ ] add @task(name)
-- [ ] add @task(aliases)
-- [ ] add @task(namespace)
 - [ ] allow importing tasks from other modules, even with same names
   - [ ] Right now, this will likely break task_data_args[func_name][main_name]
 - [ ] Consider support file with functions prefixed with "task_", and use "main" as the default task by default

@@ -94,7 +94,7 @@ def dispatch(argv: list[str] | None = None, tasks_found: bool = True) -> Any:  #
         kwargs = {}
 
         for param in task.params:
-            name = param.get_argparse_names()[0].replace("-", "_")
+            name = param.name
             value = getattr(argconfig, name)
             value = _convert_types_from_str_to_function_type(param, value)
             kwargs[name] = value

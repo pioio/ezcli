@@ -9,15 +9,21 @@ def create_tasks_file(filepath: str) -> None:
         sys.exit(1)
     with open(filepath, "w") as f:
         f.write(content)
-    print(f"Created file {filepath}")  # noqa: T201
+    print(f"Created file {filepath}, now run 'taskcli' or 'tt' to list task in it.")  # noqa: T201
 
 
 content = """#!/usr/bin/env python
 from taskcli import task, tt
 
 @task
-def mytask() -> None:
+def hello_world() -> None:
     print("Hello, World!")
+
+@task
+def say_hello(name:str, *, repeat:int=1) -> None:
+    '''Usage: tt say-hello NAME [--repeat=REPEAT]'''
+    for x in range(repeat):
+        print(f"Hello, {name}")
 
 with tt.Group("mygroup"):
     @task

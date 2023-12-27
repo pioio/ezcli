@@ -28,4 +28,4 @@ def test_init_new_file():
     stdout = res.stdout.decode("utf-8")
     print(stdout)
     stdout = clean_stdout(stdout)
-    assert "mytask" in stdout, stdout
+    assert "hello-world" in stdout, stdout

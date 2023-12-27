@@ -172,7 +172,21 @@ def smart_task_lines(task: Task, verbose: int, env_verbose: int = 0) -> list[str
                 for line in not_ready_lines
             ]
 
-    potential_line = line + " " + one_line_params
+    # padd the task name to certain minimum width so that
+    # any arguments are left-aligned
+    # This results in cleaner (arg names are aligned) output if task names are very short
+    from . import envvars
+    temp_line = line
+    if not envvars.TASKCLI_ADV_OVERRIDE_FORMATTING.is_true():
+        clean_taskname_len = len(utils.strip_escape_codes(line))
+        col_align_first_arg = 7
+        temp_line = line
+        if clean_taskname_len <= col_align_first_arg:
+            # Add padding to the left, to make the summary line start at the same column
+            temp_line = line + " " * (col_align_first_arg - clean_taskname_len)
+
+
+    potential_line = temp_line + " " + one_line_params
     if len(utils.strip_escape_codes(potential_line)) < max_left:
         line = potential_line
         one_line_params = ""  # clear, to avoid adding it again later
