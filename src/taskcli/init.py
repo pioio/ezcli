@@ -13,18 +13,19 @@ def create_tasks_file(filepath: str) -> None:
 
 
 content = """#!/usr/bin/env python
-from taskcli import task, dispatch, run, Group
+from taskcli import task, tt
 
 @task
 def mytask() -> None:
     print("Hello, World!")
 
-with Group("mygroup"):
+with tt.Group("mygroup"):
     @task
     def sometask() -> None:
         print("Hello from the group")
 
 if __name__ == "__main__":
-    # Just in case we run this script directly via './tasks.py'
-    dispatch()
+    # This 'if' statements is optional.
+    # It's here just in case you want to run this script directly via './tasks.py'
+    tt.dispatch()
 """

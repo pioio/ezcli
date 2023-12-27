@@ -1,7 +1,6 @@
 #TODO:
 - [x] add `taskcli.extra_args` to get `-- args`
 - [x] add "-f" to specify the file
-- [ ] Fix unit tests
 - [ ] show by tag
 - [ ] a single line listing all hidden tasks and hidden groups, and tasks in hidden groups, and -H
 - [ ] add TASKCLI_SIMPLE_FORMATTING=1

@@ -6,6 +6,21 @@ The guiding design principle is to make running and navigating tasks fast -- wit
 
 It's like a Makefile, but in Python.
 
+## Installation and basic usage
+```
+# Install the package
+pip install taskcli
+
+# Create a ./tasks.py file in the current directory with example content
+taskcli --init
+
+# list the tasks in tasks.py
+taskcli <task_name>
+
+# Instead of `taskcli` you can also use the `tt` script, eg:
+tt
+tt <task_name>
+```
 
 ## Overview
 All projects revolve around performing small tasks.
@@ -16,6 +31,8 @@ Over time, it becomes harder and harder to organize them.
 This library aims to solve this problem by providing means of not only easily creating tasks,
 but also easily navigating them later on.
 You can group tasks, highlight the important ones, combine tasks from many files and directories.
+
+
 
 
 ### Tasks
@@ -41,13 +58,20 @@ Each task has a namespace.
 TODO: explain
 
 ## Typical usage
-- run `t` to list all the (not hidden) tasks in local `./tasks.py` file. Some info is hidden from this overview.
-- run `t <task_name>` to run a task.
-- run `t <group_name>` to list only tasks in that group. This view includes more detailed info than the full listing.
+- run `tt` to list all the (not hidden) tasks in local `./tasks.py` file. Some info is hidden from this overview.
+- run `tt <task_name>` to run a task.
+- run `tt <group_name>` to list only tasks in that group. This view includes more detailed info than the full listing.
 
 The goal of `t` is to get a quick overview of all the tasks.
 You can always include `t -L` to view all the info for all the groups. But note that for large projects
 this can result in a lot of output
+
+## Listing tasks
+- `tt` is equivalent to `tt --list|-l` -- only shows mandatory and important parameters.
+- `tt -ll` lists tasks in more detail  -- includes all parameter, even optional ones.
+- `tt -lll` list tasks in even more detauls -- include all parameters, shows default values of optional parameters.
+
+
 
 
 ## Main features
