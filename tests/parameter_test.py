@@ -113,6 +113,7 @@ def test_list_type_2():
     assert param.is_list()
     assert not param.is_union_list_none()
     assert param.has_default()
+    assert not param.list_has_type_args()
 
 
 def test_list_type_3():
@@ -122,6 +123,8 @@ def test_list_type_3():
     assert param.is_list()
     assert not param.is_union_list_none()
     assert not param.has_default()
+    assert param.list_has_type_args()
+    assert param.get_list_type_args() == int
 
 def test_list_type_4():
     def foo(x: list[int]=[]) -> None:
@@ -130,6 +133,8 @@ def test_list_type_4():
     assert param.is_list()
     assert not param.is_union_list_none()
     assert param.has_default()
+    assert param.get_list_type_args() == int
+
 
 
 def test_union_list_none1():

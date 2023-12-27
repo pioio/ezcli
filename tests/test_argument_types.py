@@ -119,6 +119,8 @@ def test_keyword_list_with_no_defaults_requires_passing_at_least_one_arg(capsys)
 
     t = tools.include_task()
 
+    assert t.dispatch(["--paths", "1", "2", "3"]) == [1,2,3]
+
     with pytest.raises(SystemExit, match="2"):
         t.dispatch()
     assert capsys.readouterr().err.endswith("error: the following arguments are required: --paths\n")
@@ -154,13 +156,18 @@ def test_list_int_or_none(capsys):
 
     t = tools.include_task()
 
-    assert t.dispatch(["path"]) == ["path"]
-    assert t.dispatch(["path1", "path2", "path3", "path4"]) == ["path1", "path2", "path3", "path4"]
+    assert t.dispatch(["1", "2"]) == [1,2]
+    with pytest.raises(UserError, match="Could not convert 'path' to <class 'int'>"):
+        assert t.dispatch(["path"], sysexit_on_user_error=False) == ["path"]
+    with pytest.raises(UserError, match="Could not convert 'path1' to <class 'int'>"):
+        assert t.dispatch(["path1", "path2", "path3", "path4"], sysexit_on_user_error=False) == ["path1", "path2", "path3", "path4"]
 
     with pytest.raises(SystemExit, match="2"):
         t.dispatch()
 
     assert capsys.readouterr().err.endswith("error: the following arguments are required: paths\n")
+
+from taskcli.task import UserError
 
 def test_list_int_or_none_default_none():
     """The list has a default value, so providing at least one element is not mandatory."""
@@ -174,12 +181,12 @@ def test_list_int_or_none_default_none():
     assert t.dispatch() is None
     assert t.dispatch(["1", "2"]) == [1, 2]
 
-    from taskcli.task import UserError
+
     with pytest.raises(UserError, match="Could not convert 'path' to <class 'int'>"):
-        assert t.dispatch(["path"]) == ["path"]
+        assert t.dispatch(["path"], sysexit_on_user_error=False) == ["path"]
 
     with pytest.raises(UserError, match="Could not convert 'path1' to <class 'int'>"):
-        assert t.dispatch(["path1", "path2", "path3", "path4"]) == ["path1", "path2", "path3", "path4"]
+        assert t.dispatch(["path1", "path2", "path3", "path4"], sysexit_on_user_error=False) == ["path1", "path2", "path3", "path4"]
 
 def test_list_int_or_none_default_none_kw_arg():
     """The list has a default value, so providing at least one element is not mandatory."""
@@ -191,7 +198,8 @@ def test_list_int_or_none_default_none_kw_arg():
     t = tools.include_task()
 
     assert t.dispatch() is None
-    assert t.dispatch(["--paths", "path"]) == ["path"]
+    with pytest.raises(UserError, match="Could not convert 'path' to <class 'int'>"):
+        assert t.dispatch(["--paths", "path"], sysexit_on_user_error=False) == ["path"]
 
 
 def test_list_simple(capsys):

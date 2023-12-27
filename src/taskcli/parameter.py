@@ -25,83 +25,6 @@ class Parameter:
     VAR_POSITIONAL = inspect.Parameter.VAR_POSITIONAL
     VAR_KEYWORD = inspect.Parameter.VAR_KEYWORD
 
-    def has_supported_type(self) -> bool:
-        """Return True if the type of the parameter is supported by taskcli (in the context of adding it to argparse).
-
-        If param has unsupported type, but a default value, the task can be still be run,
-        but the parameter will not be added to argparse.
-        """
-        if self.type is Parameter.Empty:
-            # no type annotation, will assume it's a string
-            return True
-
-        if self.is_union_list_none():
-            return True
-
-        if self.is_list():
-            return True
-
-        if self.type in [int, float, str, bool]:
-            return True
-
-        return False
-
-    def is_union_list_none(self) -> bool:
-        if self.type is inspect.Parameter.empty:
-            return False
-
-        if self.is_union_of(list, None.__class__):
-            return True
-
-        if self.is_union():
-            union_args = get_args(self.type)
-            if len(union_args) == 2:
-
-                foundlist = False
-                foundnone = False
-                for arg in union_args:
-                    if get_origin(arg) is list:
-                        foundlist = True
-                    if arg is None.__class__:
-                        foundnone = True
-                if foundlist and foundnone:
-                    return True
-
-        return False
-
-    def is_union(self) -> bool:
-        #   'get_origin(self.annotation) is Union'  ->   python 3.9 syntax, Union[list|None]
-        # 'isinstance(self.annotation, UnionType)'  ->   python 3.10 syntax,  list|None
-        return get_origin(self.type) is Union or isinstance(self.type, UnionType)
-
-    def is_union_of(self, typevar1, typevar2): # "None.__class__" for non
-        assert typevar1 is not None, "use   None.__class__ for None"
-        assert typevar2 is not None, "use   None.__class__ for None"
-        if not self.is_union():
-            return False
-        if get_args(self.type) == (typevar1, typevar2) or get_args(self.type) == (typevar2, typevar1):
-            return True
-        return False
-
-
-    def is_list(self) -> bool:
-        if self.is_union():
-            return False
-
-        annotation = self.type
-        if get_origin(annotation) is list:
-            return True
-        if annotation is list:
-            return True
-
-        return False
-
-
-    def get_list_type(self) -> Any:
-        if str(self.type).startswith("list[") and self.type.__args__:
-            return self.type.__args__[0]
-        else:
-            None
 
     def __init__(self, param: inspect.Parameter):
         """Read the parameter and stores the information in this class for easier access."""
@@ -183,3 +106,125 @@ class Parameter:
         else:
             name = param_to_cli_option(self.name)
         return [name]
+
+
+
+    def has_supported_type(self) -> bool:
+        """Return True if the type of the parameter is supported by taskcli (in the context of adding it to argparse).
+
+        If param has unsupported type, but a default value, the task can be still be run,
+        but the parameter will not be added to argparse.
+        """
+        if self.type is Parameter.Empty:
+            # no type annotation, will assume it's a string
+            return True
+
+        if self.is_union_list_none():
+            return True
+
+        if self.is_list():
+            return True
+
+        if self.type in [int, float, str, bool]:
+            return True
+
+        return False
+
+    def is_union_list_none(self) -> bool:
+        if self.type is inspect.Parameter.empty:
+            return False
+
+        if self.is_union_of(list, None.__class__):
+            return True
+
+        if self.is_union():
+            union_args = get_args(self.type)
+            if len(union_args) == 2:
+
+                foundlist = False
+                foundnone = False
+                for arg in union_args:
+                    if get_origin(arg) is list:
+                        foundlist = True
+                    if arg is None.__class__:
+                        foundnone = True
+                if foundlist and foundnone:
+                    return True
+
+        return False
+
+    def is_union(self) -> bool:
+        #   'get_origin(self.annotation) is Union'  ->   python 3.9 syntax, Union[list|None]
+        # 'isinstance(self.annotation, UnionType)'  ->   python 3.10 syntax,  list|None
+        return get_origin(self.type) is Union or isinstance(self.type, UnionType)
+
+    def is_union_of(self, typevar1, typevar2): # "None.__class__" for non
+        assert typevar1 is not None, "use   None.__class__ for None"
+        assert typevar2 is not None, "use   None.__class__ for None"
+        if not self.is_union():
+            return False
+        if get_args(self.type) == (typevar1, typevar2) or get_args(self.type) == (typevar2, typevar1):
+            return True
+        return False
+
+    def is_list(self) -> bool:
+        if self.is_union():
+            return False
+
+        annotation = self.type
+        if get_origin(annotation) is list:
+            return True
+        if annotation is list:
+            return True
+
+        return False
+
+    def get_the_list_type(self) -> Any:
+        """Return the type of the list, or raise if not a list.
+
+        If the annotation is a list or list[X], it simpl returns that.
+        If the type is a list[x]|None, it returns the list part from that union.
+        """
+        if self.is_list():
+            return self.type
+        elif self.is_union_list_none():
+            return self.get_list_from_union()
+        else:
+            msg = "Not a list"
+            raise Exception(msg)
+
+    def list_has_type_args(self) -> bool:
+        """Can be called on x:list nad x:list|None."""
+        listtype = self.get_the_list_type()
+
+        list_arg_types = get_args(listtype)
+
+        if list_arg_types is None:
+            return False
+
+        if len(list_arg_types) == 1:
+            return True
+
+        return False
+
+    def get_list_from_union(self) -> Any:
+        """Return the list type from a union of list and None."""
+        assert self.is_union_list_none()
+        union_args = get_args(self.type)
+        assert len(union_args) == 2
+        for arg in union_args:
+            if get_origin(arg) is list:
+                return arg
+
+    def get_list_type_args(self) -> None|Any:
+        """Return the type arguments of the list annotation, or None if there are none."""
+        listtypevar = self.get_the_list_type()
+
+        list_arg_types = get_args(listtypevar)
+        if list_arg_types is None:
+            return None
+        assert isinstance(list_arg_types, tuple)
+        if len(list_arg_types) == 0:
+            return None
+        assert len(list_arg_types) == 1, f"list_arg_types: {list_arg_types}"
+        return list_arg_types[0]

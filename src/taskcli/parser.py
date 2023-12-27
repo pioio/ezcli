@@ -351,8 +351,8 @@ def _convert_types_from_str_to_function_type(param: Parameter, value: Any) -> An
 
     elif param.is_list():
         out = []
+        thetype = param.get_list_type_args()
         for item in value:
-            thetype = param.get_list_type()
             if thetype is not None:
                 try:
                     out += [thetype(item)]
@@ -373,19 +373,19 @@ def _convert_types_from_str_to_function_type(param: Parameter, value: Any) -> An
         if value == [] and param.has_default() and param.default is None:
             return None
 
-        # if isinstance(value, list):
-        #     out = []
-        #     for item in value:
-        #         thetype = param.get_list_type()
-        #         if thetype is not None:
-        #             try:
-        #                 out += [thetype(item)]
-        #             except ValueError as e:
-        #                 msg = f"Could not convert '{item}' to {thetype}"
-        #                 raise UserError(msg) from e
-        #         else:
-        #             out += [item]
-        #     value = out
+
+        out = []
+        thetype = param.get_list_type_args()
+        for item in value:
+            if thetype is not None:
+                try:
+                    out += [thetype(item)]
+                except ValueError as e:
+                    msg = f"Could not convert '{item}' to {thetype}"
+                    raise UserError(msg) from e
+            else:
+                out += [item]
+        value = out
 
 
         return value
@@ -402,6 +402,20 @@ def _convert_types_from_str_to_function_type(param: Parameter, value: Any) -> An
     # >             raise Exception(f"Type {param.type} not implemented")
     return value
 
+
+def convert_elements_to_type(param: Parameter, value: Any) -> Any:
+    out = []
+    thetype = param.get_list_type_args()
+    for item in value:
+        if thetype is not None:
+            try:
+                out += [thetype(item)]
+            except ValueError as e:
+                msg = f"Could not convert '{item}' to {thetype}"
+                raise UserError(msg) from e
+        else:
+            out += [item]
+    return out
 
 def _build_parser_name(param: inspect.Parameter) -> str:
     if param.kind == inspect.Parameter.POSITIONAL_OR_KEYWORD:
