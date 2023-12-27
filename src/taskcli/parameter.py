@@ -1,13 +1,17 @@
 import inspect
 from math import e
+from operator import is_
 from typing import Any, TypeVar
+from webbrowser import get
 
 from . import annotations
 from .utils import param_to_cli_option
 
 # So that we don't duplicate the default value of arg annotation
 default_arg_annotation = annotations.Arg()
-
+import typing
+from typing import get_origin, get_args, List, Union
+from types import UnionType
 
 class Parameter:
     """A wrapper around inspect.Parameter to make it easier to work with."""
@@ -21,15 +25,56 @@ class Parameter:
     VAR_POSITIONAL = inspect.Parameter.VAR_POSITIONAL
     VAR_KEYWORD = inspect.Parameter.VAR_KEYWORD
 
-    def is_list(self) -> bool:
-        # TODO: improve this
-        if isinstance(self.type, list): # ??? not needed?
+    def is_union_list_none(self) -> bool:
+        if self.type is inspect.Parameter.empty:
+            return False
+
+        if self.is_union_of(list, None.__class__):
             return True
-        if self.type is list: # for    'foo: list'
-            return True
-        if str(self.type).startswith("list["):  # for   'foo: list'
+
+        if self.is_union():
+            union_args = get_args(self.type)
+            if len(union_args) == 2:
+
+                foundlist = False
+                foundnone = False
+                for arg in union_args:
+                    if get_origin(arg) is list:
+                        foundlist = True
+                    if arg is None.__class__:
+                        foundnone = True
+                if foundlist and foundnone:
+                    return True
+
+        return False
+
+    def is_union(self) -> bool:
+        #   'get_origin(self.annotation) is Union'  ->   python 3.9 syntax, Union[list|None]
+        # 'isinstance(self.annotation, UnionType)'  ->   python 3.10 syntax,  list|None
+        return get_origin(self.type) is Union or isinstance(self.type, UnionType)
+
+    def is_union_of(self, typevar1, typevar2): # "None.__class__" for non
+        assert typevar1 is not None, "use   None.__class__ for None"
+        assert typevar2 is not None, "use   None.__class__ for None"
+        if not self.is_union():
+            return False
+        if get_args(self.type) == (typevar1, typevar2) or get_args(self.type) == (typevar2, typevar1):
             return True
         return False
+
+
+    def is_list(self) -> bool:
+        if self.is_union():
+            return False
+
+        annotation = self.type
+        if get_origin(annotation) is list:
+            return True
+        if annotation is list:
+            return True
+
+        return False
+
 
     def get_list_type(self) -> Any:
         if str(self.type).startswith("list[") and self.type.__args__:
@@ -69,6 +114,9 @@ class Parameter:
         # ### 4. The Arg annotation default (foobar: annotations.Arg[int, arg(default=5)])
         # If both are present, the annotation takes precedence
         self.type = param.annotation if not param_using_typing_annotated else param.annotation.__origin__
+
+
+
         if self.type is inspect.Parameter.empty:
             self.type = Parameter.Empty
 
@@ -88,6 +136,14 @@ class Parameter:
                 self.default = self.arg_annotation.default
 
         self.name = param.name
+
+    def is_positional(self) -> bool:
+        """Return True if the parameter is positional, False if it is keyword-only (i.e. requiring --flag)."""
+        return self.kind in [
+            inspect.Parameter.POSITIONAL_ONLY,
+            inspect.Parameter.POSITIONAL_OR_KEYWORD,
+            inspect.Parameter.VAR_KEYWORD, # ??? not sure ...
+        ]
 
     @property
     def important(self) -> bool:

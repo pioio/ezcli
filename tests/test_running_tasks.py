@@ -41,6 +41,7 @@ def test_sort_important():
     ]
 
 
+
 @pytest.mark.parametrize("args", [
     ["task1", "foo", "foo"],
     ["task2", "arg1 arg2", "arg1 arg2"],

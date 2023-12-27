@@ -192,6 +192,16 @@ class Task:
                 missing.append(env)
         return missing
 
+    def dispatch(self, args: list[str]|None=None) -> Any:
+        """Dispatch the task. A helper for unit tests."""
+        name = self.get_full_task_name()
+        from .parser import dispatch
+        if args:
+            res = dispatch([name, *args])
+        else:
+            res = dispatch([name])
+        return res
+
 
 def _get_wrapper(  # noqa: C901
     func: AnyFunction,

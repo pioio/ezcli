@@ -96,3 +96,67 @@ def test_basic_no_default_but_annotated():
     assert param.type == str
     assert param.default == Parameter.Empty
     assert not param.has_default()
+
+
+def test_list_type_1():
+    def foo(x: list) -> None:
+        pass
+    param = Task(foo).params[0]
+    assert param.is_list()
+    assert not param.is_union_list_none()
+    assert not param.has_default()
+
+def test_list_type_2():
+    def foo(x: list=[]) -> None:
+        pass
+    param = Task(foo).params[0]
+    assert param.is_list()
+    assert not param.is_union_list_none()
+    assert param.has_default()
+
+
+def test_list_type_3():
+    def foo(x: list[int]) -> None:
+        pass
+    param = Task(foo).params[0]
+    assert param.is_list()
+    assert not param.is_union_list_none()
+    assert not param.has_default()
+
+def test_list_type_4():
+    def foo(x: list[int]=[]) -> None:
+        pass
+    param = Task(foo).params[0]
+    assert param.is_list()
+    assert not param.is_union_list_none()
+    assert param.has_default()
+
+
+def test_union_list_none1():
+    def foo(x: list|None) -> None:  # type: ignore # noqa: PGH003
+        pass
+
+    param = Task(foo).params[0]
+    assert not param.is_list()
+    assert param.is_union_list_none()
+
+from typing import get_origin, get_args
+
+def test_union_list_none2():
+    def foo(x: list[int]|None) -> None:  # type: ignore # noqa: PGH003
+        pass
+
+    param = Task(foo).params[0]
+    assert not param.is_list()
+    #print (get_args(param.type))
+    assert param.is_union_list_none()
+
+
+def test_union_list_none3():
+    def foo2(x: list|None|dict) -> None:  # type: ignore # noqa: PGH003
+        pass
+
+    param = Task(foo2).params[0]
+    assert not param.is_list()
+    assert not param.is_union_list_none()
+

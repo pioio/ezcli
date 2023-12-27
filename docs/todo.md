@@ -3,6 +3,9 @@ Required TODO:
 - [x] add "-f" to specify the file
 - [ ] add "--no-*" version of bool flags.
 - [ ] Fix lists
+- [ ] tuples
+- [ ] list with no types
+- [ ] list|None
 
 - [ ] Make unit test use standard formatting for listing.
 - [ ] show again number of tasks in group (not shown now)
@@ -104,6 +107,7 @@ Features:
 
 
 # Later
+- dict type, accepting key=value, or json
 - [ ] tt.set_overview, this will require storing overview on per-module basis (or storing it only for current one), and loading
 - ability to customize the parser with custom flags
   - @task(customize_parser=lambda parser: parser.add_argument('--foo')

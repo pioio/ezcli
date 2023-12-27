@@ -8,6 +8,8 @@ import pytest
 import taskcli
 from taskcli import Task, task
 import taskcli.core
+import inspect
+from taskcli.types import Module
 
 ########################################################################################################################
 # pytest Fixtures
@@ -19,7 +21,7 @@ import taskcli.core
 @pytest.fixture(autouse=True)
 def reset_context_before_each_test() -> None:
     """Reset the entire context of taskcli, run this before each test"""
-    print("Resetting tasks")
+    #print("Resetting tasks")
     taskcli.utils.reset_tasks()
     return None
 
@@ -27,7 +29,18 @@ def reset_context_before_each_test() -> None:
 ########################################################################################################################
 # Other
 
-def include_tasks() -> list[Task]:
+def include_task() -> Task:
+    current_frame = inspect.currentframe()
+    assert current_frame is not None
+    previous_frame = current_frame.f_back
+    module_from_which_this_function_was_called = inspect.getmodule(previous_frame)
+
+    res = include_tasks(module=module_from_which_this_function_was_called)
+
+    assert len(res) == 1, f"Expected to find a single task, but found {len(res)} tasks, names: {[t.name for t in res]}"
+    return res[0]
+
+def include_tasks(module:Module|None=None) -> list[Task]:
     """Include the tasks from the current module, and return them. Use alongside reset_context_before_each_test .
 
     This function must be called directly from the module from which we want to include the tasks.
@@ -40,9 +53,11 @@ def include_tasks() -> list[Task]:
 
     import inspect
 
-
-    previous_frame = inspect.currentframe().f_back
-    module_from_which_this_function_was_called = inspect.getmodule(previous_frame)
+    if module is None:
+        previous_frame = inspect.currentframe().f_back
+        module_from_which_this_function_was_called = inspect.getmodule(previous_frame)
+    else:
+        module_from_which_this_function_was_called = module
 
     expected_fixture = "reset_context_before_each_test"
     if expected_fixture not in module_from_which_this_function_was_called.__dict__:

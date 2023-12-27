@@ -48,7 +48,7 @@ def dispatch(argv: list[str] | None = None, tasks_found: bool = True) -> Any:
     """Dispatch the command line arguments to the correct function."""
     # Initial parser, only used to find the tasks file
     try:
-        _dispatch_unsafe(argv, tasks_found)
+        return _dispatch_unsafe(argv, tasks_found)
     except UserError as e:
         utils.print_error(f"Error: {e}")
         sys.exit(1)
@@ -301,23 +301,35 @@ def _add_param_to_subparser(param: Parameter, subparser: argparse.ArgumentParser
         else:
             kwargs["action"] = "store_true"
 
-    ### print(param.name, param.type, param.is_list())
-    if param.is_list():
-        kwargs["nargs"] = "*"
-        kwargs["default"] = None
-        if param.default is not Parameter.Empty:
+    elif param.is_list():
+        if param.has_default():
+            kwargs["nargs"] = "*" # it's ok for user to not pass it, default will be used
+        else:
+            kwargs["nargs"] = "+" # User must pass it
+            if not param.is_positional():
+                # needed to force argparse to require --args, as by default they are optional
+                kwargs["required"] = True
+
+        if param.has_default():
             kwargs["default"] = param.default
+    elif param.is_union_list_none():
+        if param.has_default():
+            kwargs["nargs"] = "*"
+            kwargs["default"] = param.default
+        else:
+            kwargs["nargs"] = "+"
+            #kwargs["default"] = None
+
 
     if param.help:
         kwargs["help"] = param.help
-
 
 
     subparser.add_argument(*args, **kwargs)
 
 
 def _convert_types_from_str_to_function_type(param: Parameter, value: Any) -> Any:
-
+    """Called after parsing the command line arguments, to convert the types from str to the correct type."""
     if param.type is int:
         value = int(value)
     elif param.type is bool:
@@ -333,6 +345,10 @@ def _convert_types_from_str_to_function_type(param: Parameter, value: Any) -> An
             else:
                 out += [item]
         value = out
+    elif param.is_union_list_none():
+        if value is None:
+            return None
+        return value
 
     elif param.type is float:
         value = float(value)
