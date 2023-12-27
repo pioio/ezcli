@@ -44,14 +44,18 @@ def _extract_extra_args(argv: list[str], task_cli: TaskCLI) -> list[str]:
         return argv[:first_double_hyphen]
 
 
-def dispatch(argv: list[str] | None = None, tasks_found: bool = True) -> Any:
+def dispatch(argv: list[str] | None = None, tasks_found: bool = True, sysexit_on_user_error:bool=True) -> Any:
     """Dispatch the command line arguments to the correct function."""
     # Initial parser, only used to find the tasks file
     try:
         return _dispatch_unsafe(argv, tasks_found)
     except UserError as e:
         utils.print_error(f"Error: {e}")
-        sys.exit(1)
+        if sysexit_on_user_error:
+            sys.exit(1)
+        else:
+            # unit tests
+            raise
 
 
 
@@ -350,7 +354,11 @@ def _convert_types_from_str_to_function_type(param: Parameter, value: Any) -> An
         for item in value:
             thetype = param.get_list_type()
             if thetype is not None:
-                out += [thetype(item)]
+                try:
+                    out += [thetype(item)]
+                except ValueError as e:
+                    msg = f"Could not convert '{item}' to {thetype}"
+                    raise UserError(msg) from e
             else:
                 out += [item]
         value = out
@@ -364,6 +372,21 @@ def _convert_types_from_str_to_function_type(param: Parameter, value: Any) -> An
         # by the user
         if value == [] and param.has_default() and param.default is None:
             return None
+
+        # if isinstance(value, list):
+        #     out = []
+        #     for item in value:
+        #         thetype = param.get_list_type()
+        #         if thetype is not None:
+        #             try:
+        #                 out += [thetype(item)]
+        #             except ValueError as e:
+        #                 msg = f"Could not convert '{item}' to {thetype}"
+        #                 raise UserError(msg) from e
+        #         else:
+        #             out += [item]
+        #     value = out
+
 
         return value
 

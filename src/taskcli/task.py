@@ -206,14 +206,14 @@ class Task:
                 missing.append(env)
         return missing
 
-    def dispatch(self, args: list[str]|None=None) -> Any:
+    def dispatch(self, args: list[str]|None=None, sysexit_on_user_error:bool=True) -> Any:
         """Dispatch the task. A helper for unit tests."""
         name = self.get_full_task_name()
         from .parser import dispatch
         if args:
-            res = dispatch([name, *args])
+            res = dispatch([name, *args], sysexit_on_user_error=sysexit_on_user_error)
         else:
-            res = dispatch([name])
+            res = dispatch([name],sysexit_on_user_error=sysexit_on_user_error)
         return res
 
 

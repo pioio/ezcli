@@ -92,16 +92,21 @@ def test_keyword_lists_default_in_annotation_does_not_require_passing_anything()
 
 
 def test_keyword_lists_default_in_annotation_does_not_require_passing_anything_integers():
-    Paths = tt.arg(list[int], default=[1,2,3])
+    Sizes = tt.arg(list[int], default=[1,2,3])
 
     @task
-    def foo(*, paths:Paths, names:list[str]=["foobar"]):
-        return paths
+    def foo(*, sizes:Sizes, names:list[str]=["foobar"]):
+        return sizes
 
     t = tools.include_task()
     assert t.dispatch() == [1,2,3]
-    assert t.dispatch(["--paths", "1"]) == [1]
-    assert t.dispatch(["--paths", "1", "2"]) == [1, 2]
+    assert t.dispatch(["--sizes", "1"]) == [1]
+    assert t.dispatch(["--sizes", "1", "2"]) == [1, 2]
+
+    from taskcli.task import UserError
+    with pytest.raises(UserError, match="Could not convert 'foobar' to <class 'int'>"):
+        t.dispatch(["--sizes", "foobar"], sysexit_on_user_error=False)
+
 
 
 def test_keyword_list_with_no_defaults_requires_passing_at_least_one_arg(capsys):
@@ -167,8 +172,14 @@ def test_list_int_or_none_default_none():
     t = tools.include_task()
 
     assert t.dispatch() is None
-    assert t.dispatch(["path"]) == ["path"]
-    assert t.dispatch(["path1", "path2", "path3", "path4"]) == ["path1", "path2", "path3", "path4"]
+    assert t.dispatch(["1", "2"]) == [1, 2]
+
+    from taskcli.task import UserError
+    with pytest.raises(UserError, match="Could not convert 'path' to <class 'int'>"):
+        assert t.dispatch(["path"]) == ["path"]
+
+    with pytest.raises(UserError, match="Could not convert 'path1' to <class 'int'>"):
+        assert t.dispatch(["path1", "path2", "path3", "path4"]) == ["path1", "path2", "path3", "path4"]
 
 def test_list_int_or_none_default_none_kw_arg():
     """The list has a default value, so providing at least one element is not mandatory."""
@@ -199,6 +210,8 @@ def test_list_simple(capsys):
         t.dispatch()
 
     assert capsys.readouterr().err.endswith("error: the following arguments are required: paths\n")
+
+
 
 
 
