@@ -53,6 +53,13 @@ def task_list1_b(arg1: list[float]) -> None: # optional list
 
     print(arg1)
 
+@task
+def task_list1_c(arg1: list) -> None: # optional list
+    assert isinstance(arg1, list), f"arg1 is not a list, but a {type(arg1)}"
+    for item in arg1:
+        assert isinstance(item, str), f"item is not a str, but a {type(item)}"
+
+    print(arg1)
 
 ########################################################################################################################
 # bools

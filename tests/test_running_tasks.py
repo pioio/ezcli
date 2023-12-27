@@ -50,6 +50,7 @@ def test_sort_important():
 
     ["task-list1-a", "--arg1 1 1", """[1.0, 1.0]"""],
     ["task-list1-b", "1 1", """[1.0, 1.0]"""],
+    ["task-list1-c", "1 xx", """['1', 'xx']"""],
 
     ["task-bool1", "--arg1", "True"],
     ["task-bool2", "--arg1 --arg2 44", "True 44"],
