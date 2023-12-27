@@ -17,15 +17,12 @@ import taskcli.core
 from taskcli.listing import list_tasks
 from taskcli.task import Task
 
+
 this_module = sys.modules[__name__]
 
+from . import tools
+
 from .tools import reset_context_before_each_test
-
-
-def include_tasks() -> list[Task]:
-    """Goes through the usual process of including tasks."""
-    taskcli.include(this_module)
-    return taskcli.core.get_runtime().tasks
 
 
 def test_basic():
@@ -33,7 +30,7 @@ def test_basic():
     def foo():
         pass
 
-    tasks = include_tasks()
+    tasks = tools.include_tasks()
     assert len(tasks) == 1
     assert tasks[0].name == "foo"
 
@@ -47,7 +44,7 @@ def test_basic2():
     def foobar2():
         pass
 
-    tasks = include_tasks()
+    tasks = tools.include_tasks()
 
     assert len(tasks) == 2
     assert tasks[0].name == "foobar1"
@@ -61,7 +58,7 @@ def test_list_basic():
     def foobar1():
         """This is the first task"""
 
-    tasks = include_tasks()
+    tasks = tools.include_tasks()
     lines = list_tasks(tasks, verbose=0)
     assert len(lines) == 1
     assert re.match(r"\* foobar1\s+This is the first task", lines[0])
@@ -78,7 +75,7 @@ def test_groups_basic():
     def magic() -> None:
         pass
 
-    tasks = include_tasks()
+    tasks = tools.include_tasks()
     assert tasks[0].group.name == "default"
     assert tasks[1].group.name == "magical tasks"
     lines = list_tasks(tasks, verbose=0)
@@ -95,7 +92,7 @@ def test_list_positional_mandatory():
     def foobar(name: int) -> None:
         """This is the first task"""
 
-    tasks = include_tasks()
+    tasks = tools.include_tasks()
 
     lines = list_tasks(tasks, verbose=0)
     assert len(lines) == 1
@@ -107,7 +104,7 @@ def test_list_short_args_share_line_with_task_with_default():
     def foobar(paths: list[str] = ["src/"]) -> None:  # noqa:  B006
         """This is the first task"""
 
-    tasks = include_tasks()
+    tasks = tools.include_tasks()
 
     lines = list_tasks(tasks, verbose=0)
     assert len(lines) == 1
@@ -122,7 +119,7 @@ def test_list_short_args_share_line_with_task_no_default():
     def foobar(paths: list[str]) -> None:
         """This is the first task"""
 
-    tasks = include_tasks()
+    tasks = tools.include_tasks()
 
     lines = list_tasks(tasks, verbose=0)
     assert len(lines) == 1
@@ -138,7 +135,7 @@ def test_list_important_optional_args_are_shown():
     def foobar(message: Text = "some text", name: Name = "alice") -> None:  # type: ignore # noqa: PGH003
         """This is the first task"""
 
-    tasks = include_tasks()
+    tasks = tools.include_tasks()
 
     lines = list_tasks(tasks, verbose=0)
     assert len(lines) == 1
@@ -156,7 +153,7 @@ def test_list_hidden_tasks_dont_show_up_by_default():
     def hidden_task() -> None:
         """This is the hidden task"""
 
-    tasks = include_tasks()
+    tasks = tools.include_tasks()
 
     lines = list_tasks(tasks, verbose=0)
 
@@ -182,7 +179,7 @@ def test_run_default_args_str():
         nonlocal done
         done = name
 
-    include_tasks()
+    tools.include_tasks()
 
     taskcli.dispatch(argv=["foobar"])
     assert done == "xxx"
@@ -199,7 +196,7 @@ def test_run_default_args(default_arg):
         nonlocal done
         done = name
 
-    include_tasks()
+    tools.include_tasks()
 
     try:
         taskcli.dispatch(argv=["foobar"])
@@ -217,6 +214,6 @@ def test_group_context_manager():
         def foobar():
             pass
 
-        atask = include_tasks()[0]
+        atask = tools.include_tasks()[0]
         assert atask.group.name == "bar"
         assert atask.group == group

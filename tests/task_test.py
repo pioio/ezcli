@@ -2,15 +2,9 @@ import taskcli
 from taskcli import Group, Task, task
 import taskcli.core
 
+from . import tools
+
 from .tools import reset_context_before_each_test
-
-
-def include_tasks() -> list[Task]:
-    """Goes through the usual process of including tasks."""
-    import sys
-
-    taskcli.include(sys.modules[__name__])
-    return taskcli.core.get_runtime().tasks
 
 
 def test_copy():
@@ -20,7 +14,7 @@ def test_copy():
     def foobar():
         pass
 
-    task1 = include_tasks()[0]
+    task1 = tools.include_tasks()[0]
 
     assert task1.group == group
     task2 = task1.copy(group=group)
