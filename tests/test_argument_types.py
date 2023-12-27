@@ -248,34 +248,38 @@ def test_unsupported_param_types_with_defaults_work_but_emit_warning(capsys):
 
 
     assert t.dispatch() == {}
+    assert_unsupported_type_warning_was_printed(capsys)
 
+
+def test_unsupported_list_type_bool(capsys):
+    @task
+    def foo(paths:list[bool]=[True]):
+        return paths
+
+    t = tools.include_task()
+
+    assert t.dispatch() == [True]
+    assert_unsupported_type_warning_was_printed(capsys)
+
+def test_tuples_result_in_unsupported_type(capsys):
+    # TODO: we can be made to work with basic types, e.g. tuple[int,str,float]
+    @task
+    def foo(paths:tuple=(1,)):
+        return paths
+
+    t = tools.include_task()
+
+    assert t.dispatch() == (1,)
+    assert_unsupported_type_warning_was_printed(capsys)
+
+
+def assert_unsupported_type_warning_was_printed(capsys):
     error = "Warning: Task 'foo' has a parameter 'paths' which has an unsupported"
     err =  capsys.readouterr().err
     assert error in  err
 
     hint = "Add `suppress_warnings=True`"
     assert hint in err
-
-
-# def test_unsupported_list_type(capsys):
-#     """The list has no default value, so providing at least one element is mandatory"""
-
-#     @task
-#     def foo(paths:list[bool]=[True]):
-#         return paths
-
-#     t = tools.include_task()
-
-
-#     assert t.dispatch() == [True]
-
-#     error = "Warning: Task 'foo' has a parameter 'paths' which has an unsupported"
-#     err =  capsys.readouterr().err
-#     assert error in  err
-
-#     hint = "Add `suppress_warnings=True`"
-#     assert hint in err
-
 
 
 
