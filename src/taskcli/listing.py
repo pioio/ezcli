@@ -296,7 +296,7 @@ def build_pretty_param_list(  # noqa: C901
             msg = f"Unknown parameter kind: {param.kind}"
             raise Exception(msg)
 
-        if include_defaults and not param.type == bool:
+        if include_defaults and not param.type.is_bool():
             if param.has_default():
                 # Shorten default value
                 default_value: Any = param.default

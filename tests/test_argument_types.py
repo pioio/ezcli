@@ -8,6 +8,7 @@ from .tools import reset_context_before_each_test
 
 result = []
 
+
 ########################################################################################################################
 # Helpers
 def assert_unsupported_type_warning_was_printed(capsys):
@@ -18,8 +19,10 @@ def assert_unsupported_type_warning_was_printed(capsys):
     hint = "Add `suppress_warnings=True`"
     assert hint in err
 
+
 def assert_param_required_printed(capsys, name):
     assert capsys.readouterr().err.endswith(f"error: the following arguments are required: {name}\n")
+
 
 def assert_is_list_of(obj, typevar):
     assert isinstance(obj, list)
@@ -29,6 +32,7 @@ def assert_is_list_of(obj, typevar):
 
 ########################################################################################################################
 # tests
+
 
 def test_simple_task_is_called():
     @task
@@ -295,8 +299,6 @@ def test_tuples_result_in_unsupported_type(capsys):
     assert_unsupported_type_warning_was_printed(capsys)
 
 
-
-
 def test_bool_positional_results_in_error(capsys):
     @task
     def foo(force=True):
@@ -310,9 +312,10 @@ def test_bool_positional_results_in_error(capsys):
     error = "has a boolean parameter 'force' which is not keyword-only."
     assert error in capsys.readouterr().err
 
+
 def test_bool_flag_with_no_default_is_required(capsys):
     @task
-    def foo(*, force:bool):
+    def foo(*, force: bool):
         return force
 
     t = tools.include_task()
@@ -321,9 +324,10 @@ def test_bool_flag_with_no_default_is_required(capsys):
 
     assert_param_required_printed(capsys, "--force/--no-force")
 
+
 def test_bool_flag_works():
     @task
-    def foo(*, force:bool=False):
+    def foo(*, force: bool = False):
         return force
 
     t = tools.include_task()

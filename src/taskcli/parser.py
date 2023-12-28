@@ -307,11 +307,11 @@ def _add_param_to_subparser(param: Parameter, subparser: argparse.ArgumentParser
             kwargs["default"] = param.default
 
         if not param.has_default() and not param.is_positional():
-            kwargs['required'] = True
+            kwargs["required"] = True
 
         if "nargs" in kwargs:
             del kwargs["nargs"]
-        if 'default' in kwargs:
+        if "default" in kwargs:
             help_default = "true" if kwargs["default"] else "false"
 
     elif param.type.is_list():
@@ -333,7 +333,7 @@ def _add_param_to_subparser(param: Parameter, subparser: argparse.ArgumentParser
             kwargs["nargs"] = "+"
     elif param.type.raw in [int, float, str]:
         pass
-    elif param.type.raw == taskcli.ParameterType.Empty:
+    elif param.type.raw == taskcli.parametertype.ParameterType.Empty:
         pass
     else:
         # Assuming here that error will be printed when we try to run the task

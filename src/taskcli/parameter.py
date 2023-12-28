@@ -6,9 +6,8 @@ from types import UnionType
 from typing import Any, List, TypeVar, Union, get_args, get_origin
 from webbrowser import get
 
-from .parametertype import ParameterType
-
 from . import annotations
+from .parametertype import ParameterType
 from .utils import param_to_cli_option
 
 # So that we don't duplicate the default value of arg annotation
@@ -59,7 +58,6 @@ class Parameter:
         # ### 4. The Arg annotation default (foobar: annotations.Arg[int, arg(default=5)])
         # If both are present, the annotation takes precedence
         the_type = param.annotation if not param_using_typing_annotated else param.annotation.__origin__
-
 
         self.help: str | None = None
         for data in self.metadata:  # Find the help string in annotation

@@ -1,7 +1,7 @@
-from typing import Any
 import inspect
-from typing import Union, get_args, get_origin
 from types import UnionType
+from typing import Any, Union, get_args, get_origin
+
 
 class ParameterType:
     """A class to represent the type of a parameter."""
@@ -9,9 +9,10 @@ class ParameterType:
     class Empty:
         """A class to represent that type was not set."""
 
-    def __init__(self, typevar:Any, /,*, default_value:Any):
+    def __init__(self, typevar: Any, /, *, default_value: Any):
         self._type = typevar
         from .parameter import Parameter
+
         if self._type is inspect.Parameter.empty:
             self._type = ParameterType.Empty
         if self._type is Parameter.Empty:
@@ -104,7 +105,11 @@ class ParameterType:
         if self._type is bool:
             # type set explicitly
             return True
-        if self._type == ParameterType.Empty and self.param_has_default() and isinstance(self.param_get_default(), bool):
+        if (
+            self._type == ParameterType.Empty
+            and self.param_has_default()
+            and isinstance(self.param_get_default(), bool)
+        ):
             # Type set implicitly via the default value
             return True
         return False
@@ -112,6 +117,7 @@ class ParameterType:
     def param_has_default(self) -> bool:
         """Return True if the parameter has a default value."""
         from .parameter import Parameter
+
         if self._default_value is Parameter.Empty:
             return False
         return True
