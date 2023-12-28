@@ -14,10 +14,9 @@ log = logging.getLogger(__name__)
 
 
 def main() -> None:
-
     """Entrypoint for the 'taskcli' command."""
-    from taskcli import dispatch
     start = time.time()
+
     try:
         import taskcli
     except ImportError:
