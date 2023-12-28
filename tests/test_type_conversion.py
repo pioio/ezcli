@@ -90,7 +90,7 @@ def test_custom_user_type():
     assert ret.value == "somearg"
 
 
-def test_custom_user_coversion():
+def test_custom_user_coversion_function():
     def convert(value:str):
         return "converted-" + value
 

@@ -34,8 +34,12 @@ class TaskCodeLocation:
 
 def task(*args: Any, **kwargs: Any) -> AnyFunction:
     """Decorate a function as a task."""
-    file_location = inspect.stack()[1].filename
-    line_number = inspect.stack()[1].lineno
+
+    # currentframe is much(!) faster than inspect.stack()
+    current_frame = inspect.currentframe().f_back
+    file_location = current_frame.f_code.co_filename
+    line_number = current_frame.f_lineno
+
     code_location = TaskCodeLocation(file=file_location, line=line_number)
     kwargs["code_location"] = code_location
 
@@ -301,6 +305,7 @@ def _get_wrapper(  # noqa: C901
     del kwargs["group"]
     del kwargs["aliases"]
     del kwargs["env"]
+
     task = Task(wrapper_for_changing_directory, env=env, group=group, aliases=aliases, **kwargs)
 
     if not hasattr(module_which_defines_task, "decorated_functions"):

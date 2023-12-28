@@ -41,6 +41,13 @@ TASKCLI_ADV_OVERRIDE_FORMATTING = EnvVar(
     ),
 )
 
+TASKCLI_ADV_PRINT_RUNTIME = EnvVar(
+    default_value="false",
+    desc=(
+        "If set to true, prints the total exection time the tool (not including the ython interpreter startup). "
+    ),
+)
+
 
 def _set_names() -> None:
     """Use the variable name to set the 'name' property of the EnvVar objects defined in this module.

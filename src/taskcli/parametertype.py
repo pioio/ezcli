@@ -60,11 +60,12 @@ class ParameterType:
         if self._type in [int, float, str, bool]:
             return True
 
+        # Without this block specifying a custom (unknown to taskcli) class as argument type
+        # will not make it be added to argpase and will result in a warning.
         if self.arg_annotation:
             if self.arg_annotation.type is not None:
                 # user specified "arg(..., type=...)", which will be passed to argparse, which will do the conversion
                 return True
-
 
         return False
 

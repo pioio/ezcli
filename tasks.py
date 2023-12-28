@@ -1,13 +1,11 @@
 #!/usr/bin/env python
 
 # iterate over all functions
-import inspect
-import sys
-from typing import Annotated, Type, TypeVar
+
 
 import testing
 from taskcli import run, task, tt
-from tests.includetest2.subdir.subsubdir import tasks as subsubtasks
+
 
 important = tt.Group("Important", desc="Development tasks")
 
@@ -72,17 +70,10 @@ with tt.Group("Testing module"):
 
 
 with tt.Group("Hidden Group", hidden=True):
-
     @task
     def task_in_hidden_group():
         print("hello")
 
-
-with tt.Group("Hidden Group2", hidden=True):
-
-    @task
-    def run_hidden():
-        task_in_hidden_group()
 
 
 DEFAULT_LINT_PATH = "src/"
@@ -141,8 +132,6 @@ def rufftwice():
     ruff()
     ruff()
 
-
-tt.include(subsubtasks)
 
 
 @task
