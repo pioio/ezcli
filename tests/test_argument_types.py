@@ -283,6 +283,20 @@ def assert_unsupported_type_warning_was_printed(capsys):
 
 
 
+def test_bool_positional_results_in_error(capsys):
+    @task
+    def foo(force=True):
+        return force
+
+    t = tools.include_task()
+
+    with pytest.raises(SystemExit, match="1"):
+        t.dispatch()
+
+    error = "has a boolean parameter 'force' which is not keyword-only."
+    assert error in  capsys.readouterr().err
+
+
 def test_complex_argument_example():
     Paths = tt.arg(list[str], default=[".", "src"])
     Sizes = tt.arg(list[int])
@@ -297,3 +311,4 @@ def test_complex_argument_example():
     assert kwpaths == ["foobar"]
     assert kwsizes == [1,2]
     assert force == False
+

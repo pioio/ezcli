@@ -294,22 +294,22 @@ def _add_param_to_subparser(param: Parameter, subparser: argparse.ArgumentParser
     args = param.get_argparse_names()
     kwargs: dict[str, Any] = {}
 
+    help_default = None
+
     if param.has_default():
         kwargs["default"] = param.default
         if param.kind == inspect.Parameter.POSITIONAL_OR_KEYWORD:
             kwargs["nargs"] = "?"
 
-    if param.type is bool:
-
-
-
+    if param.is_bool():
+        kwargs["action"] = argparse.BooleanOptionalAction
+        default = False
         if param.has_default():
-            if param.default:
-                kwargs["action"] = "store_false"
-            else:
-                kwargs["action"] = "store_true"
-        else:
-            kwargs["action"] = "store_true"
+            default = param.default
+        kwargs["default"] = default
+        if "nargs" in kwargs:
+            del kwargs["nargs"]
+        help_default = "true" if default else "false"
 
     elif param.is_list():
         if param.has_default():
@@ -337,8 +337,13 @@ def _add_param_to_subparser(param: Parameter, subparser: argparse.ArgumentParser
         log.debug("Unsupported type %s, not adding to parser", param.type)
         return
 
-    if param.help:
+    if param.help or help_default:
+
         kwargs["help"] = param.help
+    if help_default:
+        kwargs["help"] = "" if kwargs["help"] is None else kwargs["help"]
+        kwargs["help"] += f" (default: {help_default})"
+
 
 
     subparser.add_argument(*args, **kwargs)
@@ -348,7 +353,7 @@ def _convert_types_from_str_to_function_type(param: Parameter, value: Any) -> An
     """Called after parsing the command line arguments, to convert the types from str to the correct type."""
     if param.type is int:
         value = int(value)
-    elif param.type is bool:
+    elif param.is_bool():
         # TODO
         pass
 

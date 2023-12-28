@@ -20,11 +20,30 @@ class UserError(Exception):
     pass
 
 
+@dataclass
+class TaskCodeLocation:
+    """Where the task is defined."""
+
+    file: str
+    line: int
+
+    def __str__(self) -> str:
+        return f"{self.file}:{self.line}"
+
+    def __repr__(self) -> str:
+        return f"TaskCodeLocation(file={self.file!r}, line={self.line!r})"
+
 def task(*args: Any, **kwargs: Any) -> AnyFunction:
     """Decorate a function as a task."""
+
+    file_location = inspect.stack()[1].filename
+    line_number = inspect.stack()[1].lineno
+    code_location = TaskCodeLocation(file=file_location, line=line_number)
+    kwargs["code_location"] = code_location
+
     if len(args) == 1 and callable(args[0]):
         # Decorator is used without arguments
-        return _get_wrapper(args[0])
+        return _get_wrapper(args[0], **kwargs)
     else:
         # Decorator is used with arguments
 
@@ -45,9 +64,10 @@ class Task:
             group=group,
         )
         for prop in self.__dict__:
+            # TODO explicit copy of some objects, code_location
             props_to_skip = [
                 "func",  # passed to constructor
-                "params" "group",  # created from func in constructor  # passed to constructor
+                "params", "group",  # created from func in constructor  # passed to constructor
             ]
             if prop in props_to_skip:
                 continue
@@ -69,7 +89,8 @@ class Task:
         format: str = "{name}",
         customize_parser: Callable[[Any], None] | None = None,
         is_go_task: bool = False,
-        suppress_warnings:bool = False
+        suppress_warnings:bool = False,
+        code_location: TaskCodeLocation | None = None,
     ):
         """Create a new Task.
 
@@ -95,7 +116,10 @@ class Task:
         if self not in self.group.tasks:
             self.group.tasks.append(self)
 
+        self.code_location = code_location or TaskCodeLocation(file="<unknown>", line=0)
+
         self.soft_validate_task()
+
 
     def is_valid(self) -> bool:
         """Return True if the task is valid."""
@@ -306,12 +330,15 @@ def get_validation_errors(task:Task) -> list[ValidationResult]:
     # validate params
     out:list[ValidationResult] = []
     suppress_hint = "Add `suppress_warnings=True` to the task decorator to suppress this warning."
+
     for param in task.params:
-        if param.type == bool and param.kind not in [Parameter.KEYWORD_ONLY]:
-            msg = (f"Task '{task.name}' has a boolean parameter '{param.name}' which is not keyword-only. "
+        if param.is_bool() and param.kind not in [Parameter.KEYWORD_ONLY]:
+            # This will be a common error, so make sure the error message is extra helpful
+            msg = (f"Task '{task.name}' ({task.code_location}) has a boolean parameter '{param.name}' which is not keyword-only. "
             "This is not supported. "
             f"Either make the boolean parameter explicitly a keyword-only parameter by adding `*,` in the param list "
-            "anywhere before the bool parameter (e.g. def foobar(*, param:bool) ), or use a different type.")
+            "anywhere before the bool parameter "
+            f"[e.g. def taskname(arg:name, *, {_helper_render_bool_example(param)}) ], or use a different type.")
             out += [ValidationResult(msg, fatal=True)]
         if not param.has_supported_type():
             msg = f"Task '{task.name}' has a parameter '{param.name}' which has an unsupported type {param.type}. "
@@ -327,4 +354,13 @@ def get_validation_errors(task:Task) -> list[ValidationResult]:
             out += [ValidationResult(msg, fatal=fatal)]
 
 
+    return out
+
+def _helper_render_bool_example(param:Parameter):
+    """Render a bool parameter to string for an the warning text."""
+    out = param.name
+    if param.type != Parameter.Empty:
+        out += ":bool"
+    if param.has_default():
+        out += f"={param.default}"
     return out

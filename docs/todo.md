@@ -6,7 +6,10 @@ Required TODO:
 - [x] tuples
 - [x] list with no types
 - [x] list|None
+- [ ] param.type.is_bool
+- [ ] add unit tests with "-" task names
 
+- [ ] run task binary regardless of taskfile being found or not
 - [ ] Make unit test use standard formatting for listing.
 - [ ] show again number of tasks in group (not shown now)
 - [ ] left-align first argument
@@ -14,10 +17,7 @@ Required TODO:
 - [ ] show which group has hidden tasks
 - [ ] list hidden group in one line at the end
 - [ ] denote included tasks, somehow, e.g. with a star suffix, or "^ prefix in summary
-- [ ] if hidden tasks, print them at the end of task list? (3 hidden)
 - [ ] allow imported function to chdir to the local dir?
-- [ ] unit-tests should reset config on prepare, as i might start modifying it
-- [ ] run task binary regardless of taskfile being found or not
 - [ ] mark hidden gorups as (hidden)
 - [ ] groups and tasks with tags  task -t op, also --show-tags
 - [ ] using -f to specify file in other dir still make taskfile be loaded locally
@@ -25,16 +25,14 @@ Required TODO:
 - [ ] task script
 - [ ] show num of hidden groups
 - [ ] task -L should show ALL info
-- [ ] hidden tasks
-- [ ] advanced tasks
-- [ ] TODO custom format
 - [x] add auto conversion to int/float from string
 - [ ] task .dev   to list item in group, including hidden groups
 - [ ] groups having unique namespace
 - [ ] task op
 - [ ] extend with a c
 - [ ] groups having namespacesby default, but optionally not  Group(ns=False)
-  - [ ] always print group, but if ns is optional, print it dimmed out
+  - [ ] always print group, but if ns is optional, print it dimmed ou
+- [ ] Make bools works when no type present.
 - [ ] allow one task to be in more than one group?
 - [ ] allow certain tasks in group to not be namespaced?
 - [ ] Make sure importing a module does not add its tasks to the global default group by default

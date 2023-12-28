@@ -173,6 +173,15 @@ class Parameter:
             return True
         return False
 
+    def is_bool(self) -> bool:
+        if self.type is bool:
+            # type set explicitly
+            return True
+        if self.type == Parameter.Empty and self.has_default() and isinstance(self.default, bool):
+            # Type set implicitly via the default value
+            return True
+        return False
+
     def is_list(self) -> bool:
         if self.is_union():
             return False

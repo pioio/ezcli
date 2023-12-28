@@ -105,6 +105,7 @@ def test_list_type_1():
     assert param.is_list()
     assert not param.is_union_list_none()
     assert not param.has_default()
+    assert not param.is_bool()
 
 def test_list_type_2():
     def foo(x: list=[]) -> None:
@@ -165,3 +166,32 @@ def test_union_list_none3():
     assert not param.is_list()
     assert not param.is_union_list_none()
 
+
+
+def test_is_bool_explicit():
+    def foo(x: bool) -> None:  # type: ignore # noqa: PGH003
+        pass
+
+    param = Task(foo).params[0]
+    assert not param.is_list()
+    assert param.is_bool()
+    assert not param.is_union_list_none()
+
+
+def test_is_bool2_implicit():
+    def foo(x=False) -> None:  # type: ignore # noqa: PGH003
+        pass
+
+    param = Task(foo).params[0]
+    assert not param.is_list()
+    assert param.is_bool()
+    assert not param.is_union_list_none()
+
+def test_is_bool2_explicit_with_default():
+    def foo(x:bool=False) -> None:  # type: ignore # noqa: PGH003
+        pass
+
+    param = Task(foo).params[0]
+    assert not param.is_list()
+    assert param.is_bool()
+    assert not param.is_union_list_none()
