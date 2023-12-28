@@ -2,7 +2,7 @@
 
 The options listed in this file can only be set via the environment.
 They cannot be set via the command line.
-Thus, they can be as universal global settings.
+Thus, they can be seen as universal global settings.
 Typically you will never have to change those. But you can, if you need to.
 
 Sidenote: The TaskCLIConfig object contains the remaining configuration options which can be

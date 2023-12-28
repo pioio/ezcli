@@ -59,7 +59,7 @@ class TaskCLIConfig:
         self._addded_names: set[str] = set()
         self._addded_env_vars: list[EnvVar] = []
 
-        self.init: str = self._add_str("", "init", help="Create a new tasks.py file in the current directory")
+        self.init: str = self._add_str("", "init", env=False, help="Create a new tasks.py file in the current directory")
 
         self.tags: list[str] = self._add_list([], "tags", "-t", help="Only show tasks matching any of these tags")
 
@@ -112,7 +112,7 @@ class TaskCLIConfig:
         )
 
         self.list: int = self._add_int(
-            0, "list", "-l", action="count", help="List tasks. Use -ll and -lll for a more detailed listing."
+            0, "list", "-l", action="count", env=False, help="List tasks. Use -ll and -lll for a more detailed listing."
         )
 
         self.print_return_value: bool = self._add_bool(
@@ -126,7 +126,7 @@ class TaskCLIConfig:
         )
 
         self.list_all: bool = self._add_bool(
-            False, "list_all", "-L", help="Listing tasks shows all possible infomation. Extremely very verbose output."
+            False, "list_all", "-L", env=False, help="Listing tasks shows all possible infomation. Extremely very verbose output."
         )
 
     def _store_name(self, name: str) -> None:
@@ -152,10 +152,11 @@ class TaskCLIConfig:
     def _get_args(self, name: str, short: str) -> list[str]:
         return ["--" + name.replace("_", "-")] + ([f"{short}"] if short else [])
 
-    def _add_bool(self, default: bool, name: str, short: str = "", /, *, help: str, action: str = "") -> bool:
+    def _add_bool(self, default: bool, name: str, short: str = "", /, *, help: str, action: str = "", env:bool=True) -> bool:
         """Add a boolean flag to the parser."""
         self._store_name(name)
-        self._store_env_var(name=name, default_value=default, help=help)
+        if env:
+            self._store_env_var(name=name, default_value=default, help=help)
         args = self._get_args(name, short)
 
         new_default = default
@@ -164,7 +165,8 @@ class TaskCLIConfig:
         def add_argument(parser: argparse.ArgumentParser) -> None:
             nonlocal help
             help += f" (default: {new_default}{set_from})"
-            help += f" (env: {self._to_env_var_name(name)})"
+            if env:
+                help += f" (env: {self._to_env_var_name(name)})"
             act: Any = argparse.BooleanOptionalAction if not action else action
             parser.add_argument(*args, action=act, default=None, help=help)
 
@@ -181,14 +183,16 @@ class TaskCLIConfig:
 
         self._configure_parser.append(add_argument)
         self._read_parsed_args.append(read_argument)
-        self._read_from_env.append(read_from_env)
+        if env:
+            self._read_from_env.append(read_from_env)
 
         return default
 
-    def _add_str(self, default: str, name: str, short: str = "", /, *, help: str) -> str:
+    def _add_str(self, default: str, name: str, short: str = "", /, *, help: str, env:bool=True) -> str:
         """Add a boolean flag to the parser."""
         self._store_name(name)
-        self._store_env_var(name=name, default_value=default, help=help)
+        if env:
+            self._store_env_var(name=name, default_value=default, help=help)
         args = self._get_args(name, short)
 
         new_default = default
@@ -197,7 +201,8 @@ class TaskCLIConfig:
         def add_argument(parser: argparse.ArgumentParser) -> None:
             nonlocal help
             help += f" (default: {new_default}{set_from})"
-            help += f" (env: {self._to_env_var_name(name)})"
+            if env:
+                help += f" (env: {self._to_env_var_name(name)})"
             parser.add_argument(*args, default=None, help=help)
 
         def read_argument(config: TaskCLIConfig, args: argparse.Namespace) -> None:
@@ -213,14 +218,16 @@ class TaskCLIConfig:
 
         self._configure_parser.append(add_argument)
         self._read_parsed_args.append(read_argument)
-        self._read_from_env.append(read_from_env)
+        if env:
+            self._read_from_env.append(read_from_env)
 
         return default
 
-    def _add_list(self, default: list[str], name: str, short: str = "", /, *, help: str) -> list[str]:
+    def _add_list(self, default: list[str], name: str, short: str = "", /, *, help: str, env:bool=True) -> list[str]:
         """Add a list of string to the parser."""
         self._store_name(name)
-        self._store_env_var(name=name, default_value=default, help=help)
+        if env:
+            self._store_env_var(name=name, default_value=default, help=help)
         args = self._get_args(name, short)
 
         new_default = default
@@ -229,7 +236,8 @@ class TaskCLIConfig:
         def add_argument(parser: argparse.ArgumentParser) -> None:
             nonlocal help
             help += f" (default: {new_default}{set_from})"
-            help += f" (env: {self._to_env_var_name(name)})"
+            if env:
+                help += f" (env: {self._to_env_var_name(name)})"
             parser.add_argument(*args, nargs="*", default=None, help=help)
 
         def read_argument(config: TaskCLIConfig, args: argparse.Namespace) -> None:
@@ -247,14 +255,16 @@ class TaskCLIConfig:
 
         self._configure_parser.append(add_argument)
         self._read_parsed_args.append(read_argument)
-        self._read_from_env.append(read_from_env)
+        if env:
+            self._read_from_env.append(read_from_env)
 
         return default
 
-    def _add_int(self, default: int, name: str, short: str = "", /, *, help: str, action: str = "") -> int:
+    def _add_int(self, default: int, name: str, short: str = "", /, *, help: str, action: str = "", env:bool=True) -> int:
         """Add a list of string to the parser."""
         self._store_name(name)
-        self._store_env_var(name=name, default_value=default, help=help)
+        if env:
+            self._store_env_var(name=name, default_value=default, help=help)
         args = self._get_args(name, short)
 
         new_default = default
@@ -263,7 +273,8 @@ class TaskCLIConfig:
         def add_argument(parser: argparse.ArgumentParser) -> None:
             nonlocal help
             help += f" (default: {new_default}{set_from})"
-            help += f" (env: {self._to_env_var_name(name)})"
+            if env:
+                help += f" (env: {self._to_env_var_name(name)})"
             if action:
                 parser.add_argument(*args, default=None, help=help, action=action)
             else:
@@ -288,7 +299,8 @@ class TaskCLIConfig:
 
         self._configure_parser.append(add_argument)
         self._read_parsed_args.append(read_argument)
-        self._read_from_env.append(read_from_env)
+        if env:
+            self._read_from_env.append(read_from_env)
 
         return default
 
