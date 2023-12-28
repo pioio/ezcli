@@ -11,6 +11,7 @@ Required TODO:
 - [x] improve listing tabs in group,  name[group] is clumsy
 - [ ] nice warning if no tags listed
 - [ ] unit test for searching when some matching tasks are hidden
+- [ ] remove env var from help?
 - [ ] unit test for error if no tasks detected
 - [ ] combine listing with specifying a task
 - [ ] tt should have bigger tab completion than t

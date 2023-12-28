@@ -20,10 +20,8 @@ def filter_before_listing(tasks: list[Task], settings: TaskRenderSettings) -> Fi
     progress = []
     progress += [f"Before filtering: {len(tasks)}."]
 
-
-
     if settings.tags:
-        known_tags:set[str] = set()
+        known_tags: set[str] = set()
         for task in tasks:
             if task.tags:
                 known_tags.update(task.tags)
