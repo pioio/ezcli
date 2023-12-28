@@ -81,7 +81,6 @@ def list_tasks(tasks: list[Task], settings: TaskRenderSettings | None = None) ->
 
     settings = settings or TaskRenderSettings()
     filtered_tasks = filter_tasks_by_tags(tasks, tags=settings.tags)
-    print("filtered, tasks:", len(tasks))
 
     # TODO: extract groups info
     groups = create_groups(tasks=tasks, group_order=configuration.config.group_order)
