@@ -1,20 +1,21 @@
 """Various functions that operate on Tasks."""
 from dataclasses import dataclass
-from .taskrendersettings import TaskRenderSettings
 
+from taskcli.task import UserError
 
 from .task import Task
+from .taskrendersettings import TaskRenderSettings
 
 
 @dataclass
 class FilterResult:
     """Result of filtering tasks."""
+
     tasks: list[Task]
     progress: list[str]
 
 
-
-def filter_before_listing(tasks:list[Task], settings:TaskRenderSettings) -> FilterResult:
+def filter_before_listing(tasks: list[Task], settings: TaskRenderSettings) -> FilterResult:
     """Filter tasks before listing them."""
     progress = []
     progress += [f"Before filtering: {len(tasks)}."]
@@ -41,6 +42,7 @@ def filter_before_listing(tasks:list[Task], settings:TaskRenderSettings) -> Filt
     progress += [f"Final number of tasks: {len(search_filtered_tasks)}."]
     return FilterResult(tasks=search_filtered_tasks, progress=progress)
 
+
 def filter_tasks_by_tags(tasks: list[Task], tags: list[str]) -> list[Task]:
     """Return only tasks which have any of the tags."""
     if not tags:
@@ -55,16 +57,18 @@ def filter_tasks_by_tags(tasks: list[Task], tags: list[str]) -> list[Task]:
                     break
     return filtered
 
-from taskcli.task import UserError
+
 def search_for_tasks(tasks: list[Task], search: str) -> list[Task]:
     """Search for tasks by regex."""
     import re
+
     try:
         regex = re.compile(search)
     except re.error as e:
-        raise UserError(f"Invalid Python regex: {search}") from e
+        msg = f"Invalid Python regex: {search}"
+        raise UserError(msg) from e
 
-    out:list[Task] = []
+    out: list[Task] = []
     for task in tasks:
         if regex.search(task.name):
             out.append(task)

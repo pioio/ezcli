@@ -85,9 +85,6 @@ def _dispatch_unsafe(argv: list[str] | None = None, tasks_found: bool = True) ->
     argconfig = parser.parse_args(argv)
     config.read_parsed_arguments(argconfig)
 
-    # print(config)
-    # sys.exit(1)
-
     taskcli.core.get_runtime().parsed_args = argconfig
 
     if config.init:

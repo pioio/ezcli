@@ -5,9 +5,6 @@
 import testing
 from taskcli import run, task, tt
 
-# tt.config.show_ready_info = True
-# tt.config.show_tags = True
-
 important = tt.Group("Important", desc="Development tasks")
 
 

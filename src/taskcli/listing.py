@@ -1,16 +1,17 @@
 import inspect
+import logging
 from typing import Any, final
 from venv import logger
 
 import taskcli
 import taskcli.core
-from .tasktools import filter_before_listing
 
 from . import configuration, utils
-from .configuration import config
+from .configuration import colors, config
 from .group import Group
 from .task import Task, UserError
 from .taskrendersettings import TaskRenderSettings
+from .tasktools import filter_before_listing
 from .utils import param_to_cli_option
 
 ORDER_TYPE_DEFINITION = "definition"
@@ -61,9 +62,9 @@ def _sort_tasks(tasks: list[Task], sort: str, sort_important_first: bool) -> lis
 
     return tasks
 
-import logging
+
 log = logging.getLogger(__name__)
-from .configuration import colors
+
 
 def list_tasks(tasks: list[Task], settings: TaskRenderSettings | None = None) -> list[str]:  # noqa: C901
     """Return a list of lines to be printed to the console."""

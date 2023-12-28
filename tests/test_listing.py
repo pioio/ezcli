@@ -198,11 +198,10 @@ def test_hidden_tasks_dont_show_up_by_default():
     assert "hidden-task" in "\n".join(lines), "Hidden task should be in the task listing when high verbose"
 
 
-
 def test_list_with_tags():
-
     groupa = Group("groupA")
     groupb = Group("groupB")
+
     @task(tags=["tag1", "groupa"], group=groupa)
     def foobar() -> None:
         pass
@@ -219,32 +218,40 @@ def test_list_with_tags():
 
     with tools.simple_list_format():
         lines = list_tasks(tasks)
-    assert lines == """
+    assert (
+        lines
+        == """
 # groupA
 foobar
 # groupB
 foobar2a
 1 hidden tasks, use -H to show
 """.strip().splitlines()
+    )
 
     with tools.simple_list_format():
         render_settings = TaskRenderSettings()
-        render_settings.tags = ["tag1", "tag2"] # use all tags, should list all
+        render_settings.tags = ["tag1", "tag2"]  # use all tags, should list all
         lines = list_tasks(tasks)
-    assert lines == """
+    assert (
+        lines
+        == """
 # groupA
 foobar
 # groupB
 foobar2a
 1 hidden tasks, use -H to show
 """.strip().splitlines()
-
+    )
 
     with tools.simple_list_format():
         render_settings = TaskRenderSettings()
         render_settings.tags = ["tag1"]
         lines = list_tasks(tasks, render_settings)
-    assert lines == """
+    assert (
+        lines
+        == """
 # groupA
 foobar
 """.strip().splitlines()
+    )

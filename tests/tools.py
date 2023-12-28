@@ -9,7 +9,7 @@ import pytest
 
 import taskcli
 import taskcli.core
-from taskcli import Task, task
+from taskcli import Task, task, tt
 from taskcli.types import Module
 
 ########################################################################################################################
@@ -75,7 +75,6 @@ def include_tasks(module: Module | None = None) -> list[Task]:
     taskcli.include(module_from_which_this_function_was_called)
     return taskcli.core.get_runtime().tasks
 
-from taskcli import tt
 
 @contextlib.contextmanager
 def simple_list_format(kwargs: dict[str, str] | None = None):
@@ -94,9 +93,7 @@ def simple_list_format(kwargs: dict[str, str] | None = None):
     - allows experimenting with changing formatting, without needing to adjust (most of) unit tests.
       (some unit tests do test formatting itself, and those tests do not use this context manager)
     """
-    def_kwargs = {
-        tt.config.field_show_tags.env_var_name: ""
-    }
+    def_kwargs = {tt.config.field_show_tags.env_var_name: ""}
     if kwargs:
         def_kwargs.update(kwargs)
 
@@ -125,7 +122,6 @@ def _changed_config(fun, **kwargs):
     # restore
     for k, v in old_settings.items():
         setattr(old_config, k, v)
-
 
 
 def run_tasks(cmd: str) -> tuple[str, str]:

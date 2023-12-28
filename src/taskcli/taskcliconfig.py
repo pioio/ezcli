@@ -30,18 +30,25 @@ from .task import UserError
 
 log = logging.getLogger(__name__)
 
+
 class ConfigField:
+    """A metadata field describing a configuration option.
+
+    It's used internally to obtain e.g. env var name or cli args of fields.
+    """
+
     def __init__(
-            self,
-            default: str | bool | int | list[str],
-            name:str ="",
-            short: str = "",
-            /,*,
-            help: str = "",
-            env: bool = True,
-            env_var_name: str = "",
-            action: str = "",
-            nargs:str = "",
+        self,
+        default: str | bool | int | list[str],
+        name: str = "",
+        short: str = "",
+        /,
+        *,
+        help: str = "",
+        env: bool = True,
+        env_var_name: str = "",
+        action: str = "",
+        nargs: str = "",
     ):
         self.default = default
         self.name = name
@@ -98,13 +105,20 @@ class TaskCLIConfig:
             "", "init", env=False, help="Create a new tasks.py file in the current directory"
         )
 
-        self.tags: list[str] = self._add_list([], "tags", "-t", nargs="+", help="Only show tasks matching any of these tags")
-        self.search: str = self._add_str("", "search", "-s", help="Only show tasks whose name or description is matching this python regex seach pattern.")
+        self.tags: list[str] = self._add_list(
+            [], "tags", "-t", nargs="+", help="Only show tasks matching any of these tags"
+        )
+        self.search: str = self._add_str(
+            "",
+            "search",
+            "-s",
+            help="Only show tasks whose name or description is matching this python regex seach pattern.",
+        )
 
         self.field_show_hidden: ConfigField = ConfigField(
             False, "show_hidden", "-H", help="Show all tasks and groups, even the hidden ones."
         )
-        self.show_hidden: bool = self._add_bool( self.field_show_hidden)
+        self.show_hidden: bool = self._add_bool(self.field_show_hidden)
 
         self.field_no_go_task = ConfigField(
             False,
@@ -127,9 +141,7 @@ class TaskCLIConfig:
         self.field_show_hidden_tasks = ConfigField(False, "show_hidden_tasks", help="")
         self.show_hidden_tasks: bool = self._add_bool(self.field_show_hidden_tasks)
 
-        self.field_show_tags = ConfigField(
-            True, "show_tags", help="Show tags of each task when listing tasks."
-        )
+        self.field_show_tags = ConfigField(True, "show_tags", help="Show tags of each task when listing tasks.")
         self.show_tags: bool = self._add_bool(self.field_show_tags)
 
         self.field_show_optional_args = ConfigField(False, "show_optional_args", help="")
@@ -138,19 +150,26 @@ class TaskCLIConfig:
         self.field_show_default_values = ConfigField(False, "show_default_values", help="")
         self.show_default_values: bool = self._add_bool(self.field_show_default_values)
 
-        self.field_show_ready_info = ConfigField(False,
+        self.field_show_ready_info = ConfigField(
+            False,
             "show_ready_info",
             "-r",
             help=(
                 "Listing tasks will show detailed info about the task's readiness to be run. "
                 "For example, it will list any required but missing environment variables. "
-            ))
+            ),
+        )
         self.show_ready_info: bool = self._add_bool(self.field_show_ready_info)
 
         self.field_print_env = ConfigField(False, "print_env", action="store_true", help="List the supported env vars")
         self.print_env: bool = self._add_bool(self.field_print_env)
 
-        self.field_print_env_detailed = ConfigField(False, "print_env_detailed", action="store_true", help=f"Like {self.field_print_env.cli_arg_flag}, but also include descriptions.")
+        self.field_print_env_detailed = ConfigField(
+            False,
+            "print_env_detailed",
+            action="store_true",
+            help=f"Like {self.field_print_env.cli_arg_flag}, but also include descriptions.",
+        )
         self.print_env_detailed: bool = self._add_bool(self.field_print_env_detailed)
 
         self.verbose: int = self._add_int(
@@ -161,21 +180,23 @@ class TaskCLIConfig:
             0, "list", "-l", action="count", env=False, help="List tasks. Use -ll and -lll for a more detailed listing."
         )
 
-        self.field_print_return_value = ConfigField(False,
+        self.field_print_return_value = ConfigField(
+            False,
             "print_return_value",
             "-P",
             help=(
                 "Advanced: print return value of the task function to stdout. Useful when the task "
                 "is a regular function which by itself does not print, and only returns a value."
-            ))
+            ),
+        )
         self.print_return_value: bool = self._add_bool(self.field_print_return_value)
 
-        self.field_list_all = ConfigField(False,
+        self.field_list_all = ConfigField(
+            False,
             "list_all",
             "-L",
-            help=(
-                "Listing tasks shows all possible infomation. Extremely very verbose output."
-            ))
+            help=("Listing tasks shows all possible infomation. Extremely very verbose output."),
+        )
         self.list_all: bool = self._add_bool(self.field_list_all)
 
     def _store_name(self, name: str) -> None:
@@ -183,10 +204,10 @@ class TaskCLIConfig:
         assert name not in self._addded_names
         self._addded_names.add(name)
 
-    def __str__(self):
+    def __str__(self) -> str:
         out = []
         for name in self._addded_names:
-            field:ConfigField = getattr(self, "field_" + name)
+            field: ConfigField = getattr(self, "field_" + name)
             assert isinstance(field, ConfigField)
             envtxt = ""
             if field.env:
@@ -213,9 +234,7 @@ class TaskCLIConfig:
     def _get_args(self, name: str, short: str) -> list[str]:
         return ["--" + name.replace("_", "-")] + ([f"{short}"] if short else [])
 
-    def _add_bool(
-        self, field:ConfigField
-    ) -> bool:
+    def _add_bool(self, field: ConfigField) -> bool:
         """Add a boolean flag to the parser."""
         self._store_name(field.name)
         if field.env:
@@ -224,6 +243,7 @@ class TaskCLIConfig:
 
         set_from = ""
         default = field.default
+
         def add_argument(parser: argparse.ArgumentParser) -> None:
             nonlocal field
             help = field.help
@@ -240,7 +260,9 @@ class TaskCLIConfig:
 
         def read_from_env(config: TaskCLIConfig) -> None:
             if field.env_var_name in os.environ:
-                new_default = EnvVar(default_value=str(field.default), desc=field.help, name=field.env_var_name).is_true()
+                new_default = EnvVar(
+                    default_value=str(field.default), desc=field.help, name=field.env_var_name
+                ).is_true()
                 setattr(config, field.name, new_default)
 
         self._configure_parser.append(add_argument)
@@ -286,7 +308,9 @@ class TaskCLIConfig:
 
         return default
 
-    def _add_list(self, default: list[str], name: str,short: str = "", /, *,  nargs="*", help: str, env: bool = True) -> list[str]:
+    def _add_list(
+        self, default: list[str], name: str, short: str = "", /, *, nargs: str = "*", help: str, env: bool = True
+    ) -> list[str]:
         """Add a list of string to the parser."""
         assert nargs in ["*", "+", "?", ""], f"Invalid nargs: {nargs}"
         self._store_name(name)

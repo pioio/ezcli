@@ -26,6 +26,7 @@ def should_include_taskfile_dev() -> bool:
     envvars.TASKCLI_GOTASK_TASKFILE_FILENAMES.log_debug()
 
     from taskcli import tt
+
     disabled_via_cli: bool = tt.config.field_no_go_task.cli_arg_flag in sys.argv
 
     return INCLUDE_TASKFILE_YAML and not disabled_via_cli
@@ -67,8 +68,11 @@ def include_tasks(path: str = ".") -> bool:
 
 
 def _to_disable_string() -> str:
+    from taskcli import tt
+
     return (
-        f"To disable automatic inclusion of tasks {go_task_project_name} tasks, use '{tt.config.field_no_go_task.cli_arg_flag}' or "
+        f"To disable automatic inclusion of tasks {go_task_project_name} tasks, "
+        f" use '{tt.config.field_no_go_task.cli_arg_flag}' or "
         f"unset the {envvars.TASKCLI_GOTASK_TASK_BINARY_FILEPATH.name} env var."
     )
 
