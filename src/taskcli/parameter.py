@@ -99,7 +99,9 @@ class Parameter:
         """Return the names for argparse, in order of precedence."""
         # TODO: return single flag params also
         if self.is_positional():
-            name = self.name.replace("_", "-")
+            name = self.name
+            assert "-" not in name, "for positional, we need underscores, not dashes "
         else:
             name = param_to_cli_option(self.name)
+            assert "_" not in name, "for options, we need dashes, not underscores"
         return [name]

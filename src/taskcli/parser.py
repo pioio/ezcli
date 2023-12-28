@@ -1,4 +1,5 @@
 import argparse
+from ast import arg
 import inspect
 import logging
 import os
@@ -109,6 +110,7 @@ def _dispatch_unsafe(argv: list[str] | None = None, tasks_found: bool = True) ->
             msg = "Refusing to run task due to validation errors."
             raise UserError(msg)
 
+        # convert parsed arguments to kwargs we can pass to the function
         for param in task.params:
             if not param.type.has_supported_type():
                 # Skip it
@@ -117,7 +119,13 @@ def _dispatch_unsafe(argv: list[str] | None = None, tasks_found: bool = True) ->
                 ), f"Param {param.name} does not have a default, dispatch should have never been called"
                 continue
             name = param.name
-            value = getattr(argconfig, name)
+            assert "-" not in param.name
+            try:
+                value = getattr(argconfig, name)
+            except AttributeError:
+                print(argconfig, sys.stderr)  # noqa: T201, debug
+                raise
+
             value = _convert_types_from_str_to_function_type(param, value)
             kwargs[name] = value
 
@@ -291,6 +299,7 @@ def build_parser(tasks: list[Task]) -> argparse.ArgumentParser:
 
 def _add_param_to_subparser(param: Parameter, subparser: argparse.ArgumentParser) -> None:  # noqa: C901
     args = param.get_argparse_names()
+
     kwargs: dict[str, Any] = {}
 
     help_default = None

@@ -350,3 +350,34 @@ def test_complex_argument_example():
     assert kwpaths == ["foobar"]
     assert kwsizes == [1, 2]
     assert force is False
+
+
+
+
+def test_positional_arguments_with_hyphens():
+    @task
+    def foo(foo_bar:str):
+        return foo_bar
+
+    t = tools.include_task()
+    assert t.dispatch("hello") == "hello"
+
+
+def test_keyword_arguments_with_hyphens():
+    @task
+    def foo(*, foo_bar:str):
+        return foo_bar
+
+    t = tools.include_task()
+    assert t.dispatch(['--foo-bar', "hello"]) == "hello"
+
+
+def test_task_names_with_hyphens():
+    @task
+    def foo_bar(*, foo_bar:str):
+        return foo_bar
+
+    tools.include_task()
+    from taskcli import dispatch
+    assert dispatch(["foo-bar", "--foo-bar", "hello"]) == "hello"
+
