@@ -2,13 +2,16 @@ Required TODO:
 - [x] add `taskcli.extra_args` to get `-- args`
 - [x] add "-f" to specify the file
 - [ ] add "--no-*" version of bool flags.
-- [x] list[bool]  ? list[other-type]
+- [ ] list[bool]  ? list[other-type]
 - [x] tuples
 - [x] list with no types
 - [x] list|None
-- [ ] param.type.is_bool
+- [x] param.type.is_bool
 - [ ] add unit tests with "-" task names
 - [ ] add unit test for args passed to argparse from 'arg'
+- [ ] aliases unit tests
+- [ ] coverage
+- [ ] ability to exclude certain arguments from parser (task(exclude)))
 
 - [ ] run task binary regardless of taskfile being found or not
 - [ ] Make unit test use standard formatting for listing.
@@ -23,9 +26,7 @@ Required TODO:
 - [ ] groups and tasks with tags  task -t op, also --show-tags
 - [ ] using -f to specify file in other dir still make taskfile be loaded locally
 - [ ] include
-- [ ] task script
-- [ ] show num of hidden groups
-- [ ] task -L should show ALL info
+- [x] task -L should show ALL info
 - [x] add auto conversion to int/float from string
 - [ ] task .dev   to list item in group, including hidden groups
 - [ ] groups having unique namespace
@@ -82,17 +83,12 @@ group desc should say how many hidden tasks there are
   def dev():
     fooo
 - sort order
-- unit tests
-- groups
 - auto-prefix task names with group prefix if ns=True
 - print group name on the same line as task, dimmed out, but don't require it
 - list important first
-- soft order
-- easy show hidden tasks (-H
 - TASKCLI_SHOW_HIDDEN_TASKS
 - env vars should map to config
 - before/after to run a function only once
-- aliases
 - listing all tasks in all dirs above, up intil a custom root (configurable)
   - task .
 
