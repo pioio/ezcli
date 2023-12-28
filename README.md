@@ -7,21 +7,30 @@ It's kind of like a Makefile, but in Python, and on steroids (search, tags, grou
 The guiding design principles of taskcli are:
 - encapsulate complexity of managing many tasks: show only what's needed, but make it easy to reveal more.
 - make running and navigating between groups of tasks fast, but powerful.
+- make the most important tasks stand out. Hide the less frequently used ones
 
 `taskcli` is not only for Python project.
 It can be used for any sort of project, with Python as the glue (in stead of write-once-read-never bash "oneliners").
 
 ## Basic usage overview
-`t` list all the tasks in the current directory (you can import tasks from other directories)
-`t <task_name> [args]` run a task (tool will automaticlly switch directories if needed)
-`t <group_name>` list all the tasks in a group of tasks
-`t -s <search_term>` list all the tasks matching the regex search term
-`t -t tags` list all the tasks with the given tags
-`t -t imp` list all tags maked as important
-`t -H` list all the tasks, even the onces marked as hidden and the onces in hidden group
+`tt` list all the tasks defined by the `tasks.py` in current directory (you can import tasks from other directories)
+`tt <task_name> [args]` run a task (tool will automaticlly switch directories if needed)
+`tt <group_name>` list all the tasks in a group of tasks
+`tt -s <search_term>` list all the tasks matching the regex search term
+`tt -t tags` list all the tasks with the given tags
+`tt -t imp` list all tags maked as important
+`tt -H` list all the tasks, even the onces marked as hidden and the onces in hidden group
 
-(You can also use `taskcli` instead of `t`)
+(You can also use `taskcli` instead of `tt`)
 
+## Tab completion
+Install `argcomplete` package. It's an optional dependency of taskcli
+
+Add this to your `.bashrc`
+```
+eval "$(register-python-argcomplete taskcli)"
+eval "$(register-python-argcomplete tt)"
+```
 
 ## Installation and basic usage
 ```
@@ -34,9 +43,9 @@ taskcli --init
 # list the tasks in tasks.py
 taskcli <task_name>
 
-# Instead of `taskcli` you can also use the `tt` script, eg:
-tt
-tt <task_name>
+# Instead of `taskcli` you can also use the `t` script, eg:
+t
+t <task_name>
 ```
 
 ## Overview
@@ -45,10 +54,9 @@ Be it complication, deployment, testing, making an API call, or anything else, i
 As projects grow, so does the number of tasks.
 Over time, it becomes harder and harder to organize them.
 
-This library aims to solve this problem by providing means of not only easily creating tasks,
+This tool aims to solve this problem by providing means of not only easily creating tasks,
 but also easily navigating them later on.
 You can group tasks, highlight the important ones, combine tasks from many files and directories.
-
 
 
 
@@ -75,9 +83,9 @@ Each task has a namespace.
 TODO: explain
 
 ## Typical usage
-- run `tt` to list all the (not hidden) tasks in local `./tasks.py` file. Some info is hidden from this overview.
-- run `tt <task_name>` to run a task.
-- run `tt <group_name>` to list only tasks in that group. This view includes more detailed info than the full listing.
+- run `t` to list all the (not hidden) tasks in local `./tasks.py` file. Some info is hidden from this overview.
+- run `t <task_name>` to run a task.
+- run `t <group_name>` to list only tasks in that group. This view includes more detailed info than the full listing.
 
 The goal of `t` is to get a quick overview of all the tasks.
 You can always include `t -L` to view all the info for all the groups. But note that for large projects
