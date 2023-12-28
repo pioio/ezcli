@@ -321,7 +321,7 @@ def test_bool_flag_with_no_default_is_required(capsys):
 
     assert_param_required_printed(capsys, "--force/--no-force")
 
-def test_bool_flag_works(capsys):
+def test_bool_flag_works():
     @task
     def foo(*, force:bool=False):
         return force
