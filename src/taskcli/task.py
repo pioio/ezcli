@@ -338,7 +338,7 @@ def get_validation_errors(task: Task) -> list[ValidationResult]:
     suppress_hint = "Add `suppress_warnings=True` to the task decorator to suppress this warning."
 
     for param in task.params:
-        if param.is_bool() and param.kind not in [Parameter.KEYWORD_ONLY]:
+        if param.type.is_bool() and param.kind not in [Parameter.KEYWORD_ONLY]:
             # This will be a common error, so make sure the error message is extra helpful
             msg = (
                 f"Task '{task.name}' ({task.code_location}) has a "
@@ -350,8 +350,8 @@ def get_validation_errors(task: Task) -> list[ValidationResult]:
                 f"[e.g. def taskname(arg:name, *, {_helper_render_bool_example(param)}) ], or use a different type."
             )
             out += [ValidationResult(msg, fatal=True)]
-        if not param.has_supported_type():
-            msg = f"Task '{task.name}' has a parameter '{param.name}' which has an unsupported type {param.type}. "
+        if not param.type.has_supported_type():
+            msg = f"Task '{task.name}' has a parameter '{param.name}' which has an unsupported type {param.type.raw}. "
             if param.has_default():
                 msg += (
                     "It will not be possible to specify this parameter from the CLI. "
@@ -371,7 +371,7 @@ def get_validation_errors(task: Task) -> list[ValidationResult]:
 def _helper_render_bool_example(param: Parameter) -> str:
     """Render a bool parameter to string for an the warning text."""
     out = param.name
-    if param.type != Parameter.Empty:
+    if param.type.was_specified():
         out += ":bool"
     if param.has_default():
         out += f"={param.default}"

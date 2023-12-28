@@ -2,6 +2,7 @@ from typing import Annotated, get_args, get_origin
 
 from taskcli import arg
 from taskcli.parameter import Parameter
+from taskcli.parametertype import ParameterType
 from taskcli.task import Task
 
 
@@ -12,7 +13,7 @@ def test_basic():
     task = Task(foo)
     param = task.params[0]
     assert param.name == "x"
-    assert param.type == Parameter.Empty
+    assert param.type.raw == ParameterType.Empty
 
 
 def test_basic_types_from_signature():
@@ -21,7 +22,7 @@ def test_basic_types_from_signature():
 
     param = Task(foo).params[0]
     assert param.name == "x"
-    assert param.type == str
+    assert param.type.raw == str
     assert param.default == Parameter.Empty
     assert not param.has_default()
 
@@ -32,7 +33,7 @@ def test_basic_types_from_annotated():
 
     param = Task(foo).params[0]
     assert param.name == "x"
-    assert param.type == str
+    assert param.type.raw == str
     assert param.default == Parameter.Empty
     assert not param.has_default()
 
@@ -43,7 +44,7 @@ def test_basic_default_from_param():
 
     param = Task(foo).params[0]
     assert param.name == "x"
-    assert param.type == str
+    assert param.type.raw == str
     assert param.default == "foobar"
     assert param.has_default()
 
@@ -56,7 +57,7 @@ def test_basic_default_from_annotated():
 
     param = Task(foo).params[0]
     assert param.name == "x"
-    assert param.type == str
+    assert param.type.raw == str
     assert param.default == "from-annotated"
     assert param.has_default()
 
@@ -75,12 +76,12 @@ def test_basic_default_from_param_and_annotated():
     param2 = task.params[1]
 
     assert param1.name == "x"
-    assert param1.type == str
+    assert param1.type.raw == str
     assert param1.default == "from-annotated"
     assert param1.has_default()
 
     assert param2.name == "y"
-    assert param2.type == str
+    assert param2.type.raw == str
     assert param2.default == "from-signature"
     assert param2.has_default()
 
@@ -93,7 +94,7 @@ def test_basic_no_default_but_annotated():
 
     param = Task(foo).params[0]
     assert param.name == "x"
-    assert param.type == str
+    assert param.type.raw == str
     assert param.default == Parameter.Empty
     assert not param.has_default()
 
@@ -103,10 +104,10 @@ def test_list_type_1():
         pass
 
     param = Task(foo).params[0]
-    assert param.is_list()
-    assert not param.is_union_list_none()
+    assert param.type.is_list()
+    assert not param.type.is_union_list_none()
     assert not param.has_default()
-    assert not param.is_bool()
+    assert not param.type.is_bool()
 
 
 def test_list_type_2():
@@ -114,10 +115,10 @@ def test_list_type_2():
         pass
 
     param = Task(foo).params[0]
-    assert param.is_list()
-    assert not param.is_union_list_none()
+    assert param.type.is_list()
+    assert not param.type.is_union_list_none()
     assert param.has_default()
-    assert not param.list_has_type_args()
+    assert not param.type.list_has_type_args()
 
 
 def test_list_type_3():
@@ -125,11 +126,11 @@ def test_list_type_3():
         pass
 
     param = Task(foo).params[0]
-    assert param.is_list()
-    assert not param.is_union_list_none()
+    assert param.type.is_list()
+    assert not param.type.is_union_list_none()
     assert not param.has_default()
-    assert param.list_has_type_args()
-    assert param.get_list_type_args() == int
+    assert param.type.list_has_type_args()
+    assert param.type.get_list_type_args() == int
 
 
 def test_list_type_4():
@@ -137,10 +138,10 @@ def test_list_type_4():
         pass
 
     param = Task(foo).params[0]
-    assert param.is_list()
-    assert not param.is_union_list_none()
+    assert param.type.is_list()
+    assert not param.type.is_union_list_none()
     assert param.has_default()
-    assert param.get_list_type_args() == int
+    assert param.type.get_list_type_args() == int
 
 
 def test_union_list_none1():
@@ -148,8 +149,8 @@ def test_union_list_none1():
         pass
 
     param = Task(foo).params[0]
-    assert not param.is_list()
-    assert param.is_union_list_none()
+    assert not param.type.is_list()
+    assert param.type.is_union_list_none()
 
 
 def test_union_list_none2():
@@ -157,8 +158,8 @@ def test_union_list_none2():
         pass
 
     param = Task(foo).params[0]
-    assert not param.is_list()
-    assert param.is_union_list_none()
+    assert not param.type.is_list()
+    assert param.type.is_union_list_none()
 
 
 def test_union_list_none3():
@@ -166,8 +167,8 @@ def test_union_list_none3():
         pass
 
     param = Task(foo2).params[0]
-    assert not param.is_list()
-    assert not param.is_union_list_none()
+    assert not param.type.is_list()
+    assert not param.type.is_union_list_none()
 
 
 def test_is_bool_explicit():
@@ -175,9 +176,9 @@ def test_is_bool_explicit():
         pass
 
     param = Task(foo).params[0]
-    assert not param.is_list()
-    assert param.is_bool()
-    assert not param.is_union_list_none()
+    assert not param.type.is_list()
+    assert param.type.is_bool()
+    assert not param.type.is_union_list_none()
 
 
 def test_is_bool2_implicit():
@@ -185,9 +186,9 @@ def test_is_bool2_implicit():
         pass
 
     param = Task(foo).params[0]
-    assert not param.is_list()
-    assert param.is_bool()
-    assert not param.is_union_list_none()
+    assert not param.type.is_list()
+    assert param.type.is_bool()
+    assert not param.type.is_union_list_none()
 
 
 def test_is_bool2_explicit_with_default():
@@ -195,6 +196,6 @@ def test_is_bool2_explicit_with_default():
         pass
 
     param = Task(foo).params[0]
-    assert not param.is_list()
-    assert param.is_bool()
-    assert not param.is_union_list_none()
+    assert not param.type.is_list()
+    assert param.type.is_bool()
+    assert not param.type.is_union_list_none()

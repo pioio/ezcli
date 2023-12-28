@@ -110,7 +110,7 @@ def _dispatch_unsafe(argv: list[str] | None = None, tasks_found: bool = True) ->
             raise UserError(msg)
 
         for param in task.params:
-            if not param.has_supported_type():
+            if not param.type.has_supported_type():
                 # Skip it
                 assert (
                     param.has_default()
@@ -300,7 +300,7 @@ def _add_param_to_subparser(param: Parameter, subparser: argparse.ArgumentParser
         if param.kind == inspect.Parameter.POSITIONAL_OR_KEYWORD:
             kwargs["nargs"] = "?"
 
-    if param.is_bool():
+    if param.type.is_bool():
         kwargs["action"] = argparse.BooleanOptionalAction
         default = False
         if param.has_default():
@@ -310,7 +310,7 @@ def _add_param_to_subparser(param: Parameter, subparser: argparse.ArgumentParser
             del kwargs["nargs"]
         help_default = "true" if default else "false"
 
-    elif param.is_list():
+    elif param.type.is_list():
         if param.has_default():
             kwargs["nargs"] = "*"  # it's ok for user to not pass it, default will be used
         else:
@@ -321,15 +321,15 @@ def _add_param_to_subparser(param: Parameter, subparser: argparse.ArgumentParser
 
         if param.has_default():
             kwargs["default"] = param.default
-    elif param.is_union_list_none():
+    elif param.type.is_union_list_none():
         if param.has_default():
             kwargs["nargs"] = "*"
             kwargs["default"] = param.default
         else:
             kwargs["nargs"] = "+"
-    elif param.type in [int, float, str]:
+    elif param.type.raw in [int, float, str]:
         pass
-    elif param.type == taskcli.parameter.Parameter.Empty:
+    elif param.type.raw == taskcli.ParameterType.Empty:
         pass
     else:
         # Assuming here that error will be printed when we try to run the task
@@ -347,15 +347,15 @@ def _add_param_to_subparser(param: Parameter, subparser: argparse.ArgumentParser
 
 def _convert_types_from_str_to_function_type(param: Parameter, value: Any) -> Any:  # noqa: C901
     """Convert values from argparse to the types defined in the task."""
-    if param.type is int:
+    if param.type.raw is int:
         value = int(value)
-    elif param.is_bool():
+    elif param.type.is_bool():
         # TODO
         pass
 
-    elif param.is_list():
+    elif param.type.is_list():
         out = []
-        thetype = param.get_list_type_args()
+        thetype = param.type.get_list_type_args()
         for item in value:
             if thetype is not None:
                 try:
@@ -366,7 +366,7 @@ def _convert_types_from_str_to_function_type(param: Parameter, value: Any) -> An
             else:
                 out += [item]
         value = out
-    elif param.is_union_list_none():
+    elif param.type.is_union_list_none():
         if value is None:
             return None
 
@@ -378,7 +378,7 @@ def _convert_types_from_str_to_function_type(param: Parameter, value: Any) -> An
             return None
 
         out = []
-        thetype = param.get_list_type_args()
+        thetype = param.type.get_list_type_args()
         for item in value:
             if thetype is not None:
                 try:
@@ -392,7 +392,7 @@ def _convert_types_from_str_to_function_type(param: Parameter, value: Any) -> An
 
         return value
 
-    elif param.type is float:
+    elif param.type.raw is float:
         value = float(value)
 
     # list of int
@@ -408,7 +408,7 @@ def _convert_types_from_str_to_function_type(param: Parameter, value: Any) -> An
 def convert_elements_in_list_to_type(param: Parameter, value: Any) -> Any:
     """Convert elements in a list."""
     out = []
-    thetype = param.get_list_type_args()
+    thetype = param.type.get_list_type_args()
     for item in value:
         if thetype is not None:
             try:

@@ -11,6 +11,7 @@ from .configuration import config
 from .core import get_extra_args, get_extra_args_list, get_runtime, include
 from .group import Group
 from .parameter import Parameter
+from .parametertype import ParameterType
 from .parser import dispatch
 from .runcommand import run
 from .task import Task, task
