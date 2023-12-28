@@ -201,3 +201,8 @@ It can also be used for creating simple tasks.
 - This library builds on many ideas from the excellent `argh` project. If you like the idea of building CLI interfaces from python function signatures, but don't need the advanced task-like features, check `argh` out.
 - The library uses `argparse` and `argcomplete` behing the scenes.
 
+
+
+## FAQ
+Q: why no namespace by default?
+A: in most cases it just requires additional unnecessary keystrokes. If you feel you need namespaces, you can add them manually.

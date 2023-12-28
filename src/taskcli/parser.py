@@ -27,9 +27,7 @@ TODO:
 
 """
 
-
-# GROUP_SUFFIX = "[group]"  # TODO: change this later
-GROUP_SUFFIX = "/"  # TODO: change this later
+GROUP_SUFFIX = "/"
 
 log = logging.getLogger(__name__)
 
@@ -185,8 +183,6 @@ def _dispatch_unsafe(argv: list[str] | None = None, tasks_found: bool = True) ->
         print_listed_tasks(tasks, render_settings=render_settings)
 
     return None
-
-
 
 
 def print_task_not_found_error() -> None:
