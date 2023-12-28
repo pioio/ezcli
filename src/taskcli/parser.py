@@ -172,12 +172,21 @@ def _dispatch_unsafe(argv: list[str] | None = None, tasks_found: bool = True) ->
                 if argconfig.task in task.aliases:
                     return _dispatch(task)
 
+            # not found, search group name without a suffix
+            groups = [task.group for task in tasks if task.group]
+            groups = list(set(groups))
+            for group in groups:
+                if group.get_name_for_cli() == argconfig.task:
+                    print_listed_tasks(group.tasks, render_settings=render_settings)
+
             print(f"Task {argconfig.task} not found")  # noqa: T201
             sys.exit(1)
     else:
         print_listed_tasks(tasks, render_settings=render_settings)
 
     return None
+
+
 
 
 def print_task_not_found_error() -> None:
@@ -253,6 +262,7 @@ def build_parser(tasks: list[Task]) -> argparse.ArgumentParser:
     subparsers = root_parser.add_subparsers(help="Task to run")
 
     groups = []
+    added_subparsers = []
     for task in tasks:
         # add group names
 
@@ -261,6 +271,7 @@ def build_parser(tasks: list[Task]) -> argparse.ArgumentParser:
             groups.append(task.group)
             subparser = subparsers.add_parser(group_name + GROUP_SUFFIX)
             subparser.set_defaults(task=group_name + GROUP_SUFFIX)
+            added_subparsers += [group_name + GROUP_SUFFIX]
 
         # > groupandtask = "." + group_name + "." + task.name
         # > subparser = subparsers.add_parser(groupandtask)
@@ -271,12 +282,23 @@ def build_parser(tasks: list[Task]) -> argparse.ArgumentParser:
         for name in all_names_of_task:
             subparser = subparsers.add_parser(name)
             subparser.set_defaults(task=name)
+            added_subparsers += [name]
 
             if task.customize_parser:
                 task.customize_parser(subparser)
 
             for param in task.params:
                 _add_param_to_subparser(param, subparser)
+
+    # finally, if 'group-name' is still available, add it as an aliast to "/"
+    # if group-name and task-name have the same name, expecting here the task to take precedence
+    # TODO: add unit test for this case
+    for task in tasks:
+        group_name = task.group.name.replace(" ", "-").lower()
+        if group_name not in added_subparsers:
+            subparser = subparsers.add_parser(group_name)
+            subparser.set_defaults(task=group_name)
+            added_subparsers += [group_name]
 
     return root_parser
 
