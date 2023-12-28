@@ -3,12 +3,12 @@ from typing import Any, final
 
 import taskcli
 import taskcli.core
-from .taskrendersettings import TaskRenderSettings
 
 from . import configuration, utils
 from .configuration import config
 from .group import Group
 from .task import Task
+from .taskrendersettings import TaskRenderSettings
 from .utils import param_to_cli_option
 
 ORDER_TYPE_DEFINITION = "definition"
@@ -59,8 +59,9 @@ def _sort_tasks(tasks: list[Task], sort: str, sort_important_first: bool) -> lis
 
     return tasks
 
+
 def filter_tasks_by_tags(tasks: list[Task], tags: list[str]) -> list[Task]:
-    """Return only tasks which have any of the tags"""
+    """Return only tasks which have any of the tags."""
     if not tags:
         return tasks
 
@@ -73,10 +74,10 @@ def filter_tasks_by_tags(tasks: list[Task], tags: list[str]) -> list[Task]:
                     break
     return filtered
 
-def list_tasks(tasks: list[Task], settings:TaskRenderSettings|None=None) -> list[str]:  # noqa: C901
+
+def list_tasks(tasks: list[Task], settings: TaskRenderSettings | None = None) -> list[str]:  # noqa: C901
     """Return a list of lines to be printed to the console."""
     assert len(tasks) > 0, "No tasks found"
-
 
     settings = settings or TaskRenderSettings()
     tasks = filter_tasks_by_tags(tasks, tags=settings.tags)
@@ -109,7 +110,6 @@ def list_tasks(tasks: list[Task], settings:TaskRenderSettings|None=None) -> list
 
         tasks = _sort_tasks(group.tasks, sort=config.sort, sort_important_first=config.sort_important_first)
 
-
         for task in tasks:
             if task.is_hidden() and not settings.show_hidden_tasks:
                 num_hidden_tasks += 1
@@ -136,14 +136,16 @@ def list_tasks(tasks: list[Task], settings:TaskRenderSettings|None=None) -> list
         lines.append(line)
     return lines
 
-def _render_tags(tags:list[str]) -> str:
+
+def _render_tags(tags: list[str]) -> str:
     """Return a string with all tags, formatted for the console."""
     endc = configuration.get_end_color()
     tags = [f"#{tag}" for tag in tags]
 
     return f"{configuration.colors.blue}{','.join(tags)}{endc}"
 
-def smart_task_lines(task: Task, settings:TaskRenderSettings) -> list[str]:  # noqa: C901
+
+def smart_task_lines(task: Task, settings: TaskRenderSettings) -> list[str]:  # noqa: C901
     """Render a single task into a list of lines, scale formatting to the amount of content."""
     lines: list[str] = []
 
@@ -181,7 +183,6 @@ def smart_task_lines(task: Task, settings:TaskRenderSettings) -> list[str]:  # n
         format = config.render_format_not_ready
 
     line = format_colors(format, name=name)
-
 
     one_line_params = build_pretty_param_string(
         task, include_optional=settings.show_optional_args, include_defaults=settings.show_default_values
@@ -229,7 +230,9 @@ def smart_task_lines(task: Task, settings:TaskRenderSettings) -> list[str]:  # n
 
     if one_line_params:
         num_params = len(
-            build_pretty_param_list(task, include_optional=settings.show_optional_args, include_defaults=settings.show_default_values)
+            build_pretty_param_list(
+                task, include_optional=settings.show_optional_args, include_defaults=settings.show_default_values
+            )
         )
 
         if len(utils.strip_escape_codes(one_line_params)) > 80 or num_params > config.render_max_params_per_line:

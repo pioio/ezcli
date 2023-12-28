@@ -8,16 +8,16 @@ from typing import Any, Iterable
 
 import taskcli
 import taskcli.core
-from .taskrendersettings import TaskRenderSettings
-from .envvar import EnvVar
 from taskcli.task import UserError
 
 from . import configuration, envvars, examples, taskfiledev, utils
+from .envvar import EnvVar
 from .init import create_tasks_file
 from .listing import list_tasks
 from .parameter import Parameter
 from .task import Task
 from .taskcli import TaskCLI
+from .taskrendersettings import TaskRenderSettings
 from .types import AnyFunction
 from .utils import param_to_cli_option
 
@@ -105,11 +105,8 @@ def _dispatch_unsafe(argv: list[str] | None = None, tasks_found: bool = True) ->
         print_task_not_found_error()
         sys.exit(1)
 
-    # if argconfig.show_hidden:
-    #     taskcli.config.show_hidden_tasks = True
-    #     taskcli.config.show_hidden_groups = True
-
     import taskcli.taskrendersettings as rendersettings
+
     render_settings = rendersettings.new_settings(config=config)
 
     if config.list or config.list_all:
@@ -162,7 +159,7 @@ def _dispatch_unsafe(argv: list[str] | None = None, tasks_found: bool = True) ->
             hidden_tasks_str = f" ({hidden_tasks} hidden)" if hidden_tasks > 0 else ""
             taskcli.utils.print_err(f"Tasks in group {group_name} ({num_tasks}) {hidden_tasks_str}")
 
-            print_listed_tasks(tasks_in_group,render_settings=render_settings)
+            print_listed_tasks(tasks_in_group, render_settings=render_settings)
             sys.exit(1)
         else:
             for task in tasks:
@@ -216,7 +213,8 @@ def filter_tasks_by_tags(tasks: list[Task], tags: Iterable[str]) -> list[Task]:
                     break
     return out
 
-def print_listed_tasks(tasks: list[Task], render_settings:TaskRenderSettings) -> None:
+
+def print_listed_tasks(tasks: list[Task], render_settings: TaskRenderSettings) -> None:
     """Print the listed tasks."""
     lines = list_tasks(tasks, settings=render_settings)
     for line in lines:
@@ -245,27 +243,11 @@ def _add_initial_tasks_to_parser(parser: argparse.ArgumentParser) -> None:
     )
 
 
-# def add_bool_to_parser(parser: argparse.ArgumentParser, name: str, default: bool, help: str) -> None:
-#     """Add a bool argument to the parser."""
-#     desc = help
-#     desc += " (default: true)" if default else " (default: false)"
-#     env_var_name
-#     from_env
-#     parser.add_argument(
-#         f"--{name}",
-#         action=argparse.BooleanOptionalAction,
-#         help=help,
-#         default=default,
-#     )
-
 def build_parser(tasks: list[Task]) -> argparse.ArgumentParser:
     """Build the parser."""
     root_parser = argparse.ArgumentParser()
 
-
     _add_initial_tasks_to_parser(root_parser)
-
-
 
     subparsers = root_parser.add_subparsers(help="Task to run")
 

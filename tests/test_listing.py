@@ -189,7 +189,8 @@ def test_hidden_tasks_dont_show_up_by_default():
         ), f"Hidden task should be missing from listing by default, but it is not, line: {line}"
 
     from taskcli.taskrendersettings import TaskRenderSettings
+
     render_settings = TaskRenderSettings()
     render_settings.show_hidden_tasks = True
-    lines = list_tasks(tasks, settings = render_settings)
+    lines = list_tasks(tasks, settings=render_settings)
     assert "hidden-task" in "\n".join(lines), "Hidden task should be in the task listing when high verbose"

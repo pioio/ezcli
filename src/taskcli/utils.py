@@ -81,8 +81,9 @@ def reset_tasks() -> None:
             module.decorated_functions = []  # type: ignore[attr-defined]
 
     # Clear global configuration (some tests might modify it)
-    from taskcli.taskcliconfig import TaskCLIConfig
     from taskcli import tt
+    from taskcli.taskcliconfig import TaskCLIConfig
+
     new_config = TaskCLIConfig(load_from_env=False)
     for key, value in new_config.__dict__.items():
         setattr(tt.config, key, value)

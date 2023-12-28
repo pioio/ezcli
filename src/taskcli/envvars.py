@@ -1,6 +1,15 @@
-"""Environment variables used by taskcli."""
+"""(Some) environment variables used by taskcli.
+
+The options listed in this file can only be set via the environment.
+They cannot be set via the command line.
+Thus, they can be as universal global settings.
+Typically you will never have to change those. But you can, if you need to.
+
+Sidenote: The TaskCLIConfig object contains the remaining configuration options which can be
+set not only via the environment, but also via other means (e.g. CLI arguments).
+These are the options which are more likely to be changed by the user.
+"""
 import logging
-import os
 import sys
 
 from taskcli import configuration
@@ -57,6 +66,7 @@ TASKCLI_ARG_SHOW_TAGS = EnvVar(
     desc=("If set to true, shows the tags of each task in the list output."),
 )
 
+
 def _set_names() -> None:
     """Use the variable name to set the 'name' property of the EnvVar objects defined in this module.
 
@@ -67,13 +77,13 @@ def _set_names() -> None:
             value.name = name
 
 
-def show_env(verbose: int, extra_vars:list[EnvVar]|None=None) -> None:
+def show_env(verbose: int, extra_vars: list[EnvVar] | None = None) -> None:
     """Print the environment variables used by taskcli."""
     print("# Environment variables used by taskcli:", file=sys.stderr)  # noqa: T201
 
     extra_vars = extra_vars or []
     env_vars_to_list = []
-    for name, value in globals().items():
+    for _, value in globals().items():
         if isinstance(value, EnvVar):
             env_vars_to_list.append(value)
     env_vars_to_list.extend(extra_vars)
@@ -94,7 +104,6 @@ def show_env(verbose: int, extra_vars:list[EnvVar]|None=None) -> None:
             if value.desc and verbose:
                 desc = f" {dark}{value.desc}{clear}"
             print(f"{green}{name}{clear}={color}{value.value}{clear}{desc}")  # noqa: T201
-
 
 
 _set_names()

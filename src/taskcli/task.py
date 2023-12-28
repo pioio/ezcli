@@ -6,12 +6,12 @@ from dataclasses import dataclass
 from typing import Callable, Iterable
 
 import taskcli.core
-from .tags import TAG_IMPORTANT
 
 from . import utils
 from .configuration import config
 from .group import DEFAULT_GROUP, Group
 from .parameter import Parameter
+from .tags import TAG_IMPORTANT
 from .types import Any, AnyFunction
 
 
