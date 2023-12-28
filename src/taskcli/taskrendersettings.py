@@ -1,6 +1,7 @@
 import argparse
 from dataclasses import dataclass
 from tabnanny import verbose
+import dataclasses
 
 @dataclass
 class TaskRenderSettings:
@@ -11,6 +12,7 @@ class TaskRenderSettings:
     show_hidden_tasks = False
     show_ready_env = False
     show_ready_detail:int = 1
+    tags:list[str] = dataclasses.field(default_factory=list)
     verbose:int = 0
 
 
@@ -23,12 +25,13 @@ def new_settings(config:argparse.Namespace) -> TaskRenderSettings:
     s.show_optional_args = config.show_optional_args or verbose >= 2 or config.list_all
     s.show_default_values = config.show_default_values or verbose >= 3 or config.list_all
 
-    s.show_hidden_groups = config.show_hidden_groups or verbose >= 3 or config.list_all
-    s.show_hidden_tasks = config.show_hidden_tasks or verbose >= 3 or config.list_all
+    s.show_hidden_groups = config.show_hidden_groups or verbose >= 3 or config.list_all or config.show_hidden
+    s.show_hidden_tasks = config.show_hidden_tasks or verbose >= 3 or config.list_all or config.show_hidden
 
     s.show_ready_detail = config.ready or verbose >= 2 or config.list_all
 
     s.verbose = verbose
+    s.tags = config.tags
 
     return s
 

@@ -59,12 +59,27 @@ def _sort_tasks(tasks: list[Task], sort: str, sort_important_first: bool) -> lis
 
     return tasks
 
+def filter_tasks_by_tags(tasks: list[Task], tags: list[str]) -> list[Task]:
+    """Return only tasks which have any of the tags"""
+    if not tags:
+        return tasks
+
+    filtered = []
+    for task in tasks:
+        if task.tags:
+            for tag in task.tags:
+                if tag in tags:
+                    filtered.append(task)
+                    break
+    return filtered
 
 def list_tasks(tasks: list[Task], settings:TaskRenderSettings|None=None) -> list[str]:  # noqa: C901
     """Return a list of lines to be printed to the console."""
     assert len(tasks) > 0, "No tasks found"
 
+
     settings = settings or TaskRenderSettings()
+    tasks = filter_tasks_by_tags(tasks, tags=settings.tags)
 
     # TODO: extract groups info
     groups = create_groups(tasks=tasks, group_order=configuration.config.group_order)

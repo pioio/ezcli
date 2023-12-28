@@ -292,7 +292,7 @@ def build_parser(tasks: list[Task]) -> argparse.ArgumentParser:
         "-l", "--list", action="count", default=0, help="List tasks, use -ll and -lll for more info"
     )
     root_parser.add_argument(
-        "-t", "--tags", nargs="?", help="Only list tasks containing any of the specified tags."
+        "-t", "--tags", nargs="?", help="Only list tasks containing any of the specified tags.", default=[]
     )
     root_parser.add_argument(
         "-T", "--show-tags",
