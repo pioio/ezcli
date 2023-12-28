@@ -75,6 +75,7 @@ def include_tasks(module: Module | None = None) -> list[Task]:
     taskcli.include(module_from_which_this_function_was_called)
     return taskcli.core.get_runtime().tasks
 
+from taskcli import tt
 
 @contextlib.contextmanager
 def simple_list_format(kwargs: dict[str, str] | None = None):
@@ -94,7 +95,7 @@ def simple_list_format(kwargs: dict[str, str] | None = None):
       (some unit tests do test formatting itself, and those tests do not use this context manager)
     """
     def_kwargs = {
-        "TASKCLI_CFG_SHOW_TAGS":"false"
+        tt.config.field_show_tags.env_var_name: ""
     }
     if kwargs:
         def_kwargs.update(kwargs)

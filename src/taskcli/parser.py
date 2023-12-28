@@ -225,7 +225,7 @@ def print_listed_tasks(tasks: list[Task], render_settings: TaskRenderSettings) -
 
 
 ARG_SHOW_HIDDEN_SHORT = "-H"
-ARG_NO_GO_TASK = "--no-go-task"
+
 DEFAULT_TASK_PY = envvars.TASKCLI_TASKS_PY_FILENAMES.value
 
 
