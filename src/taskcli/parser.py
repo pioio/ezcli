@@ -8,6 +8,7 @@ from typing import Any, Iterable
 
 import taskcli
 import taskcli.core
+from .taskrendersettings import TaskRenderSettings
 from .envvar import EnvVar
 from taskcli.task import UserError
 
@@ -100,11 +101,11 @@ def _dispatch_unsafe(argv: list[str] | None = None, tasks_found: bool = True) ->
         taskcli.config.show_hidden_tasks = True
         taskcli.config.show_hidden_groups = True
 
-    if argconfig.list:
-        print_listed_tasks(tasks, verbose=argconfig.list, ready_verbose=argconfig.ready, argconfig=argconfig)
-        return
-    if argconfig.list_all:
-        print_listed_tasks(tasks, verbose=999, ready_verbose=999, argconfig=argconfig)
+    import taskcli.taskrendersettings as rendersettings
+    render_settings = rendersettings.new_settings(argconfig)
+
+    if argconfig.list or argconfig.list_all:
+        print_listed_tasks(tasks, render_settings=render_settings)
         return
     if argconfig.examples:
         examples.print_examples()
@@ -155,7 +156,7 @@ def _dispatch_unsafe(argv: list[str] | None = None, tasks_found: bool = True) ->
             hidden_tasks_str = f" ({hidden_tasks} hidden)" if hidden_tasks > 0 else ""
             taskcli.utils.print_err(f"Tasks in group {group_name} ({num_tasks}) {hidden_tasks_str}")
 
-            print_listed_tasks(tasks_in_group, verbose=4, ready_verbose=999, argconfig=argconfig)
+            print_listed_tasks(tasks_in_group,render_settings=render_settings)
             sys.exit(1)
         else:
             for task in tasks:
@@ -170,7 +171,7 @@ def _dispatch_unsafe(argv: list[str] | None = None, tasks_found: bool = True) ->
             print(f"Task {argconfig.task} not found")  # noqa: T201
             sys.exit(1)
     else:
-        print_listed_tasks(tasks, verbose=1, ready_verbose=ready_verbose, argconfig=argconfig)
+        print_listed_tasks(tasks, render_settings=render_settings)
 
     return None
 
@@ -209,9 +210,9 @@ def filter_tasks_by_tags(tasks: list[Task], tags: Iterable[str]) -> list[Task]:
                     break
     return out
 
-def print_listed_tasks(tasks: list[Task], verbose: int, ready_verbose: int, argconfig:argparse.Namespace) -> None:
+def print_listed_tasks(tasks: list[Task], render_settings:TaskRenderSettings) -> None:
     """Print the listed tasks."""
-    lines = list_tasks(tasks, verbose=verbose, env_verbose=ready_verbose)
+    lines = list_tasks(tasks, settings=render_settings)
     for line in lines:
         print(line)  # noqa: T201
 
@@ -238,6 +239,19 @@ def _add_initial_tasks_to_parser(parser: argparse.ArgumentParser) -> None:
     )
 
 
+# def add_bool_to_parser(parser: argparse.ArgumentParser, name: str, default: bool, help: str) -> None:
+#     """Add a bool argument to the parser."""
+#     desc = help
+#     desc += " (default: true)" if default else " (default: false)"
+#     env_var_name
+#     from_env
+#     parser.add_argument(
+#         f"--{name}",
+#         action=argparse.BooleanOptionalAction,
+#         help=help,
+#         default=default,
+#     )
+
 def build_parser(tasks: list[Task]) -> argparse.ArgumentParser:
     """Build the parser."""
     root_parser = argparse.ArgumentParser()
@@ -254,11 +268,25 @@ def build_parser(tasks: list[Task]) -> argparse.ArgumentParser:
         "--show-env-detailed", action="store_true", help="like --show-env, but also include descriptions."
     )
     root_parser.add_argument(
+        "--show-optional-args", action=argparse.BooleanOptionalAction
+    )
+    root_parser.add_argument(
+        "--show-default-values", action=argparse.BooleanOptionalAction
+    )
+    root_parser.add_argument(
+        "--show-hidden-groups", action=argparse.BooleanOptionalAction
+    )
+    root_parser.add_argument(
+        "--show-hidden-tasks", action=argparse.BooleanOptionalAction
+    )
+
+
+    root_parser.add_argument(
         "--examples", action="store_true", default=False, help="Show code examples of how to use taskcli."
     )
-    # > root_parser.add_argument("-v", "--verbose", action="store_true")
+    root_parser.add_argument("-v", "--verbose", action="store_true")
     root_parser.add_argument(
-        "-r", "--ready", help="Show detailed info about task being ready", action="count", default=0
+        "-r", "--ready", help="Show detailed info about task being ready", action="store_true", default=1
     )
     root_parser.add_argument(
         "-l", "--list", action="count", default=0, help="List tasks, use -ll and -lll for more info"
@@ -273,7 +301,6 @@ def build_parser(tasks: list[Task]) -> argparse.ArgumentParser:
         default=envvars.TASKCLI_ARG_SHOW_TAGS.is_true(),
 
     )
-
 
     root_parser.add_argument(
         "--init", action="store_true", default=False, help="Create a new tasks.py file in the current directory"

@@ -22,7 +22,7 @@ def test_groups_basic():
     assert tasks[1].group.name == "magical tasks"
 
     with tools.simple_list_format():
-        lines = list_tasks(tasks, verbose=0)
+        lines = list_tasks(tasks)
 
     assert """# default
 foobar1

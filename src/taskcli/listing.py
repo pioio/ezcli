@@ -3,6 +3,7 @@ from typing import Any, final
 
 import taskcli
 import taskcli.core
+from .taskrendersettings import TaskRenderSettings
 
 from . import configuration, utils
 from .configuration import config
@@ -59,11 +60,11 @@ def _sort_tasks(tasks: list[Task], sort: str, sort_important_first: bool) -> lis
     return tasks
 
 
-def list_tasks(tasks: list[Task], verbose: int, env_verbose: int = 0) -> list[str]:  # noqa: C901
+def list_tasks(tasks: list[Task], settings:TaskRenderSettings|None=None) -> list[str]:  # noqa: C901
     """Return a list of lines to be printed to the console."""
     assert len(tasks) > 0, "No tasks found"
 
-    show_hidden_groups = verbose >= 3 or configuration.config.show_hidden_groups
+    settings = settings or TaskRenderSettings()
 
     # TODO: extract groups info
     groups = create_groups(tasks=tasks, group_order=configuration.config.group_order)
@@ -80,7 +81,7 @@ def list_tasks(tasks: list[Task], verbose: int, env_verbose: int = 0) -> list[st
     for group in groups:
         GROUP_IS_HIDDEN = group.hidden or group.name in taskcli.core.get_runtime().hidden_groups
 
-        if not show_hidden_groups and GROUP_IS_HIDDEN:
+        if not settings.show_hidden_groups and GROUP_IS_HIDDEN:
             num_hidden_groups += 1
             continue
 
@@ -93,12 +94,12 @@ def list_tasks(tasks: list[Task], verbose: int, env_verbose: int = 0) -> list[st
 
         tasks = _sort_tasks(group.tasks, sort=config.sort, sort_important_first=config.sort_important_first)
 
-        show_hidden_tasks = verbose >= 3 or configuration.config.show_hidden_tasks
+
         for task in tasks:
-            if task.is_hidden() and not show_hidden_tasks:
+            if task.is_hidden() and not settings.show_hidden_tasks:
                 num_hidden_tasks += 1
                 continue
-            lines.extend(smart_task_lines(task, verbose=verbose, env_verbose=env_verbose))
+            lines.extend(smart_task_lines(task, settings=settings))
     lines = [line.rstrip() for line in lines]
 
     FIRST_LINE_STARTS_WITH_NEW_LINE = lines and lines[0] and lines[0][0] == "\n"
@@ -121,7 +122,7 @@ def list_tasks(tasks: list[Task], verbose: int, env_verbose: int = 0) -> list[st
     return lines
 
 
-def smart_task_lines(task: Task, verbose: int, env_verbose: int = 0) -> list[str]:  # noqa: C901
+def smart_task_lines(task: Task, settings:TaskRenderSettings) -> list[str]:  # noqa: C901
     """Render a single task into a list of lines, scale formatting to the amount of content."""
     lines: list[str] = []
 
@@ -157,17 +158,15 @@ def smart_task_lines(task: Task, verbose: int, env_verbose: int = 0) -> list[str
 
     line = format_colors(format, name=name)
 
-    include_optional = verbose >= 2
-    include_defaults = verbose >= 3
 
     one_line_params = build_pretty_param_string(
-        task, include_optional=include_optional, include_defaults=include_defaults
+        task, include_optional=settings.show_optional_args, include_defaults=settings.show_default_values
     )
 
     not_ready_lines = []
     # Check if env is ok
     if not task.is_ready():
-        if env_verbose == 0:
+        if not settings.show_ready_env:
             not_ready_reason = task.get_not_ready_reason_short()
             one_line_params += f" {configuration.colors.red}{not_ready_reason}{configuration.colors.end}"
         else:
@@ -206,12 +205,12 @@ def smart_task_lines(task: Task, verbose: int, env_verbose: int = 0) -> list[str
 
     if one_line_params:
         num_params = len(
-            build_pretty_param_list(task, include_optional=include_optional, include_defaults=include_defaults)
+            build_pretty_param_list(task, include_optional=settings.show_optional_args, include_defaults=settings.show_default_values)
         )
 
         if len(utils.strip_escape_codes(one_line_params)) > 80 or num_params > config.render_max_params_per_line:
             param_list = build_pretty_param_list(
-                task, include_optional=include_optional, include_defaults=include_defaults
+                task, include_optional=settings.show_optional_args, include_defaults=settings.show_default_values
             )
             for param in param_list:
                 lines.append(param_line_prefix + param)

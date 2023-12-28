@@ -4,6 +4,7 @@ from json import tool
 import taskcli
 from taskcli import Group, Task, arg, task
 from taskcli.listing import list_tasks
+from taskcli.taskrendersettings import TaskRenderSettings
 
 from . import tools
 from .test_including import clean_stdout
@@ -19,7 +20,7 @@ def test_listing_tasks_works():
 
     tasks = tools.include_tasks()
     with tools.simple_list_format():
-        lines = list_tasks(tasks, verbose=0)
+        lines = list_tasks(tasks)
     assert len(lines) == 1
     assert re.match(r"foobar1\s+This is the first task", lines[0])
 
@@ -53,8 +54,10 @@ def test_alphanumeric_order():
 
     tasks = include_tasks()
     show_hidden_tasks = 3
+    settings = TaskRenderSettings()
+    settings.show_hidden_tasks = True
     with tools.simple_list_format():
-        lines = taskcli.listing.list_tasks(tasks, verbose=show_hidden_tasks)
+        lines = taskcli.listing.list_tasks(tasks, settings=settings)
     linestxt = "\n".join(lines)
     assert (
         linestxt
@@ -110,7 +113,7 @@ def test_positional_mandatory_args_are_listed_by_default():
     tasks = tools.include_tasks()
 
     with tools.simple_list_format():
-        lines = list_tasks(tasks, verbose=0)
+        lines = list_tasks(tasks)
     assert len(lines) == 1
     assert re.match(r"foobar\s+NAME\s+.*$", lines[0])
 
@@ -123,7 +126,7 @@ def test_positional_optional_args_are_not_listed_by_default():
     tasks = tools.include_tasks()
 
     with tools.simple_list_format():
-        lines = list_tasks(tasks, verbose=0)
+        lines = list_tasks(tasks)
     assert len(lines) == 1
 
     assert re.match(
@@ -139,7 +142,7 @@ def test_list_short_args_share_line_with_summary_no_default():
     tasks = tools.include_tasks()
 
     with tools.simple_list_format():
-        lines = list_tasks(tasks, verbose=0)
+        lines = list_tasks(tasks)
     assert len(lines) == 1
 
     assert re.match(r"foobar\s+PATHS\s+This is the first task", lines[0]), "No default, so it should appear"
@@ -156,7 +159,7 @@ def test_list_important_optional_args_are_always_shown():
     tasks = tools.include_tasks()
 
     with tools.simple_list_format():
-        lines = list_tasks(tasks, verbose=0)
+        lines = list_tasks(tasks)
     assert len(lines) == 1
     assert re.match(
         r"foobar\s+NAME\s+This is the first task", lines[0]
@@ -175,7 +178,7 @@ def test_hidden_tasks_dont_show_up_by_default():
     tasks = tools.include_tasks()
 
     with tools.simple_list_format():
-        lines = list_tasks(tasks, verbose=0)
+        lines = list_tasks(tasks)
 
     task_names = [task.name for task in tasks]
     assert "hidden-task" in task_names, "Hidden task should be in the list of tasks, but it is not"
@@ -185,5 +188,8 @@ def test_hidden_tasks_dont_show_up_by_default():
             "hidden-task" not in line
         ), f"Hidden task should be missing from listing by default, but it is not, line: {line}"
 
-    lines = list_tasks(tasks, verbose=3)
+    from taskcli.taskrendersettings import TaskRenderSettings
+    render_settings = TaskRenderSettings()
+    render_settings.show_hidden_tasks = True
+    lines = list_tasks(tasks, settings = render_settings)
     assert "hidden-task" in "\n".join(lines), "Hidden task should be in the task listing when high verbose"
