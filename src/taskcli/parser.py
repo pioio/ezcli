@@ -228,7 +228,7 @@ def print_listed_tasks(tasks: list[Task], render_settings: TaskRenderSettings) -
         print(line)  # noqa: T201
 
 
-ARG_SHOW_HIDDEN_SHORT = "-H"
+
 
 DEFAULT_TASK_PY = envvars.TASKCLI_TASKS_PY_FILENAMES.value
 

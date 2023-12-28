@@ -9,6 +9,9 @@ Required TODO:
 - [x] param.type.is_bool
 - [x] add unit tests with "-" task names
 - [x] improve listing tabs in group,  name[group] is clumsy
+- [ ] num hidden tasks in each group
+  - [ ] filter out hidden before filterting by tags
+- [ ]
 - [ ] nice warning if no tags listed
 - [ ] unit test for searching when some matching tasks are hidden
 - [ ] remove env var from help?

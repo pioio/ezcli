@@ -1,3 +1,4 @@
+
 import re
 from json import tool
 
@@ -5,12 +6,14 @@ from argh import dispatch
 
 import taskcli
 from taskcli import Group, Task, arg, task
+from taskcli import listing
 from taskcli.listing import list_tasks
 from taskcli.taskrendersettings import TaskRenderSettings
 
 from . import tools
 from .test_including import clean_stdout
 from .tools import include_tasks, reset_context_before_each_test
+from taskcli import constants
 
 sideeffect = 0
 
@@ -221,12 +224,12 @@ def test_list_with_tags():
         lines = list_tasks(tasks)
     assert (
         lines
-        == """
+        == f"""
 # groupA
 foobar
 # groupB
 foobar2a
-1 hidden tasks, use -H to show
+1 hidden tasks, {constants.HELP_TEXT_USE_H_TO_SHOW_HIDDEN}
 """.strip().splitlines()
     )
 
@@ -236,12 +239,12 @@ foobar2a
         lines = list_tasks(tasks)
     assert (
         lines
-        == """
+        == f"""
 # groupA
 foobar
 # groupB
 foobar2a
-1 hidden tasks, use -H to show
+1 hidden tasks, {constants.HELP_TEXT_USE_H_TO_SHOW_HIDDEN}
 """.strip().splitlines()
     )
 

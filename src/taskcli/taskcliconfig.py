@@ -23,7 +23,7 @@ import logging
 import os
 from typing import Any, Callable
 from webbrowser import get
-
+from . import constants
 from . import envvars, utils
 from .envvar import EnvVar
 from .task import UserError
@@ -120,7 +120,7 @@ class TaskCLIConfig:
             default_show_hidden = True
 
         self.field_show_hidden: ConfigField = ConfigField(
-            default_show_hidden, "show_hidden", "-H", help="Show all tasks and groups, even the hidden ones."
+            default_show_hidden, "show_hidden", constants.ARG_SHOW_HIDDEN_SHORT, help="Show all tasks and groups, even the hidden ones."
         )
         self.show_hidden: bool = self._add_bool(self.field_show_hidden)
 

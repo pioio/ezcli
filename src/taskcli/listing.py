@@ -6,6 +6,7 @@ from venv import logger
 import taskcli
 import taskcli.core
 
+from . import constants
 from . import configuration, utils
 from .configuration import colors, config
 from .group import Group
@@ -13,6 +14,7 @@ from .task import Task, UserError
 from .taskrendersettings import TaskRenderSettings
 from .tasktools import filter_before_listing
 from .utils import param_to_cli_option
+from .constants import HELP_TEXT_USE_H_TO_SHOW_HIDDEN
 
 ORDER_TYPE_DEFINITION = "definition"
 ORDER_TYPE_ALPHA = "alpha"
@@ -137,7 +139,7 @@ def list_tasks(tasks: list[Task], settings: TaskRenderSettings | None = None) ->
             final_line.append(f"{num_hidden_groups} hidden groups")
         if num_hidden_tasks:
             final_line.append(f"{num_hidden_tasks} hidden tasks")
-        final_line.append(f"use {parser.ARG_SHOW_HIDDEN_SHORT} to show")
+        final_line.append(HELP_TEXT_USE_H_TO_SHOW_HIDDEN)
     if final_line:
         line = f"{configuration.colors.dark_gray}{', '.join(final_line)}{configuration.colors.end}"
         lines.append(line)
