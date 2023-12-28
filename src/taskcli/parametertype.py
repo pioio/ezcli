@@ -2,9 +2,6 @@ from typing import Any
 import inspect
 from typing import Union, get_args, get_origin
 from types import UnionType
-import typing
-if typing.TYPE_CHECKING:
-    from .parameter import Parameter
 
 class ParameterType:
     """A class to represent the type of a parameter."""
@@ -104,7 +101,6 @@ class ParameterType:
 
     def is_bool(self) -> bool:
         """Return True if the parameter type is bool."""
-        from .parameter import Parameter
         if self._type is bool:
             # type set explicitly
             return True
