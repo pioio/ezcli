@@ -36,14 +36,16 @@ def test_conversion_to_float_works(value):
 
 
 @pytest.mark.parametrize("value", ["foobar"])
-def test_conversion_to_float_raises_(value):
+def test_conversion_to_float_raises_(value, capsys):
     @task
     def foo(a: float):
         assert isinstance(a, float)
 
     tools.include_tasks()
-    with pytest.raises(Exception, match="could not convert string to float"):
+    with pytest.raises(SystemExit, match="2"):
         dispatch(["foo", value])
+
+    assert "invalid float value" in capsys.readouterr().err
 
 
 @pytest.mark.skip()
@@ -68,3 +70,21 @@ def test_conversion_to_bool_works():
 
     tools.include_tasks()
     dispatch(["foo", "true"])
+
+from taskcli import tt
+
+def test_custom_user_type():
+    class Foobar:
+        def __init__(self, value):
+            self.value = value
+
+    FoobarType = tt.arg(Foobar, type=Foobar)
+    @task
+    def foo(a: FoobarType):
+        assert isinstance(a, Foobar)
+        return a
+
+    t = tools.include_task()
+    ret = t.dispatch(["foo"])
+    assert isinstance(ret, Foobar)
+    assert ret.value == "foo"

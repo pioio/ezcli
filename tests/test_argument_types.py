@@ -352,11 +352,9 @@ def test_complex_argument_example():
     assert force is False
 
 
-
-
 def test_positional_arguments_with_hyphens():
     @task
-    def foo(foo_bar:str):
+    def foo(foo_bar: str):
         return foo_bar
 
     t = tools.include_task()
@@ -365,19 +363,48 @@ def test_positional_arguments_with_hyphens():
 
 def test_keyword_arguments_with_hyphens():
     @task
-    def foo(*, foo_bar:str):
+    def foo(*, foo_bar: str):
         return foo_bar
 
     t = tools.include_task()
-    assert t.dispatch(['--foo-bar', "hello"]) == "hello"
+    assert t.dispatch(["--foo-bar", "hello"]) == "hello"
 
 
 def test_task_names_with_hyphens():
     @task
-    def foo_bar(*, foo_bar:str):
+    def foo_bar(*, foo_bar: str):
         return foo_bar
 
     tools.include_task()
     from taskcli import dispatch
+
     assert dispatch(["foo-bar", "--foo-bar", "hello"]) == "hello"
 
+
+def test_choices_str(capsys):
+    Foobar = tt.arg(str, choices=["aaa", "bbb"])
+
+    @task
+    def foo_bar(foo_bar: Foobar):
+        return foo_bar
+
+    t = tools.include_task()
+    assert t.dispatch("aaa") == "aaa"
+    assert t.dispatch("bbb") == "bbb"
+    with pytest.raises(SystemExit, match="2"):
+        t.dispatch("ccc")
+    assert capsys.readouterr().err.endswith("error: argument foo_bar: invalid choice: 'ccc' (choose from 'aaa', 'bbb')\n")
+
+
+def test_choices_int(capsys):
+    Foobar = tt.arg(int, choices=[111, 222])
+
+    @task
+    def foo_bar(foo_bar: Foobar):
+        return foo_bar
+
+    t = tools.include_task()
+    assert t.dispatch("111") == 111
+    assert t.dispatch("222") == 222
+    with pytest.raises(SystemExit, match="2"):
+        t.dispatch("333")

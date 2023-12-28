@@ -2,6 +2,8 @@ import inspect
 from types import UnionType
 from typing import Any, Union, get_args, get_origin
 
+from nox import param
+
 
 class ParameterType:
     """A class to represent the type of a parameter."""
@@ -9,7 +11,7 @@ class ParameterType:
     class Empty:
         """A class to represent that type was not set."""
 
-    def __init__(self, typevar: Any, /, *, default_value: Any):
+    def __init__(self, typevar: Any, /, *, default_value: Any, arg_annotation:Any = None):
         self._type = typevar
         from .parameter import Parameter
 
@@ -19,6 +21,8 @@ class ParameterType:
             self._type = ParameterType.Empty
 
         self._default_value = default_value  # default value of the parameter
+
+        self.arg_annotation = arg_annotation
 
     @property
     def raw(self) -> Any:
@@ -55,6 +59,12 @@ class ParameterType:
 
         if self._type in [int, float, str, bool]:
             return True
+
+        if self.arg_annotation:
+            if self.arg_annotation.type is not None:
+                # user specified "arg(..., type=...)", which will be passed to argparse, which will do the conversion
+                return True
+
 
         return False
 

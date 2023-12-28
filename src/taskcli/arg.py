@@ -18,8 +18,11 @@ def arg(
     metavar: str | None = None,
     nargs: str | int | None = None,
     default: Any = Parameter.Empty,
+    type: Any = Parameter.Empty,
 ) -> Annotated[T, str, Arg]:
     """Create an annotated type with an Arg annotation.
+
+    the Arg() objects get stored in task.param[].arg_annotation
 
     Examples
       - arg(int, "The number of foos in the bar", important=True)

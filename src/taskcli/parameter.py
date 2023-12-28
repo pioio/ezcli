@@ -36,6 +36,7 @@ class Parameter:
         # Metadata coming from typing.Annotated, empty list if not using it
         self.metadata: list[Any] = [] if not param_using_typing_annotated else param.annotation.__metadata__
 
+        # The Arg annotation, if present, can cantain various additional options
         self.arg_annotation: annotations.Arg | None = None
         for data in self.metadata:
             if isinstance(data, annotations.Arg):
@@ -74,7 +75,7 @@ class Parameter:
             if self.arg_annotation.default is not annotations.Empty:
                 self.default = self.arg_annotation.default
 
-        self.type = ParameterType(the_type, default_value=self.default)
+        self.type = ParameterType(the_type, default_value=self.default, arg_annotation=self.arg_annotation)
 
         self.name = param.name
 

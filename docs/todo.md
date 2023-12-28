@@ -1,31 +1,31 @@
 Required TODO:
 - [x] add `taskcli.extra_args` to get `-- args`
 - [x] add "-f" to specify the file
-- [ ] add "--no-*" version of bool flags.
-- [ ] list[bool]  ? list[other-type]
+- [x] add "--no-*" version of bool flags.
+- [x] list[bool]  ? list[other-type]
 - [x] tuples
 - [x] list with no types
 - [x] list|None
 - [x] param.type.is_bool
-- [ ] add unit tests with "-" task names
+- [x] add unit tests with "-" task names
+- [ ] improve argparsr usageunit test choices
+    - [ ] unittest choices
+    - [ ] allow argparse to do the type conversion, use "type"
+    - [ ] make metavar work in task list
+
+- [ ] make type work with user defined functions
 - [ ] add unit test for args passed to argparse from 'arg'
 - [ ] aliases unit tests
-- [ ] coverage
-- [ ] ability to exclude certain arguments from parser (task(exclude)))
-
+- [x] coverage
 - [ ] run task binary regardless of taskfile being found or not
-- [ ] Make unit test use standard formatting for listing.
 - [ ] show again number of tasks in group (not shown now)
-- [ ] left-align first argument
-- [ ] add tests that invoke tasks with arguments
 - [ ] show which group has hidden tasks
+- [ ] mark hidden gorups as (hidden)
 - [ ] list hidden group in one line at the end
 - [ ] denote included tasks, somehow, e.g. with a star suffix, or "^ prefix in summary
 - [ ] allow imported function to chdir to the local dir?
-- [ ] mark hidden gorups as (hidden)
 - [ ] groups and tasks with tags  task -t op, also --show-tags
 - [ ] using -f to specify file in other dir still make taskfile be loaded locally
-- [ ] include
 - [x] task -L should show ALL info
 - [x] add auto conversion to int/float from string
 - [ ] task .dev   to list item in group, including hidden groups
@@ -50,16 +50,12 @@ Required TODO:
   - [ ] include not decorated function
   - [ ] A includes B, B includes A
   - [ ] detect duplicates
-  - [ ] task ... task --foo
   - [ ] include in tasks.py still broken
     - [ ] def xxx():
             pass
 
         include(xxx)
-- [ ] FIXME: broken 'task ruff src'
-- [x] Aliases
-- [x] -L list all
-- [ ] task --init <filename> to create a stub task file
+
 #### groups
 
 Each task has one namespace,
@@ -102,6 +98,9 @@ Features:
 
 
 # Later
+- [ ] chaining tasks  `taskcli task1 task2`
+- [ ] pre/post hooks
+- [ ] ability to exclude certain arguments from parser (task(exclude)), the arg must have a default)
 - dict type, accepting key=value, or json
 - [ ] tt.set_overview, this will require storing overview on per-module basis (or storing it only for current one), and loading
 - ability to customize the parser with custom flags

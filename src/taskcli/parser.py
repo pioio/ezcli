@@ -1,9 +1,9 @@
 import argparse
-from ast import arg
 import inspect
 import logging
 import os
 import sys
+from ast import arg
 from typing import Any
 
 import taskcli
@@ -341,7 +341,8 @@ def _add_param_to_subparser(param: Parameter, subparser: argparse.ArgumentParser
         else:
             kwargs["nargs"] = "+"
     elif param.type.raw in [int, float, str]:
-        pass
+        # to make argparse's internal type conversion work so that "choices=[111,222]" work
+        kwargs["type"] = param.type.raw
     elif param.type.raw == taskcli.parametertype.ParameterType.Empty:
         pass
     else:
@@ -354,6 +355,13 @@ def _add_param_to_subparser(param: Parameter, subparser: argparse.ArgumentParser
     if help_default:
         kwargs["help"] = "" if kwargs["help"] is None else kwargs["help"]
         kwargs["help"] += f" (default: {help_default})"
+
+    # Finally, apply any custom argparse fields from the Arg annotation, but preserve the default value
+    # because the Arg(default=foo) could have been set for the param, but could have later
+    # been overridden in the function signature
+    # This custom argparse fields should be applied only at the end
+    if param.arg_annotation:
+        kwargs = kwargs | param.arg_annotation.get_argparse_fields()
 
     subparser.add_argument(*args, **kwargs)
 

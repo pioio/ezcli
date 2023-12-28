@@ -16,13 +16,13 @@ with tt.Group("dev", desc="Development tasks"):
 
     @task(aliases="cov")
     def coverage():
-        """Compute test coverage"""
+        """Compute test coverage."""
         test(extraargs="--cov=taskcli --cov-report=html")
         # print summary:
         run("coverage report")
 
     @task(aliases="t", env=["FOOBAR"])
-    def test(extraargs: str=""):
+    def test(extraargs: str = ""):
         """Run unit tests."""
         run(f"pytest {extraargs} tests/ -vvv {tt.get_extra_args()} ")
 
@@ -35,7 +35,6 @@ with tt.Group("dev", desc="Development tasks"):
     def zox():
         """Run extensive tests using nox."""
         run("nox")
-
 
     @task(hidden=True)
     def nox_special():
