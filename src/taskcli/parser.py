@@ -4,10 +4,11 @@ import logging
 import os
 import sys
 from ast import arg
-from typing import Any
+from typing import Any, Iterable
 
 import taskcli
 import taskcli.core
+from .envvar import EnvVar
 from taskcli.task import UserError
 
 from . import configuration, envvars, examples, taskfiledev, utils
@@ -100,10 +101,10 @@ def _dispatch_unsafe(argv: list[str] | None = None, tasks_found: bool = True) ->
         taskcli.config.show_hidden_groups = True
 
     if argconfig.list:
-        print_listed_tasks(tasks, verbose=argconfig.list, ready_verbose=argconfig.ready)
+        print_listed_tasks(tasks, verbose=argconfig.list, ready_verbose=argconfig.ready, argconfig=argconfig)
         return
     if argconfig.list_all:
-        print_listed_tasks(tasks, verbose=999, ready_verbose=999)
+        print_listed_tasks(tasks, verbose=999, ready_verbose=999, argconfig=argconfig)
         return
     if argconfig.examples:
         examples.print_examples()
@@ -154,7 +155,7 @@ def _dispatch_unsafe(argv: list[str] | None = None, tasks_found: bool = True) ->
             hidden_tasks_str = f" ({hidden_tasks} hidden)" if hidden_tasks > 0 else ""
             taskcli.utils.print_err(f"Tasks in group {group_name} ({num_tasks}) {hidden_tasks_str}")
 
-            print_listed_tasks(tasks_in_group, verbose=4, ready_verbose=999)
+            print_listed_tasks(tasks_in_group, verbose=4, ready_verbose=999, argconfig=argconfig)
             sys.exit(1)
         else:
             for task in tasks:
@@ -169,7 +170,7 @@ def _dispatch_unsafe(argv: list[str] | None = None, tasks_found: bool = True) ->
             print(f"Task {argconfig.task} not found")  # noqa: T201
             sys.exit(1)
     else:
-        print_listed_tasks(tasks, verbose=1, ready_verbose=ready_verbose)
+        print_listed_tasks(tasks, verbose=1, ready_verbose=ready_verbose, argconfig=argconfig)
 
     return None
 
@@ -194,7 +195,21 @@ def print_task_not_found_error() -> None:
     sys.exit(1)
 
 
-def print_listed_tasks(tasks: list[Task], verbose: int, ready_verbose: int) -> None:
+def filter_tasks_by_tags(tasks: list[Task], tags: Iterable[str]) -> list[Task]:
+    """Filter tasks by tags."""
+    if not tags:
+        return tasks
+
+    out = []
+    for task in tasks:
+        if task.tags:
+            for tag in tags:
+                if tag in task.tags:
+                    out.append(task)
+                    break
+    return out
+
+def print_listed_tasks(tasks: list[Task], verbose: int, ready_verbose: int, argconfig:argparse.Namespace) -> None:
     """Print the listed tasks."""
     lines = list_tasks(tasks, verbose=verbose, env_verbose=ready_verbose)
     for line in lines:
@@ -227,6 +242,10 @@ def build_parser(tasks: list[Task]) -> argparse.ArgumentParser:
     """Build the parser."""
     root_parser = argparse.ArgumentParser()
 
+    def default_from_env(ev:EnvVar) -> str:
+        """Return the default value for the --file argument."""
+        return f"(Default: {ev.value}, change with {ev.name})"
+
     # Main parsers
     root_parser.add_argument(
         "--show-env", action="store_true", help="Show the supported environment variables, and their description"
@@ -244,6 +263,18 @@ def build_parser(tasks: list[Task]) -> argparse.ArgumentParser:
     root_parser.add_argument(
         "-l", "--list", action="count", default=0, help="List tasks, use -ll and -lll for more info"
     )
+    root_parser.add_argument(
+        "-t", "--tags", nargs="?", help="Only list tasks containing any of the specified tags."
+    )
+    root_parser.add_argument(
+        "-T", "--show-tags",
+        action=argparse.BooleanOptionalAction,
+        help=f"Show tags of each task, when listing tasks. {default_from_env(envvars.TASKCLI_ARG_SHOW_TAGS)}",
+        default=envvars.TASKCLI_ARG_SHOW_TAGS.is_true(),
+
+    )
+
+
     root_parser.add_argument(
         "--init", action="store_true", default=False, help="Create a new tasks.py file in the current directory"
     )

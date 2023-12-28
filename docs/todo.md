@@ -16,6 +16,7 @@ Required TODO:
 - [ ] make type work with user defined functions
 - [ ] add unit test for args passed to argparse from 'arg'
 - [ ] aliases unit tests
+- [ ] -lt
 - [x] coverage
 - [ ] run task binary regardless of taskfile being found or not
 - [ ] show again number of tasks in group (not shown now)

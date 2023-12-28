@@ -6,6 +6,7 @@ from dataclasses import dataclass
 from typing import Callable, Iterable
 
 import taskcli.core
+from .tags import TAG_IMPORTANT
 
 from . import utils
 from .configuration import config
@@ -110,6 +111,7 @@ class Task:
         is_go_task: bool = False,
         suppress_warnings: bool = False,
         code_location: TaskCodeLocation | None = None,
+        tags: list[str] | None = None,
     ):
         """Create a new Task.
 
@@ -121,9 +123,13 @@ class Task:
         self.custom_desc = custom_desc  # entirely optional
         self.func = func
         self.aliases = aliases or []
+        self.tags = tags or []
         self.env = env or []
         self.hidden = hidden
         self.important = important
+        if important and TAG_IMPORTANT not in self.tags:
+            self.tags.append(TAG_IMPORTANT)
+
         self.params = [Parameter(param) for param in inspect.signature(func).parameters.values()]
         self.name_format = format
         self.customize_parser = customize_parser
