@@ -10,6 +10,7 @@ Required TODO:
 - [x] add unit tests with "-" task names
 - [x] improve listing tabs in group,  name[group] is clumsy
 - [ ] nice warning if no tags listed
+- [ ] unit test for searching when some matching tasks are hidden
 - [ ] unit test for error if no tasks detected
 - [ ] combine listing with specifying a task
 - [ ] tt should have bigger tab completion than t
@@ -28,7 +29,7 @@ Required TODO:
 - [ ] list hidden group in one line at the end
 - [ ] denote included tasks, somehow, e.g. with a star suffix, or "^ prefix in summary
 - [ ] allow imported function to chdir to the local dir?
-- [ ] groups and tasks with tags  task -t op, also --show-tags
+- [x] groups and tasks with tags  task -t op, also --show-tags
 - [ ] using -f to specify file in other dir still make taskfile be loaded locally
 - [x] task -L should show ALL info
 - [x] add auto conversion to int/float from string

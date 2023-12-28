@@ -176,6 +176,7 @@ def _dispatch_unsafe(argv: list[str] | None = None, tasks_found: bool = True) ->
             for group in groups:
                 if group.get_name_for_cli() == argconfig.task:
                     print_listed_tasks(group.tasks, render_settings=render_settings)
+                    sys.exit(1)
 
             print(f"Task {argconfig.task} not found")  # noqa: T201
             sys.exit(1)
