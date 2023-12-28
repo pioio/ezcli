@@ -11,7 +11,7 @@ class ParameterType:
     class Empty:
         """A class to represent that type was not set."""
 
-    def __init__(self, typevar: Any, /, *, default_value: Any, arg_annotation:Any = None):
+    def __init__(self, typevar: Any, /, *, default_value: Any, arg_annotation: Any = None):
         self._type = typevar
         from .parameter import Parameter
 

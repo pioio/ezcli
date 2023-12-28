@@ -5,7 +5,7 @@ import pytest
 
 import taskcli
 import taskcli.core
-from taskcli import dispatch, task
+from taskcli import dispatch, task, tt
 from taskcli.group import Group
 from taskcli.parser import _extract_extra_args
 from taskcli.task import Task
@@ -71,7 +71,6 @@ def test_conversion_to_bool_works():
     tools.include_tasks()
     dispatch(["foo", "true"])
 
-from taskcli import tt
 
 def test_custom_user_type():
     class Foobar:
@@ -79,6 +78,7 @@ def test_custom_user_type():
             self.value = value
 
     FoobarType = tt.arg(Foobar, type=Foobar)
+
     @task
     def foo(a: FoobarType):
         assert isinstance(a, Foobar)
@@ -91,14 +91,33 @@ def test_custom_user_type():
 
 
 def test_custom_user_coversion_function():
-    def convert(value:str):
+    def convert(value: str):
         return "converted-" + value
 
     FoobarType = tt.arg(str, type=convert)
+
     @task
     def foo(a: FoobarType):
         assert isinstance(a, str)
         return a
 
     t = tools.include_task()
-    assert  t.dispatch(["somearg"]) == "converted-somearg"
+    assert t.dispatch(["somearg"]) == "converted-somearg"
+
+
+def test_aliases_work():
+    @task(aliases="foo1")
+    def task1():
+        return "t1"
+
+    @task(aliases=["foo2a", "foo2b"])
+    def task2():
+        return "t2"
+
+    tasks = tools.include_tasks()
+
+    assert dispatch(["task1"]) == "t1"
+    assert dispatch(["foo1"]) == "t1"
+    assert dispatch(["task2"]) == "t2"
+    assert dispatch(["foo2a"]) == "t2"
+    assert dispatch(["foo2b"]) == "t2"

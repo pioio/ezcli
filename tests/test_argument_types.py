@@ -393,7 +393,9 @@ def test_choices_str(capsys):
     assert t.dispatch("bbb") == "bbb"
     with pytest.raises(SystemExit, match="2"):
         t.dispatch("ccc")
-    assert capsys.readouterr().err.endswith("error: argument foo_bar: invalid choice: 'ccc' (choose from 'aaa', 'bbb')\n")
+    assert capsys.readouterr().err.endswith(
+        "error: argument foo_bar: invalid choice: 'ccc' (choose from 'aaa', 'bbb')\n"
+    )
 
 
 def test_choices_int(capsys):

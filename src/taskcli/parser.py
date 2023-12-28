@@ -309,7 +309,11 @@ def _add_param_to_subparser(param: Parameter, subparser: argparse.ArgumentParser
         if param.kind == inspect.Parameter.POSITIONAL_OR_KEYWORD:
             kwargs["nargs"] = "?"
 
-    if param.arg_annotation and param.arg_annotation.type is not None and param.arg_annotation.type is not Parameter.Empty:
+    if (
+        param.arg_annotation
+        and param.arg_annotation.type is not None
+        and param.arg_annotation.type is not Parameter.Empty
+    ):
         # user specified "arg(..., type=...)", which will be passed to argparse, which attempt the conversion
         # This check has to be first, as in principle we could be converting from str to str
         pass

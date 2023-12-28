@@ -4,11 +4,11 @@ import json
 import logging
 import os
 import sys
+import time
 
 from . import envvars, task, taskfiledev
 from .parser import build_initial_parser
 from .utils import print_err, print_error
-import time
 
 log = logging.getLogger(__name__)
 
@@ -60,7 +60,7 @@ def main() -> None:
     finally:
         if envvars.TASKCLI_ADV_PRINT_RUNTIME.is_true():
             took = time.time() - start
-            print(f"Runtime: {took:.3f}s")
-            print(f"    Import: {import_took:.3f}s")
-            print(f"   Include: {include_took:.3f}s")
-            print(f"  Dispatch: {include_took:.3f}s")
+            print(f"Runtime: {took:.3f}s")  # noqa: T201
+            print(f"    Import: {import_took:.3f}s")  # noqa: T201
+            print(f"   Include: {include_took:.3f}s")  # noqa: T201
+            print(f"  Dispatch: {dispatch_took:.3f}s")  # noqa: T201

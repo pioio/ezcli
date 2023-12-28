@@ -22,7 +22,7 @@ class Arg:
     choices: Iterable[Any] | None = None
     metavar: str | None = None
     nargs: str | int | None = None
-    type: Any = None
+    type: Any = None  # noqa: A003
 
     def get_argparse_fields(self) -> dict[str, Any]:
         """Return a dict of fields which can be passed to argparse.add_argument."""

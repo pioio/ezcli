@@ -43,9 +43,7 @@ TASKCLI_ADV_OVERRIDE_FORMATTING = EnvVar(
 
 TASKCLI_ADV_PRINT_RUNTIME = EnvVar(
     default_value="false",
-    desc=(
-        "If set to true, prints the total exection time the tool (not including the ython interpreter startup). "
-    ),
+    desc=("If set to true, prints the total exection time the tool (not including the ython interpreter startup). "),
 )
 
 

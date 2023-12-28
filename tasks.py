@@ -6,7 +6,6 @@
 import testing
 from taskcli import run, task, tt
 
-
 important = tt.Group("Important", desc="Development tasks")
 
 
@@ -70,10 +69,10 @@ with tt.Group("Testing module"):
 
 
 with tt.Group("Hidden Group", hidden=True):
+
     @task
     def task_in_hidden_group():
         print("hello")
-
 
 
 DEFAULT_LINT_PATH = "src/"
@@ -125,7 +124,6 @@ with tt.Group("lint", desc="Code cleanup tasks") as x:
 def rufftwice():
     ruff()
     ruff()
-
 
 
 @task

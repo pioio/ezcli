@@ -34,14 +34,9 @@ class TaskCodeLocation:
 
 def task(*args: Any, **kwargs: Any) -> AnyFunction:
     """Decorate a function as a task."""
-
     # currentframe is much(!) faster than inspect.stack()
-    current_frame = inspect.currentframe().f_back
-    file_location = current_frame.f_code.co_filename
-    line_number = current_frame.f_lineno
 
-    code_location = TaskCodeLocation(file=file_location, line=line_number)
-    kwargs["code_location"] = code_location
+    kwargs["code_location"] = _get_code_location()
 
     if len(args) == 1 and callable(args[0]):
         # Decorator is used without arguments
@@ -55,6 +50,25 @@ def task(*args: Any, **kwargs: Any) -> AnyFunction:
 
         return decorator
 
+def _get_code_location() -> TaskCodeLocation:
+    """Inspects the stack to find the location of the task definition.
+
+    This info is later used to print warnings about the task.
+    This function can be called only from the @task decorator.
+    """
+    current_frame = inspect.currentframe()
+    assert current_frame is not None
+
+    prev_fame = current_frame.f_back
+    assert prev_fame is not None
+
+    prev_fame = current_frame.f_back
+    assert prev_fame is not None
+
+    file_location = prev_fame.f_code.co_filename
+    line_number = prev_fame.f_lineno
+
+    return TaskCodeLocation(file=file_location, line=line_number)
 
 class Task:
     """A decorated function."""
