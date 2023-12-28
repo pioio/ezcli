@@ -76,6 +76,8 @@ this can result in a lot of output
 
 ## Main features
 - Optimized for fast startup (majority of startup time is python interpreter startup). Benchmark with `TASKCLI_ADV_PRINT_RUNTIME=1`
+- Easy to start, flexible when needed (access to underlying `argparse` parser)
+-
 
 ## Other features
 - Expose regular python function into a task, print their output to stdout  (`-P` flag.)
@@ -122,8 +124,8 @@ def do_something():
    It's useful to see at a glance which tasks are ready to run, and which are not.
    Specify either env var names, or  for advanced cases, a function that returns a string.
 
-## Readmap
-Custom env validation functions
+## Roadmap
+- Custom env validation functions
 
 
 ## Disclaimer
