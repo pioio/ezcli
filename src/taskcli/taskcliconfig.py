@@ -1,13 +1,21 @@
 """The default runtime configuration of taskcli.
 
+This file defines the default runtime configuration of taskcli which can be set via
+- config file
+- env vars
+- CLI arguments
+
+Note: some additional configurable env vars are in envvars.py.
+
+
 Config load order
 - built-in defaults    -> during import
 - global config file   -> during import  (TODO)
 - user config file     -> during import  (TODO)
 - tasks.py settings    -> taskcli.config.show_hidden = True  (from ./tasks.py)
     How to prevent imported modules from changing the defaults? taskcli.config.reset()
-- env vars -> run during dispatch -> during dispatch
-- CLI arguments                   -> during dispatch
+- env vars             -> run during dispatch
+- CLI arguments        -> during dispatch
 
 """
 import argparse
