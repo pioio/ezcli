@@ -80,6 +80,12 @@ def _dispatch_unsafe(argv: list[str] | None = None, tasks_found: bool = True) ->
     if argconfig.init:
         create_tasks_file("tasks.py")
         return
+    if argconfig.show_env:
+        envvars.show_env(verbose=False)
+        return
+    if argconfig.show_env_detailed:
+        envvars.show_env(verbose=True)
+        return
 
     if argconfig.version:
         print("version info...")  # noqa: T201
@@ -223,6 +229,10 @@ def build_parser(tasks: list[Task]) -> argparse.ArgumentParser:
 
     # Main parsers
     root_parser.add_argument("--version", action="store_true")
+    root_parser.add_argument("--show-env", action="store_true",
+                             help="Show the supported environment variables, and their description")
+    root_parser.add_argument("--show-env-detailed", action="store_true",
+                             help="like --show-env, but also include descriptions.")
     root_parser.add_argument("-v", "--verbose", action="store_true")
     root_parser.add_argument(
         "-r", "--ready", help="Show detailed info about task being ready", action="count", default=0

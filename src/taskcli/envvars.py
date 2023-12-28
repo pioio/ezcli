@@ -2,6 +2,8 @@
 import logging
 import os
 
+from taskcli import configuration
+
 from .envvar import EnvVar
 
 log = logging.getLogger(__name__)
@@ -13,7 +15,8 @@ TASKCLI_TASKS_PY_FILENAMES = EnvVar(
 
 TASKCLI_GOTASK_TASK_BINARY_FILEPATH = EnvVar(
     default_value="",
-    desc="The absolute path to the binary of the taskfile.dev tool. Used to include tasks from Taskfile.yaml files.",
+    desc=("The absolute path to the binary of the taskfile.dev tool. Used to include tasks from Taskfile.yaml files."
+          "Setting this can add 20ms to each execution of taskcli if taskfile yaml files are in the local directory."),
 )
 
 TASKCLI_GOTASK_TASKFILE_FILENAMES = EnvVar(
@@ -55,6 +58,27 @@ def _set_names() -> None:
     for name, value in globals().items():
         if isinstance(value, EnvVar):
             value.name = name
+import sys
+def show_env(verbose: int) -> None:
+    """Print the environment variables used by taskcli."""
+    print("# Environment variables used by taskcli:", file=sys.stderr)  # noqa: T201
+
+    for name, value in globals().items():
+        if isinstance(value, EnvVar):
+            color = ""
+            clear = ""
+            green = ""
+            green = configuration.colors.green
+            clear = configuration.colors.end
+            dark = configuration.colors.dark_gray
+            if value.value != value.default_value:
+                color = configuration.colors.yellow
+            print(f"{green}{name}{clear}={color}{value.value}{clear}")  # noqa: T201
+            if value.desc and verbose:
+                print(f"{dark}{value.desc}{clear}")
+
+            # format desc to lines of 80 chars long, break on sapce
+            formatted = ""
 
 
 _set_names()

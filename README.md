@@ -75,7 +75,7 @@ this can result in a lot of output
 
 
 ## Main features
-
+- Optimized for fast startup (majority of startup time is python interpreter startup). Benchmark with `TASKCLI_ADV_PRINT_RUNTIME=1`
 
 ## Other features
 - Expose regular python function into a task, print their output to stdout  (`-P` flag.)

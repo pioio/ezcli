@@ -9,6 +9,7 @@ import time
 from . import envvars, task, taskfiledev
 from .parser import build_initial_parser
 from .utils import print_err, print_error
+from . import utils
 
 log = logging.getLogger(__name__)
 
@@ -16,6 +17,8 @@ log = logging.getLogger(__name__)
 def main() -> None:
     """Entrypoint for the 'taskcli' command."""
     start = time.time()
+    INVALID_TIME = -1
+
 
     try:
         import taskcli
@@ -28,8 +31,8 @@ def main() -> None:
     argconfig, _ = parser.parse_known_args(argv or sys.argv[1:])
 
     tasks_found = False
-    import_took = 999
-    include_took = 999
+    import_took = INVALID_TIME
+    include_took = INVALID_TIME
     for filename in argconfig.file.split(","):
         filename = filename.strip()
         if os.path.exists(filename):
@@ -47,12 +50,15 @@ def main() -> None:
             include_took = time.time() - start_include
             tasks_found = True
 
+    taskfile_took = INVALID_TIME
     if taskfiledev.should_include_taskfile_dev():
+        start_taskfile = time.time()
         tasks_were_included = taskfiledev.include_tasks()
         if tasks_were_included:
             tasks_found = True
+        taskfile_took = time.time() - start_taskfile
 
-    dispatch_took = 999
+    dispatch_took = INVALID_TIME
     try:
         start_dispatch = time.time()
         taskcli.dispatch(tasks_found=tasks_found)
@@ -60,7 +66,16 @@ def main() -> None:
     finally:
         if envvars.TASKCLI_ADV_PRINT_RUNTIME.is_true():
             took = time.time() - start
-            print(f"Runtime: {took:.3f}s")  # noqa: T201
-            print(f"    Import: {import_took:.3f}s")  # noqa: T201
-            print(f"   Include: {include_took:.3f}s")  # noqa: T201
-            print(f"  Dispatch: {dispatch_took:.3f}s")  # noqa: T201
+            utils.print_stderr(f"Runtime: {took:.3f}s")  # noqa: T201
+            if import_took != INVALID_TIME:
+                utils.print_stderr(f"    Import: {import_took:.3f}s")  # noqa: T201
+
+            if include_took != INVALID_TIME:
+                utils.print_stderr(f"   Include: {include_took:.3f}s")  # noqa: T201
+
+            if dispatch_took != INVALID_TIME:
+                utils.print_stderr(f"  Dispatch: {dispatch_took:.3f}s")  # noqa: T201
+
+            if taskfile_took != INVALID_TIME:
+                utils.print_stderr(f"  Taskfile: {taskfile_took:.3f}s (time to run the 'task' binary, "
+                                   f"{envvars.TASKCLI_GOTASK_TASK_BINARY_FILEPATH})")  # noqa: T201
