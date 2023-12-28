@@ -89,6 +89,11 @@ def reset_tasks() -> None:
         setattr(tt.config, key, value)
 
 
+def get_basename() -> str:
+    """Return the name of the taskcli executable."""
+    return os.path.basename(sys.argv[0])
+
+
 def get_root_module() -> str:
     """Return the name of the module of the runtime."""
     return sys.modules["__main__"].__name__

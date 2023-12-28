@@ -23,19 +23,22 @@ def filter_before_listing(tasks: list[Task], settings: TaskRenderSettings) -> Fi
     if settings.tags:
         filtered_tasks = filter_tasks_by_tags(tasks, tags=settings.tags)
         if not filtered_tasks:
-            progress += [f"No tasks after filtering by tag ({settings.tags})"]
+            progress += [f"No tasks after filtering by tags ({', '.join(settings.tags)})"]
             return FilterResult(tasks=[], progress=progress)
 
-        progress += [f"After filtering by tag ({settings.tags}): {len(filtered_tasks)}."]
+        progress += [f"After filtering by tags ({', '.join(settings.tags)}): {len(filtered_tasks)}."]
     else:
         filtered_tasks = tasks
 
     if settings.search:
         search_filtered_tasks = search_for_tasks(tasks=filtered_tasks, search=settings.search)
         if not search_filtered_tasks:
-            progress += [f"No tasks after filtering by regex search ({settings.search})"]
+            progress += [f"No tasks after searching name and summary with regex search ({settings.search})"]
             return FilterResult(tasks=[], progress=progress)
-        progress += [f"After filtering by regex search ({settings.search}): {len(search_filtered_tasks)}."]
+        progress += [
+            f"After searching searching name and summary with regex "
+            f"search ({settings.search}): {len(search_filtered_tasks)}."
+        ]
     else:
         search_filtered_tasks = filtered_tasks
 

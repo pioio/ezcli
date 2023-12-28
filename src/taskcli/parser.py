@@ -28,7 +28,8 @@ TODO:
 """
 
 
-GROUP_SUFFIX = "[group]"  # TODO: change this later
+# GROUP_SUFFIX = "[group]"  # TODO: change this later
+GROUP_SUFFIX = "/"  # TODO: change this later
 
 log = logging.getLogger(__name__)
 

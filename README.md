@@ -13,15 +13,23 @@ The guiding design principles of taskcli are:
 It can be used for any sort of project, with Python as the glue (in stead of write-once-read-never bash "oneliners").
 
 ## Basic usage overview
-`tt` list all the tasks defined by the `tasks.py` in current directory (you can import tasks from other directories)
-`tt <task_name> [args]` run a task (tool will automaticlly switch directories if needed)
-`tt <group_name>` list all the tasks in a group of tasks
-`tt -s <search_term>` list all the tasks matching the regex search term
-`tt -t tags` list all the tasks with the given tags
-`tt -t imp` list all tags maked as important
-`tt -H` list all the tasks, even the onces marked as hidden and the onces in hidden group
+`t` list all the tasks defined by the `tasks.py` in current directory (you can import tasks from other directories)
+`t <task_name> [args]` run a task (tool will automaticlly switch directories if needed)
+`t <group_name>` list all the tasks in a group of tasks (also the hidden ones)
+`t -s <search_term>` list all the tasks matching the regex search term
+`t -t tags` list all the tasks with the given tags
+`t -t imp` list all tags maked as important
+`t -H` list all the tasks, even the onces marked as hidden and the onces in hidden group
 
-(You can also use `taskcli` instead of `tt`)
+(You can also use `taskcli` instead of `t`)
+
+By default `taskcli` installs these entrypoints: `t`, `tt`, `taskcli`
+- `t` and `taskcli` are equivalent; and are the default entrypoints to the tool.
+- `tt` is the equivalent of running `t --show-hidden` (i.e. `t -H`), so, by default it shows all the hidden tasks and groups. This distinction also impacts tab completion. Tab completion for `t` only shows not hidden groups/tasks, while tab completion for `tt` shows all groups/tasks.
+
+Rationale: in practice I found simply switching between `t` and `tt` to be the fastest way of toggling between showing some, vs. all, tasks. Wasteful? A bit, maybe. Handy? You bet!
+
+
 
 ## Tab completion
 Install `argcomplete` package. It's an optional dependency of taskcli
