@@ -77,7 +77,7 @@ def include_tasks(module: Module | None = None) -> list[Task]:
 
 
 @contextlib.contextmanager
-def simple_list_format():
+def simple_list_format(kwargs: dict[str, str] | None = None):
     """Context manager to change list formatting to a simple one, which is easy to unit test.
 
     Does two things:
@@ -93,7 +93,13 @@ def simple_list_format():
     - allows experimenting with changing formatting, without needing to adjust (most of) unit tests.
       (some unit tests do test formatting itself, and those tests do not use this context manager)
     """
-    with set_env(TASKCLI_ADV_OVERRIDE_FORMATTING="true"):
+    def_kwargs = {
+        "TASKCLI_CFG_SHOW_TAGS":"false"
+    }
+    if kwargs:
+        def_kwargs.update(kwargs)
+
+    with set_env(TASKCLI_ADV_OVERRIDE_FORMATTING="true", **def_kwargs):
         with _changed_config(taskcli.configuration.apply_simple_formatting):
             yield
 
@@ -113,10 +119,12 @@ def _changed_config(fun, **kwargs):
     old_config = taskcli.configuration.config
     old_settings = {k: v for k, v in old_config.__dict__.items() if k.startswith("render_")}
     taskcli.configuration.apply_simple_formatting()
+
     yield
     # restore
     for k, v in old_settings.items():
         setattr(old_config, k, v)
+
 
 
 def run_tasks(cmd: str) -> tuple[str, str]:

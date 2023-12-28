@@ -71,7 +71,7 @@ class TaskCLIConfig:
             "", "init", env=False, help="Create a new tasks.py file in the current directory"
         )
 
-        self.tags: list[str] = self._add_list([], "tags", "-t", help="Only show tasks matching any of these tags")
+        self.tags: list[str] = self._add_list([], "tags", "-t", nargs="+", help="Only show tasks matching any of these tags")
 
         self.show_hidden: bool = self._add_bool(
             False, "show_hidden", "-H", help="Show all tasks and groups, even the hidden ones."
@@ -95,7 +95,7 @@ class TaskCLIConfig:
 
         self.show_hidden_tasks: bool = self._add_bool(False, "show_hidden_tasks", help="")
         self.show_tags: bool = self._add_bool(
-            False, "show_tags", "-T", help="Show tags of each task when listing tasks."
+            True, "show_tags", help="Show tags of each task when listing tasks."
         )
 
         self.show_optional_args: bool = self._add_bool(False, "show_optional_args", help="")
@@ -147,6 +147,12 @@ class TaskCLIConfig:
         """To prevent adding the same name twice."""
         assert name not in self._addded_names
         self._addded_names.add(name)
+
+    def __str__(self):
+        out = []
+        for name in self._addded_names:
+            out += [f"{name}='{getattr(self, name)}'"]
+        return "\n".join(out)
 
     def _store_env_var(self, name: str, default_value: str | bool | int | list[str], help: str) -> None:
         name = self._to_env_var_name(name)
@@ -239,8 +245,9 @@ class TaskCLIConfig:
 
         return default
 
-    def _add_list(self, default: list[str], name: str, short: str = "", /, *, help: str, env: bool = True) -> list[str]:
+    def _add_list(self, default: list[str], name: str,short: str = "", /, *,  nargs="*", help: str, env: bool = True) -> list[str]:
         """Add a list of string to the parser."""
+        assert nargs in ["*", "+", "?", ""], f"Invalid nargs: {nargs}"
         self._store_name(name)
         if env:
             self._store_env_var(name=name, default_value=default, help=help)
@@ -254,7 +261,7 @@ class TaskCLIConfig:
             help += f" (default: {new_default}{set_from})"
             if env:
                 help += f" (env: {self._to_env_var_name(name)})"
-            parser.add_argument(*args, nargs="*", default=None, help=help)
+            parser.add_argument(*args, nargs=nargs, default=None, help=help)
 
         def read_argument(config: TaskCLIConfig, args: argparse.Namespace) -> None:
             value = getattr(args, name)

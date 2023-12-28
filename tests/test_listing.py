@@ -1,6 +1,8 @@
 import re
 from json import tool
 
+from argh import dispatch
+
 import taskcli
 from taskcli import Group, Task, arg, task
 from taskcli.listing import list_tasks
@@ -194,3 +196,55 @@ def test_hidden_tasks_dont_show_up_by_default():
     render_settings.show_hidden_tasks = True
     lines = list_tasks(tasks, settings=render_settings)
     assert "hidden-task" in "\n".join(lines), "Hidden task should be in the task listing when high verbose"
+
+
+
+def test_list_with_tags():
+
+    groupa = Group("groupA")
+    groupb = Group("groupB")
+    @task(tags=["tag1", "groupa"], group=groupa)
+    def foobar() -> None:
+        pass
+
+    @task(tags=["tag2"], group=groupb)
+    def foobar2a() -> None:
+        pass
+
+    @task(tags=["tag2"], hidden=True, group=groupb)
+    def foobar2b() -> None:
+        pass
+
+    tasks = tools.include_tasks()
+
+    with tools.simple_list_format():
+        lines = list_tasks(tasks)
+    assert lines == """
+# groupA
+foobar
+# groupB
+foobar2a
+1 hidden tasks, use -H to show
+""".strip().splitlines()
+
+    with tools.simple_list_format():
+        render_settings = TaskRenderSettings()
+        render_settings.tags = ["tag1", "tag2"] # use all tags, should list all
+        lines = list_tasks(tasks)
+    assert lines == """
+# groupA
+foobar
+# groupB
+foobar2a
+1 hidden tasks, use -H to show
+""".strip().splitlines()
+
+
+    with tools.simple_list_format():
+        render_settings = TaskRenderSettings()
+        render_settings.tags = ["tag1"]
+        lines = list_tasks(tasks, render_settings)
+    assert lines == """
+# groupA
+foobar
+""".strip().splitlines()

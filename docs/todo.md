@@ -9,7 +9,10 @@ Required TODO:
 - [x] param.type.is_bool
 - [x] add unit tests with "-" task names
 - [ ] make tags list work, add unit tests
+- [ ] improve listing tabs in group,  name[group] is clumsy
 - [ ] nice warning if no tags listed
+- [ ] when -t empty, list nay with tags
+- [ ] proper typed interface to @task
 - [ ] make metavar work in task list
 - [ ] unit test for   @task(important=True, format="{name} {clear}{red}(PROD!)")
 

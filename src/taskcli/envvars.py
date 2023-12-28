@@ -63,13 +63,11 @@ TASKCLI_ADV_PRINT_RUNTIME = EnvVar(
 
 TASKCLI_TAG_FOR_IMPORTANT_TASKS = EnvVar(
     default_value="imp",
-    desc=("The tag string automatically assigned to important tasks. Important tasks can be then listed with 'tt -t <tag>'."),
+    desc=(
+        "The tag string automatically assigned to important tasks. Important tasks can be then listed with 'tt -t <tag>'."
+    ),
 )
 
-TASKCLI_ARG_SHOW_TAGS = EnvVar(
-    default_value="false",
-    desc=("If set to true, shows the tags of each task in the list output."),
-)
 
 
 def _set_names() -> None:

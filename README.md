@@ -2,9 +2,14 @@
 
 A tool for turning Python functions into powerful CLI interfaces for **fast** real-life task automation.
 
-The guiding design principle is to make running and navigating tasks fast -- with fewest keystrokes.
-
 It's like a Makefile, but in Python.
+
+The guiding design principles of taskcli are:
+- encapsulate complexity of managing many tasks: show only what's needed, make it easy to reveal more
+- make running and navigating tasks fast -- with fewest keystrokes.
+
+`taskcli` is not only for Python project.
+It can be used for any sort of project, with Python as the glue (in place of write-one read-never long bash "oneliners").
 
 ## Installation and basic usage
 ```

@@ -127,7 +127,7 @@ class Task:
         self.env = env or []
         self.hidden = hidden
         self.important = important
-        if important and TAG_IMPORTANT not in self.tags:
+        if important and TAG_IMPORTANT and TAG_IMPORTANT not in self.tags:
             self.tags.append(TAG_IMPORTANT)
 
         self.params = [Parameter(param) for param in inspect.signature(func).parameters.values()]
