@@ -50,6 +50,7 @@ def task(*args: Any, **kwargs: Any) -> AnyFunction:
 
         return decorator
 
+
 def _get_code_location() -> TaskCodeLocation:
     """Inspects the stack to find the location of the task definition.
 
@@ -69,6 +70,7 @@ def _get_code_location() -> TaskCodeLocation:
     line_number = prev_fame.f_lineno
 
     return TaskCodeLocation(file=file_location, line=line_number)
+
 
 class Task:
     """A decorated function."""

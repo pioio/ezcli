@@ -11,8 +11,11 @@ from . import configuration
 ENDC = configuration.get_end_color()
 UNDERLINE = configuration.get_underline()
 
+
 def print_stderr(text: str) -> None:
+    """Print string to stderr, unmodified."""
     print(text, file=sys.stderr, flush=True)  # noqa: T201
+
 
 def print_err(text: str) -> None:
     """Print to stderr."""

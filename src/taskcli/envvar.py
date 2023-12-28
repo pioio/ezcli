@@ -31,5 +31,6 @@ class EnvVar:
         if val in ("true", "1", "yes"):
             return True
         return False
+
     def __str__(self) -> str:
         return self.pretty()

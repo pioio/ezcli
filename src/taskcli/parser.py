@@ -87,9 +87,9 @@ def _dispatch_unsafe(argv: list[str] | None = None, tasks_found: bool = True) ->
         envvars.show_env(verbose=True)
         return
 
-    if argconfig.version:
-        print("version info...")  # noqa: T201
-        sys.exit(0)
+    # >  if argconfig.version:
+    # >      print("version info...")
+    # >      sys.exit(0)
 
     if not tasks_found:
         print_task_not_found_error()
@@ -228,12 +228,16 @@ def build_parser(tasks: list[Task]) -> argparse.ArgumentParser:
     root_parser = argparse.ArgumentParser()
 
     # Main parsers
-    root_parser.add_argument("--version", action="store_true")
-    root_parser.add_argument("--show-env", action="store_true",
-                             help="Show the supported environment variables, and their description")
-    root_parser.add_argument("--show-env-detailed", action="store_true",
-                             help="like --show-env, but also include descriptions.")
-    root_parser.add_argument("-v", "--verbose", action="store_true")
+    root_parser.add_argument(
+        "--show-env", action="store_true", help="Show the supported environment variables, and their description"
+    )
+    root_parser.add_argument(
+        "--show-env-detailed", action="store_true", help="like --show-env, but also include descriptions."
+    )
+    root_parser.add_argument(
+        "--examples", action="store_true", default=False, help="Show code examples of how to use taskcli."
+    )
+    # > root_parser.add_argument("-v", "--verbose", action="store_true")
     root_parser.add_argument(
         "-r", "--ready", help="Show detailed info about task being ready", action="count", default=0
     )
@@ -243,10 +247,8 @@ def build_parser(tasks: list[Task]) -> argparse.ArgumentParser:
     root_parser.add_argument(
         "--init", action="store_true", default=False, help="Create a new tasks.py file in the current directory"
     )
+    root_parser.add_argument("--version", action="store_true")
     _add_initial_tasks_to_parser(root_parser)
-    root_parser.add_argument(
-        "--examples", action="store_true", default=False, help="Show code examples of how to use taskcli."
-    )
     root_parser.add_argument(
         ARG_NO_GO_TASK,
         action="store_true",
