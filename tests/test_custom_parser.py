@@ -2,8 +2,8 @@ import argparse
 import sys
 
 import taskcli
-from taskcli import Task, task
 import taskcli.core
+from taskcli import Task, task
 
 from .tools import include_tasks, reset_context_before_each_test
 

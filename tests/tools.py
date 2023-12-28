@@ -1,14 +1,15 @@
 """Various tools for unit tests."""
 import contextlib
+import inspect
 import os
-import sys
 import subprocess
+import sys
+
 import pytest
 
 import taskcli
-from taskcli import Task, task
 import taskcli.core
-import inspect
+from taskcli import Task, task
 from taskcli.types import Module
 
 ########################################################################################################################
@@ -17,17 +18,18 @@ from taskcli.types import Module
 # Fictures with autosuse=True are run before each test,
 # but to kick in they must be imported directly (from .tools import fixture_name)
 
+
 # as long as this one is imported to a test module, it will be used before each test
 @pytest.fixture(autouse=True)
 def reset_context_before_each_test() -> None:
     """Reset the entire context of taskcli, run this before each test"""
-    #print("Resetting tasks")
     taskcli.utils.reset_tasks()
     return None
 
 
 ########################################################################################################################
 # Other
+
 
 def include_task() -> Task:
     current_frame = inspect.currentframe()
@@ -40,7 +42,8 @@ def include_task() -> Task:
     assert len(res) == 1, f"Expected to find a single task, but found {len(res)} tasks, names: {[t.name for t in res]}"
     return res[0]
 
-def include_tasks(module:Module|None=None) -> list[Task]:
+
+def include_tasks(module: Module | None = None) -> list[Task]:
     """Include the tasks from the current module, and return them. Use alongside reset_context_before_each_test .
 
     This function must be called directly from the module from which we want to include the tasks.
@@ -61,8 +64,10 @@ def include_tasks(module:Module|None=None) -> list[Task]:
 
     expected_fixture = "reset_context_before_each_test"
     if expected_fixture not in module_from_which_this_function_was_called.__dict__:
-        msg = (f"The module which uses include_tasks() must also import {expected_fixture} "
-            "to reset the list of tasks between each test.")
+        msg = (
+            f"The module which uses include_tasks() must also import {expected_fixture} "
+            "to reset the list of tasks between each test."
+        )
         print("found: " + str(module_from_which_this_function_was_called.__dict__.keys()))
         print(module_from_which_this_function_was_called.__name__)
         raise Exception(msg)
@@ -99,7 +104,7 @@ def set_env(**kwargs):
     old_env = os.environ.copy()
     os.environ.update(kwargs)
     yield
-    os.environ = old_env
+    os.environ = old_env  # noqa: B003
 
 
 @contextlib.contextmanager
@@ -114,8 +119,6 @@ def _changed_config(fun, **kwargs):
         setattr(old_config, k, v)
 
 
-
-
 def run_tasks(cmd: str) -> tuple[str, str]:
     print(f"run_tasks: {cmd}")
     process = subprocess.Popen(
@@ -127,4 +130,3 @@ def run_tasks(cmd: str) -> tuple[str, str]:
     )
     stdout, stderr = process.communicate()
     return stdout.decode(), stderr.decode()
-

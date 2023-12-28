@@ -12,15 +12,13 @@ from typing import Annotated
 import pytest
 
 import taskcli
-from taskcli import Group, arg, task
 import taskcli.core
+from taskcli import Group, arg, task
 from taskcli.listing import list_tasks
 from taskcli.task import Task
 
 from . import tools
-
 from .tools import reset_context_before_each_test
-
 
 
 def test_basic2():
@@ -39,7 +37,6 @@ def test_basic2():
     assert not tasks[0].important
     assert tasks[1].name == "foobar2"
     assert tasks[1].important
-
 
 
 def test_run_default_args_str():
@@ -76,5 +73,3 @@ def test_run_default_args(default_arg):
     except SystemExit:
         pytest.fail("SystemExit should not be raised")
     assert done == default_arg
-
-

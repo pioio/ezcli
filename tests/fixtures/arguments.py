@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 
-from taskcli import task, run, tt
-
+from taskcli import run, task, tt
 
 
 @task
@@ -9,44 +8,39 @@ def task1(arg1: str) -> None:
     assert isinstance(arg1, str)
     print(arg1)
 
+
 @task
 def task2(arg1: str, arg2: str) -> None:
     assert isinstance(arg1, str)
     assert isinstance(arg2, str)
     print(arg1, arg2)
 
+
 @task
-def task3(arg1: str,*, arg2: str) -> None:
+def task3(arg1: str, *, arg2: str) -> None:
     assert isinstance(arg1, str)
     assert isinstance(arg2, str)
     print(arg1, arg2)
 
+
 @task
-def task4(arg1: str,*, arg2: int) -> None:
+def task4(arg1: str, *, arg2: int) -> None:
     assert isinstance(arg1, str)
     assert isinstance(arg2, int)
     print(arg1, arg2)
 
+
 @task
-def task5(arg1: float,*, arg2: int) -> None:
+def task5(arg1: float, *, arg2: int) -> None:
     assert isinstance(arg1, float)
     assert isinstance(arg2, int)
     print(arg1, arg2)
 
+
 #######################################################################################################################
 # Lists
 @task
-def task_list1_a(*, arg1: list[float]) -> None: # positional list
-    #print(arg1)
-    assert isinstance(arg1, list), f"arg1 is not a list, but a {type(arg1)}"
-    for item in arg1:
-        assert isinstance(item, float), f"item is not a float, but a {type(item)}"
-
-    print(arg1)
-
-@task
-def task_list1_a_default(*, arg1: list[float]=[1]) -> None: # positional list
-    #print(arg1)
+def task_list1_a(*, arg1: list[float]) -> None:  # positional list
     assert isinstance(arg1, list), f"arg1 is not a list, but a {type(arg1)}"
     for item in arg1:
         assert isinstance(item, float), f"item is not a float, but a {type(item)}"
@@ -55,38 +49,49 @@ def task_list1_a_default(*, arg1: list[float]=[1]) -> None: # positional list
 
 
 @task
-def task_list1_b(arg1: list[float]) -> None: # optional list
+def task_list1_a_default(*, arg1: list[float] = [1]) -> None:  # positional list # noqa: B006
     assert isinstance(arg1, list), f"arg1 is not a list, but a {type(arg1)}"
     for item in arg1:
         assert isinstance(item, float), f"item is not a float, but a {type(item)}"
 
     print(arg1)
 
+
 @task
-def task_list1_b_default(arg1: list[float]=[444.0]) -> None: # optional list
+def task_list1_b(arg1: list[float]) -> None:  # optional list
     assert isinstance(arg1, list), f"arg1 is not a list, but a {type(arg1)}"
     for item in arg1:
         assert isinstance(item, float), f"item is not a float, but a {type(item)}"
 
     print(arg1)
 
-@task
-def task_list1_c(arg1list: list) -> None: # optional list
 
+@task
+def task_list1_b_default(arg1: list[float] = [444.0]) -> None:  # optional list # noqa: B006
+    assert isinstance(arg1, list), f"arg1 is not a list, but a {type(arg1)}"
+    for item in arg1:
+        assert isinstance(item, float), f"item is not a float, but a {type(item)}"
+
+    print(arg1)
+
+
+@task
+def task_list1_c(arg1list: list) -> None:  # optional list
     assert isinstance(arg1list, list), f"arg1 is not a list, but a {type(arg1list)}"
     for item in arg1list:
         assert isinstance(item, str), f"item is not a str, but a {type(item)}"
 
     print(arg1list)
 
-@task
-def task_list1_c_default(arg1list: list=["def1","def2"]) -> None: # optional list
 
+@task
+def task_list1_c_default(arg1list: list = ["def1", "def2"]) -> None:  # optional list # noqa: B006
     assert isinstance(arg1list, list), f"arg1 is not a list, but a {type(arg1list)}"
     for item in arg1list:
         assert isinstance(item, str), f"item is not a str, but a {type(item)}"
 
     print(arg1list)
+
 
 ########################################################################################################################
 # bools
@@ -103,6 +108,7 @@ def task_bool1_error(arg1xx: bool) -> None:
     print(msg)
     raise Exception(msg)
 
+
 @task
 def task_bool2(*, arg1: bool, arg2: int) -> None:
     assert isinstance(arg1, bool)
@@ -110,9 +116,8 @@ def task_bool2(*, arg1: bool, arg2: int) -> None:
     print(arg1, arg2)
 
 
-
 @task
-def task_complex1(arg1:int,  arg2:float=3.0, *, arg3: bool, arg4: int=44) -> None:
+def task_complex1(arg1: int, arg2: float = 3.0, *, arg3: bool, arg4: int = 44) -> None:
     assert isinstance(arg1, int)
     assert isinstance(arg2, float)
     assert isinstance(arg3, bool)

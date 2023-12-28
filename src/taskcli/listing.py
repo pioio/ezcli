@@ -59,7 +59,7 @@ def _sort_tasks(tasks: list[Task], sort: str, sort_important_first: bool) -> lis
     return tasks
 
 
-def list_tasks(tasks: list[Task], verbose: int, env_verbose: int = 0) -> list[str]:
+def list_tasks(tasks: list[Task], verbose: int, env_verbose: int = 0) -> list[str]:  # noqa: C901
     """Return a list of lines to be printed to the console."""
     assert len(tasks) > 0, "No tasks found"
 
@@ -71,7 +71,9 @@ def list_tasks(tasks: list[Task], verbose: int, env_verbose: int = 0) -> list[st
     # first, prepare rows, row can how more than one line
     lines: list[str] = []
 
-    num_visible_groups = len([group.name for group in groups if group.name not in taskcli.core.get_runtime().hidden_groups])
+    num_visible_groups = len(
+        [group.name for group in groups if group.name not in taskcli.core.get_runtime().hidden_groups]
+    )
 
     num_hidden_groups = 0
     num_hidden_tasks = 0
@@ -179,6 +181,7 @@ def smart_task_lines(task: Task, verbose: int, env_verbose: int = 0) -> list[str
     # any arguments are left-aligned
     # This results in cleaner (arg names are aligned) output if task names are very short
     from . import envvars
+
     temp_line = line
     if not envvars.TASKCLI_ADV_OVERRIDE_FORMATTING.is_true():
         clean_taskname_len = len(utils.strip_escape_codes(line))
@@ -187,7 +190,6 @@ def smart_task_lines(task: Task, verbose: int, env_verbose: int = 0) -> list[str
         if clean_taskname_len <= col_align_first_arg:
             # Add padding to the left, to make the summary line start at the same column
             temp_line = line + " " * (col_align_first_arg - clean_taskname_len)
-
 
     potential_line = temp_line + " " + one_line_params
     if len(utils.strip_escape_codes(potential_line)) < max_left:

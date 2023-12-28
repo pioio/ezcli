@@ -19,6 +19,13 @@ def arg(
     nargs: str | int | None = None,
     default: Any = Parameter.Empty,
 ) -> Annotated[T, str, Arg]:
+    """Create an annotated type with an Arg annotation.
+
+    Examples
+      - arg(int, "The number of foos in the bar", important=True)
+      - arg(int, "The number of foos in the bar")
+
+    """
     kwargs = locals()
 
     del kwargs["help"]

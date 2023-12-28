@@ -1,9 +1,8 @@
-from dataclasses import dataclass
 import functools
 import inspect
-from logging import fatal
 import os
 import sys
+from dataclasses import dataclass
 from typing import Callable, Iterable
 
 import taskcli.core
@@ -14,10 +13,9 @@ from .group import DEFAULT_GROUP, Group
 from .parameter import Parameter
 from .types import Any, AnyFunction
 
+
 class UserError(Exception):
     """Print nice error to the user."""
-
-    pass
 
 
 @dataclass
@@ -33,9 +31,9 @@ class TaskCodeLocation:
     def __repr__(self) -> str:
         return f"TaskCodeLocation(file={self.file!r}, line={self.line!r})"
 
+
 def task(*args: Any, **kwargs: Any) -> AnyFunction:
     """Decorate a function as a task."""
-
     file_location = inspect.stack()[1].filename
     line_number = inspect.stack()[1].lineno
     code_location = TaskCodeLocation(file=file_location, line=line_number)
@@ -67,7 +65,8 @@ class Task:
             # TODO explicit copy of some objects, code_location
             props_to_skip = [
                 "func",  # passed to constructor
-                "params", "group",  # created from func in constructor  # passed to constructor
+                "params",
+                "group",  # created from func in constructor  # passed to constructor
             ]
             if prop in props_to_skip:
                 continue
@@ -89,7 +88,7 @@ class Task:
         format: str = "{name}",
         customize_parser: Callable[[Any], None] | None = None,
         is_go_task: bool = False,
-        suppress_warnings:bool = False,
+        suppress_warnings: bool = False,
         code_location: TaskCodeLocation | None = None,
     ):
         """Create a new Task.
@@ -109,7 +108,7 @@ class Task:
         self.name_format = format
         self.customize_parser = customize_parser
         self.is_go_task: bool = is_go_task
-        self.suppress_warnings:bool = suppress_warnings
+        self.suppress_warnings: bool = suppress_warnings
 
         self.group: Group = group or DEFAULT_GROUP
 
@@ -119,7 +118,6 @@ class Task:
         self.code_location = code_location or TaskCodeLocation(file="<unknown>", line=0)
 
         self.soft_validate_task()
-
 
     def is_valid(self) -> bool:
         """Return True if the task is valid."""
@@ -230,14 +228,15 @@ class Task:
                 missing.append(env)
         return missing
 
-    def dispatch(self, args: list[str]|None=None, sysexit_on_user_error:bool=True) -> Any:
+    def dispatch(self, args: list[str] | None = None, sysexit_on_user_error: bool = True) -> Any:
         """Dispatch the task. A helper for unit tests."""
         name = self.get_full_task_name()
         from .parser import dispatch
+
         if args:
             res = dispatch([name, *args], sysexit_on_user_error=sysexit_on_user_error)
         else:
-            res = dispatch([name],sysexit_on_user_error=sysexit_on_user_error)
+            res = dispatch([name], sysexit_on_user_error=sysexit_on_user_error)
         return res
 
 
@@ -323,40 +322,53 @@ def _get_wrapper(  # noqa: C901
 
 @dataclass
 class ValidationResult:
-    msg:str = ""
-    fatal:bool = False
+    """A validation result of a task."""
 
-def get_validation_errors(task:Task) -> list[ValidationResult]:
+    msg: str = ""
+    fatal: bool = False
+
+
+def get_validation_errors(task: Task) -> list[ValidationResult]:
+    """Return a list of validation errors for the task.
+
+    Error can be fatal (task can't be run), or not.
+    """
     # validate params
-    out:list[ValidationResult] = []
+    out: list[ValidationResult] = []
     suppress_hint = "Add `suppress_warnings=True` to the task decorator to suppress this warning."
 
     for param in task.params:
         if param.is_bool() and param.kind not in [Parameter.KEYWORD_ONLY]:
             # This will be a common error, so make sure the error message is extra helpful
-            msg = (f"Task '{task.name}' ({task.code_location}) has a boolean parameter '{param.name}' which is not keyword-only. "
-            "This is not supported. "
-            f"Either make the boolean parameter explicitly a keyword-only parameter by adding `*,` in the param list "
-            "anywhere before the bool parameter "
-            f"[e.g. def taskname(arg:name, *, {_helper_render_bool_example(param)}) ], or use a different type.")
+            msg = (
+                f"Task '{task.name}' ({task.code_location}) has a "
+                f"boolean parameter '{param.name}' which is not keyword-only. "
+                "This is not supported. "
+                f"Either make the boolean parameter explicitly a keyword-only parameter by "
+                "adding `*,` in the param list "
+                "anywhere before the bool parameter "
+                f"[e.g. def taskname(arg:name, *, {_helper_render_bool_example(param)}) ], or use a different type."
+            )
             out += [ValidationResult(msg, fatal=True)]
         if not param.has_supported_type():
             msg = f"Task '{task.name}' has a parameter '{param.name}' which has an unsupported type {param.type}. "
             if param.has_default():
-                msg += ("It will not be possible to specify this parameter from the CLI. "
-                        "When invoking the task the param default value will be used.")
+                msg += (
+                    "It will not be possible to specify this parameter from the CLI. "
+                    "When invoking the task the param default value will be used."
+                )
                 msg += " " + suppress_hint
                 fatal = False
-            else :
+            else:
                 msg += "The parameter does not have a default value set, so taskcli cannot skip adding it to argparse."
                 msg += "Either add a default value to this parameter, or change the type to a supported type."
                 fatal = True
             out += [ValidationResult(msg, fatal=fatal)]
 
-
     return out
 
-def _helper_render_bool_example(param:Parameter):
+
+def _helper_render_bool_example(param: Parameter) -> str:
     """Render a bool parameter to string for an the warning text."""
     out = param.name
     if param.type != Parameter.Empty:

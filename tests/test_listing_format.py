@@ -9,18 +9,20 @@ Any logic tests should be in other test module and be using simplified listing f
 import re
 
 from taskcli import task
-from . import tools
 from taskcli.listing import list_tasks
+
+from . import tools
 from .tools import reset_context_before_each_test
+
 
 def test_list_positional_mandatory():
     """Test that positional mandatory arguments are listed"""
+
     @task
     def foobar(name: int) -> None:
         """This is the first task"""
 
     tasks = tools.include_tasks()
-
 
     lines = list_tasks(tasks, verbose=0)
     assert len(lines) == 1
@@ -47,4 +49,3 @@ def test_formatting():
         "task2",
         "task3",
     ]
-

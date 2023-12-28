@@ -4,15 +4,16 @@ import subprocess
 import pytest
 
 import taskcli
-from taskcli import dispatch, task
 import taskcli.core
+from taskcli import dispatch, task
 from taskcli.group import Group
 from taskcli.parser import _extract_extra_args
 from taskcli.task import Task
 from taskcli.taskcli import TaskCLI
 
+from . import tools
 from .tools import reset_context_before_each_test
-from  . import tools
+
 
 @pytest.mark.parametrize("value", ["1", "-12", "0", "-0"])
 def test_conversion_to_int_works(value):

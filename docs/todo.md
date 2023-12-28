@@ -8,6 +8,7 @@ Required TODO:
 - [x] list|None
 - [ ] param.type.is_bool
 - [ ] add unit tests with "-" task names
+- [ ] add unit test for args passed to argparse from 'arg'
 
 - [ ] run task binary regardless of taskfile being found or not
 - [ ] Make unit test use standard formatting for listing.

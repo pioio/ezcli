@@ -4,8 +4,8 @@ import subprocess
 import pytest
 
 import taskcli
-from taskcli import dispatch, task
 import taskcli.core
+from taskcli import dispatch, task
 from taskcli.group import Group
 from taskcli.parser import _extract_extra_args
 from taskcli.task import Task
@@ -27,9 +27,6 @@ def test_foobar():
 
 @pytest.mark.skip("Not implemented yet")
 def test_tab_completion():
-    import os
-    import subprocess
-
     try:
         os.environ["_ARGCOMPLETE"] = "1"
         os.environ["COMP_LINE"] = "tests/fixtures/testtabcomplete/tasks.py "  # The user's current input
@@ -60,10 +57,6 @@ def test_tab_completion():
         del os.environ["COMP_POINT"]
 
 
-
-
-
-
 def test_extracting_double_hyphen_args():
     args = ["foo", "--", "--baz", "--bar"]
     task_cli = TaskCLI()
@@ -92,4 +85,3 @@ def test_create_groups():
 
     groups = taskcli.listing.create_groups([t1, t2, t3], group_order=["default", "foo"])
     assert (len(groups)) == 2
-

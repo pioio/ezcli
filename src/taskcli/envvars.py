@@ -4,8 +4,6 @@ import os
 
 from .envvar import EnvVar
 
-# from .taskfiledev import go_task_project_name
-
 log = logging.getLogger(__name__)
 
 TASKCLI_TASKS_PY_FILENAMES = EnvVar(

@@ -1,14 +1,16 @@
-from json import tool
-import taskcli
-from taskcli import Group, Task, task
 import re
-from .tools import include_tasks, reset_context_before_each_test
+from json import tool
+
+import taskcli
+from taskcli import Group, Task, arg, task
+from taskcli.listing import list_tasks
+
 from . import tools
 from .test_including import clean_stdout
-from taskcli.listing import list_tasks
-from taskcli import arg
+from .tools import include_tasks, reset_context_before_each_test
 
 sideeffect = 0
+
 
 def test_listing_tasks_works():
     @task
@@ -20,7 +22,6 @@ def test_listing_tasks_works():
         lines = list_tasks(tasks, verbose=0)
     assert len(lines) == 1
     assert re.match(r"foobar1\s+This is the first task", lines[0])
-
 
 
 def test_alphanumeric_order():
@@ -101,7 +102,6 @@ task-in-hidden-group
     )
 
 
-
 def test_positional_mandatory_args_are_listed_by_default():
     @task
     def foobar(name: int) -> None:
@@ -113,7 +113,6 @@ def test_positional_mandatory_args_are_listed_by_default():
         lines = list_tasks(tasks, verbose=0)
     assert len(lines) == 1
     assert re.match(r"foobar\s+NAME\s+.*$", lines[0])
-
 
 
 def test_positional_optional_args_are_not_listed_by_default():

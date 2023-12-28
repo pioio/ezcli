@@ -1,11 +1,10 @@
 """Logic for including tasks from other places."""
 
 import sys
-from .types import Module, AnyFunction, Any
 
-from .task import task
-from  . import core
-from .task import Task
+from . import core
+from .task import Task, task
+from .types import Any, AnyFunction, Module
 
 
 def include_module(module: Module) -> None:
@@ -17,6 +16,7 @@ def include_module(module: Module) -> None:
         assert isinstance(decorated_fun, Task), f"Expected Task, got {type(decorated_fun)}"
         runtime = core.get_runtime()
         runtime.tasks.append(decorated_fun)
+
 
 def include_function(function: AnyFunction, **kwargs: Any) -> None:
     """Include a function as a task."""

@@ -5,14 +5,13 @@ import logging
 import os
 import sys
 
-from .utils import print_err, print_error
-
-from . import envvars, taskfiledev
+from . import envvars, task, taskfiledev
 from .parser import build_initial_parser
+from .utils import print_err, print_error
 
 log = logging.getLogger(__name__)
 
-from . import task
+
 def main() -> None:
     """Entrypoint for the 'taskcli' command."""
     from taskcli import dispatch
@@ -46,6 +45,4 @@ def main() -> None:
         if tasks_were_included:
             tasks_found = True
 
-
     taskcli.dispatch(tasks_found=tasks_found)
-

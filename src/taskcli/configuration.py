@@ -71,12 +71,6 @@ class Config:
     render_color_summary: str = colors.white
     render_extra_line_indent: str = "    "
 
-    render_format_important_tasks: str = "{white}* {green}{underline}{name}{clear}"
-    render_task_name: str = "{white}* {green}{name}{clear}"
-    render_format_hidden_tasks: str = "{white}* {dark_gray}{name}{clear}"
-    render_format_not_ready: str = "{red}* {green}{name}{clear}"
-    render_format_included_taskfile_dev_task: str = "{blue}* {green}{name}{clear}"
-
     render_format_important_tasks: str = "{green}{underline}{name}{clear}"
     render_task_name: str = "{green}{name}{clear}"
     render_format_hidden_tasks: str = "{dark_gray}{name}{clear}"
@@ -153,7 +147,7 @@ class Config:
 config = Config()
 
 
-def apply_simple_formatting():
+def apply_simple_formatting() -> None:
     """Change the formatting to make the output simpler."""
     config.render_format_important_tasks = "{name}"
     config.render_task_name = "{name}"
@@ -163,7 +157,7 @@ def apply_simple_formatting():
     config.render_format_of_group_name = "# {name}"
 
 
-def apply_simple_coded_formatting():
+def apply_simple_coded_formatting() -> None:
     """Change the formatting to make the output simpler."""
     config.render_format_important_tasks = "{name} IMPORTANT"
     config.render_task_name = "{name}"

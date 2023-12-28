@@ -3,9 +3,9 @@ import pytest
 
 import taskcli
 from taskcli import Task, dispatch, include, task
+from tests import tools
 
 from .tools import reset_context_before_each_test, run_tasks
-from tests import tools
 
 
 def test_get_taskfile_dir():

@@ -6,12 +6,7 @@ import typing
 
 import taskcli
 
-
 from . import configuration
-
-
-
-
 
 ENDC = configuration.get_end_color()
 UNDERLINE = configuration.get_underline()
@@ -31,6 +26,7 @@ def print_error(text: str) -> None:
     text = f"{RED}taskcli: Error: {text}{ENDC}"
 
     print(text, file=sys.stderr, flush=True)  # noqa: T201
+
 
 def print_warning(text: str) -> None:
     """Print yellow text to stderr."""
@@ -69,6 +65,7 @@ def reset_tasks() -> None:
     """Clear the list of tasks."""
     # clear included tasks
     from . import core
+
     core.get_runtime().tasks = []
     taskcli.group.DEFAULT_GROUP.tasks = []
     taskcli.group.created.clear()

@@ -1,8 +1,8 @@
-from taskcli import Group, task
-from . import tools
-
 import taskcli
+from taskcli import Group, task
 from taskcli.listing import list_tasks
+
+from . import tools
 from .tools import reset_context_before_each_test
 
 
@@ -28,7 +28,6 @@ def test_groups_basic():
 foobar1
 # magical tasks
 magic""" in "\n".join(lines)
-
 
 
 def test_group_context_manager():

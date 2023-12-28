@@ -6,7 +6,6 @@ import sys
 from typing import Annotated, Type, TypeVar
 
 import testing
-from run import run
 from taskcli import run, task, tt
 from tests.includetest2.subdir.subsubdir import tasks as subsubtasks
 
@@ -14,6 +13,7 @@ important = tt.Group("Important", desc="Development tasks")
 
 
 with tt.Group("dev", desc="Development tasks"):
+
     @task(aliases="t", env=["FOOBAR"])
     def test():
         """Run unit tests."""
@@ -127,7 +127,6 @@ with tt.Group("lint", desc="Code cleanup tasks") as x:
         """Reorder imports, float them to top."""
         path_txt = " ".join(paths)
         run(f"isort {path_txt} --float-to-top")
-
 
 
 @task

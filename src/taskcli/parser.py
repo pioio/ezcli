@@ -9,7 +9,7 @@ import taskcli
 import taskcli.core
 from taskcli.task import UserError
 
-from . import configuration, envvars, examples, taskfiledev
+from . import configuration, envvars, examples, taskfiledev, utils
 from .init import create_tasks_file
 from .listing import list_tasks
 from .parameter import Parameter
@@ -17,7 +17,7 @@ from .task import Task
 from .taskcli import TaskCLI
 from .types import AnyFunction
 from .utils import param_to_cli_option
-from . import utils
+
 """"
 TODO:
   auto-aliases for commands
@@ -44,7 +44,7 @@ def _extract_extra_args(argv: list[str], task_cli: TaskCLI) -> list[str]:
         return argv[:first_double_hyphen]
 
 
-def dispatch(argv: list[str] | None = None, tasks_found: bool = True, sysexit_on_user_error:bool=True) -> Any:
+def dispatch(argv: list[str] | None = None, tasks_found: bool = True, sysexit_on_user_error: bool = True) -> Any:
     """Dispatch the command line arguments to the correct function."""
     # Initial parser, only used to find the tasks file
     try:
@@ -56,7 +56,6 @@ def dispatch(argv: list[str] | None = None, tasks_found: bool = True, sysexit_on
         else:
             # unit tests
             raise
-
 
 
 def _dispatch_unsafe(argv: list[str] | None = None, tasks_found: bool = True) -> Any:  # noqa: C901
@@ -113,7 +112,9 @@ def _dispatch_unsafe(argv: list[str] | None = None, tasks_found: bool = True) ->
         for param in task.params:
             if not param.has_supported_type():
                 # Skip it
-                assert param.has_default(), f"Param {param.name} does not have a default, dispatch should have never been called"
+                assert (
+                    param.has_default()
+                ), f"Param {param.name} does not have a default, dispatch should have never been called"
                 continue
             name = param.name
             value = getattr(argconfig, name)
@@ -177,7 +178,6 @@ def print_task_not_found_error() -> None:
             "See the docs on how to include and list its tasks automatically."
         )
     sys.exit(1)
-
 
 
 def print_listed_tasks(tasks: list[Task], verbose: int, ready_verbose: int) -> None:
@@ -289,8 +289,7 @@ def build_parser(tasks: list[Task]) -> argparse.ArgumentParser:
     return root_parser
 
 
-
-def _add_param_to_subparser(param: Parameter, subparser: argparse.ArgumentParser) -> None:
+def _add_param_to_subparser(param: Parameter, subparser: argparse.ArgumentParser) -> None:  # noqa: C901
     args = param.get_argparse_names()
     kwargs: dict[str, Any] = {}
 
@@ -313,9 +312,9 @@ def _add_param_to_subparser(param: Parameter, subparser: argparse.ArgumentParser
 
     elif param.is_list():
         if param.has_default():
-            kwargs["nargs"] = "*" # it's ok for user to not pass it, default will be used
+            kwargs["nargs"] = "*"  # it's ok for user to not pass it, default will be used
         else:
-            kwargs["nargs"] = "+" # User must pass it
+            kwargs["nargs"] = "+"  # User must pass it
             if not param.is_positional():
                 # needed to force argparse to require --args, as by default they are optional
                 kwargs["required"] = True
@@ -338,19 +337,16 @@ def _add_param_to_subparser(param: Parameter, subparser: argparse.ArgumentParser
         return
 
     if param.help or help_default:
-
         kwargs["help"] = param.help
     if help_default:
         kwargs["help"] = "" if kwargs["help"] is None else kwargs["help"]
         kwargs["help"] += f" (default: {help_default})"
 
-
-
     subparser.add_argument(*args, **kwargs)
 
 
-def _convert_types_from_str_to_function_type(param: Parameter, value: Any) -> Any:
-    """Called after parsing the command line arguments, to convert the types from str to the correct type."""
+def _convert_types_from_str_to_function_type(param: Parameter, value: Any) -> Any:  # noqa: C901
+    """Convert values from argparse to the types defined in the task."""
     if param.type is int:
         value = int(value)
     elif param.is_bool():
@@ -381,7 +377,6 @@ def _convert_types_from_str_to_function_type(param: Parameter, value: Any) -> An
         if value == [] and param.has_default() and param.default is None:
             return None
 
-
         out = []
         thetype = param.get_list_type_args()
         for item in value:
@@ -394,7 +389,6 @@ def _convert_types_from_str_to_function_type(param: Parameter, value: Any) -> An
             else:
                 out += [item]
         value = out
-
 
         return value
 
@@ -411,7 +405,8 @@ def _convert_types_from_str_to_function_type(param: Parameter, value: Any) -> An
     return value
 
 
-def convert_elements_to_type(param: Parameter, value: Any) -> Any:
+def convert_elements_in_list_to_type(param: Parameter, value: Any) -> Any:
+    """Convert elements in a list."""
     out = []
     thetype = param.get_list_type_args()
     for item in value:
@@ -424,6 +419,7 @@ def convert_elements_to_type(param: Parameter, value: Any) -> Any:
         else:
             out += [item]
     return out
+
 
 def _build_parser_name(param: inspect.Parameter) -> str:
     if param.kind == inspect.Parameter.POSITIONAL_OR_KEYWORD:

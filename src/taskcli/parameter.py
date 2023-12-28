@@ -1,7 +1,9 @@
 import inspect
+import typing
 from math import e
 from operator import is_
-from typing import Any, TypeVar
+from types import UnionType
+from typing import Any, List, TypeVar, Union, get_args, get_origin
 from webbrowser import get
 
 from . import annotations
@@ -9,9 +11,7 @@ from .utils import param_to_cli_option
 
 # So that we don't duplicate the default value of arg annotation
 default_arg_annotation = annotations.Arg()
-import typing
-from typing import get_origin, get_args, List, Union
-from types import UnionType
+
 
 class Parameter:
     """A wrapper around inspect.Parameter to make it easier to work with."""
@@ -24,7 +24,6 @@ class Parameter:
     KEYWORD_ONLY = inspect.Parameter.KEYWORD_ONLY
     VAR_POSITIONAL = inspect.Parameter.VAR_POSITIONAL
     VAR_KEYWORD = inspect.Parameter.VAR_KEYWORD
-
 
     def __init__(self, param: inspect.Parameter):
         """Read the parameter and stores the information in this class for easier access."""
@@ -59,8 +58,6 @@ class Parameter:
         # If both are present, the annotation takes precedence
         self.type = param.annotation if not param_using_typing_annotated else param.annotation.__origin__
 
-
-
         if self.type is inspect.Parameter.empty:
             self.type = Parameter.Empty
 
@@ -86,7 +83,7 @@ class Parameter:
         return self.kind in [
             inspect.Parameter.POSITIONAL_ONLY,
             inspect.Parameter.POSITIONAL_OR_KEYWORD,
-            inspect.Parameter.VAR_KEYWORD, # ??? not sure ...
+            inspect.Parameter.VAR_KEYWORD,  # ??? not sure ...
         ]
 
     @property
@@ -106,8 +103,6 @@ class Parameter:
         else:
             name = param_to_cli_option(self.name)
         return [name]
-
-
 
     def has_supported_type(self) -> bool:
         """Return True if the type of the parameter is supported by taskcli (in the context of adding it to argparse).
@@ -137,6 +132,7 @@ class Parameter:
         return False
 
     def is_union_list_none(self) -> bool:
+        """Return True if the parameter is a union of list and None."""
         if self.type is inspect.Parameter.empty:
             return False
 
@@ -146,7 +142,6 @@ class Parameter:
         if self.is_union():
             union_args = get_args(self.type)
             if len(union_args) == 2:
-
                 foundlist = False
                 foundnone = False
                 for arg in union_args:
@@ -160,11 +155,16 @@ class Parameter:
         return False
 
     def is_union(self) -> bool:
-        #   'get_origin(self.annotation) is Union'  ->   python 3.9 syntax, Union[list|None]
-        # 'isinstance(self.annotation, UnionType)'  ->   python 3.10 syntax,  list|None
+        """Return True if the parameter type is a union.
+
+        Python has two union syntaxes:
+           'get_origin(self.annotation) is Union'  ->   python 3.9 syntax, Union[list|None]
+           'isinstance(self.annotation, UnionType)'  ->   python 3.10 syntax,  list|None
+        """
         return get_origin(self.type) is Union or isinstance(self.type, UnionType)
 
-    def is_union_of(self, typevar1, typevar2): # "None.__class__" for non
+    def is_union_of(self, typevar1: Any, typevar2: Any) -> bool:  # "None.__class__" for non
+        """Return True if the parameter type is a union of the two specified types."""
         assert typevar1 is not None, "use   None.__class__ for None"
         assert typevar2 is not None, "use   None.__class__ for None"
         if not self.is_union():
@@ -174,6 +174,7 @@ class Parameter:
         return False
 
     def is_bool(self) -> bool:
+        """Return True if the parameter type is bool."""
         if self.type is bool:
             # type set explicitly
             return True
@@ -183,6 +184,7 @@ class Parameter:
         return False
 
     def is_list(self) -> bool:
+        """Return True if the parameter type is a list."""
         if self.is_union():
             return False
 
@@ -231,7 +233,7 @@ class Parameter:
             if get_origin(arg) is list:
                 return arg
 
-    def get_list_type_args(self) -> None|Any:
+    def get_list_type_args(self) -> None | Any:
         """Return the type arguments of the list annotation, or None if there are none."""
         listtypevar = self.get_the_list_type()
 

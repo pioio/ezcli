@@ -1,18 +1,22 @@
+import argparse
 import dataclasses
 import functools
 import inspect
 import os
 import sys
+import typing
 
 import taskcli
-import argparse
 
-from .task import Task
 from .group import Group
-from .task import Task, task
+from .include import include_function, include_module
+from .task import task
 from .taskcli import TaskCLI
 from .types import Any, AnyFunction, Module
-from .include import include_module, include_function
+
+if typing.TYPE_CHECKING:
+    from .task import Task
+
 
 task_cli = TaskCLI()
 

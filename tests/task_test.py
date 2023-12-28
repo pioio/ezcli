@@ -1,9 +1,8 @@
 import taskcli
-from taskcli import Group, Task, task
 import taskcli.core
+from taskcli import Group, Task, task
 
 from . import tools
-
 from .tools import reset_context_before_each_test
 
 
