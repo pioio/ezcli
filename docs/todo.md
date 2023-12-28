@@ -8,17 +8,16 @@ Required TODO:
 - [x] list|None
 - [x] param.type.is_bool
 - [x] add unit tests with "-" task names
-- [ ] improve argparsr usageunit test choices
-    - [ ] unittest choices
-    - [ ] allow argparse to do the type conversion, use "type"
-    - [ ] make metavar work in task list
+- [ ] make tags list work, add unit tests
+- [ ] nice warning if no tags listed
+- [ ] make metavar work in task list
+- [ ] unit test for   @task(important=True, format="{name} {clear}{red}(PROD!)")
 
-- [ ] make type work with user defined functions
-- [ ] add unit test for args passed to argparse from 'arg'
-- [ ] aliases unit tests
-- [ ] -lt
+- [x] make type work with user defined functions
+- [x] add unit test for args passed to argparse from 'arg'
+- [x] aliases unit tests
 - [x] coverage
-- [ ] run task binary regardless of taskfile being found or not
+- [C] run task binary regardless of taskfile being found or not
 - [ ] show again number of tasks in group (not shown now)
 - [ ] show which group has hidden tasks
 - [ ] mark hidden gorups as (hidden)

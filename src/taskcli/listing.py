@@ -80,7 +80,8 @@ def list_tasks(tasks: list[Task], settings: TaskRenderSettings | None = None) ->
     assert len(tasks) > 0, "No tasks found"
 
     settings = settings or TaskRenderSettings()
-    tasks = filter_tasks_by_tags(tasks, tags=settings.tags)
+    filtered_tasks = filter_tasks_by_tags(tasks, tags=settings.tags)
+    print("filtered, tasks:", len(tasks))
 
     # TODO: extract groups info
     groups = create_groups(tasks=tasks, group_order=configuration.config.group_order)
@@ -101,14 +102,16 @@ def list_tasks(tasks: list[Task], settings: TaskRenderSettings | None = None) ->
             num_hidden_groups += 1
             continue
 
-        if num_visible_groups > 1:
+        tasks_to_show = [group_task for group_task in group.tasks if group_task in filtered_tasks]
+
+        if num_visible_groups > 1 and len(tasks_to_show) > 0:
             num_tasks = group.render_num_shown_hidden_tasks()
             group_name_rendered = format_colors(
                 config.render_format_of_group_name, name=group.name, desc=group.desc, num_tasks=num_tasks
             )
             lines += [group_name_rendered]
 
-        tasks = _sort_tasks(group.tasks, sort=config.sort, sort_important_first=config.sort_important_first)
+        tasks = _sort_tasks(tasks_to_show, sort=config.sort, sort_important_first=config.sort_important_first)
 
         for task in tasks:
             if task.is_hidden() and not settings.show_hidden_tasks:

@@ -61,6 +61,11 @@ TASKCLI_ADV_PRINT_RUNTIME = EnvVar(
     desc=("If set to true, prints the total exection time the tool (not including the ython interpreter startup). "),
 )
 
+TASKCLI_TAG_FOR_IMPORTANT_TASKS = EnvVar(
+    default_value="imp",
+    desc=("The tag string automatically assigned to important tasks. Important tasks can be then listed with 'tt -t <tag>'."),
+)
+
 TASKCLI_ARG_SHOW_TAGS = EnvVar(
     default_value="false",
     desc=("If set to true, shows the tags of each task in the list output."),

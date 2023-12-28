@@ -6,6 +6,7 @@ import testing
 from taskcli import run, task, tt
 
 tt.config.show_ready_info = True
+tt.config.show_tags = True
 
 important = tt.Group("Important", desc="Development tasks")
 
@@ -26,11 +27,6 @@ with tt.Group("dev", desc="Development tasks"):
 
     @task(important=True, format="{name} {clear}{red}(PROD!)")
     def nox():
-        """Run extensive tests using nox."""
-        run("nox")
-
-    @task(important=True)
-    def zox():
         """Run extensive tests using nox."""
         run("nox")
 
