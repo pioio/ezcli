@@ -55,7 +55,9 @@ def filter_tasks_by_tags(tasks: list[Task], tags: list[str]) -> list[Task]:
                     break
     return filtered
 
+from taskcli.task import UserError
 def search_for_tasks(tasks: list[Task], search: str) -> list[Task]:
+    """Search for tasks by regex."""
     import re
     try:
         regex = re.compile(search)

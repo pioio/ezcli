@@ -104,6 +104,7 @@ Features:
 # Later
 - [ ] chaining tasks  `taskcli task1 task2`
 - [ ] pre/post hooks
+- [ ] -S search through docstrings, include matching line?
 - [ ] ability to exclude certain arguments from parser (task(exclude)), the arg must have a default)
 - dict type, accepting key=value, or json
 - [ ] tt.set_overview, this will require storing overview on per-module basis (or storing it only for current one), and loading
