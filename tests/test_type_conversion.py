@@ -85,6 +85,20 @@ def test_custom_user_type():
         return a
 
     t = tools.include_task()
-    ret = t.dispatch(["foo"])
+    ret = t.dispatch(["somearg"])
     assert isinstance(ret, Foobar)
-    assert ret.value == "foo"
+    assert ret.value == "somearg"
+
+
+def test_custom_user_coversion():
+    def convert(value:str):
+        return "converted-" + value
+
+    FoobarType = tt.arg(str, type=convert)
+    @task
+    def foo(a: FoobarType):
+        assert isinstance(a, str)
+        return a
+
+    t = tools.include_task()
+    assert  t.dispatch(["somearg"]) == "converted-somearg"

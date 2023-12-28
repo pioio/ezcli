@@ -27,6 +27,9 @@ class Arg:
     def get_argparse_fields(self) -> dict[str, Any]:
         """Return a dict of fields which can be passed to argparse.add_argument."""
         out: dict[str, Any] = {}
+
+        from .parameter import Parameter
+
         if self.action is not None:
             out["action"] = self.action
         if self.choices is not None:
@@ -35,8 +38,8 @@ class Arg:
             out["metavar"] = self.metavar
         if self.nargs is not None:
             out["nargs"] = self.nargs
-        # if self.type is not None:
-        #     out["type"] = self.type
+        if self.type is not None and self.type is not Parameter.Empty:
+            out["type"] = self.type
 
         # Don't return the default here, it's special, as it can also be set in function signature
 

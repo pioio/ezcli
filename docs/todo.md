@@ -31,6 +31,7 @@ Required TODO:
 - [ ] task .dev   to list item in group, including hidden groups
 - [ ] groups having unique namespace
 - [ ] task op
+- [ ] examples: parts "call with" in docstring and try to call the example with that
 - [ ] extend with a c
 - [ ] groups having namespacesby default, but optionally not  Group(ns=False)
   - [ ] always print group, but if ns is optional, print it dimmed ou

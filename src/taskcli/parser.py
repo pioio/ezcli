@@ -309,7 +309,11 @@ def _add_param_to_subparser(param: Parameter, subparser: argparse.ArgumentParser
         if param.kind == inspect.Parameter.POSITIONAL_OR_KEYWORD:
             kwargs["nargs"] = "?"
 
-    if param.type.is_bool():
+    if param.arg_annotation and param.arg_annotation.type is not None and param.arg_annotation.type is not Parameter.Empty:
+        # user specified "arg(..., type=...)", which will be passed to argparse, which attempt the conversion
+        # This check has to be first, as in principle we could be converting from str to str
+        pass
+    elif param.type.is_bool():
         kwargs["action"] = argparse.BooleanOptionalAction
 
         if param.has_default() and param.default in [True, False]:
@@ -345,6 +349,7 @@ def _add_param_to_subparser(param: Parameter, subparser: argparse.ArgumentParser
         kwargs["type"] = param.type.raw
     elif param.type.raw == taskcli.parametertype.ParameterType.Empty:
         pass
+
     else:
         # Assuming here that error will be printed when we try to run the task
         log.debug("Unsupported type %s, not adding to parser", param.type)
