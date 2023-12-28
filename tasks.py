@@ -2,9 +2,10 @@
 
 # iterate over all functions
 
-
 import testing
 from taskcli import run, task, tt
+
+tt.config.show_ready_info = True
 
 important = tt.Group("Important", desc="Development tasks")
 

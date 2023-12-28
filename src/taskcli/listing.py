@@ -136,6 +136,12 @@ def list_tasks(tasks: list[Task], settings:TaskRenderSettings|None=None) -> list
         lines.append(line)
     return lines
 
+def _render_tags(tags:list[str]) -> str:
+    """Return a string with all tags, formatted for the console."""
+    endc = configuration.get_end_color()
+    tags = [f"#{tag}" for tag in tags]
+
+    return f"{configuration.colors.blue}{','.join(tags)}{endc}"
 
 def smart_task_lines(task: Task, settings:TaskRenderSettings) -> list[str]:  # noqa: C901
     """Render a single task into a list of lines, scale formatting to the amount of content."""
@@ -152,6 +158,9 @@ def smart_task_lines(task: Task, settings:TaskRenderSettings) -> list[str]:  # n
 
     param_line_prefix = "  "
     summary = task.get_summary_line()
+
+    if settings.show_tags:
+        summary += " " + _render_tags(task.tags)
 
     if not task.is_valid():
         summary = "(DISABLED) " + summary
@@ -181,7 +190,7 @@ def smart_task_lines(task: Task, settings:TaskRenderSettings) -> list[str]:  # n
     not_ready_lines = []
     # Check if env is ok
     if not task.is_ready():
-        if not settings.show_ready_env:
+        if not settings.show_ready_info:
             not_ready_reason = task.get_not_ready_reason_short()
             one_line_params += f" {configuration.colors.red}{not_ready_reason}{configuration.colors.end}"
         else:
@@ -239,7 +248,7 @@ def smart_task_lines(task: Task, settings:TaskRenderSettings) -> list[str]:  # n
 def create_groups(tasks: list[Task], group_order: list[str]) -> list[Group]:
     """Return a dict of group_name -> list of tasks, ordered per group_order, group not listed there will be last."""
     groups: list[Group] = []
-    remaining_tasks: set[Task] = set()
+    remaining_tasks: list[Task] = list()
 
     for expected_group_name in group_order:
         for task in tasks:
@@ -248,7 +257,7 @@ def create_groups(tasks: list[Task], group_order: list[str]) -> list[Group]:
             if task.group.name == expected_group_name and not already_present:
                 groups.append(task.group)
             else:
-                remaining_tasks.add(task)
+                remaining_tasks.append(task)
 
     for task in remaining_tasks:
         if task.group not in groups:

@@ -76,17 +76,25 @@ def _dispatch_unsafe(argv: list[str] | None = None, tasks_found: bool = True) ->
 
     argv = _extract_extra_args(argv, taskcli.core.get_runtime())
 
+    from taskcli.taskcliconfig import TaskCLIConfig
+    from taskcli.tt import config
+
+    config.read_from_env()
+
+    config.configure_parser(parser)
     argconfig = parser.parse_args(argv)
+    config.read_parsed_arguments(argconfig)
+
     taskcli.core.get_runtime().parsed_args = argconfig
 
-    if argconfig.init:
+    if config.init:
         create_tasks_file("tasks.py")
         return
-    if argconfig.show_env:
-        envvars.show_env(verbose=False)
+    if config.print_env:
+        envvars.show_env(verbose=False, extra_vars=config.get_env_vars())
         return
-    if argconfig.show_env_detailed:
-        envvars.show_env(verbose=True)
+    if config.print_env_detailed:
+        envvars.show_env(verbose=True, extra_vars=config.get_env_vars())
         return
 
     # >  if argconfig.version:
@@ -97,17 +105,17 @@ def _dispatch_unsafe(argv: list[str] | None = None, tasks_found: bool = True) ->
         print_task_not_found_error()
         sys.exit(1)
 
-    if argconfig.show_hidden:
-        taskcli.config.show_hidden_tasks = True
-        taskcli.config.show_hidden_groups = True
+    # if argconfig.show_hidden:
+    #     taskcli.config.show_hidden_tasks = True
+    #     taskcli.config.show_hidden_groups = True
 
     import taskcli.taskrendersettings as rendersettings
-    render_settings = rendersettings.new_settings(argconfig)
+    render_settings = rendersettings.new_settings(config=config)
 
-    if argconfig.list or argconfig.list_all:
+    if config.list or config.list_all:
         print_listed_tasks(tasks, render_settings=render_settings)
         return
-    if argconfig.examples:
+    if config.examples:
         examples.print_examples()
         return
 
@@ -138,11 +146,9 @@ def _dispatch_unsafe(argv: list[str] | None = None, tasks_found: bool = True) ->
             kwargs[name] = value
 
         ret_value = task.func(**kwargs)
-        if argconfig.print_return_value:
+        if config.print_return_value:
             print(ret_value)  # noqa: T201
         return ret_value
-
-    ready_verbose = argconfig.ready
 
     if hasattr(argconfig, "task"):
         if argconfig.task.endswith(GROUP_SUFFIX):
@@ -256,85 +262,10 @@ def build_parser(tasks: list[Task]) -> argparse.ArgumentParser:
     """Build the parser."""
     root_parser = argparse.ArgumentParser()
 
-    def default_from_env(ev:EnvVar) -> str:
-        """Return the default value for the --file argument."""
-        return f"(Default: {ev.value}, change with {ev.name})"
 
-    # Main parsers
-    root_parser.add_argument(
-        "--show-env", action="store_true", help="Show the supported environment variables, and their description"
-    )
-    root_parser.add_argument(
-        "--show-env-detailed", action="store_true", help="like --show-env, but also include descriptions."
-    )
-    root_parser.add_argument(
-        "--show-optional-args", action=argparse.BooleanOptionalAction
-    )
-    root_parser.add_argument(
-        "--show-default-values", action=argparse.BooleanOptionalAction
-    )
-    root_parser.add_argument(
-        "--show-hidden-groups", action=argparse.BooleanOptionalAction
-    )
-    root_parser.add_argument(
-        "--show-hidden-tasks", action=argparse.BooleanOptionalAction
-    )
-
-
-    root_parser.add_argument(
-        "--examples", action="store_true", default=False, help="Show code examples of how to use taskcli."
-    )
-    root_parser.add_argument("-v", "--verbose", action="store_true")
-    root_parser.add_argument(
-        "-r", "--ready", help="Show detailed info about task being ready", action="store_true", default=1
-    )
-    root_parser.add_argument(
-        "-l", "--list", action="count", default=0, help="List tasks, use -ll and -lll for more info"
-    )
-    root_parser.add_argument(
-        "-t", "--tags", nargs="?", help="Only list tasks containing any of the specified tags.", default=[]
-    )
-    root_parser.add_argument(
-        "-T", "--show-tags",
-        action=argparse.BooleanOptionalAction,
-        help=f"Show tags of each task, when listing tasks. {default_from_env(envvars.TASKCLI_ARG_SHOW_TAGS)}",
-        default=envvars.TASKCLI_ARG_SHOW_TAGS.is_true(),
-
-    )
-
-    root_parser.add_argument(
-        "--init", action="store_true", default=False, help="Create a new tasks.py file in the current directory"
-    )
-    root_parser.add_argument("--version", action="store_true")
     _add_initial_tasks_to_parser(root_parser)
-    root_parser.add_argument(
-        ARG_NO_GO_TASK,
-        action="store_true",
-        default=False,
-        help=(
-            "Disable automatic inclusion of tasks from 'task' binary. "
-            "Note, for the automaic inclusion to work, "
-            f"{envvars.TASKCLI_GOTASK_TASK_BINARY_FILEPATH.name} must first be set."
-        ),
-    )
-    root_parser.add_argument(
-        "-P",
-        "--print-return-value",
-        action="store_true",
-        default=False,
-        help=(
-            "advanced: print return value of task to stdout; useful when the task "
-            "is a regular function which by itself does not print."
-        ),
-    )
-    root_parser.add_argument(
-        "-L",
-        "--list-all",
-        action="store_true",
-        default=False,
-        help="List everything, hidden tasks, hidden group, with max verbosity.",
-    )
-    root_parser.add_argument("--show-hidden", ARG_SHOW_HIDDEN_SHORT, action="store_true", default=False)
+
+
 
     subparsers = root_parser.add_subparsers(help="Task to run")
 

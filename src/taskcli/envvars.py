@@ -67,12 +67,20 @@ def _set_names() -> None:
             value.name = name
 
 
-def show_env(verbose: int) -> None:
+def show_env(verbose: int, extra_vars:list[EnvVar]|None=None) -> None:
     """Print the environment variables used by taskcli."""
     print("# Environment variables used by taskcli:", file=sys.stderr)  # noqa: T201
 
+    extra_vars = extra_vars or []
+    env_vars_to_list = []
     for name, value in globals().items():
         if isinstance(value, EnvVar):
+            env_vars_to_list.append(value)
+    env_vars_to_list.extend(extra_vars)
+
+    for value in env_vars_to_list:
+        if isinstance(value, EnvVar):
+            name = value.name
             color = ""
             clear = ""
             green = ""
@@ -81,9 +89,12 @@ def show_env(verbose: int) -> None:
             dark = configuration.colors.dark_gray
             if value.value != value.default_value:
                 color = configuration.colors.yellow
-            print(f"{green}{name}{clear}={color}{value.value}{clear}")  # noqa: T201
+
+            desc = ""
             if value.desc and verbose:
-                print(f"{dark}{value.desc}{clear}")  # noqa: T201
+                desc = f" {dark}{value.desc}{clear}"
+            print(f"{green}{name}{clear}={color}{value.value}{clear}{desc}")  # noqa: T201
+
 
 
 _set_names()

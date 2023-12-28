@@ -67,7 +67,7 @@ def param_to_cli_option(arg: str) -> str:
 
 
 def reset_tasks() -> None:
-    """Clear the list of tasks."""
+    """Clear the list of tasks and the entire context."""
     # clear included tasks
     from . import core
 
@@ -75,10 +75,17 @@ def reset_tasks() -> None:
     taskcli.group.DEFAULT_GROUP.tasks = []
     taskcli.group.created.clear()
 
-    # clear tasks in each module
+    # Clear tasks in each module
     for module in sys.modules.values():
         if hasattr(module, "decorated_functions"):
             module.decorated_functions = []  # type: ignore[attr-defined]
+
+    # Clear global configuration (some tests might modify it)
+    from taskcli.taskcliconfig import TaskCLIConfig
+    from taskcli import tt
+    new_config = TaskCLIConfig(load_from_env=False)
+    for key, value in new_config.__dict__.items():
+        setattr(tt.config, key, value)
 
 
 def get_root_module() -> str:
