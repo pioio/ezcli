@@ -8,8 +8,10 @@ Required TODO:
 - [x] list|None
 - [x] param.type.is_bool
 - [x] add unit tests with "-" task names
-- [ ] improve listing tabs in group,  name[group] is clumsy
+- [x] improve listing tabs in group,  name[group] is clumsy
 - [ ] nice warning if no tags listed
+- [ ] unit test for error if no tasks detected
+- [ ] combine listing with specifying a task
 - [ ] tt should have bigger tab completion than t
 - [ ] proper typed interface to @task
 - [ ] make metavar work in task list

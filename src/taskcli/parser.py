@@ -52,7 +52,7 @@ def dispatch(argv: list[str] | None = None, tasks_found: bool = True, sysexit_on
     try:
         return _dispatch_unsafe(argv, tasks_found)
     except UserError as e:
-        utils.print_error(f"Error: {e}")
+        utils.print_error(f"{e}")
         if sysexit_on_user_error:
             sys.exit(1)
         else:

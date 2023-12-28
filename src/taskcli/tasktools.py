@@ -20,7 +20,18 @@ def filter_before_listing(tasks: list[Task], settings: TaskRenderSettings) -> Fi
     progress = []
     progress += [f"Before filtering: {len(tasks)}."]
 
+
+
     if settings.tags:
+        known_tags:set[str] = set()
+        for task in tasks:
+            if task.tags:
+                known_tags.update(task.tags)
+        if known_tags:
+            progress += [f"Known tags: {', '.join(known_tags)}"]
+        else:
+            msg = "Cannot filter by tags: the selected tasks do not have any tags"
+            raise UserError(msg)
         filtered_tasks = filter_tasks_by_tags(tasks, tags=settings.tags)
         if not filtered_tasks:
             progress += [f"No tasks after filtering by tags ({', '.join(settings.tags)})"]
