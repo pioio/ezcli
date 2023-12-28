@@ -32,7 +32,8 @@ def test_include_basic():
 
     assert (
         stdout
-        == """child1
+        == """# default
+child1
 child1-via-parent
 child2
 child2-via-parent
@@ -92,7 +93,7 @@ def test_include_from_subsubdir_works():
     with tools.simple_list_format():
         stdout, _ = run_tasks("tests/includetest1/parent_test_2.py")
 
-    assert stdout.strip() == """subsubchild"""
+    assert stdout.strip() == """# default\nsubsubchild"""
 
 
 def test_including_not_decorated_function():

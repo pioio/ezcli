@@ -32,6 +32,7 @@ def test_sort_important():
     lines = stdout.splitlines()
     lines = [line.strip() for line in lines]
     assert lines == [
+        "# default",
         "task2",  # marked as important
         "task1",
         "task3",

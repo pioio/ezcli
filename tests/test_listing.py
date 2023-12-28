@@ -23,8 +23,8 @@ def test_listing_tasks_works():
     tasks = tools.include_tasks()
     with tools.simple_list_format():
         lines = list_tasks(tasks)
-    assert len(lines) == 1
-    assert re.match(r"foobar1\s+This is the first task", lines[0])
+    assert len(lines) == 2
+    assert re.match(r"foobar1\s+This is the first task", lines[1])
 
 
 def test_alphanumeric_order():
@@ -63,7 +63,8 @@ def test_alphanumeric_order():
     linestxt = "\n".join(lines)
     assert (
         linestxt
-        == """a-imporant1
+        == """# default
+a-imporant1
 z-imporant2
 a-regular1
 b-hidden1
@@ -116,8 +117,8 @@ def test_positional_mandatory_args_are_listed_by_default():
 
     with tools.simple_list_format():
         lines = list_tasks(tasks)
-    assert len(lines) == 1
-    assert re.match(r"foobar\s+NAME\s+.*$", lines[0])
+    assert len(lines) == 2
+    assert re.match(r"foobar\s+NAME\s+.*$", lines[1])
 
 
 def test_positional_optional_args_are_not_listed_by_default():
@@ -129,10 +130,10 @@ def test_positional_optional_args_are_not_listed_by_default():
 
     with tools.simple_list_format():
         lines = list_tasks(tasks)
-    assert len(lines) == 1
+    assert len(lines) == 2
 
     assert re.match(
-        r"foobar\s+This is the first task", lines[0]
+        r"foobar\s+This is the first task", lines[1]
     ), "Since we have a default, we should not see it listed"
 
 
@@ -145,9 +146,9 @@ def test_list_short_args_share_line_with_summary_no_default():
 
     with tools.simple_list_format():
         lines = list_tasks(tasks)
-    assert len(lines) == 1
+    assert len(lines) == 2
 
-    assert re.match(r"foobar\s+PATHS\s+This is the first task", lines[0]), "No default, so it should appear"
+    assert re.match(r"foobar\s+PATHS\s+This is the first task", lines[1]), "No default, so it should appear"
 
 
 def test_list_important_optional_args_are_always_shown():
@@ -162,9 +163,9 @@ def test_list_important_optional_args_are_always_shown():
 
     with tools.simple_list_format():
         lines = list_tasks(tasks)
-    assert len(lines) == 1
+    assert len(lines) == 2
     assert re.match(
-        r"foobar\s+NAME\s+This is the first task", lines[0]
+        r"foobar\s+NAME\s+This is the first task", lines[1]
     ), "Text is optional, but not important, so it should not be shown. Name is optional, but important, so show it."
 
 

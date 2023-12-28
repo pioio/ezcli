@@ -25,8 +25,8 @@ def test_list_positional_mandatory():
     tasks = tools.include_tasks()
 
     lines = list_tasks(tasks)
-    assert len(lines) == 1
-    assert re.match(r"foobar\s+NAME\s+This is the first task", lines[0])
+    assert len(lines) == 2
+    assert re.match(r"foobar\s+NAME\s+This is the first task", lines[1])
 
 
 def test_formatting():

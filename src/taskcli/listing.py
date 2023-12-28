@@ -104,7 +104,7 @@ def list_tasks(tasks: list[Task], settings: TaskRenderSettings | None = None) ->
         tasks_to_show = [group_task for group_task in group.tasks if group_task in filtered_tasks]
         from .parser import GROUP_SUFFIX
 
-        if num_visible_groups > 1 and len(tasks_to_show) > 0:
+        if len(tasks_to_show) > 0:
             num_tasks = group.render_num_shown_hidden_tasks()
             group_name_rendered = format_colors(
                 config.render_format_of_group_name,
