@@ -302,13 +302,17 @@ def _add_param_to_subparser(param: Parameter, subparser: argparse.ArgumentParser
 
     if param.type.is_bool():
         kwargs["action"] = argparse.BooleanOptionalAction
-        default = False
-        if param.has_default():
-            default = param.default
-        kwargs["default"] = default
+
+        if param.has_default() and param.default in [True, False]:
+            kwargs["default"] = param.default
+
+        if not param.has_default() and not param.is_positional():
+            kwargs['required'] = True
+
         if "nargs" in kwargs:
             del kwargs["nargs"]
-        help_default = "true" if default else "false"
+        if 'default' in kwargs:
+            help_default = "true" if kwargs["default"] else "false"
 
     elif param.type.is_list():
         if param.has_default():

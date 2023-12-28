@@ -8,12 +8,27 @@ from .tools import reset_context_before_each_test
 
 result = []
 
+########################################################################################################################
+# Helpers
+def assert_unsupported_type_warning_was_printed(capsys):
+    error = "Warning: Task 'foo' has a parameter 'paths' which has an unsupported"
+    err = capsys.readouterr().err
+    assert error in err
+
+    hint = "Add `suppress_warnings=True`"
+    assert hint in err
+
+def assert_param_required_printed(capsys, name):
+    assert capsys.readouterr().err.endswith(f"error: the following arguments are required: {name}\n")
 
 def assert_is_list_of(obj, typevar):
     assert isinstance(obj, list)
     for item in obj:
         assert isinstance(item, typevar)
 
+
+########################################################################################################################
+# tests
 
 def test_simple_task_is_called():
     @task
@@ -225,7 +240,7 @@ def test_list_simple(capsys):
     with pytest.raises(SystemExit, match="2"):
         t.dispatch()
 
-    assert capsys.readouterr().err.endswith("error: the following arguments are required: paths\n")
+    assert_param_required_printed(capsys, "paths")
 
 
 def test_unsupported_param_types_with_no_defaults_cause_error(capsys):
@@ -280,13 +295,6 @@ def test_tuples_result_in_unsupported_type(capsys):
     assert_unsupported_type_warning_was_printed(capsys)
 
 
-def assert_unsupported_type_warning_was_printed(capsys):
-    error = "Warning: Task 'foo' has a parameter 'paths' which has an unsupported"
-    err = capsys.readouterr().err
-    assert error in err
-
-    hint = "Add `suppress_warnings=True`"
-    assert hint in err
 
 
 def test_bool_positional_results_in_error(capsys):
@@ -301,6 +309,26 @@ def test_bool_positional_results_in_error(capsys):
 
     error = "has a boolean parameter 'force' which is not keyword-only."
     assert error in capsys.readouterr().err
+
+def test_bool_flag_with_no_default_is_required(capsys):
+    @task
+    def foo(*, force:bool):
+        return force
+
+    t = tools.include_task()
+    with pytest.raises(SystemExit, match="2"):
+        t.dispatch()
+
+    assert_param_required_printed(capsys, "--force/--no-force")
+
+def test_bool_flag_works(capsys):
+    @task
+    def foo(*, force:bool=False):
+        return force
+
+    t = tools.include_task()
+    assert t.dispatch("--force")
+    assert not t.dispatch("--no-force")
 
 
 def test_complex_argument_example():
