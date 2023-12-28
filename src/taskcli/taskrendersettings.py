@@ -18,6 +18,7 @@ class TaskRenderSettings:
     show_hidden_tasks = False
     show_ready_info = False
     tags: list[str] = dataclasses.field(default_factory=list)
+    search: str = ""
     verbose: int = 0
 
 
@@ -49,5 +50,7 @@ def new_settings(config: TaskCLIConfig) -> TaskRenderSettings:
 
     s.verbose = verbose
     s.tags = config.tags
+
+    s.search = config.search
 
     return s

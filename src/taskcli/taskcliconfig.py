@@ -99,6 +99,7 @@ class TaskCLIConfig:
         )
 
         self.tags: list[str] = self._add_list([], "tags", "-t", nargs="+", help="Only show tasks matching any of these tags")
+        self.search: str = self._add_str("", "search", "-s", help="Only show tasks whose name or description is matching this python regex seach pattern.")
 
         self.field_show_hidden: ConfigField = ConfigField(
             False, "show_hidden", "-H", help="Show all tasks and groups, even the hidden ones."

@@ -1,13 +1,15 @@
 import inspect
 from typing import Any, final
+from venv import logger
 
 import taskcli
 import taskcli.core
+from .tasktools import filter_before_listing
 
 from . import configuration, utils
 from .configuration import config
 from .group import Group
-from .task import Task
+from .task import Task, UserError
 from .taskrendersettings import TaskRenderSettings
 from .utils import param_to_cli_option
 
@@ -59,32 +61,29 @@ def _sort_tasks(tasks: list[Task], sort: str, sort_important_first: bool) -> lis
 
     return tasks
 
-
-def filter_tasks_by_tags(tasks: list[Task], tags: list[str]) -> list[Task]:
-    """Return only tasks which have any of the tags."""
-    if not tags:
-        return tasks
-
-    filtered = []
-    for task in tasks:
-        if task.tags:
-            for tag in task.tags:
-                if tag in tags:
-                    filtered.append(task)
-                    break
-    return filtered
-
+import logging
+log = logging.getLogger(__name__)
+from .configuration import colors
 
 def list_tasks(tasks: list[Task], settings: TaskRenderSettings | None = None) -> list[str]:  # noqa: C901
     """Return a list of lines to be printed to the console."""
     assert len(tasks) > 0, "No tasks found"
 
+    if not tasks:
+        return ["No tasks to be listed"]
+
     settings = settings or TaskRenderSettings()
-    filtered_tasks = filter_tasks_by_tags(tasks, tags=settings.tags)
+
+    filter_result = filter_before_listing(tasks=tasks, settings=settings)
+    filtered_tasks = filter_result.tasks
+    if not filtered_tasks:
+        raise UserError("\n".join([f"{colors.red}No tasks found!{colors.end}", *filter_result.progress]))
 
     # TODO: extract groups info
     groups = create_groups(tasks=tasks, group_order=configuration.config.group_order)
 
+    for line in filter_result.progress:
+        log.debug(line)
     # first, prepare rows, row can how more than one line
     lines: list[str] = []
 
