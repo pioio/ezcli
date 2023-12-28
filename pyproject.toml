@@ -9,4 +9,4 @@ name="taskcli"
 
 [project.scripts]
 taskcli = "taskcli.main:main"
-tt = "taskcli.main:main"
+t = "taskcli.main:main"

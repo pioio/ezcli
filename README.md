@@ -1,15 +1,27 @@
-# `taskcli` - a library for pragmatic and powerful CLI tools
+# `taskcli` - a novel way of creating complex, real-life CLI interfaces from python functions
 
 A tool for turning Python functions into powerful CLI interfaces for **fast** real-life task automation.
 
-It's like a Makefile, but in Python.
+It's kind of like a Makefile, but in Python, and on steroids (search, tags, grouping, highlighting, etc).
 
 The guiding design principles of taskcli are:
-- encapsulate complexity of managing many tasks: show only what's needed, make it easy to reveal more
-- make running and navigating tasks fast -- with fewest keystrokes.
+- encapsulate complexity of managing many tasks: show only what's needed, but make it easy to reveal more.
+- make running and navigating between groups of tasks fast, but powerful.
 
 `taskcli` is not only for Python project.
-It can be used for any sort of project, with Python as the glue (in place of write-one read-never long bash "oneliners").
+It can be used for any sort of project, with Python as the glue (in stead of write-once-read-never bash "oneliners").
+
+## Basic usage overview
+`t` list all the tasks in the current directory (you can import tasks from other directories)
+`t <task_name> [args]` run a task (tool will automaticlly switch directories if needed)
+`t <group_name>` list all the tasks in a group of tasks
+`t -s <search_term>` list all the tasks matching the regex search term
+`t -t tags` list all the tasks with the given tags
+`t -t imp` list all tags maked as important
+`t -H` list all the tasks, even the onces marked as hidden and the onces in hidden group
+
+(You can also use `taskcli` instead of `t`)
+
 
 ## Installation and basic usage
 ```
