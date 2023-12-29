@@ -127,7 +127,7 @@ class Task:
         self._extra_summary: list[str] = []
         if isinstance(aliases, str):
             aliases = [aliases]
-        self.aliases = aliases or []
+        self._aliases = aliases or []
 
         self.tags = tags or []
         self.env = env or []
@@ -159,6 +159,23 @@ class Task:
 
         self.soft_validate_task()
         self._included_from:Module | None = included_from
+
+    @property
+    def name(self) -> str:
+        """Return the name of the task, including all task namespaces and group namespace."""
+        return self._get_full_task_name()
+
+    @property
+    def aliases(self) -> list[str]:
+        """Return the aliases of the task, prefixed with any namespaces."""
+        out = []
+        for alias in self._aliases:
+            if self.group.alias_namespace:
+                ns_alias = self.group.alias_namespace + alias
+            else:
+                ns_alias = alias
+            out += [ns_alias]
+        return out
 
     def is_valid(self) -> bool:
         """Return True if the task is valid."""
@@ -194,10 +211,7 @@ class Task:
         assert self.group is not None
         return self.group.hidden
 
-    @property
-    def name(self) -> str:
-        """Return the name of the task."""
-        return self._get_full_task_name()
+
 
     def get_base_name(self) -> str:
         """Return the base name of the task, sans namespaces.
@@ -229,9 +243,9 @@ class Task:
             self.namespaces = [group.namespace, *self.namespaces]
         if group.alias_namespace:
             new_aliases = []
-            for alias in self.aliases:
+            for alias in self._aliases:
                 new_aliases.append(group.alias_namespace + alias)
-            self.aliases = new_aliases
+            self._aliases = new_aliases
 
     def add_namespace(self, namespace:str="", alias_namespace:str="") -> None:
         """Add a namespace to the task."""
@@ -239,26 +253,16 @@ class Task:
             self.namespaces = [namespace, *self.namespaces]
 
         new_aliases = []
-        for alias in self.aliases:
+        for alias in self._aliases:
             new_aliases.append(alias_namespace + alias)
-        self.aliases = new_aliases
+        self._aliases = new_aliases
 
     def get_all_task_names(self) -> list[str]:
-        """Return all names of the task, including aliases."""
-
+        """Return all (namespaced) names of the task which can be used on the CLI to call it, including aliases."""
         out = [self._get_full_task_name()]
-        out += self.get_namespaced_aliases()
+        out += self.aliases
         return out
 
-    def get_namespaced_aliases(self) -> list[str]:
-        out = []
-        for alias in self.aliases:
-            if self.group.alias_namespace:
-                ns_alias = self.group.alias_namespace + alias
-            else:
-                ns_alias = alias
-            out += [ns_alias]
-        return out
 
     def get_summary_line(self) -> str:
         """Return the first line of docstring, or empty string if no docstring."""

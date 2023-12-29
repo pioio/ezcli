@@ -227,7 +227,7 @@ def smart_task_lines(task: Task, settings: TaskRenderSettings) -> list[str]:  # 
             ]
 
 
-    aliases = ",".join(task.get_namespaced_aliases())
+    aliases = ",".join(task.aliases)
     aliases_color = configuration.colors.pink
     clear = configuration.colors.end
     if aliases:

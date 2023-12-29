@@ -181,7 +181,7 @@ def _dispatch_unsafe(argv: list[str] | None = None, tasks_found: bool = True) ->
 
             # Not found, search aliases
             for task in tasks:
-                if argconfig.task in task.get_namespaced_aliases():
+                if argconfig.task in task.aliases:
                     return _dispatch(task)
 
             # not found, search group name without a suffix

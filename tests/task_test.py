@@ -25,7 +25,7 @@ def test_copy():
     assert task1.name == task2.name
     assert task1.important == task2.important
     assert task1.hidden == task2.hidden
-    assert task1.aliases == task2.aliases
+    assert task1._aliases == task2._aliases
 
 
 def test_argparse_names():

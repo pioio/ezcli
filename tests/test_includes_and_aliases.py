@@ -52,7 +52,7 @@ def test_simple_include_with_aliases():
     tasksdict = tt.get_tasks_dict()
     assert "group1.task1" in tasksdict
     group1task1 = tasksdict["group1.task1"]
-    assert "g1t1" in group1task1.get_namespaced_aliases(), "alias namespace from should have been appended to the task's aliases"
+    assert "g1t1" in group1task1.aliases, "alias namespace from should have been appended to the task's aliases"
 
     assert "group1.task2" in tasksdict
 
@@ -75,12 +75,12 @@ def test_simple_include_with_aliases_from_a_group():
 
     assert "group1.namespace1.groupS.task1" in tasksdict
     group1task1 = tasksdict["group1.namespace1.groupS.task1"]
-    assert "g1ns1gSt1" in group1task1.get_namespaced_aliases()
+    assert "g1ns1gSt1" in group1task1.aliases
 
     # Task0 is not in the groupS
     assert "group1.namespace1.task0" in tasksdict
     group1task0 = tasksdict["group1.namespace1.task0"]
-    assert  "g1ns1t0" in group1task0.get_namespaced_aliases()
+    assert  "g1ns1t0" in group1task0.aliases
 
 
 def test_include_from_same_module_with_namespace():
@@ -140,7 +140,7 @@ def test_include_from_same_module_no_namespace_but_to_a_group():
     with tt.Group("group", namespace="group", alias_namespace="g") as group:
         tt.include(foobar)
         t = tt.get_tasks_dict()["group.foobar"]
-        assert len(t.get_namespaced_aliases()) == 0
+        assert len(t.aliases) == 0
 
 
 
@@ -171,7 +171,7 @@ def test_include_from_a_group_via_group_with_include_namesapce():
     with tt.Group("group2", namespace="group2", alias_namespace="g2") as group:
         tt.include(foobar, namespace="include1", alias_namespace="i1")
         t = tt.get_tasks_dict()["group2.include1.group1.foobar"]
-        assert ["g2i1g1f"] == t.get_namespaced_aliases()
+        assert ["g2i1g1f"] == t.aliases
 
 
 import sys
