@@ -35,9 +35,14 @@ def test_include_basic():
         == """# default
 child1
 child1-via-parent
+child1-via-parent-no-change-dir
 child2
 child2-via-parent
-parent"""
+child2-via-parent-no-change-dir
+parent
+parent-no-change-dir
+parent-no-change-dir-to-sibling
+parent-sibling"""
     )
 
 
@@ -49,7 +54,8 @@ parent"""
 #   in both cases if @task decorator is there, we want to change the dir if change_dir=True (the default)
 
 
-def test_include_cwd_change():
+def test_that_running_a_task_in_subdir_changes_to_that_dir():
+    """Typical usecase, we should change"""
     stdout, _ = run_tasks("tests/includetest1/parent_test_1.py parent")
     stdout = clean_stdout(stdout)
     last_two_dirs = stdout.split("/")[-2:]
@@ -57,6 +63,14 @@ def test_include_cwd_change():
 
     assert stdout.strip().endswith("tests/includetest1")
     # this test is ran from above "tests/includetest1", parent1 task should change dir to "tests/includetest1"
+
+import os
+def test_that_running_a_task_in_subdir_do_not_changes_to_that_dir_if_task_has___change_dir___set_to_false():
+    """The task we're calling has change_dir=false, so we should not change the dir"""
+    cwd = os.getcwd()
+    stdout, _ = run_tasks("tests/includetest1/parent_test_1.py parent-no-change-dir")
+    stdout = clean_stdout(stdout)
+    assert stdout.strip().endswith(cwd)
 
 
 def test_include_cwd_change_child1():
@@ -67,6 +81,32 @@ def test_include_cwd_change_child1():
 def test_include_cwd_change_child1_via_parent():
     stdout, _ = run_tasks("tests/includetest1/parent_test_1.py child1-via-parent")
     assert stdout.strip().endswith("tests/includetest1/subdir"), "should have changed dir"
+
+
+# def test_include_cwd_change_child1_via_parent_with_no_change():
+#     """Here we're calling a task which initially does not change dir, which then calls fun/task which does change it."""
+#     stdout, _ = run_tasks("tests/includetest1/parent_test_1.py child1-via-parent-no-change-dir")
+#     assert stdout.strip().endswith("tests/includetest1/subdir"), "should have changed dir"
+
+# def test_include_cwd_change_child2_via_parent_with_no_change():
+#     """Here we're calling a task which initially does not change dir, which then calls fun/task which does NOT change it."""
+#     cwd = os.getcwd()
+#     stdout, _ = run_tasks("tests/includetest1/parent_test_1.py child2-via-parent-no-change-dir")
+#     assert stdout.strip().endswith(cwd), "should have NOT changed dir"
+
+# def test_calling_sibling_with_change_via_parent_with_no_change_should_change_dir():
+#     """Call a task with change_dir=False which then calls a sibling task which does change dir."""
+
+#     stdout, _ = run_tasks("tests/includetest1/parent_test_1.py parent-no-change-child2-via-parent-no-change-dir")
+#     assert stdout.strip().endswith("tests/includetest1/")
+
+
+# def test_calling_sibling_with_no_change_via_parent_with_no_change_should_not_change_dir():
+#     """Call a task with change_dir=False which then calls a sibling task with change_dir=False"""
+
+#     cwd = os.getcwd()
+#     stdout, _ = run_tasks("tests/includetest1/parent_test_1.py child2-via-parent-no-change-dir")
+#     assert stdout.strip().endswith("tests/includetest1/")
 
 
 # child2 does not change dir upon entering the task
