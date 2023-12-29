@@ -19,7 +19,7 @@ with tt.Group("dev", desc="Development tasks"):
         # print summary:
         run("coverage report")
 
-    @task(aliases="t", env=["FOOBAR"])
+    @task(aliases="t", env=["FOOBAR"], important=True)
     def test(extraargs: str = ""):
         """Run unit tests."""
         run(f"pytest {extraargs} tests/ -vvv {tt.get_extra_args()} ")

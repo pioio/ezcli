@@ -10,14 +10,13 @@ Required TODO:
 - [x] add unit tests with "-" task names
 - [x] improve listing tabs in group,  name[group] is clumsy
 - [ ] unit test hide-not-read
+- [ ] searching by tag should show hidden tasks, samel ike showing a group
 - [ ] num hidden tasks in each group
   - [ ] filter out hidden before filterting by tags
 - [ ]
 - [ ] nice warning if no tags listed
 - [ ] separate defaults for tt mode on per fiel basis
-- [ ] make "t gr*oof" auto enter search mode - will require custom argparse validator
 - [ ] unit test for searching when some matching tasks are hidden
-- [ ] remove env var from help?
 - [ ] unit test for error if no tasks detected
 - [ ] combine listing with specifying a task
 - [ ] tt should have bigger tab completion than t
@@ -114,6 +113,8 @@ Features:
 # Later
 - [ ] chaining tasks  `taskcli task1 task2`
 - [ ] pre/post hooks
+- [ ] --hide-regexp
+- [ ] make "t gr*oof" auto enter search mode - will require custom argparse validator
 - [ ] -S search through docstrings, include matching line?
 - [ ] ability to exclude certain arguments from parser (task(exclude)), the arg must have a default)
 - dict type, accepting key=value, or json
