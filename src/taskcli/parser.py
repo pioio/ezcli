@@ -75,7 +75,6 @@ def _dispatch_unsafe(argv: list[str] | None = None, tasks_found: bool = True) ->
 
     argv = _extract_extra_args(argv, taskcli.core.get_runtime())
 
-    from taskcli.taskcliconfig import TaskCLIConfig
     from taskcli.tt import config
 
     config.read_from_env()

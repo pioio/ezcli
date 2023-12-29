@@ -417,5 +417,5 @@ class TaskCLIConfig:
             f(self)
 
 
-default_config = TaskCLIConfig()  # built-in default config
+
 runtime_config = TaskCLIConfig()  # modified with CLI arguments

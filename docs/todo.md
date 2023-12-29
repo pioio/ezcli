@@ -13,6 +13,8 @@ Required TODO:
   - [ ] filter out hidden before filterting by tags
 - [ ]
 - [ ] nice warning if no tags listed
+- [ ] separate defaults for tt mode on per fiel basis
+- [ ] make "t gr*oof" auto enter search mode - will require custom argparse validator
 - [ ] unit test for searching when some matching tasks are hidden
 - [ ] remove env var from help?
 - [ ] unit test for error if no tasks detected
