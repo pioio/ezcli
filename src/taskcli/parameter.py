@@ -103,8 +103,7 @@ class Parameter:
         out += [self.name[0].upper()]
         return out
 
-
-    def get_argparse_names(self, known_short_args:set[str]) -> list[str]:
+    def get_argparse_names(self, known_short_args: set[str]) -> list[str]:
         """Return the names for argparse, in order of precedence."""
         # TODO: return single flag params also
         out = []
@@ -121,7 +120,7 @@ class Parameter:
             candidate2 = "-" + self.name[0].upper()
             if candidate1 not in known_short_args:
                 out += [candidate1]
-            elif candidate2  not in known_short_args:
+            elif candidate2 not in known_short_args:
                 out += [candidate2]
             else:
                 # we tried, don't add any short flag

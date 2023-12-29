@@ -1,4 +1,5 @@
 from nox import param
+
 import taskcli
 import taskcli.core
 from taskcli import Group, Task, task
@@ -28,7 +29,6 @@ def test_copy():
 
 
 def test_argparse_names():
-
     @task
     def foobar(*, foo1, foo2, foo3):
         pass

@@ -1,3 +1,5 @@
+import os
+
 ########################################################################################################################
 import pytest
 
@@ -64,7 +66,7 @@ def test_that_running_a_task_in_subdir_changes_to_that_dir():
     assert stdout.strip().endswith("tests/includetest1")
     # this test is ran from above "tests/includetest1", parent1 task should change dir to "tests/includetest1"
 
-import os
+
 def test_that_running_a_task_in_subdir_do_not_changes_to_that_dir_if_task_has___change_dir___set_to_false():
     """The task we're calling has change_dir=false, so we should not change the dir"""
     cwd = os.getcwd()

@@ -272,6 +272,10 @@ def smart_task_lines(task: Task, settings: TaskRenderSettings) -> list[str]:  # 
     if line_len < min_left:  # add padding before the summary
         line += " " * (min_left - line_len)
 
+    # if left-col goes all the way to max make sure there is a space before the summary
+    if line[-1] != " ":
+        line += " "
+
     line += summary
     lines.append(line)
 

@@ -285,7 +285,6 @@ def build_parser(tasks: list[Task]) -> argparse.ArgumentParser:
             if task.customize_parser:
                 task.customize_parser(subparser)
 
-
             known_short_args = set()
             for param in task.params:
                 args = param.get_argparse_names(known_short_args)
@@ -308,9 +307,7 @@ def build_parser(tasks: list[Task]) -> argparse.ArgumentParser:
     return root_parser
 
 
-def _add_param_to_subparser(args:list[str], param: Parameter, subparser: argparse.ArgumentParser) -> None:  # noqa: C901
-
-
+def _add_param_to_subparser(args: list[str], param: Parameter, subparser: argparse.ArgumentParser) -> None:  # noqa: C901
     kwargs: dict[str, Any] = {}
 
     help_default = None

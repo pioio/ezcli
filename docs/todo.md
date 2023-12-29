@@ -9,8 +9,8 @@ Required TODO:
 - [x] param.type.is_bool
 - [x] add unit tests with "-" task names
 - [x] improve listing tabs in group,  name[group] is clumsy
-- [ ] auto-adding short-flags for params. Show them in -L
-  - [ ] specify custom hosrt flags via args?
+- [x] auto-adding short-flags for params. Show them in -L
+  - [x] specify custom hosrt flags via args?
 - [ ] spacing between one-line-arg and summary
 - [ ] add unit testing example
 - [x] per-group setting to sort hidden last
