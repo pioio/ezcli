@@ -119,6 +119,7 @@ Features:
 
 
 # Later
+- [ ] add Group(ns="prefix.")
 - [ ] chaining tasks  `taskcli task1 task2`
 - [ ] pre/post hooks
 - [ ] --hide-regexp

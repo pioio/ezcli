@@ -36,3 +36,15 @@ def display_disk_usage(host:str="localhost", *, remote_user:str="root"):
         run("df -h")
     else:
         run(f"ssh {remote_user}@{host} df -h")
+
+@task
+def say_hello(message="Hello, world!", *, repeat:int=1):
+    """Say hello."""
+    for _ in range(repeat):
+        print(message)
+
+@task(aliases=["ls", "list"]) # multiple aliases
+def list_files(files:list[str]=["."]):
+    """List files. Optionally append '-- <args>' to add any number of custom arguments."""
+    args = tt.get_extra_args()
+    run(f"ls --color=always {' '.join(files)} {args} ")
