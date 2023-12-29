@@ -96,6 +96,8 @@ class Task:
             setattr(new_task, prop, getattr(self, prop))
         return new_task
 
+    def __repr__(self) -> str:
+        return f"Task(name={self.name!r}, group={self.group.name!r}, important={self.important}, hidden={self.hidden})"
     def __init__(
         self,
         func: AnyFunction,

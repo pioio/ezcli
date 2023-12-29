@@ -126,10 +126,6 @@ class Config:
 
     sort = "alpha"  # "alpha"  "definition"
 
-    # If true, tasks marked as important will be shown first.
-    # If false, marking task as important will not impact its position in the list
-    sort_important_first: bool = True
-
     #####################################################################
     # Advanced config options
 

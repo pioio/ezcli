@@ -45,7 +45,7 @@ def format_colors(template: str, **kwargs: Any) -> str:
     return template.format(**format)
 
 
-def _sort_tasks(tasks: list[Task], sort: str, sort_important_first: bool) -> list[Task]:
+def _sort_tasks(tasks: list[Task], sort_important_first: bool, sort_hidden_last:bool=True,sort: str=ORDER_TYPE_ALPHA) -> list[Task]:
     """Sort into 3 buckets - important, regular, hidden."""
     presorted = []
 
@@ -56,26 +56,32 @@ def _sort_tasks(tasks: list[Task], sort: str, sort_important_first: bool) -> lis
         # dont's sort
         presorted = tasks
 
+    out = []
     if sort_important_first:
         # Bubble the important ones to the top
         tasks = []
         for task in presorted:
             if task.important:
-                tasks.append(task)
+                out.append(task)
+
+    if sort_hidden_last:
+        for task in presorted:
+            if task in out:
+                continue
+            if not task.is_hidden():
+                out.append(task)
 
         for task in presorted:
-            if task in tasks:
+            if task in out:
                 continue
-            if not task.important and not task.is_hidden():
-                tasks.append(task)
+            if task.is_hidden():
+                out.append(task)
 
-        for task in presorted:
-            if task in tasks:
-                continue
-            if not task.important and task.is_hidden():
-                tasks.append(task)
-
-    return tasks
+    for task in presorted:
+        if task in out:
+            continue
+        out.append(task)
+    return out
 
 from .constants import GROUP_SUFFIX
 log = logging.getLogger(__name__)
@@ -133,7 +139,10 @@ def list_tasks(tasks: list[Task], settings: TaskRenderSettings | None = None) ->
         lines += [group_name_rendered]
 
 
-        tasks_to_show = _sort_tasks(tasks_to_show, sort=config.sort, sort_important_first=config.sort_important_first)
+        tasks_to_show = _sort_tasks(tasks_to_show,
+                                     sort=config.sort,
+                                     sort_important_first=group.sort_important_first,
+                                     sort_hidden_last=group.sort_hidden_last)
         for task in tasks_to_show:
             lines.extend(smart_task_lines(task, settings=settings))
         if num_hidden_in_this_group:

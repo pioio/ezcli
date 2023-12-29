@@ -11,7 +11,9 @@ created = []
 class Group:
     """A group of tasks."""
 
-    def __init__(self, name: str, desc: str = "", hidden: bool = False):
+    def __init__(self, name: str, desc: str = "", hidden: bool = False,
+                 sort_hidden_last: bool = True, sort_important_first: bool = True
+                 ):
         """Create a new group of tasks.
 
         Args:
@@ -25,6 +27,8 @@ class Group:
         self.hidden = hidden
         self.tasks: list["Task"] = []
 
+        self.sort_important_first = sort_important_first
+        self.sort_hidden_last = sort_hidden_last
 
         global created
         # TODO: this will fail if moduls define groups of same names
@@ -39,7 +43,8 @@ class Group:
         _stack.append(self)
 
         return self
-
+    def __repr__(self) -> str:
+        return f"Group({self.name}, hidden={self.hidden})"
     def __exit__(self, *args: object) -> None:
         global _stack
         _stack.pop()
