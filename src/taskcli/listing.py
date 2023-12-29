@@ -1,21 +1,19 @@
 import inspect
 import logging
-
 from typing import Any, final
 from venv import logger
 
 import taskcli
 import taskcli.core
 
-from . import constants
-from . import configuration, utils
+from . import configuration, constants, utils
 from .configuration import colors, config
+from .constants import GROUP_SUFFIX, HELP_TEXT_USE_H_TO_SHOW_HIDDEN
 from .group import Group
 from .task import Task, UserError
 from .taskrendersettings import TaskRenderSettings
-from .tasktools import filter_before_listing
+from .tasktools import FilterResult, filter_before_listing
 from .utils import param_to_cli_option
-from .constants import HELP_TEXT_USE_H_TO_SHOW_HIDDEN
 
 ORDER_TYPE_DEFINITION = "definition"
 ORDER_TYPE_ALPHA = "alpha"
@@ -45,7 +43,9 @@ def format_colors(template: str, **kwargs: Any) -> str:
     return template.format(**format)
 
 
-def _sort_tasks(tasks: list[Task], sort_important_first: bool, sort_hidden_last:bool=True,sort: str=ORDER_TYPE_ALPHA) -> list[Task]:
+def _sort_tasks(  # noqa: C901
+    tasks: list[Task], sort_important_first: bool, sort_hidden_last: bool = True, sort: str = ORDER_TYPE_ALPHA
+) -> list[Task]:
     """Sort into 3 buckets - important, regular, hidden."""
     presorted = []
 
@@ -83,7 +83,7 @@ def _sort_tasks(tasks: list[Task], sort_important_first: bool, sort_hidden_last:
         out.append(task)
     return out
 
-from .constants import GROUP_SUFFIX
+
 log = logging.getLogger(__name__)
 
 
@@ -117,9 +117,7 @@ def list_tasks(tasks: list[Task], settings: TaskRenderSettings | None = None) ->
     # Note that a tasks can result in more than one line.
     lines: list[str] = []
 
-
     for group in groups:
-
         tasks_to_show = [group_task for group_task in group.tasks if group_task in filtered_tasks]
         if not tasks_to_show:
             # if a group is hidden (and we're hiding hidden group), tasks_to_show will be empty
@@ -138,11 +136,12 @@ def list_tasks(tasks: list[Task], settings: TaskRenderSettings | None = None) ->
         )
         lines += [group_name_rendered]
 
-
-        tasks_to_show = _sort_tasks(tasks_to_show,
-                                     sort=config.sort,
-                                     sort_important_first=group.sort_important_first,
-                                     sort_hidden_last=group.sort_hidden_last)
+        tasks_to_show = _sort_tasks(
+            tasks_to_show,
+            sort=config.sort,
+            sort_important_first=group.sort_important_first,
+            sort_hidden_last=group.sort_hidden_last,
+        )
         for task in tasks_to_show:
             lines.extend(smart_task_lines(task, settings=settings))
         if num_hidden_in_this_group:
@@ -154,7 +153,6 @@ def list_tasks(tasks: list[Task], settings: TaskRenderSettings | None = None) ->
     if FIRST_LINE_STARTS_WITH_NEW_LINE:
         # This can happen if user prefixes the custom group format with a "\n" to separate groups with whitesapce
         lines[0] = lines[0][1:]
-
 
     num_hidden_groups = len(filter_result.hidden_groups)
     num_hidden_tasks = filter_result.num_total_hidden_in_hidden_groups
@@ -170,7 +168,7 @@ def list_tasks(tasks: list[Task], settings: TaskRenderSettings | None = None) ->
         lines.append(line)
     return lines
 
-from .tasktools import FilterResult
+
 def _render_summary_line(filter_result: FilterResult) -> str:
     """Return a string with a summary of the filtering."""
     num_tasks = len(filter_result.tasks)
@@ -186,6 +184,7 @@ def _render_summary_line(filter_result: FilterResult) -> str:
     if num_tasks_in_hidden_groups:
         summary += f", {num_tasks_in_hidden_groups} tasks in hidden groups"
     return summary
+
 
 def _render_tags(tags: list[str]) -> str:
     """Return a string with all tags, formatted for the console."""

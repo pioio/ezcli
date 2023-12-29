@@ -11,16 +11,22 @@ created = []
 class Group:
     """A group of tasks."""
 
-    def __init__(self, name: str, desc: str = "", hidden: bool = False,
-                 sort_hidden_last: bool = True, sort_important_first: bool = True
-                 ):
+    def __init__(
+        self,
+        name: str,
+        desc: str = "",
+        hidden: bool = False,
+        sort_hidden_last: bool = True,
+        sort_important_first: bool = True,
+    ):
         """Create a new group of tasks.
 
         Args:
             name: Name of the group
-            desc: Description of the group
+            desc: one-line description of the group, seen in the task list
             hidden: If true, the group is hidden by default
-            hidden_tasks_listed_last: If true, hidden tasks are listed last when listing tasks.
+            sort_hidden_last: If true, hidden tasks are sorted last (after all other tasks)
+            sort_important_first: If true, important tasks are sorted as first (before all other tasks)
         """
         self.name = name
         self.desc = desc
@@ -43,8 +49,10 @@ class Group:
         _stack.append(self)
 
         return self
+
     def __repr__(self) -> str:
         return f"Group({self.name}, hidden={self.hidden})"
+
     def __exit__(self, *args: object) -> None:
         global _stack
         _stack.pop()

@@ -70,15 +70,17 @@ with tt.Group("Hidden Group", hidden=True):
     def task_in_hidden_group():
         print("hello")
 
-
     @task
     def task_in_hidden_group2():
         print("hello")
 
+
 with tt.Group("HiddenGroup2", hidden=True):
+
     @task
     def task_in_hidden_group3():
         print("hello")
+
 
 DEFAULT_LINT_PATH = "src/"
 

@@ -6,7 +6,7 @@ import typing
 
 import taskcli
 
-from . import configuration
+from . import configuration, constants
 
 ENDC = configuration.get_end_color()
 UNDERLINE = configuration.get_underline()
@@ -93,7 +93,6 @@ def get_basename() -> str:
     """Return the name of the taskcli executable."""
     return os.path.basename(sys.argv[0])
 
-from . import constants
 
 def is_basename_tt() -> bool:
     """Return the name of the taskcli executable."""

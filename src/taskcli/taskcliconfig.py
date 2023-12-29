@@ -23,8 +23,8 @@ import logging
 import os
 from typing import Any, Callable
 from webbrowser import get
-from . import constants
-from . import envvars, utils
+
+from . import constants, envvars, utils
 from .envvar import EnvVar
 from .task import UserError
 
@@ -118,7 +118,10 @@ class TaskCLIConfig:
         default_show_hidden = False
 
         self.field_show_hidden: ConfigField = ConfigField(
-            default_show_hidden, "show_hidden", constants.ARG_SHOW_HIDDEN_SHORT, help="Show all tasks and groups, even the hidden ones."
+            default_show_hidden,
+            "show_hidden",
+            constants.ARG_SHOW_HIDDEN_SHORT,
+            help="Show all tasks and groups, even the hidden ones.",
         )
         self.show_hidden: bool = self._add_bool(self.field_show_hidden)
 
@@ -134,23 +137,36 @@ class TaskCLIConfig:
         )
         self.no_go_task: bool = self._add_bool(self.field_no_go_task)
 
-
         self.field_examples = ConfigField(False, "examples", help="Print code examples of how to use taskcli.")
         self.examples: bool = self._add_bool(self.field_examples)
 
-        self.field_show_hidden_groups = ConfigField(False, "show_hidden_groups", help="Listing will show groups that were marked with hidden=True")
+        self.field_show_hidden_groups = ConfigField(
+            False, "show_hidden_groups", help="Listing will show groups that were marked with hidden=True"
+        )
         self.show_hidden_groups: bool = self._add_bool(self.field_show_hidden_groups)
 
-        self.field_show_hidden_tasks = ConfigField(False, "show_hidden_tasks", help="Listing will show tasks that are marked with hidden=True")
+        self.field_show_hidden_tasks = ConfigField(
+            False, "show_hidden_tasks", help="Listing will show tasks that are marked with hidden=True"
+        )
         self.show_hidden_tasks: bool = self._add_bool(self.field_show_hidden_tasks)
 
-        self.field_show_tags = ConfigField(True, "show_tags",  help="Listing will show tags of each task.")
+        self.field_show_tags = ConfigField(True, "show_tags", help="Listing will show tags of each task.")
         self.show_tags: bool = self._add_bool(self.field_show_tags)
 
-        self.field_show_optional_args = ConfigField(False, "show_optional_args",  help="Listing will show optional arguments of each task.")
+        self.field_show_optional_args = ConfigField(
+            False, "show_optional_args", help="Listing will show optional arguments of each task."
+        )
         self.show_optional_args: bool = self._add_bool(self.field_show_optional_args)
 
-        self.field_show_default_values = ConfigField(False, "show_default_values",  help=f"Listing will show default values of any arguments that are shown. Use with {self.field_show_optional_args.cli_arg_flag} to also show values of the optional arguments.")
+        self.field_show_default_values = ConfigField(
+            False,
+            "show_default_values",
+            help=(
+                f"Listing will show default values of any arguments that are shown. "
+                f"Use with {self.field_show_optional_args.cli_arg_flag} to also show values of "
+                "the optional arguments."
+            ),
+        )
         self.show_default_values: bool = self._add_bool(self.field_show_default_values)
 
         self.field_show_ready_info = ConfigField(
@@ -164,7 +180,14 @@ class TaskCLIConfig:
         )
         self.show_ready_info: bool = self._add_bool(self.field_show_ready_info)
 
-        self.field_hide_not_ready = ConfigField(False, "hide_not_ready",  help=f"Tasks which are not ready to run (e.g. due to missing env vars) will be automatically marked as hidden.")
+        self.field_hide_not_ready = ConfigField(
+            False,
+            "hide_not_ready",
+            help=(
+                "Tasks which are not ready to run (e.g. due to missing env vars) "
+                "will be automatically marked as hidden."
+            ),
+        )
         self.hide_not_ready: bool = self._add_bool(self.field_hide_not_ready)
 
         self.field_print_env = ConfigField(False, "print_env", action="store_true", help="List the supported env vars")
@@ -205,9 +228,8 @@ class TaskCLIConfig:
         )
         self.list_all: bool = self._add_bool(self.field_list_all)
 
-
         self.default_options: list[str] = []
-        self.default_options_tt:list[str] = []
+        self.default_options_tt: list[str] = []
 
     def _store_name(self, name: str) -> None:
         """To prevent adding the same name twice."""
@@ -257,7 +279,7 @@ class TaskCLIConfig:
             help = field.help
             help += f" (default: {field.default}{set_from})"
             act: Any = "store_true" if not field.action else field.action
-            #> act: Any = argparse.BooleanOptionalAction if not field.action else field.action
+            # > act: Any = argparse.BooleanOptionalAction if not field.action else field.action
             parser.add_argument(*args, action=act, default=None, help=help)
 
         def read_argument(config: TaskCLIConfig, args: argparse.Namespace) -> None:

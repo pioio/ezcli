@@ -16,7 +16,7 @@ log = logging.getLogger(__name__)
 go_task_project_name = "Taskfile.dev"
 
 
-def should_include_taskfile_dev(argv:list[str]) -> bool:
+def should_include_taskfile_dev(argv: list[str]) -> bool:
     """Check if env vars are set to look for a Taskfile.dev file."""
     INCLUDE_TASKFILE_YAML: bool = bool(
         envvars.TASKCLI_GOTASK_TASK_BINARY_FILEPATH.value and envvars.TASKCLI_GOTASK_TASKFILE_FILENAMES.value
@@ -123,8 +123,6 @@ def _include_tasks_json(cmd: str, json_string: str, dir: str = ".") -> bool:
 
         log.debug(f"Included task: {prefix + name}")
         tasks_were_included = True
-
-    import sys
 
     this_module = sys.modules[__name__]
     taskcli.include(this_module)

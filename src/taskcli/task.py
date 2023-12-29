@@ -34,23 +34,43 @@ class TaskCodeLocation:
 
 
 def task(
-        *args: Any,
-        change_dir: bool = True,
-        # ------------ args below are copy-pasted from the Task.__init__
-        name: str = "",
-        desc: str = "",
-        group: Group | None = None,
-        hidden: bool = False,
-        aliases: Iterable[str]|str | None = None,
-        important: bool = False,
-        env: list[str] | None = None,
-        format: str = "{name}",
-        customize_parser: Callable[[Any], None] | None = None,
-        is_go_task: bool = False,
-        suppress_warnings: bool = False,
-        tags: list[str] | None = None,
-    ) -> AnyFunction:
-    """Decorate a function as a task."""
+    *args: Any,
+    change_dir: bool = True,
+    # ------------ args below are copy-pasted from the Task.__init__
+    # We don't specify those via **kwargs to get a better IDE experience
+    name: str = "",
+    desc: str = "",
+    group: Group | None = None,
+    hidden: bool = False,
+    aliases: Iterable[str] | str | None = None,
+    important: bool = False,
+    env: list[str] | None = None,
+    format: str = "{name}",
+    customize_parser: Callable[[Any], None] | None = None,
+    suppress_warnings: bool = False,
+    tags: list[str] | None = None,
+    is_go_task: bool = False,
+) -> AnyFunction:
+    """Create a new Task. This is a decorator, use it on function to create new tasks.
+
+    Args:
+        change_dir: whether to change directory to the directory where this task is defined.
+        name: optional name of the task. By default it's the name of the function.
+        desc: optional description of the task. By default it's the first line of the docstring.
+        group: optional group of the task. By default it's the current group or the default group
+        important: If True, the task will be listed in a way which stands out
+        hidden: If True, the task will not be listed by default in `taskcli` output (use `tt` to list).
+        aliases: Optional list of aliases for the task. Can be a string, or iterable
+        env: Optional list of environment variables which must be set for the task to be runnable.
+        format: Optional format string for the name of the task. You can use colors like e.g. "{red}{name}{clear}".
+        customize_parser: Optional function which can customize the argparse parser for the task.
+        suppress_warnings: If True, warnings about the task being misconfigure will not be printed.
+        tags: Optional list of tags for the task. Tags are used to filter tasks with `-t <tag>`
+        args: optional arguments to the task decorator. Ignore those.
+        is_go_task: used internally to mark tasks imported from the go-task project.
+
+
+    """
     # currentframe is much(!) faster than inspect.stack()
     kwargs = locals()
     del kwargs["args"]
@@ -114,23 +134,23 @@ class Task:
 
     def __repr__(self) -> str:
         return f"Task(name={self.name!r}, group={self.group.name!r}, important={self.important}, hidden={self.hidden})"
+
     def __init__(
         self,
         # Args below can be copy-pasted to the `def task` decorator
-
         func: AnyFunction,
         name: str = "",
         desc: str = "",
         group: Group | None = None,
         hidden: bool = False,
-        aliases: Iterable[str]|str | None = None,
+        aliases: Iterable[str] | str | None = None,
         important: bool = False,
         env: list[str] | None = None,
         format: str = "{name}",
         customize_parser: Callable[[Any], None] | None = None,
-        is_go_task: bool = False,
         suppress_warnings: bool = False,
         tags: list[str] | None = None,
+        is_go_task: bool = False,
         # ------------ don't include those in dev tasks
         code_location: TaskCodeLocation | None = None,
     ):
@@ -143,7 +163,7 @@ class Task:
         self._name = name  # entirely optional
         self._desc = desc  # entirely optional
         self.func = func
-        self._extra_summary:list[str] = []
+        self._extra_summary: list[str] = []
         if isinstance(aliases, str):
             aliases = [aliases]
         self.aliases = aliases or []
@@ -243,7 +263,6 @@ class Task:
         elif extra_summary:
             basic_summary = extra_summary
         return basic_summary
-
 
     def get_taskfile_dir(self) -> str:
         """Return the directory in which the task was define."""

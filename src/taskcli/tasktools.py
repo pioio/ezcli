@@ -1,12 +1,13 @@
 """Various functions that operate on Tasks."""
+import collections
+import dataclasses
 from dataclasses import dataclass
 
 from taskcli.task import UserError
 
 from .task import Task
 from .taskrendersettings import TaskRenderSettings
-import dataclasses
-import collections
+
 
 @dataclass
 class FilterResult:
@@ -14,11 +15,13 @@ class FilterResult:
 
     progress: list[str] = dataclasses.field(default_factory=list)
     tasks: list[Task] = dataclasses.field(default_factory=list)
-    num_hidden_per_group: dict[str,int] = dataclasses.field(default_factory=lambda: collections.defaultdict(int))
+    num_hidden_per_group: dict[str, int] = dataclasses.field(default_factory=lambda: collections.defaultdict(int))
     num_total_hidden: int = 0
     num_total_hidden_in_hidden_groups: int = 0
 
-    hidden_groups:set[str] = dataclasses.field(default_factory=set)
+    hidden_groups: set[str] = dataclasses.field(default_factory=set)
+
+
 @dataclass
 class FilterContext:
     """Current context for filtering tasks.
@@ -56,51 +59,55 @@ def filter_before_listing(tasks: list[Task], settings: TaskRenderSettings) -> Fi
     return ctx.result
 
 
-def _filter_before_listing__hide_tasks_in_hidden_groups(ctx:FilterContext):
+def _filter_before_listing__hide_tasks_in_hidden_groups(ctx: FilterContext) -> None:
     if ctx.settings.show_hidden_groups:
         ctx.result.progress += ["Showing tasks in hidden groups (not hiding them)."]
         return
 
-    visible:list[Task] = []
+    visible: list[Task] = []
     for task in ctx.result.tasks:
         if task.is_in_hidden_group():
             ctx.result.hidden_groups.add(task.group.name)
             ctx.result.num_hidden_per_group[task.group.name] += 1
-            ctx.result.num_total_hidden_in_hidden_groups +=1
+            ctx.result.num_total_hidden_in_hidden_groups += 1
         else:
             visible.append(task)
 
     ctx.result.tasks = visible
     if not ctx.result.tasks:
         ctx.result.progress += [
-            f"No tasks after hiding tasks in hidden groups. All {ctx.result.num_total_hidden_in_hidden_groups} tasks are in hidden groups."]
+            "No tasks after hiding tasks in hidden groups. "
+            f"All {ctx.result.num_total_hidden_in_hidden_groups} tasks are in hidden groups."
+        ]
     else:
-        ctx.result.progress += [f"Hidden {ctx.result.num_total_hidden_in_hidden_groups} tasks, {len(ctx.result.tasks)} tasks left."]
+        ctx.result.progress += [
+            f"Hidden {ctx.result.num_total_hidden_in_hidden_groups} tasks, {len(ctx.result.tasks)} tasks left."
+        ]
 
 
-def _filter_before_listing__hide_hidden_tasks(ctx:FilterContext):
+def _filter_before_listing__hide_hidden_tasks(ctx: FilterContext) -> None:
     if ctx.settings.show_hidden_tasks:
         ctx.result.progress += ["Showing hidden tasks (not hiding them)."]
         return
 
-
-    visible:list[Task] = []
+    visible: list[Task] = []
     for task in ctx.result.tasks:
         if task.is_hidden():
             ctx.result.num_hidden_per_group[task.group.name] += 1
-            ctx.result.num_total_hidden +=1
+            ctx.result.num_total_hidden += 1
         else:
             visible.append(task)
 
     ctx.result.tasks = visible
     if not ctx.result.tasks:
         ctx.result.progress += [
-            f"No tasks after hiding hidden tasks. All {ctx.result.num_total_hidden} tasks are hidden."]
+            f"No tasks after hiding hidden tasks. All {ctx.result.num_total_hidden} tasks are hidden."
+        ]
     else:
         ctx.result.progress += [f"Hidden {ctx.result.num_total_hidden} tasks, {len(ctx.result.tasks)} tasks left."]
 
 
-def _filter_before_listing__filter_by_tags(ctx:FilterContext):
+def _filter_before_listing__filter_by_tags(ctx: FilterContext) -> None:
     if not ctx.settings.tags:
         ctx.result.progress += ["Not filtering by tags."]
         return
@@ -120,9 +127,12 @@ def _filter_before_listing__filter_by_tags(ctx:FilterContext):
         if not ctx.result.tasks:
             ctx.result.progress += [f"No tasks after filtering by tags ({', '.join(ctx.settings.tags)})"]
         else:
-            ctx.result.progress += [f"After filtering by tags ({', '.join(ctx.settings.tags)}): {len(ctx.result.tasks)}."]
+            ctx.result.progress += [
+                f"After filtering by tags ({', '.join(ctx.settings.tags)}): {len(ctx.result.tasks)}."
+            ]
 
-def _filter_before_listing__filter_by_search(ctx:FilterContext):
+
+def _filter_before_listing__filter_by_search(ctx: FilterContext) -> None:
     if not ctx.settings.search:
         ctx.result.progress += ["Not filtering by search."]
         return
@@ -130,7 +140,9 @@ def _filter_before_listing__filter_by_search(ctx:FilterContext):
     if ctx.settings.search:
         ctx.result.tasks = search_for_tasks(ctx.result.tasks, search=ctx.settings.search)
         if not ctx.result.tasks:
-            ctx.result.progress += [f"No tasks after searching name and summary with regex search ({ctx.settings.search})"]
+            ctx.result.progress += [
+                f"No tasks after searching name and summary with regex search ({ctx.settings.search})"
+            ]
         else:
             ctx.result.progress += [
                 f"After searching searching name and summary with regex "

@@ -13,6 +13,7 @@ Required TODO:
 - [ ] add unit testing example
 - [x] per-group setting to sort hidden last
 - [ ] custom_name/desc to name/desc
+- [ ] unit test that changing dir via function call works
 - [ ] spacing between one-line-arg and summary
 - [ ] optional flags are not gray (disk usage example)
 - [ ] unit test hide-not-read

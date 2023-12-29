@@ -11,6 +11,7 @@ import taskcli.core
 from taskcli.task import UserError
 
 from . import configuration, envvars, examples, taskfiledev, utils
+from .constants import GROUP_SUFFIX
 from .envvar import EnvVar
 from .init import create_tasks_file
 from .listing import list_tasks
@@ -27,7 +28,6 @@ TODO:
 
 """
 
-from .constants import GROUP_SUFFIX
 
 log = logging.getLogger(__name__)
 
@@ -67,6 +67,7 @@ def _dispatch_unsafe(argv: list[str] | None = None, tasks_found: bool = True) ->
 
     # Must happen before tab completion
     from taskcli.tt import config
+
     config.read_from_env()
     config.configure_parser(parser)
 
@@ -188,7 +189,7 @@ def _dispatch_unsafe(argv: list[str] | None = None, tasks_found: bool = True) ->
     return None
 
 
-def print_task_not_found_error(argv:list[str]) -> None:
+def print_task_not_found_error(argv: list[str]) -> None:
     """Print the error message when no tasks are found."""
     # TODO, check upper dirs
     print(  # noqa: T201
@@ -228,8 +229,6 @@ def print_listed_tasks(tasks: list[Task], render_settings: TaskRenderSettings) -
     lines = list_tasks(tasks, settings=render_settings)
     for line in lines:
         print(line)  # noqa: T201
-
-
 
 
 DEFAULT_TASK_PY = envvars.TASKCLI_TASKS_PY_FILENAMES.value
