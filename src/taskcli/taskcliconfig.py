@@ -49,9 +49,11 @@ class ConfigField:
         env_var_name: str = "",
         action: str = "",
         nargs: str = "",
+        metavar: str = "",
     ):
         self.default = default
         self.name = name
+        self.metavar = metavar or name.upper().replace("-", "_")
         self.short = short
         self.env = env
         self.help = help
@@ -101,19 +103,25 @@ class TaskCLIConfig:
         self._addded_names: set[str] = set()
         self._addded_env_vars: list[EnvVar] = []
 
-        self.init: str = self._add_str(
-            "", "init", env=False, help="Create a new tasks.py file in the current directory"
+        self.field_init: ConfigField = ConfigField(
+            "",
+            "init",
+            env=False,
+            help="Create a new tasks.py file in the current directory"
         )
+        self.init: str = self._add_str(self.field_init)
 
         self.tags: list[str] = self._add_list(
             [], "tags", "-t", nargs="+", help="Only show tasks matching any of these tags"
         )
-        self.search: str = self._add_str(
+
+        self.field_search: ConfigField = ConfigField(
             "",
             "search",
             "-s",
             help="Only show tasks whose name or description is matching this python regex seach pattern.",
         )
+        self.search: str = self._add_str(self.field_search)
 
         default_show_hidden = False
 
@@ -266,10 +274,7 @@ class TaskCLIConfig:
 
     def _add_bool(self, field: ConfigField) -> bool:
         """Add a boolean flag to the parser."""
-        self._store_name(field.name)
-        if field.env:
-            self._store_env_var(name=field.name, default_value=field.default, help=field.help)
-        args = self._get_args(field.name, field.short)
+        args = self._shared_init_field(field)
 
         set_from = ""
         default = field.default
@@ -302,38 +307,42 @@ class TaskCLIConfig:
         assert isinstance(default, bool)
         return default
 
-    def _add_str(self, default: str, name: str, short: str = "", /, *, help: str, env: bool = True) -> str:
-        """Add a boolean flag to the parser."""
-        self._store_name(name)
-        if env:
-            self._store_env_var(name=name, default_value=default, help=help)
-        args = self._get_args(name, short)
+    def _shared_init_field(self, field: ConfigField) -> list[str]:
+        self._store_name(field.name)
+        if field.env:
+            self._store_env_var(name=field.name, default_value=field.default, help=field.help)
+        args = self._get_args(field.name, field.short)
+        return args
 
-        new_default = default
-        set_from = ""
+    def _add_str(self, field: ConfigField) -> str:
+        """Add a str flag to the parser."""
+        args = self._shared_init_field(field)
+
 
         def add_argument(parser: argparse.ArgumentParser) -> None:
-            nonlocal help
-            help += f" (default: {new_default}{set_from})"
-            parser.add_argument(*args, default=None, help=help)
+            nonlocal field
+            help = field.help
+            help += f" (default: {field.default})"
+            parser.add_argument(*args, default=None, help=field.help, type=str, nargs=None if not field.nargs else field.nargs)
 
         def read_argument(config: TaskCLIConfig, args: argparse.Namespace) -> None:
-            value = getattr(args, name)
+            value = getattr(args, field.name)
             if value is not None:
-                setattr(config, name, value)
+                setattr(config, field.name, value)
 
         def read_from_env(config: TaskCLIConfig) -> None:
-            env_var_name = self._to_env_var_name(name)
+            env_var_name = self._to_env_var_name(field.name)
             if env_var_name in os.environ:
-                new_default = EnvVar(default_value=str(default), desc=help, name=env_var_name)
-                setattr(config, name, new_default)
+                new_default = EnvVar(default_value=str(field.default), desc=field.help, name=env_var_name)
+                setattr(config, field.name, new_default)
 
         self._configure_parser.append(add_argument)
         self._read_parsed_args.append(read_argument)
-        if env:
+        if field.env:
             self._read_from_env.append(read_from_env)
 
-        return default
+        assert isinstance(field.default, str)
+        return field.default
 
     def _add_list(
         self, default: list[str], name: str, short: str = "", /, *, nargs: str = "*", help: str, env: bool = True

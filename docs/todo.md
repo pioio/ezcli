@@ -2,7 +2,6 @@
 - [x] Include from module by filter
 - [ ]
 - [ ] mark included task with^
-- [ ] includes from taskfile files AGAIN not showing up
 - [ ] task init is broken
 - [ ] optional flags are not gray (disk usage example)
 - [ ] unit test hide-not-read

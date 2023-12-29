@@ -9,7 +9,12 @@ def create_tasks_file(filepath: str) -> None:
         sys.exit(1)
     with open(filepath, "w") as f:
         f.write(content)
-    print(f"Created file {filepath}, now run 'taskcli' or 'tt' to list task in it.")  # noqa: T201
+
+    if filepath == "tasks.py":
+        print(f"Created file {filepath}, now run 'taskcli' or 'tt' to list task in it.") # noqa: T201
+    else:
+        print (f"Created file {filepath}, now run 'taskcli -f {filepath}' or 'tt -f {filepath}' to list task in it.")  # noqa: T201
+
 
 
 content = """#!/usr/bin/env python
