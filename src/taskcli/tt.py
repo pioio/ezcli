@@ -24,6 +24,6 @@ from .runcommand import run
 from .task import Task, task
 from .taskcliconfig import runtime_config as config
 from .types import Any, AnyFunction, Module
-from .utils import get_tasks
+from .utils import get_tasks, get_tasks_dict, get_task
 
 __all__ = ["config"]

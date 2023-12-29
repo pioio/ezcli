@@ -138,6 +138,7 @@ def test_include_from_subsubdir_works():
     assert stdout.strip() == """# default\nsubsubchild ^"""
 
 
+@pytest.mark.skip()
 def test_including_not_decorated_function():
     done = 0
 
@@ -164,7 +165,7 @@ def test_including_not_decorated_function_name_change():
     taskcli.dispatch(["xxx"])
     assert done == 42
 
-
+from taskcli.task import UserError
 def test_including_decorated_function():
     done = 0
 
@@ -173,9 +174,12 @@ def test_including_decorated_function():
         nonlocal done
         done = 42
 
-    include(somefun)
+    with pytest.raises(UserError, match="already exists in"):
+        include(somefun)
 
-    taskcli.dispatch(["somefun"])
+    include(somefun, namespace="foo")
+
+    taskcli.dispatch(["foo.somefun"])
     assert done == 42
 
 

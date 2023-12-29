@@ -1,5 +1,5 @@
 import taskcli
-from taskcli import Group, task
+from taskcli import Group, task, tt
 from taskcli.listing import list_tasks
 
 from . import tools
@@ -42,3 +42,82 @@ def test_group_context_manager():
         atask = tools.include_tasks()[0]
         assert atask.group.name == "bar"
         assert atask.group == group
+
+
+def test_group_namespace_but_no_alias_names():
+    """Test that if group has no alias namespace, the tasks's aliases are not namespaced."""
+
+    @task(aliases=["t1", "t2"])
+    def tasknogroup():
+        pass
+
+    with Group("bar", namespace="bar") as group:
+
+        @task(aliases=["a1", "a2"])
+        def foobar():
+            pass
+
+        atask = tt.get_tasks_dict()["bar.foobar"]
+        assert atask.group.name == "bar"
+        assert atask.group == group
+        assert atask.get_full_task_name() == "bar.foobar"
+        assert atask.get_namespaced_aliases() == ["a1", "a2"]
+
+    # same behavior when copying
+    task_no_group = tt.get_tasks_dict()["tasknogroup"]
+    task_no_group.add_namespace_from_group(group)
+    assert task_no_group.get_full_task_name() == "bar.tasknogroup"
+    assert task_no_group.get_namespaced_aliases() == ["t1", "t2"], "group has no alias namespace, so task aliases should not be namespaced"
+
+
+def test_group_namespace_with_alias_names():
+    """Test that both namespace and alias namespace are added to the task."""
+
+    @task(aliases=["t1", "t2"])
+    def tasknogroup():
+        pass
+
+    with Group("bar", namespace="bar", alias_namespace="b") as group:
+
+        @task(aliases=["a1", "a2"])
+        def foobar():
+            pass
+
+        atask = tt.get_tasks_dict()["bar.foobar"]
+        assert atask.group.name == "bar"
+        assert atask.group == group
+        assert atask.get_full_task_name() == "bar.foobar"
+        assert atask.get_namespaced_aliases() == ["ba1", "ba2"]
+
+
+    # same behavior when copying
+    task_no_group = tt.get_tasks_dict()["tasknogroup"]
+    task_no_group.add_namespace_from_group(group)
+    assert task_no_group.get_full_task_name() == "bar.tasknogroup"
+    assert task_no_group.get_namespaced_aliases() == ["bt1", "bt2"]
+
+
+def test_group_alias_namespace():
+    """If group has only alias namespace, only that should be added to the test."""
+
+    @task(aliases=["t1", "t2"])
+    def tasknogroup():
+        pass
+
+    with Group("bar", alias_namespace="b") as group:
+
+        @task(aliases=["a1", "a2"])
+        def foobar():
+            pass
+
+        atask = tt.get_tasks_dict()["foobar"]
+        assert atask.group.name == "bar"
+        assert atask.group == group
+        assert atask.get_full_task_name() == "foobar"
+        assert atask.get_namespaced_aliases() == ["ba1", "ba2"]
+
+    # same behavior when copying
+    task_no_group = tt.get_tasks_dict()["tasknogroup"]
+    task_no_group.add_namespace_from_group(group)
+    assert task_no_group.get_full_task_name() == "tasknogroup"
+    assert task_no_group.get_namespaced_aliases() == ["bt1", "bt2"]

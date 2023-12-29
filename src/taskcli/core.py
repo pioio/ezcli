@@ -39,7 +39,9 @@ def get_parsed_args() -> argparse.Namespace:
     return task_cli.parsed_args
 
 from . import utils
-def include(object: Module | AnyFunction,
+if typing.TYPE_CHECKING:
+    from .tt import Task
+def include(object: Module | AnyFunction | "Task",
             to_module:Module|None=None,
             namespace:str="",
             alias_namespace:str="",
@@ -51,10 +53,16 @@ def include(object: Module | AnyFunction,
     if to_module is None:
         to_module = utils.get_callers_module()
 
+    from .tt import Task
+
     if isinstance(object, Module):
         include_module(object, to_module=to_module, namespace=namespace, alias_namespace=alias_namespace, **kwargs)
     elif inspect.isfunction(object):
         include_function(object, to_module=to_module, namespace=namespace, alias_namespace=alias_namespace, **kwargs)
+    elif isinstance(object, Task):
+        from_module:Module = sys.modules[object.func.__module__]
+        from .include import _include_task
+        _include_task(object, from_module=from_module, to_module=to_module, namespace=namespace, alias_namespace=alias_namespace, **kwargs)
 
 
 def get_runtime() -> "TaskCLI":

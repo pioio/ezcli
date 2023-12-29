@@ -202,10 +202,11 @@ class Task:
         return self.get_full_task_name()
 
     def get_full_task_name(self) -> str:
-        """Return the full name of the task."""
+        """Return the full name of the task, including any namespace of the group the task is in right now."""
         if self._name:
-            return self._name
-        out = self.func.__name__.replace("_", "-")
+            out = self._name
+        else:
+            out = self.func.__name__.replace("_", "-")
         out.lstrip("-")  # for _private functions
 
         if self.namespaces:
@@ -216,11 +217,20 @@ class Task:
 
         return out
 
-    def add_namespace(self, namespace:str, alias_namespace:str="") -> None:
+    def add_namespace_from_group(self, group:Group) -> None:
+        """Copy the namesapce from the specied group into the task (used for copied tasks to preservs namespace of the old group)."""
+        if group.namespace:
+            self.namespaces = [group.namespace, *self.namespaces]
+        if group.alias_namespace:
+            new_aliases = []
+            for alias in self.aliases:
+                new_aliases.append(group.alias_namespace + alias)
+            self.aliases = new_aliases
+
+    def add_namespace(self, namespace:str="", alias_namespace:str="") -> None:
         """Add a namespace to the task."""
-        if not alias_namespace:
-            alias_namespace = namespace
-        self.namespaces = [namespace, *self.namespaces]
+        if namespace:
+            self.namespaces = [namespace, *self.namespaces]
 
         new_aliases = []
         for alias in self.aliases:

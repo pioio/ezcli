@@ -36,6 +36,7 @@ def test_get_tasks_with_current_module(capsys):
     assert tasks[0].name == "foobar"
 
 
+@pytest.mark.skip("dummy task from tools decorator gets cleared by reset_context_before_each_test")
 def test_get_tasks_includes_included_tasks():
     from .tools import dummy_task_from_tools
     import taskcli
