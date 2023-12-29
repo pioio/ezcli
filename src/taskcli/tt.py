@@ -11,5 +11,6 @@ from .runcommand import run
 from .task import Task, task
 from .taskcliconfig import runtime_config as config
 from .types import Any, AnyFunction, Module
+from .utils import get_tasks
 
 __all__ = ["config"]

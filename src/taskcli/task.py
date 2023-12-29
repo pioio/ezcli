@@ -88,52 +88,11 @@ def task(
         return decorator
 
 
-def _get_code_location() -> TaskCodeLocation:
-    """Inspects the stack to find the location of the task definition.
-
-    This info is later used to print warnings about the task.
-    This function can be called only from the @task decorator.
-    """
-    current_frame = inspect.currentframe()
-    assert current_frame is not None
-
-    prev_fame = current_frame.f_back
-    assert prev_fame is not None
-
-    prev_fame = current_frame.f_back
-    assert prev_fame is not None
-
-    file_location = prev_fame.f_code.co_filename
-    line_number = prev_fame.f_lineno
-
-    return TaskCodeLocation(file=file_location, line=line_number)
-
-
 class Task:
-    """A decorated function."""
+    """Represents a single task. Gets created via the `@task` decorator.
 
-    def copy(self, group: Group) -> "Task":
-        """Return a copy of the task."""
-        new_task = Task(
-            func=self.func,
-            group=group,
-        )
-        for prop in self.__dict__:
-            # TODO explicit copy of some objects, code_location
-            props_to_skip = [
-                "func",  # passed to constructor
-                "params",
-                "group",  # created from func in constructor  # passed to constructor
-            ]
-            if prop in props_to_skip:
-                continue
 
-            # For everything else shallow copy should be good enough here
-            setattr(new_task, prop, getattr(self, prop))
-        return new_task
-
-    def __repr__(self) -> str:
-        return f"Task(name={self.name!r}, group={self.group.name!r}, important={self.important}, hidden={self.hidden})"
+    """
 
     def __init__(
         self,
@@ -151,7 +110,7 @@ class Task:
         suppress_warnings: bool = False,
         tags: list[str] | None = None,
         is_go_task: bool = False,
-        # ------------ don't include those in dev tasks
+        # ------------ don't include those in 'def task'
         code_location: TaskCodeLocation | None = None,
     ):
         """Create a new Task.
@@ -335,6 +294,30 @@ class Task:
         else:
             res = dispatch([name], sysexit_on_user_error=sysexit_on_user_error)
         return res
+
+    def copy(self, group: Group) -> "Task":
+        """Return a copy of the task."""
+        new_task = Task(
+            func=self.func,
+            group=group,
+        )
+        for prop in self.__dict__:
+            # TODO explicit copy of some objects, code_location
+            props_to_skip = [
+                "func",  # passed to constructor
+                "params",
+                "group",  # created from func in constructor  # passed to constructor
+            ]
+            if prop in props_to_skip:
+                continue
+
+            # For everything else shallow copy should be good enough here
+            setattr(new_task, prop, getattr(self, prop))
+        return new_task
+
+    def __repr__(self) -> str:
+        return f"Task(name={self.name!r}, group={self.group.name!r}, important={self.important}, hidden={self.hidden})"
+
 
 
 def _get_wrapper(  # noqa: C901

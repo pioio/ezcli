@@ -24,7 +24,7 @@ with tt.Group("dev", desc="Development tasks"):
         """Run unit tests."""
         run(f"pytest {extraargs} tests/ -vvv {tt.get_extra_args()} ")
 
-    @task(important=True, format="{name} {clear}{red}(PROD!)")
+    @task(important=True)
     def nox():
         """Run extensive tests using nox."""
         run("nox")
@@ -43,6 +43,7 @@ with tt.Group("dev", desc="Development tasks"):
     @task
     def runcompletion():
         run("_ARGCOMPLETE=1 ./tasks.py")
+
 
 
 # TODO: instead of important, use a not-important, and hide them explicitly instead
@@ -148,6 +149,12 @@ def pc():
     """Run pre-commit hooks."""
     lint()
 
+
+
+for t in tt.get_tasks():
+    t.important = True
+    t.tags += ["prod"]
+    t.name_format = "{red}{name}{clear}"
 
 if __name__ == "__main__":
     tt.dispatch()

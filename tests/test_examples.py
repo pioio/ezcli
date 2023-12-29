@@ -17,7 +17,7 @@ def test_all_example():
         assert example.text
 
         shared_headers = """
-from taskcli import task, include, group, dispatch
+from taskcli import task, include, group, dispatch, tt
 """
         shared_footers = """
 if __name__ == "__main__":

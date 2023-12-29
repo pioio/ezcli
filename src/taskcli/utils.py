@@ -2,6 +2,7 @@ import contextlib
 import os
 import re
 import sys
+
 import typing
 
 import taskcli
@@ -64,6 +65,39 @@ def param_to_cli_option(arg: str) -> str:
         return "-" + arg.replace("_", "-")
     else:
         return "--" + arg.replace("_", "-")
+
+if typing.TYPE_CHECKING:
+    from .task import Task
+
+def get_tasks() -> list["Task"]:
+    """Return the list of all tasks defined in the current module. Can be used to customize many tasks at ones.
+
+    Example:
+        ```
+        @task
+        def deploy_to_prod()
+            pass
+
+        tasks:list[Task] = tt.get_tasks()
+        for t in tasks:
+            if "prod" in t.name:
+                t.important = True
+        ```
+    """
+    from . import core
+    import inspect
+    frame = inspect.currentframe()
+    assert frame is not None
+    frame = frame.f_back
+    assert frame is not None
+
+    module = inspect.getmodule(frame)
+    print("module", module.__name__)
+    if hasattr(module, "decorated_functions"):
+        return module.decorated_functions
+    else:
+        print_error("get_tasks(): No tasks found in the current module")
+        sys.exit(1)
 
 
 def reset_tasks() -> None:

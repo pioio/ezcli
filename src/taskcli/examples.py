@@ -99,6 +99,31 @@ def task1():
 @task({HL}aliases=("t2","foobar"){END})
 def task2():
     pass
-""",
+"""
         ),
+
+        Example(
+            title="Customize tasks base on custom conditions",
+            text=f"""# You can batch customize the tasks programmatically, for example to add a default argument to all tasks
+# For example, you can append a custom tag to all tasks with a certain name pattern
+# Example below adds the tag "prod" to all tasks with "prod" in their name, marks them as important, as makes
+# them the listed in red.
+
+from taskcli import Task, tt, task
+
+@task
+def {PINK}deploy_to_prod{END}():
+    pass
+
+tasks:list[Task] = {HL}tt.get_tasks(){END}
+for t in tasks:
+    if "prod" in {PINK}t.name{END}:
+        t.important = True
+        t.tags += ["prod"]
+        t.name_format = "{{red}}{{name}}{{clear}}"
+"""
+
+        )
+
+
     ]

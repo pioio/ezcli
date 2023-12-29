@@ -12,6 +12,7 @@ Required TODO:
 - [x] auto-adding short-flags for params. Show them in -L
   - [x] specify custom hosrt flags via args?
 - [ ] spacing between one-line-arg and summary
+- [ ] Ability to loop over all tasks, and modify them
 - [ ] add unit testing example
 - [x] per-group setting to sort hidden last
 - [x] custom_name/desc to name/desc
