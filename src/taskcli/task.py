@@ -198,15 +198,19 @@ class Task:
     def get_summary_line(self) -> str:
         """Return the first line of docstring, or empty string if no docstring."""
         extra_summary = " ".join(self._extra_summary)
-        if extra_summary:
-            extra_summary = " " + extra_summary
 
+        basic_summary = ""
         if self.custom_desc:
-            return self.custom_desc.split("\n")[0] + extra_summary
-        if self.func.__doc__ is None:
-            return "" + extra_summary
+            basic_summary = self.custom_desc
+        elif self.func.__doc__ is not None:
+            basic_summary = self.func.__doc__.split("\n")[0]
 
-        return self.func.__doc__.split("\n")[0]  + extra_summary
+        if basic_summary and extra_summary:
+            basic_summary += " " + extra_summary
+        elif extra_summary:
+            basic_summary = extra_summary
+        return basic_summary
+
 
     def get_taskfile_dir(self) -> str:
         """Return the directory in which the task was define."""

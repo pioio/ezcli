@@ -150,7 +150,7 @@ class TaskCLIConfig:
         self.field_show_optional_args = ConfigField(False, "show_optional_args",  help="Listing will show optional arguments of each task.")
         self.show_optional_args: bool = self._add_bool(self.field_show_optional_args)
 
-        self.field_show_default_values = ConfigField(False, "show_default_values",  help=f"Listing will show default values of optional arguments when listing tasks. {self.field_show_optional_args.cli_arg_flag} must be set.")
+        self.field_show_default_values = ConfigField(False, "show_default_values",  help=f"Listing will show default values of any arguments that are shown. Use with {self.field_show_optional_args.cli_arg_flag} to also show values of the optional arguments.")
         self.show_default_values: bool = self._add_bool(self.field_show_default_values)
 
         self.field_show_ready_info = ConfigField(

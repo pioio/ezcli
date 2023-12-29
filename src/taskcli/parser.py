@@ -65,6 +65,11 @@ def _dispatch_unsafe(argv: list[str] | None = None, tasks_found: bool = True) ->
     tasks: list[Task] = taskcli.core.get_runtime().tasks
     parser = build_parser(tasks)
 
+    # Must happen before tab completion
+    from taskcli.tt import config
+    config.read_from_env()
+    config.configure_parser(parser)
+
     if "_ARGCOMPLETE" in os.environ:
         import argcomplete
 
@@ -76,11 +81,6 @@ def _dispatch_unsafe(argv: list[str] | None = None, tasks_found: bool = True) ->
 
     argv = _extract_extra_args(argv, taskcli.core.get_runtime())
 
-    from taskcli.tt import config
-
-    config.read_from_env()
-
-    config.configure_parser(parser)
     log.debug(f"Parsing arguments: {argv}")
     argconfig = parser.parse_args(argv)
 

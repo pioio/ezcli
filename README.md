@@ -7,10 +7,11 @@ It's kind of like a Makefile, but in Python, and on steroids (search, tags, grou
 The guiding design principles of taskcli are:
 - encapsulate complexity of managing many tasks: show only what's needed, but make it easy to reveal more.
 - make running and navigating between groups of tasks fast, but powerful.
-- make the most important tasks stand out. Hide the less frequently used ones
+- make the most important tasks stand out. Hide the less frequently used ones.
 
 `taskcli` is not only for Python project.
-It can be used for any sort of project, with Python as the glue (in stead of write-once-read-never bash "oneliners").
+
+It can be used for any sort of project, with Python as the glue.
 
 ## Basic usage overview
 `t` list all the tasks defined by the `tasks.py` in current directory (you can import tasks from other directories)
@@ -23,11 +24,27 @@ It can be used for any sort of project, with Python as the glue (in stead of wri
 
 (You can also use `taskcli` instead of `t`)
 
-By default `taskcli` installs these entrypoints: `t`, `tt`, `taskcli`
-- `t` and `taskcli` are equivalent; and are the default entrypoints to the tool.
-- `tt` is the equivalent of running `t --show-hidden` (i.e. `t -H`), so, by default it shows all the hidden tasks and groups. This distinction also impacts tab completion. Tab completion for `t` only shows not hidden groups/tasks, while tab completion for `tt` shows all groups/tasks.
 
-Rationale: in practice I found simply switching between `t` and `tt` to be the fastest way of toggling between showing some, vs. all, tasks. Wasteful? A bit, maybe. Handy? You bet!
+## The entrypoints - `t` vs `tt` - less vs more
+By default `taskcli` installs these entrypoints: `t`, `tt`, `taskcli`
+- `t` and `taskcli` are equivalent; they are the default entrypoints to the tool.
+- `tt` is an alternative entrypoint designed to show a bit more info by default. By default it's the equivalent of running `t --show-hidden` (i.e. `t -H`), so, by default it shows all the hidden tasks and groups.
+
+This distinction also impacts tab completion. Tab completion for `t` only shows not hidden groups/tasks, while tab completion for `tt` shows all groups/tasks.
+You can customize either entrypoint by adding more default flags (e.g. to make `tt` also show values of default arguments) by customizing `tt.config` object in your `tasks.py`.
+
+Rationale for many entrypoints: in practice I found simply switching between `t` and `tt` to be the fastest way of toggling between showing some, vs. all, tasks. Wasteful? A bit, maybe. Handy? You bet!
+
+
+## Key features
+- Pythonic way of defining tasks - simply create a function.
+- Easily manage, group, highlight, tag, list your tasks.
+- Auto hide tasks which are not ready to be run (e.g. due to missing env vars) (`tt.config.hide_not_ready = True`)
+- Import and reuse tasks from other modules/dirs  (`tt.include(module_name)`). Directories will be switch autmtically as needed.
+- Quickly see the overview of all the tasks, along with optional and mandatory arguments.
+- Customize the way your tasks are listed. Customize it on per-project basis, or globally for many projects.
+- Configurable: easy to start, but also easy to customize for larger projects.
+- Automatically switch directories when running tasks imported from other directories (can be disabled).
 
 
 
@@ -187,14 +204,6 @@ YAML has its benefits, but also drawbacks.
 `argh` is a great library for creating CLI interfaces from python functions.
 It can also be used for creating simple tasks.
 
-## Key features
-- Pythonic way of defining tasks - simply create a function.
-- Easily manage, group, highlight, list your tasks.
-- Import and reuse tasks from other modules/dirs.
-- Quickly see the overview of all the tasks, along with optional and mandatory arguments.
-- Customize the way your tasks are listed. Customize it on per-project basis, or globally for many projects.
-- Configurable: easy to start, but also easy to customize for larger projects.
-- Automatically switch directries when running tasks imported from other directories (can be disabled).
 
 ## Acknowledgements
 - The idea was inspired by Taskfile.dev and `Justfile`

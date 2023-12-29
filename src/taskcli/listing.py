@@ -188,8 +188,6 @@ def smart_task_lines(task: Task, settings: TaskRenderSettings) -> list[str]:  # 
         format = config.render_format_hidden_tasks
     if task.is_go_task:
         format = config.render_format_included_taskfile_dev_task
-    if not task.is_ready():
-        format = config.render_format_not_ready
 
     line = format_colors(format, name=name)
 

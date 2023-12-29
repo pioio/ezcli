@@ -74,7 +74,6 @@ class Config:
     render_format_important_tasks: str = "{green}{underline}{name}{clear}"
     render_task_name: str = "{green}{name}{clear}"
     render_format_hidden_tasks: str = "{dark_gray}{name}{clear}"
-    render_format_not_ready: str = "{green}{name}{clear}"
     render_format_included_taskfile_dev_task: str = "{green}{name}{clear}"
 
     # Always show these args in the task list, even if they are optional
@@ -152,7 +151,6 @@ def apply_simple_formatting() -> None:
     config.render_format_important_tasks = "{name}"
     config.render_task_name = "{name}"
     config.render_format_hidden_tasks = "{name}"
-    config.render_format_not_ready = "{name}"
     config.render_format_included_taskfile_dev_task = "{name}"
     config.render_format_of_group_name = "# {name}"
 
@@ -162,7 +160,6 @@ def apply_simple_coded_formatting() -> None:
     config.render_format_important_tasks = "{name} IMPORTANT"
     config.render_task_name = "{name}"
     config.render_format_hidden_tasks = "{name} HIDDEN"
-    config.render_format_not_ready = "{name} NOT-READY"
     config.render_format_included_taskfile_dev_task = "{name} FROM-TASKFILE"
     config.render_format_of_group_name = "# {name}"
 

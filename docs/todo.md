@@ -9,6 +9,7 @@ Required TODO:
 - [x] param.type.is_bool
 - [x] add unit tests with "-" task names
 - [x] improve listing tabs in group,  name[group] is clumsy
+- [ ] unit test hide-not-read
 - [ ] num hidden tasks in each group
   - [ ] filter out hidden before filterting by tags
 - [ ]
