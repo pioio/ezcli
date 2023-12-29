@@ -285,8 +285,15 @@ def build_parser(tasks: list[Task]) -> argparse.ArgumentParser:
             if task.customize_parser:
                 task.customize_parser(subparser)
 
+
+            known_short_args = set()
             for param in task.params:
-                _add_param_to_subparser(param, subparser)
+                args = param.get_argparse_names(known_short_args)
+                if len(args) == 2:
+                    # store the short flag for later, to prevent conflicts
+                    assert len(args[1]) == 2, f"Expected short flag to be 2 chars, got {args[1]}"
+                    known_short_args.add(args[1])
+                _add_param_to_subparser(args=args, param=param, subparser=subparser)
 
     # finally, if 'group-name' is still available, add it as an aliast to "/"
     # if group-name and task-name have the same name, expecting here the task to take precedence
@@ -301,8 +308,8 @@ def build_parser(tasks: list[Task]) -> argparse.ArgumentParser:
     return root_parser
 
 
-def _add_param_to_subparser(param: Parameter, subparser: argparse.ArgumentParser) -> None:  # noqa: C901
-    args = param.get_argparse_names()
+def _add_param_to_subparser(args:list[str], param: Parameter, subparser: argparse.ArgumentParser) -> None:  # noqa: C901
+
 
     kwargs: dict[str, Any] = {}
 

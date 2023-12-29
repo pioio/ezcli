@@ -96,13 +96,37 @@ class Parameter:
         """Return True if the parameter has a default value."""
         return self.default is not Parameter.Empty
 
-    def get_argparse_names(self) -> list[str]:
+    def get_preffered_short_flags(self) -> list[str]:
+        assert self.is_positional() is False, "short flags are only for options, not for positional parameters"
+        out = []
+        out += [self.name[0].lower()]
+        out += [self.name[0].upper()]
+        return out
+
+
+    def get_argparse_names(self, known_short_args:set[str]) -> list[str]:
         """Return the names for argparse, in order of precedence."""
         # TODO: return single flag params also
+        out = []
         if self.is_positional():
             name = self.name
+            out += [name]
             assert "-" not in name, "for positional, we need underscores, not dashes "
         else:
             name = param_to_cli_option(self.name)
+            out += [name]
+
+            # Now come up with a unique short flag (used ones were provided via known_short_args)
+            candidate1 = "-" + self.name[0].lower()
+            candidate2 = "-" + self.name[0].upper()
+            if candidate1 not in known_short_args:
+                out += [candidate1]
+            elif candidate2  not in known_short_args:
+                out += [candidate2]
+            else:
+                # we tried, don't add any short flag
+                pass
+
             assert "_" not in name, "for options, we need dashes, not underscores"
-        return [name]
+
+        return out

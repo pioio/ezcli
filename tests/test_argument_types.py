@@ -140,7 +140,7 @@ def test_keyword_list_with_no_defaults_requires_passing_at_least_one_arg(capsys)
 
     with pytest.raises(SystemExit, match="2"):
         t.dispatch()
-    assert capsys.readouterr().err.endswith("error: the following arguments are required: --paths\n")
+    assert capsys.readouterr().err.endswith("error: the following arguments are required: --paths/-p\n")
 
 
 ##########################################################################################
@@ -322,7 +322,7 @@ def test_bool_flag_with_no_default_is_required(capsys):
     with pytest.raises(SystemExit, match="2"):
         t.dispatch()
 
-    assert_param_required_printed(capsys, "--force/--no-force")
+    assert_param_required_printed(capsys, "--force/--no-force/-f")
 
 
 def test_bool_flag_works():
