@@ -1,5 +1,6 @@
 import argparse
 import inspect
+from json import load
 import logging
 import os
 import sys
@@ -8,6 +9,7 @@ from typing import Any, Iterable
 
 import taskcli
 import taskcli.core
+from .include import load_tasks_from_module_to_runtime
 from taskcli.task import UserError
 
 from . import configuration, envvars, examples, taskfiledev, utils
@@ -20,7 +22,7 @@ from .task import Task
 from .taskcli import TaskCLI
 from .taskrendersettings import TaskRenderSettings
 from .types import AnyFunction
-from .utils import param_to_cli_option
+from .utils import param_to_cli_option, print_warning
 
 """"
 TODO:
@@ -45,11 +47,20 @@ def _extract_extra_args(argv: list[str], task_cli: TaskCLI) -> list[str]:
         task_cli.extra_args_list = argv[first_double_hyphen + 1 :]
         return argv[:first_double_hyphen]
 
+from .types import Module
 
-def dispatch(argv: list[str] | None = None, tasks_found: bool = True, sysexit_on_user_error: bool = True) -> Any:
+def dispatch(argv: list[str] | None = None, *, module:Module|None=None, tasks_found: bool = True, sysexit_on_user_error: bool = True) -> Any:
     """Dispatch the command line arguments to the correct function."""
     # Initial parser, only used to find the tasks file
     log.debug("Dispatching with argv=%s", argv)
+
+    if module is None:
+        module = utils.get_callers_module()
+
+    load_tasks_from_module_to_runtime(module)
+
+
+
     try:
         return _dispatch_unsafe(argv, tasks_found)
     except UserError as e:
@@ -170,7 +181,7 @@ def _dispatch_unsafe(argv: list[str] | None = None, tasks_found: bool = True) ->
 
             # Not found, search aliases
             for task in tasks:
-                if argconfig.task in task.aliases:
+                if argconfig.task in task.get_namespaced_aliases():
                     return _dispatch(task)
 
             # not found, search group name without a suffix
@@ -253,6 +264,12 @@ def _add_initial_tasks_to_parser(parser: argparse.ArgumentParser) -> None:
 
 def build_parser(tasks: list[Task]) -> argparse.ArgumentParser:
     """Build the parser."""
+
+    log.debug("build_parser(): called for following tasks:")
+    for task in tasks:
+        log.debug("  %s", task.get_full_task_name())
+
+
     root_parser = argparse.ArgumentParser()
 
     _add_initial_tasks_to_parser(root_parser)
@@ -278,7 +295,22 @@ def build_parser(tasks: list[Task]) -> argparse.ArgumentParser:
         all_names_of_task = task.get_all_task_names()
 
         for name in all_names_of_task:
-            subparser = subparsers.add_parser(name)
+            log.debug(f"build_parser(): Adding parser for {name}")  # noqa: T201
+            try:
+                subparser = subparsers.add_parser(name)
+            except argparse.ArgumentError as e:
+                reasons = ""
+                if "conflicting subparser" in str(e):
+                    reasons = " (conflicting subparser - try to rename the task, change its aliases, or include it under a different namespace)"
+
+                task_name = task.get_full_task_name()
+                import_location=""
+                if task._included_from:
+                    import_location = f"Included from: {task._included_from.__file__}"
+
+                utils.print_error(f"Failed to add command '{name}' (task: {task_name}). {reasons} {import_location}")
+                sys.exit(1)
+                continue
             subparser.set_defaults(task=name)
             added_subparsers += [name]
 

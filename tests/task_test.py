@@ -18,7 +18,7 @@ def test_copy():
     task1 = tools.include_tasks()[0]
 
     assert task1.group == group
-    task2 = task1.copy(group=group)
+    task2 = task1.copy(group=group, included_from=None)
 
     assert task2.group == group
     assert task1 != task2

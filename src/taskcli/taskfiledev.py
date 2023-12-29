@@ -8,6 +8,7 @@ from re import sub
 
 import taskcli
 from taskcli import task
+from .types import Module
 
 from . import envvars, parser, utils
 
@@ -32,7 +33,7 @@ def should_include_taskfile_dev(argv: list[str]) -> bool:
     return INCLUDE_TASKFILE_YAML and not disabled_via_cli
 
 
-def include_tasks(path: str = ".") -> bool:
+def include_tasks( to_module:Module,path: str = ".") -> bool:
     """Include tasks from a Taskfile.dev file. Returns True if tasks were included, False otherwise."""
     assert envvars.TASKCLI_GOTASK_TASK_BINARY_FILEPATH.value
 
@@ -58,7 +59,12 @@ def include_tasks(path: str = ".") -> bool:
                 msg = f"Error running '{' '.join(cmd)}':\n{lines}'"
                 raise TaskfileDevError(msg) from e
             output_str = output.stdout.decode("utf-8")
-            return _include_tasks_json(json_string=output_str, cmd=" ".join(cmd))
+            tasks_were_created =  _include_tasks_json(json_string=output_str, cmd=" ".join(cmd))
+            this_module = sys.modules[__name__]
+
+            skip_include_info=True # to not mark them as included
+            taskcli.include(this_module, to_module=to_module, skip_include_info=skip_include_info)
+            return tasks_were_created
     except TaskfileDevError as e:
         to_disable = _to_disable_string()
         msg = f"Warning: failed to include {go_task_project_name} tasks: " + str(e) + ". "
@@ -124,8 +130,9 @@ def _include_tasks_json(cmd: str, json_string: str, dir: str = ".") -> bool:
         log.debug(f"Included task: {prefix + name}")
         tasks_were_included = True
 
-    this_module = sys.modules[__name__]
-    taskcli.include(this_module)
+    #this_module = sys.modules[__name__]
+
+    #taskcli.include(this_module)
     return tasks_were_included
 
 

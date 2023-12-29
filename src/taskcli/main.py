@@ -45,7 +45,9 @@ def main() -> None:  # noqa: C901
 
             log.debug(f"Including tasks from {filename}")
             start_include = time.time()
-            taskcli.include(sometasks)
+
+            # This includes the tasks from 'sometasks' into THIS module (main)
+            taskcli.include(sometasks, skip_include_info=True)
             include_took = time.time() - start_include
             tasks_found = True
 
@@ -54,10 +56,11 @@ def main() -> None:  # noqa: C901
     # might impact the output of get_argv()   (the default argument)
     argv = get_argv()
 
+    this_module = sys.modules[__name__]
     taskfile_took = INVALID_TIME
     if taskfiledev.should_include_taskfile_dev(argv=argv):
         start_taskfile = time.time()
-        tasks_were_included = taskfiledev.include_tasks()
+        tasks_were_included = taskfiledev.include_tasks(to_module=this_module)
         if tasks_were_included:
             tasks_found = True
         taskfile_took = time.time() - start_taskfile

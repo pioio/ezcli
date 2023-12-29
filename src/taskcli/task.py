@@ -1,4 +1,6 @@
+from ast import Mod
 import functools
+from hmac import new
 import inspect
 import os
 import sys
@@ -12,7 +14,7 @@ from .configuration import config
 from .group import DEFAULT_GROUP, Group
 from .parameter import Parameter
 from .tags import TAG_IMPORTANT
-from .types import Any, AnyFunction
+from .types import Any, AnyFunction, Module
 
 
 class UserError(Exception):
@@ -86,7 +88,7 @@ def task(
             return _get_wrapper(func, *args, **kwargs)
 
         return decorator
-
+from .constants import NAMESPACE_SEPARATOR
 
 class Task:
     """Represents a single task. Gets created via the `@task` decorator.
@@ -112,6 +114,7 @@ class Task:
         is_go_task: bool = False,
         # ------------ don't include those in 'def task'
         code_location: TaskCodeLocation | None = None,
+        included_from:Module|None = None,
     ):
         """Create a new Task.
 
@@ -122,6 +125,7 @@ class Task:
         self._name = name  # entirely optional
         self._desc = desc  # entirely optional
         self.func = func
+        self.namespaces:list[str] = []
         self._extra_summary: list[str] = []
         if isinstance(aliases, str):
             aliases = [aliases]
@@ -151,9 +155,12 @@ class Task:
         if self not in self.group.tasks:
             self.group.tasks.append(self)
 
-        self.code_location = code_location or TaskCodeLocation(file="<unknown>", line=0)
+        dummy = TaskCodeLocation(file="unknown", line=1)
+        self.code_location = code_location or  dummy
+
 
         self.soft_validate_task()
+        self._included_from:Module | None = included_from
 
     def is_valid(self) -> bool:
         """Return True if the task is valid."""
@@ -195,17 +202,47 @@ class Task:
         return self.get_full_task_name()
 
     def get_full_task_name(self) -> str:
-        """Return the full name of the task, including the group."""
+        """Return the full name of the task."""
         if self._name:
             return self._name
         out = self.func.__name__.replace("_", "-")
         out.lstrip("-")  # for _private functions
 
+        if self.namespaces:
+            out = NAMESPACE_SEPARATOR.join(self.namespaces) + NAMESPACE_SEPARATOR + out
+
+        if self.group.namespace:
+            out = self.group.namespace + NAMESPACE_SEPARATOR + out
+
         return out
+
+    def add_namespace(self, namespace:str, alias_namespace:str="") -> None:
+        """Add a namespace to the task."""
+        if not alias_namespace:
+            alias_namespace = namespace
+        self.namespaces = [namespace, *self.namespaces]
+
+        new_aliases = []
+        for alias in self.aliases:
+            new_aliases.append(alias_namespace + alias)
+        self.aliases = new_aliases
 
     def get_all_task_names(self) -> list[str]:
         """Return all names of the task, including aliases."""
-        return [self.get_full_task_name(), *self.aliases]
+
+        out = [self.get_full_task_name()]
+        out += self.get_namespaced_aliases()
+        return out
+
+    def get_namespaced_aliases(self) -> list[str]:
+        out = []
+        for alias in self.aliases:
+            if self.group.alias_namespace:
+                ns_alias = self.group.alias_namespace + alias
+            else:
+                ns_alias = alias
+            out += [ns_alias]
+        return out
 
     def get_summary_line(self) -> str:
         """Return the first line of docstring, or empty string if no docstring."""
@@ -295,11 +332,12 @@ class Task:
             res = dispatch([name], sysexit_on_user_error=sysexit_on_user_error)
         return res
 
-    def copy(self, group: Group) -> "Task":
+    def copy(self, group: Group, included_from:Module|None) -> "Task":
         """Return a copy of the task."""
         new_task = Task(
             func=self.func,
             group=group,
+            included_from=included_from,
         )
         for prop in self.__dict__:
             # TODO explicit copy of some objects, code_location
@@ -307,12 +345,14 @@ class Task:
                 "func",  # passed to constructor
                 "params",
                 "group",  # created from func in constructor  # passed to constructor
+                "_included_from", # passed to constructor
             ]
             if prop in props_to_skip:
                 continue
-
             # For everything else shallow copy should be good enough here
             setattr(new_task, prop, getattr(self, prop))
+
+
         return new_task
 
     def __repr__(self) -> str:
@@ -393,11 +433,11 @@ def _get_wrapper(  # noqa: C901
 
     module_which_defines_task.decorated_functions.append(task)
 
-    if module_which_defines_task_name == "__main__":
-        # Auto-include to the runtime if the module defining the tasks is the one we started (./tasks.py)
-        # everything else needs to be explicitly included
-        runtime = taskcli.core.get_runtime()
-        runtime.tasks.append(task)
+    # if module_which_defines_task_name == "__main__":
+    #     # Auto-include to the runtime if the module defining the tasks is the one we started (./tasks.py)
+    #     # everything else needs to be explicitly included
+    #     runtime = taskcli.core.get_runtime()
+    #     runtime.tasks.append(task)
 
     return wrapper_for_changing_directory
 

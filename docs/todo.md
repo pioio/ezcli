@@ -16,12 +16,23 @@ Required TODO:
 - [x] add unit testing example
 - [x] per-group setting to sort hidden last
 - [x] custom_name/desc to name/desc
+- [] namespace
+    - have group.namespace
+    - hacve include.namespace
+    - make sure both combine (group.namespace + task.namespace + task.name
+    - TODO: XXX in include.py
+    - test that namespaces stack when including
+- What about including task which has aliaseS? Prefix aliases!
+- tt.get_task("docs.generate-all-docs").aliases =
+
+- [ ] mark included task with^
+- [ ] includes from taskfile files AGAIN not showing up
 - [ ] Including
   - [ ] rename decorated_functions to _taskcli_tasks
-  - [ ] make include include into the module from which it was called, not to the runtime
-  - [ ] make dispatch run on a module, and include all tasks from it
-  - [ ] this way "get_tasks" will return all included tasks
-    - [ ] mark Tasks with _was_included
+  - [x] make include include into the module from which it was called, not to the runtime
+  - [x] make dispatch run on a module, and include all tasks from it
+  - [x] this way "get_tasks" will return all included tasks
+    - [x] mark Tasks with _was_included
 - [ ] task init is broken
 - [ ] better unit test that changing dir via function call works
 - [ ] optional flags are not gray (disk usage example)

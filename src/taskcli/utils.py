@@ -71,7 +71,12 @@ def param_to_cli_option(arg: str) -> str:
 if typing.TYPE_CHECKING:
     from .task import Task
 
-def get_current_module(offset) -> Module:
+def get_callers_module() -> Module:
+    """Return the module of the function calling this function."""
+    offset = 3
+    return get_module(offset=offset)
+
+def get_module(offset) -> Module:
     """Return the module of the caller.
 
     Args:
@@ -99,13 +104,9 @@ def get_imported_tasks() -> list["Task"]:
     """Returns the list of tasks imported from other modules."""
     raise NotImplementedError("TODO: implement this")
 
-def get_all_tasks() -> list["Task"]:
-    """Return the list of all tasks imported into the runtime."""
-    from .core import get_runtime
-    return get_runtime().tasks
 
-def get_tasks(module:Module|None=None) -> list["Task"]:
-    """Return the list of all tasks defined in the specified module. Can be used to customize many tasks at ones.
+def get_tasks(module:Module|None=None, also_included=True) -> list["Task"]:
+    """Return the list of all tasks defined in the specified module. Including any included tasks.
 
     If no module is specified, the module of the caller is used.
 
@@ -114,7 +115,6 @@ def get_tasks(module:Module|None=None) -> list["Task"]:
     In practice inless you explicitlu specify a module, this function must only be called
     from the ./tasks.py file defining the tasks.
 
-    TODO: consider allowing it to return included tasks as well.
 
     Example:
         ```
@@ -122,18 +122,28 @@ def get_tasks(module:Module|None=None) -> list["Task"]:
         def deploy_to_prod()
             pass
 
+        tt.include(somemodule.somefunction)
+
         tasks:list[Task] = tt.get_tasks()
+        assert len(tasks) == 2
         for t in tasks:
             if "prod" in t.name:
                 t.important = True
         ```
     """
     if module is None:
-        module = get_current_module(offset=2)
+        module = get_module(offset=2)
 
     module_path = module.__file__
     if hasattr(module, "decorated_functions") and len(module.decorated_functions):
-        return module.decorated_functions
+        out = []
+        for task in module.decorated_functions:
+            if task._included_from and not also_included:
+                # skipping included tasks
+                continue
+            out.append(task)
+
+        return out
     else:
         print_error(f"get_tasks(): No tasks found in the current module ({module_path}). "
                     "Make sure to use the @task decorator first.")

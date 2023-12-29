@@ -18,6 +18,8 @@ class Group:
         hidden: bool = False,
         sort_hidden_last: bool = True,
         sort_important_first: bool = True,
+        namespace: str = "",
+        alias_namespace: str = "",
     ):
         """Create a new group of tasks.
 
@@ -27,11 +29,16 @@ class Group:
             hidden: If true, the group is hidden by default
             sort_hidden_last: If true, hidden tasks are sorted last (after all other tasks)
             sort_important_first: If true, important tasks are sorted as first (before all other tasks)
+            namespace: namespaces prepended to all tasks added to this group
+            alias_namespace: namespace prepended to all aliases of tasks added to this group
         """
         self.name = name
         self.desc = desc
         self.hidden = hidden
         self.tasks: list["Task"] = []
+
+        self.namespace: str = namespace
+        self.alias_namespace: str = alias_namespace
 
         self.sort_important_first = sort_important_first
         self.sort_hidden_last = sort_hidden_last

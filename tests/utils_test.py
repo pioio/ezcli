@@ -36,16 +36,31 @@ def test_get_tasks_with_current_module(capsys):
     assert tasks[0].name == "foobar"
 
 
-###
-
-def test_get_all_tasks(capsys):
-    assert len(utils.get_all_tasks()) == 0
+def test_get_tasks_includes_included_tasks():
+    from .tools import dummy_task_from_tools
+    import taskcli
 
     @task
-    def foobar():
+    def dummy_task_from_here():
         pass
 
-    assert len(utils.get_all_tasks()) == 0
-    tasks = tools.include_tasks()
+    taskcli.include(dummy_task_from_tools)
 
-    assert utils.get_all_tasks() == tasks
+    tasks = utils.get_tasks(also_included=True)
+    assert len(tasks) == 2
+    assert tasks[0].name == "dummy-task-from-here"
+    assert tasks[1].name == "dummy-task-from-tools"
+
+
+    tasks = utils.get_tasks(also_included=False)
+    assert len(tasks) == 1
+    assert tasks[0].name == "dummy-task-from-here"
+
+
+
+###
+def test_get_callers_module():
+    def foo():
+        return utils.get_callers_module()
+
+    assert foo.__module__ == __name__

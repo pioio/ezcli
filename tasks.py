@@ -4,6 +4,7 @@
 
 import testing
 from taskcli import run, task, tt
+from docsgenerator import tasks as docgentasks
 
 important = tt.Group("Important", desc="Development tasks")
 
@@ -132,6 +133,9 @@ with tt.Group("lint", desc="Code cleanup tasks") as x:
 def rufftwice():
     ruff()
     ruff()
+
+with tt.Group("included tasks", namespace="included", alias_namespace="i"):
+    tt.include(docgentasks, namespace="docs", alias_namespace="d")
 
 
 @task

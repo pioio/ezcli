@@ -17,6 +17,7 @@ class TaskRenderSettings:
     show_hidden_groups = False
     show_hidden_tasks = False
     show_ready_info = False
+    show_include_info = False
     tags: list[str] = dataclasses.field(default_factory=list)
     search: str = ""
     verbose: int = 0
@@ -52,6 +53,8 @@ def new_settings(config: TaskCLIConfig) -> TaskRenderSettings:
     s.tags = config.tags
 
     s.search = config.search
+
+    s.show_include_info = verbose >= 3 or config.list_all or config.list >= 3
 
     # Always show hidden tasks and groups when filtering by tags or searching.
     if config.tags or config.search:

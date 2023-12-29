@@ -102,6 +102,7 @@ def list_tasks(tasks: list[Task], settings: TaskRenderSettings | None = None) ->
 
     settings = settings or TaskRenderSettings()
 
+
     filter_result = filter_before_listing(tasks=tasks, settings=settings)
     filtered_tasks = filter_result.tasks
     if not filtered_tasks:
@@ -199,8 +200,16 @@ def smart_task_lines(task: Task, settings: TaskRenderSettings) -> list[str]:  # 
     lines: list[str] = []
 
     param_line_prefix = "  "
-    name = task.name
+    name = task.get_full_task_name()
     name = format_colors(task.name_format, name=name)
+
+    included_from_line = []
+    include_color = configuration.colors.blue
+    if task._included_from:
+        name += f"{include_color} ^{configuration.colors.end}"
+        if settings.show_include_info:
+            included_from_line += [param_line_prefix + f"{include_color}Included from:{configuration.colors.end} {task._included_from.__file__}"]
+
 
 
     not_ready_lines = []
@@ -218,7 +227,7 @@ def smart_task_lines(task: Task, settings: TaskRenderSettings) -> list[str]:  # 
             ]
 
 
-    aliases = ",".join(task.aliases)
+    aliases = ",".join(task.get_namespaced_aliases())
     aliases_color = configuration.colors.pink
     clear = configuration.colors.end
     if aliases:
@@ -303,6 +312,7 @@ def smart_task_lines(task: Task, settings: TaskRenderSettings) -> list[str]:  # 
             lines.append(param_line_prefix + one_line_params)
 
     lines += not_ready_lines
+    lines += included_from_line
     return lines
 
 

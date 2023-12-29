@@ -72,7 +72,9 @@ def include_tasks(module: Module | None = None) -> list[Task]:
         print(module_from_which_this_function_was_called.__name__)
         raise Exception(msg)
 
-    taskcli.include(module_from_which_this_function_was_called)
+    from taskcli.include import load_tasks_from_module_to_runtime
+    assert module_from_which_this_function_was_called is not None
+    load_tasks_from_module_to_runtime(module_from_which_this_function_was_called)
     return taskcli.core.get_runtime().tasks
 
 
@@ -135,3 +137,9 @@ def run_tasks(cmd: str) -> tuple[str, str]:
     )
     stdout, stderr = process.communicate()
     return stdout.decode(), stderr.decode()
+
+
+@task
+def dummy_task_from_tools() -> None:
+    """Dummy task, used for testing"""
+    print("Hello from inside taskcli")

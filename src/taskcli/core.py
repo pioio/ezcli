@@ -38,13 +38,23 @@ def get_parsed_args() -> argparse.Namespace:
         raise RuntimeError(msg)
     return task_cli.parsed_args
 
+from . import utils
+def include(object: Module | AnyFunction,
+            to_module:Module|None=None,
+            namespace:str="",
+            alias_namespace:str="",
+            **kwargs: Any) -> None:
+    """Include tasks from the specified object into the module which calling this function.
 
-def include(object: Module | AnyFunction, **kwargs: Any) -> None:
-    """Include tasks from the specified object."""
+    This function is meant to be called directly from a ./tasks.py file.
+    """
+    if to_module is None:
+        to_module = utils.get_callers_module()
+
     if isinstance(object, Module):
-        include_module(object, **kwargs)
+        include_module(object, to_module=to_module, namespace=namespace, alias_namespace=alias_namespace, **kwargs)
     elif inspect.isfunction(object):
-        include_function(object, **kwargs)
+        include_function(object, to_module=to_module, namespace=namespace, alias_namespace=alias_namespace, **kwargs)
 
 
 def get_runtime() -> "TaskCLI":
