@@ -9,6 +9,8 @@ Required TODO:
 - [x] param.type.is_bool
 - [x] add unit tests with "-" task names
 - [x] improve listing tabs in group,  name[group] is clumsy
+- [ ] auto-adding short-flags for params. Show them in -L
+- [ ] optional flags are not gray (disk usage example)
 - [ ] unit test hide-not-read
 - [ ] searching by tag should show hidden tasks, samel ike showing a group
 - [ ] num hidden tasks in each group

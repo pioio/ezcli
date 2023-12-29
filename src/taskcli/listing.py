@@ -135,7 +135,6 @@ def list_tasks(tasks: list[Task], settings: TaskRenderSettings | None = None) ->
         lines[0] = lines[0][1:]
 
 
-
     num_hidden_groups = len(filter_result.hidden_groups)
     num_hidden_tasks = filter_result.num_total_hidden_in_hidden_groups
     final_line = []
