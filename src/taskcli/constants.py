@@ -11,3 +11,4 @@ strings in unit tests, consider putting them here.
 
 ARG_SHOW_HIDDEN_SHORT = "-H"
 HELP_TEXT_USE_H_TO_SHOW_HIDDEN = f"use {ARG_SHOW_HIDDEN_SHORT} to show (or run 'tt')"
+TT_COMMAND_NAME = "tt"

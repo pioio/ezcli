@@ -116,8 +116,6 @@ class TaskCLIConfig:
         )
 
         default_show_hidden = False
-        if utils.get_basename() == "tt":
-            default_show_hidden = True
 
         self.field_show_hidden: ConfigField = ConfigField(
             default_show_hidden, "show_hidden", constants.ARG_SHOW_HIDDEN_SHORT, help="Show all tasks and groups, even the hidden ones."
@@ -202,6 +200,9 @@ class TaskCLIConfig:
             help=("Listing tasks shows all possible infomation. Extremely very verbose output."),
         )
         self.list_all: bool = self._add_bool(self.field_list_all)
+
+        self.default_options: list[str] = []
+        self.default_options_tt:list[str] = []
 
     def _store_name(self, name: str) -> None:
         """To prevent adding the same name twice."""
@@ -415,7 +416,6 @@ class TaskCLIConfig:
         """Read the parsed arguments."""
         for f in self._read_from_env:
             f(self)
-
 
 
 runtime_config = TaskCLIConfig()  # modified with CLI arguments

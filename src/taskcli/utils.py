@@ -93,6 +93,12 @@ def get_basename() -> str:
     """Return the name of the taskcli executable."""
     return os.path.basename(sys.argv[0])
 
+from . import constants
+
+def is_basename_tt() -> bool:
+    """Return the name of the taskcli executable."""
+    return get_basename() == constants.TT_COMMAND_NAME
+
 
 def get_root_module() -> str:
     """Return the name of the module of the runtime."""

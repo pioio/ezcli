@@ -48,8 +48,13 @@ def main() -> None:  # noqa: C901
             include_took = time.time() - start_include
             tasks_found = True
 
+    # This part be right after importing the default ./task.p and before anything else
+    # this way we allow ./tasks.py to change the default config, which in turn
+    # might impact the output of get_argv()   (the default argument)
+    argv = get_argv()
+
     taskfile_took = INVALID_TIME
-    if taskfiledev.should_include_taskfile_dev():
+    if taskfiledev.should_include_taskfile_dev(argv=argv):
         start_taskfile = time.time()
         tasks_were_included = taskfiledev.include_tasks()
         if tasks_were_included:
@@ -59,7 +64,7 @@ def main() -> None:  # noqa: C901
     dispatch_took = INVALID_TIME
     try:
         start_dispatch = time.time()
-        taskcli.dispatch(tasks_found=tasks_found)
+        taskcli.dispatch(argv=argv, tasks_found=tasks_found)
         dispatch_took = time.time() - start_dispatch
     finally:
         if envvars.TASKCLI_ADV_PRINT_RUNTIME.is_true():
@@ -79,3 +84,19 @@ def main() -> None:  # noqa: C901
                     f"  Taskfile: {taskfile_took:.3f}s (time to run the 'task' binary, "
                     f"{envvars.TASKCLI_GOTASK_TASK_BINARY_FILEPATH})"
                 )
+
+def get_argv() -> list[str]:
+    """Return the command line arguments. Prefixed with default options if needed.
+
+    Different set of default options for 't|taskcli' and 'tt' commands
+    """
+    from taskcli import tt
+    if utils.is_basename_tt():
+        argv = ["--show-hidden"] + tt.config.default_options_tt + sys.argv[1:]
+        if tt.config.default_options_tt:
+            log.debug(f"Using custom default options (tt): {tt.config.default_options_tt}")
+    else:
+        argv = tt.config.default_options + sys.argv[1:]
+        if tt.config.default_options:
+            log.debug(f"Using custom default options: {tt.config.default_options}")
+    return argv

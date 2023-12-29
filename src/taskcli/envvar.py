@@ -14,7 +14,7 @@ class EnvVar:
 
     def log_debug(self) -> None:
         """Log the name=value of this environment variable."""
-        log.debug(self.pretty)
+        log.debug(self.pretty())
 
     def pretty(self) -> str:
         """Return a pretty string representation of this environment variable."""

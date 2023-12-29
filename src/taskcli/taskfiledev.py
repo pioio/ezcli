@@ -16,7 +16,7 @@ log = logging.getLogger(__name__)
 go_task_project_name = "Taskfile.dev"
 
 
-def should_include_taskfile_dev() -> bool:
+def should_include_taskfile_dev(argv:list[str]) -> bool:
     """Check if env vars are set to look for a Taskfile.dev file."""
     INCLUDE_TASKFILE_YAML: bool = bool(
         envvars.TASKCLI_GOTASK_TASK_BINARY_FILEPATH.value and envvars.TASKCLI_GOTASK_TASKFILE_FILENAMES.value
@@ -27,7 +27,7 @@ def should_include_taskfile_dev() -> bool:
 
     from taskcli import tt
 
-    disabled_via_cli: bool = tt.config.field_no_go_task.cli_arg_flag in sys.argv
+    disabled_via_cli: bool = tt.config.field_no_go_task.cli_arg_flag in argv
 
     return INCLUDE_TASKFILE_YAML and not disabled_via_cli
 

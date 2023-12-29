@@ -49,6 +49,7 @@ def _extract_extra_args(argv: list[str], task_cli: TaskCLI) -> list[str]:
 def dispatch(argv: list[str] | None = None, tasks_found: bool = True, sysexit_on_user_error: bool = True) -> Any:
     """Dispatch the command line arguments to the correct function."""
     # Initial parser, only used to find the tasks file
+    log.debug("Dispatching with argv=%s", argv)
     try:
         return _dispatch_unsafe(argv, tasks_found)
     except UserError as e:
@@ -80,7 +81,9 @@ def _dispatch_unsafe(argv: list[str] | None = None, tasks_found: bool = True) ->
     config.read_from_env()
 
     config.configure_parser(parser)
+    log.debug(f"Parsing arguments: {argv}")
     argconfig = parser.parse_args(argv)
+
     config.read_parsed_arguments(argconfig)
 
     taskcli.core.get_runtime().parsed_args = argconfig
@@ -100,7 +103,7 @@ def _dispatch_unsafe(argv: list[str] | None = None, tasks_found: bool = True) ->
     # >      sys.exit(0)
 
     if not tasks_found:
-        print_task_not_found_error()
+        print_task_not_found_error(argv)
         sys.exit(1)
 
     import taskcli.taskrendersettings as rendersettings
@@ -185,7 +188,7 @@ def _dispatch_unsafe(argv: list[str] | None = None, tasks_found: bool = True) ->
     return None
 
 
-def print_task_not_found_error() -> None:
+def print_task_not_found_error(argv:list[str]) -> None:
     """Print the error message when no tasks are found."""
     # TODO, check upper dirs
     print(  # noqa: T201
@@ -197,7 +200,7 @@ def print_task_not_found_error() -> None:
     )
     local_taskfile = taskfiledev.has_taskfile_dev()
 
-    if taskfiledev.has_taskfile_dev() and not taskfiledev.should_include_taskfile_dev():
+    if taskfiledev.has_taskfile_dev() and not taskfiledev.should_include_taskfile_dev(argv):
         print(  # noqa: T201
             f"taskcli: Note: found a {local_taskfile} file. "
             "See the docs on how to include and list its tasks automatically."

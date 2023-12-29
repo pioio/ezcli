@@ -7,6 +7,8 @@ from taskcli import run, task, tt
 
 important = tt.Group("Important", desc="Development tasks")
 
+tt.config.default_options = ["--no-go-task"]
+tt.config.default_options_tt = ["--show-ready-info"]
 
 with tt.Group("dev", desc="Development tasks"):
 
