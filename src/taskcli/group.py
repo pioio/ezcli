@@ -12,10 +12,19 @@ class Group:
     """A group of tasks."""
 
     def __init__(self, name: str, desc: str = "", hidden: bool = False):
+        """Create a new group of tasks.
+
+        Args:
+            name: Name of the group
+            desc: Description of the group
+            hidden: If true, the group is hidden by default
+            hidden_tasks_listed_last: If true, hidden tasks are listed last when listing tasks.
+        """
         self.name = name
         self.desc = desc
         self.hidden = hidden
         self.tasks: list["Task"] = []
+
 
         global created
         # TODO: this will fail if moduls define groups of same names

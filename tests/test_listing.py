@@ -70,8 +70,8 @@ def test_alphanumeric_order():
 a-imporant1
 z-imporant2
 a-regular1
-b-hidden1
 c-regular2
+b-hidden1
 d-hidden2"""
     ), "important tasks should be first, the rest should come in alphanumeric order"
 
@@ -103,8 +103,8 @@ def test_list_everything_works(capsys):
     assert (
         stdout
         == """# default
-hidden-task
 not-hidden-task
+hidden-task
 # hidden-group HIDDEN
 task-in-hidden-group
 """

@@ -46,7 +46,10 @@ def format_colors(template: str, **kwargs: Any) -> str:
 
 
 def _sort_tasks(tasks: list[Task], sort: str, sort_important_first: bool) -> list[Task]:
+    """Sort into 3 buckets - important, regular, hidden."""
     presorted = []
+
+    # Pre-sorting determines the order of items within each bucket
     if sort == ORDER_TYPE_ALPHA:
         presorted = sorted(tasks, key=lambda task: task.name)
     else:
@@ -59,8 +62,17 @@ def _sort_tasks(tasks: list[Task], sort: str, sort_important_first: bool) -> lis
         for task in presorted:
             if task.important:
                 tasks.append(task)
+
         for task in presorted:
-            if not task.important:
+            if task in tasks:
+                continue
+            if not task.important and not task.is_hidden():
+                tasks.append(task)
+
+        for task in presorted:
+            if task in tasks:
+                continue
+            if not task.important and task.is_hidden():
                 tasks.append(task)
 
     return tasks
