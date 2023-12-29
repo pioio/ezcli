@@ -136,6 +136,7 @@ def rufftwice():
 
 with tt.Group("included tasks", namespace="included", alias_namespace="i"):
     tt.include(docgentasks, namespace="docs", alias_namespace="d")
+    assert tt.get_task("included.docs.test-documentation")._included_from
 
 
 @task

@@ -77,10 +77,15 @@ def _include_task(task:Task, from_module:Module, to_module:Module, skip_include_
         group = get_current_group()
         copy = task.copy(group=group, included_from=from_module)
         copy.add_namespace_from_group(task.group)
+        copy._included_from = from_module # ensure is set
     else:
         # We're including the root module, preserve the group info, otherwise we would move all tasks to 'default'
         group = task.group
         copy = task.copy(group=group, included_from=None)
+
+        # So that those which were included into the root module continue to be marked as included
+        if task._included_from:
+            copy._included_from = task._included_from
 
     if namespace:
         copy.add_namespace(namespace, alias_namespace=alias_namespace)

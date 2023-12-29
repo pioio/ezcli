@@ -52,6 +52,7 @@ def test_simple_include_with_aliases():
     tasksdict = tt.get_tasks_dict()
     assert "group1.task1" in tasksdict
     group1task1 = tasksdict["group1.task1"]
+    assert group1task1._included_from
     assert "g1t1" in group1task1.aliases, "alias namespace from should have been appended to the task's aliases"
 
     assert "group1.task2" in tasksdict
@@ -285,3 +286,4 @@ def test_include_via_custom_filter():
     assert "foobar2" in tasks  # original one
     assert "ns1.foobar1" in tasks #
     assert "ns1.foobar2" not in tasks # include
+    assert tasks["ns1.foobar1"]._included_from

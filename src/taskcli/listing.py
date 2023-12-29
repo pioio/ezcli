@@ -210,8 +210,6 @@ def smart_task_lines(task: Task, settings: TaskRenderSettings) -> list[str]:  # 
         if settings.show_include_info:
             included_from_line += [param_line_prefix + f"{include_color}Included from:{configuration.colors.end} {task._included_from.__file__}"]
 
-
-
     not_ready_lines = []
     not_ready_text = ""
     # Check if env is ok
