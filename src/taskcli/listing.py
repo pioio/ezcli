@@ -198,16 +198,34 @@ def smart_task_lines(task: Task, settings: TaskRenderSettings) -> list[str]:  # 
     """Render a single task into a list of lines, scale formatting to the amount of content."""
     lines: list[str] = []
 
+    param_line_prefix = "  "
     name = task.name
     name = format_colors(task.name_format, name=name)
+
+
+    not_ready_lines = []
+    not_ready_text = ""
+    # Check if env is ok
+    if not task.is_ready():
+        if not settings.show_ready_info:
+            not_ready_reason = task.get_not_ready_reason_short()
+            not_ready_text = f"{configuration.colors.red}{not_ready_reason}{configuration.colors.end}"
+        else:
+            not_ready_lines = task.get_not_ready_reason_long()
+            not_ready_lines = [
+                f"{param_line_prefix}{configuration.colors.red}{line}{configuration.colors.end}"
+                for line in not_ready_lines
+            ]
+
 
     aliases = ",".join(task.aliases)
     aliases_color = configuration.colors.pink
     clear = configuration.colors.end
     if aliases:
-        name += f" {clear}{aliases_color}{aliases}{clear}"
+        name += f"{clear} {aliases_color}{aliases}{clear}"
+    if not_ready_text:
+        name += f" {not_ready_text}"
 
-    param_line_prefix = "  "
     summary = task.get_summary_line()
 
     if settings.show_tags:
@@ -235,18 +253,7 @@ def smart_task_lines(task: Task, settings: TaskRenderSettings) -> list[str]:  # 
         task, include_optional=settings.show_optional_args, include_defaults=settings.show_default_values
     )
 
-    not_ready_lines = []
-    # Check if env is ok
-    if not task.is_ready():
-        if not settings.show_ready_info:
-            not_ready_reason = task.get_not_ready_reason_short()
-            one_line_params += f" {configuration.colors.red}{not_ready_reason}{configuration.colors.end}"
-        else:
-            not_ready_lines = task.get_not_ready_reason_long()
-            not_ready_lines = [
-                f"{param_line_prefix}{configuration.colors.red}{line}{configuration.colors.end}"
-                for line in not_ready_lines
-            ]
+
 
     # padd the task name to certain minimum width so that
     # any arguments are left-aligned

@@ -35,8 +35,8 @@ with tt.Group("dev", desc="Development tasks"):
         run("nox")
 
     @task(env=["foooo_username", "foooo_password"])
-    def nox_special2(mandatory_arg: str):
-        del mandatory_arg
+    def nox_speciadddl2(arg: str):
+        del arg
         """(test) Run even more special tests using nox."""
         run("nox")
 

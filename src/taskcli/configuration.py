@@ -102,14 +102,16 @@ class Config:
     # Only rows with very long task names will be longer than this.
     # If your task have many manadatory arguments, you may want to increase
     # this to vertically align the summaries of tasks.
-    render_max_left_column_width: int = 30
-
-    # any tasks with more rendered params then this will be split into multiple lines
-    render_max_params_per_line: int = 5
+    render_max_left_column_width: int = 22
 
     # The left column will never be smaller than this, even with short task names
     # Increaase it if you prefer your summaries to be more to the right.
     render_min_left_column_width: int = 22
+
+
+    # any tasks with more rendered params then this will be split into multiple lines
+    render_max_params_per_line: int = 5
+
 
     # The column with the task name will never be shorter than this
     # Increasing this will the start of arg listing to the right.
