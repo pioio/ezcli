@@ -29,3 +29,5 @@ def test_init_new_file():
     print(stdout)
     stdout = clean_stdout(stdout)
     assert "hello-world" in stdout, stdout
+    assert "default" in stdout, stdout
+    assert "mygroup" in stdout, stdout

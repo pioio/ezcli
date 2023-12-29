@@ -1,11 +1,13 @@
 
 - [x] Include from module by filter
-- [ ]
+
 - [ ] mark included task with^
 - [ ] task init is broken
 - [ ] optional flags are not gray (disk usage example)
+- [x] test init.py
 - [ ] unit test hide-not-read
-- [ ] searching by tag should show hidden tasks, samel ike showing a group
+- [ ] unit test: searching by tag should show hidden tasks, samel ike showing a group - unit
+- [ ] unit test- broken get hidden
 - [ ] num hidden tasks in each group
   - [ ] filter out hidden before filterting by tags
 
