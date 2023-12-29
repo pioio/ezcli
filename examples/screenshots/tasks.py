@@ -4,17 +4,30 @@ import requests
 
 
 with tt.Group("Weather"):
-    @task(aliases="w")
-    def weather():
+    @task(aliases="here")
+    def weather_here():
         """auto-determine the current city, and check weather there."""
-        city = requests.get("https://ipinfo.io").json()
-        city = city["city"]
+        city = requests.get("https://ipinfo.io").json()["city"]
         weather_in(city) # call the other task
 
     @task
     def weather_in(city):
-        """Curl wttr.in to check the weather in the given city."""
+        """Curl wttr.in to check the weather in the given city. Mandatory argument."""
         run(f"curl wttr.in/{city}")
+
+    for city in ["Boston", "Sydney", "London", "Yokohama"]:
+        @task(hidden=True, custom_name=f"weather-{city.lower()}", custom_desc=f"Check weather in {city}.")
+        def weather_in_a_city(city=city): # we need the arg to bind the loop variable
+            weather_in(city)
+
+    @task(aliases="w")
+    def weather(cities:list[str]=[]):
+        """Check weather here (no arg), or specify seceral Cities."""
+        if cities:
+            for city in cities:
+                weather_in(city)
+        else:
+            weather_here()
 
 @task(aliases="du")
 def display_disk_usage(host:str="localhost", *, remote_user:str="root"):
