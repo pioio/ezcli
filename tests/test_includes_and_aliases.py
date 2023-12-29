@@ -10,7 +10,7 @@ def test_include_module_via_groups_with_aliases():
 
     tasks = tt.get_tasks()
 
-    full_names = [t.get_full_task_name() for t in tasks]
+    full_names = [t._get_full_task_name() for t in tasks]
 
     assert "nsA.taska" in full_names, f"Full names: {full_names}"
 
@@ -26,7 +26,7 @@ def test_include_module_via_groups_with_aliases_and_import_namespaces():
 
     tasks = tt.get_tasks()
 
-    full_names = [t.get_full_task_name() for t in tasks]
+    full_names = [t._get_full_task_name() for t in tasks]
 
     assert "group_nsA.taska" in full_names, f"Full names: {full_names}"
     assert "group_nsA.include_nsA.taskb1" in full_names, f"Full names: {full_names}"
@@ -58,9 +58,9 @@ def test_simple_include_with_aliases():
 
     # Test that applying namespace grom group works fine
     sometask_ = tasksdict["sometask"]
-    assert sometask_.get_full_task_name() == "sometask"
+    assert sometask_._get_full_task_name() == "sometask"
     sometask_.add_namespace_from_group(group1)
-    assert sometask_.get_full_task_name() == "group1.sometask"
+    assert sometask_._get_full_task_name() == "group1.sometask"
 
 
 def test_simple_include_with_aliases_from_a_group():

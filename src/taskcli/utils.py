@@ -109,7 +109,7 @@ def get_imported_tasks() -> list["Task"]:
 def get_task(name:str) -> "Task":
     module = get_callers_module()
     tasks = get_tasks(module=module)
-    d = {t.get_full_task_name(): t for t in tasks}
+    d = {t._get_full_task_name(): t for t in tasks}
     from .task import UserError
     if name not in d:
         raise UserError(f"get_task(): Task '{name}' not found in module {module.__file__}")
@@ -120,7 +120,7 @@ def get_task(name:str) -> "Task":
 def get_tasks_dict() -> dict[str,"Task"]:
     module = get_callers_module()
     tasks = get_tasks(module=module)
-    return {t.get_full_task_name(): t for t in tasks}
+    return {t._get_full_task_name(): t for t in tasks}
 
 def get_tasks(module:Module|None=None, also_included=True) -> list["Task"]:
     """Return the list of all tasks defined in the specified module. Including any included tasks.

@@ -92,8 +92,6 @@ from .constants import NAMESPACE_SEPARATOR
 
 class Task:
     """Represents a single task. Gets created via the `@task` decorator.
-
-
     """
 
     def __init__(
@@ -199,15 +197,23 @@ class Task:
     @property
     def name(self) -> str:
         """Return the name of the task."""
-        return self.get_full_task_name()
+        return self._get_full_task_name()
 
-    def get_full_task_name(self) -> str:
-        """Return the full name of the task, including any namespace of the group the task is in right now."""
+    def get_base_name(self) -> str:
+        """Return the base name of the task, sans namespaces.
+
+        In most cases, you want to use 'task.name' instead of this function.
+        """
         if self._name:
             out = self._name
         else:
             out = self.func.__name__.replace("_", "-")
         out.lstrip("-")  # for _private functions
+        return out
+
+    def _get_full_task_name(self) -> str:
+        """Return the full name of the task, including any namespace of the group the task is in right now."""
+        out = self.get_base_name()
 
         if self.namespaces:
             out = NAMESPACE_SEPARATOR.join(self.namespaces) + NAMESPACE_SEPARATOR + out
@@ -240,7 +246,7 @@ class Task:
     def get_all_task_names(self) -> list[str]:
         """Return all names of the task, including aliases."""
 
-        out = [self.get_full_task_name()]
+        out = [self._get_full_task_name()]
         out += self.get_namespaced_aliases()
         return out
 
@@ -330,7 +336,7 @@ class Task:
 
     def dispatch(self, args: list[str] | str | None = None, sysexit_on_user_error: bool = True) -> Any:
         """Dispatch the task. A helper for unit tests."""
-        name = self.get_full_task_name()
+        name = self._get_full_task_name()
         from .parser import dispatch
 
         if isinstance(args, str):

@@ -93,7 +93,7 @@ def test_group_namespace_with_alias_names():
     # same behavior when copying
     task_no_group = tt.get_tasks_dict()["tasknogroup"]
     task_no_group.add_namespace_from_group(group)
-    assert task_no_group.get_full_task_name() == "bar.tasknogroup"
+    assert task_no_group._get_full_task_name() == "bar.tasknogroup"
     assert task_no_group.get_namespaced_aliases() == ["bt1", "bt2"]
 
 
