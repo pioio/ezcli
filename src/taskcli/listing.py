@@ -222,10 +222,10 @@ def smart_task_lines(task: Task, settings: TaskRenderSettings) -> list[str]:  # 
         max_left = max_left_if_no_summary
 
     format = config.render_task_name
-    if task.important:
-        format = config.render_format_important_tasks
     if task.hidden:
         format = config.render_format_hidden_tasks
+    if task.important:
+        format = config.render_format_important_tasks
     if task.is_go_task:
         format = config.render_format_included_taskfile_dev_task
 
