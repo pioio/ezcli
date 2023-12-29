@@ -164,6 +164,9 @@ class TaskCLIConfig:
         )
         self.show_ready_info: bool = self._add_bool(self.field_show_ready_info)
 
+        self.field_hide_not_ready = ConfigField(False, "hide_not_ready",  help=f"Tasks which are not ready to run (e.g. due to missing env vars) will be automatically marked as hidden.")
+        self.hide_not_ready: bool = self._add_bool(self.field_hide_not_ready)
+
         self.field_print_env = ConfigField(False, "print_env", action="store_true", help="List the supported env vars")
         self.print_env: bool = self._add_bool(self.field_print_env)
 

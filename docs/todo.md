@@ -130,6 +130,12 @@ Features:
   - [ ] auto add tags based on argument nam or task regex, or envvars
   - [ ] decorate tags based on tags
 
+- use field doctstring to fill out the help field in ConfigField, and then run _add_boola utomatically
+    self.field_hide_not_ready = ConfigField(False, "hide_not_ready",  help=f"Tasks which are not ready to run (e.g. due to missing env vars) will be automatically marked as hidden.")
+    self.hide_not_ready: bool = False
+    """Docstring"""
+    ...
+
 # FIXME
 - [ ] Text in help output broken - does include task name. We should modify parser's print-usage to include task name
 

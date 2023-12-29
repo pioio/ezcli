@@ -9,6 +9,7 @@ important = tt.Group("Important", desc="Development tasks")
 
 tt.config.default_options = ["--no-go-task"]
 tt.config.default_options_tt = ["--show-ready-info"]
+tt.config.hide_not_ready = True
 
 with tt.Group("dev", desc="Development tasks"):
 

@@ -122,6 +122,7 @@ class Task:
         self.custom_name = custom_name  # entirely optional
         self.custom_desc = custom_desc  # entirely optional
         self.func = func
+        self._extra_summary:list[str] = []
         self.aliases = aliases or []
         self.tags = tags or []
         self.env = env or []
@@ -129,6 +130,12 @@ class Task:
         self.important = important
         if important and TAG_IMPORTANT and TAG_IMPORTANT not in self.tags:
             self.tags.append(TAG_IMPORTANT)
+
+        from taskcli import tt
+
+        if tt.config.hide_not_ready and not self.is_ready():
+            self.hidden = True
+            self._extra_summary += ["(auto hidden)"]
 
         self.params = [Parameter(param) for param in inspect.signature(func).parameters.values()]
         self.name_format = format
@@ -190,11 +197,16 @@ class Task:
 
     def get_summary_line(self) -> str:
         """Return the first line of docstring, or empty string if no docstring."""
+        extra_summary = " ".join(self._extra_summary)
+        if extra_summary:
+            extra_summary = " " + extra_summary
+
         if self.custom_desc:
-            return self.custom_desc.split("\n")[0]
+            return self.custom_desc.split("\n")[0] + extra_summary
         if self.func.__doc__ is None:
-            return ""
-        return self.func.__doc__.split("\n")[0]
+            return "" + extra_summary
+
+        return self.func.__doc__.split("\n")[0]  + extra_summary
 
     def get_taskfile_dir(self) -> str:
         """Return the directory in which the task was define."""
