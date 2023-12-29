@@ -11,11 +11,18 @@ Required TODO:
 - [x] improve listing tabs in group,  name[group] is clumsy
 - [x] auto-adding short-flags for params. Show them in -L
   - [x] specify custom hosrt flags via args?
-- [ ] spacing between one-line-arg and summary
-- [ ] Ability to loop over all tasks, and modify them
-- [ ] add unit testing example
+- [x] spacing between one-line-arg and summary
+- [x] Ability to loop over all tasks, and modify them
+- [x] add unit testing example
 - [x] per-group setting to sort hidden last
 - [x] custom_name/desc to name/desc
+- [ ] Including
+  - [ ] rename decorated_functions to _taskcli_tasks
+  - [ ] make include include into the module from which it was called, not to the runtime
+  - [ ] make dispatch run on a module, and include all tasks from it
+  - [ ] this way "get_tasks" will return all included tasks
+    - [ ] mark Tasks with _was_included
+- [ ] task init is broken
 - [ ] better unit test that changing dir via function call works
 - [ ] optional flags are not gray (disk usage example)
 - [ ] unit test hide-not-read

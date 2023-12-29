@@ -1,4 +1,17 @@
-"""Exposes all the commonly used functions and classes."""
+"""Exposes all the commonly used functions and classes.
+
+This module is the public API of the library.
+
+Example:
+```
+    from taskcli import task, run, tt
+
+    @task
+    def foobar():
+        run("date")
+```
+
+"""
 
 
 from . import core

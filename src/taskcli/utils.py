@@ -7,6 +7,8 @@ import typing
 
 import taskcli
 
+from .types import Module
+
 from . import configuration, constants
 
 ENDC = configuration.get_end_color()
@@ -69,11 +71,48 @@ def param_to_cli_option(arg: str) -> str:
 if typing.TYPE_CHECKING:
     from .task import Task
 
-def get_tasks() -> list["Task"]:
-    """Return the list of all tasks defined in the current module. Can be used to customize many tasks at ones.
+def get_current_module(offset) -> Module:
+    """Return the module of the caller.
 
-    This function should be called after all tasks are defined.
-    It must only be called from the ./tasks.py file defining the tasks.
+    Args:
+        offset (int): 0 for the current module (invalid), 1 for the caller of this function, 2 for the caller's caller,
+
+    Example:
+            when calling from ./tasks,py, use offset=1.
+            when calling from a taskcli.utils, which was called from ./tasks.py, use offset=2.
+    """
+    import inspect
+    assert offset >= 1
+
+    frame = inspect.currentframe()
+    for _ in range(offset):
+        assert frame is not None
+        frame = frame.f_back
+        assert frame is not None
+
+    module = inspect.getmodule(frame)
+    assert module is not None
+    return module
+
+
+def get_imported_tasks() -> list["Task"]:
+    """Returns the list of tasks imported from other modules."""
+    raise NotImplementedError("TODO: implement this")
+
+def get_all_tasks() -> list["Task"]:
+    """Return the list of all tasks imported into the runtime."""
+    from .core import get_runtime
+    return get_runtime().tasks
+
+def get_tasks(module:Module|None=None) -> list["Task"]:
+    """Return the list of all tasks defined in the specified module. Can be used to customize many tasks at ones.
+
+    If no module is specified, the module of the caller is used.
+
+    This function should be called after all tasks are defined (after @task decorator has been used in that module).
+
+    In practice inless you explicitlu specify a module, this function must only be called
+    from the ./tasks.py file defining the tasks.
 
     TODO: consider allowing it to return included tasks as well.
 
@@ -89,19 +128,15 @@ def get_tasks() -> list["Task"]:
                 t.important = True
         ```
     """
-    from . import core
-    import inspect
-    frame = inspect.currentframe()
-    assert frame is not None
-    frame = frame.f_back
-    assert frame is not None
+    if module is None:
+        module = get_current_module(offset=2)
 
-    module = inspect.getmodule(frame)
-    print("module", module.__name__)
-    if hasattr(module, "decorated_functions"):
+    module_path = module.__file__
+    if hasattr(module, "decorated_functions") and len(module.decorated_functions):
         return module.decorated_functions
     else:
-        print_error("get_tasks(): No tasks found in the current module")
+        print_error(f"get_tasks(): No tasks found in the current module ({module_path}). "
+                    "Make sure to use the @task decorator first.")
         sys.exit(1)
 
 

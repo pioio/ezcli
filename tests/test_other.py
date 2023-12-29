@@ -73,3 +73,5 @@ def test_run_default_args(default_arg):
     except SystemExit:
         pytest.fail("SystemExit should not be raised")
     assert done == default_arg
+
+
