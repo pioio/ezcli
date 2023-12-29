@@ -40,7 +40,7 @@ TASKCLI_GOTASK_TASKFILE_FILENAMES = EnvVar(
 )
 
 TASKCLI_GOTASK_TASK_NAME_PREFIX = EnvVar(
-    default_value="tf:", desc=("String to prefix to all task names from a Taskfile.dev yaml file. ")
+    default_value="tf.", desc=("String to prefix to all task names from a Taskfile.dev yaml file. ")
 )
 
 TASKCLI_GOTASK_TASK_GROUP_NAME = EnvVar(

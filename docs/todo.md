@@ -1,6 +1,7 @@
 
-- [ ] Include from module by filter
+- [x] Include from module by filter
 - [ ] check for usage of task.name, prefer task.get_fullname
+- [ ]
 - [ ] mark included task with^
 - [ ] includes from taskfile files AGAIN not showing up
 - [ ] task init is broken

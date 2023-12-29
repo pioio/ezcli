@@ -90,51 +90,11 @@ def _include_task(task:Task, from_module:Module, to_module:Module, skip_include_
 
     existing_tasks = [t for t in to_module.decorated_functions if t.name == copy.name]
     if existing_tasks:
-        msg = f"Task '{copy.get_full_task_name()}' included from {from_module.__file__} already exists in module {to_module.__file__}."
+        msg = f"Task '{copy.name}' included from {from_module.__file__} already exists in module {to_module.__file__}."
         raise UserError(msg)
 
     to_module.decorated_functions.append(copy)
     log.debug(f"include_module(): including task {task.name} from {from_module.__file__} to {to_module.__file__}")
-
-
-    # found = False
-
-    # for atask in module_of_fun.decorated_functions:
-    #     if atask.func == fun:
-    #         found = True
-    #         break
-    # if not found:
-    #     # function has not been decorated with @task yet, decore it, so that we can include it
-    #     #task(fun, **kwargs)
-    #     raise Exception("included function was not decorated with @task")
-
-    # from_module = module_of_fun
-    # thetask = module_of_fun.decorated_functions[-1]
-
-    # if not skip_include_info:
-    #     group = get_current_group()
-    #     copy = task.copy(group=group, included_from=from_module)
-    #     copy.add_namespace_from_group(task.group)
-    # else:
-    #     # We're including the root module, preserve the group info, otherwise we would move all tasks to 'default'
-    #     group = task.group
-    #     copy = task.copy(group=group, included_from=None)
-
-
-    # if not skip_include_info:
-    #     thetask._included_from = module_of_fun
-    # if namespace:
-    #     #thetask.namespaces = [namespace] # namesapce? TODO: XXX
-    #     thetask.add_namespace(namespace, alias_namespace=alias_namespace)
-
-
-    # if module_of_fun != to_module:
-    #     # the two module can be one and the same when running 'include' in the function
-    #     # located in the same module as where we're running include
-    #     log.debug(f"include_function(): including task {thetask.name} from {module_of_fun.__file__} to {to_module.__file__}")
-    #     to_module.decorated_functions.append(thetask)
-    # #runtime = core.get_runtime()
-    # #runtime.tasks.append(thetask)
 
 
 def load_tasks_from_module_to_runtime(module: Module) -> None:

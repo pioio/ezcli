@@ -60,13 +60,13 @@ def test_group_namespace_but_no_alias_names():
         atask = tt.get_tasks_dict()["bar.foobar"]
         assert atask.group.name == "bar"
         assert atask.group == group
-        assert atask.get_full_task_name() == "bar.foobar"
+        assert atask.name == "bar.foobar"
         assert atask.get_namespaced_aliases() == ["a1", "a2"]
 
     # same behavior when copying
     task_no_group = tt.get_tasks_dict()["tasknogroup"]
     task_no_group.add_namespace_from_group(group)
-    assert task_no_group.get_full_task_name() == "bar.tasknogroup"
+    assert task_no_group.name == "bar.tasknogroup"
     assert task_no_group.get_namespaced_aliases() == ["t1", "t2"], "group has no alias namespace, so task aliases should not be namespaced"
 
 
@@ -86,7 +86,7 @@ def test_group_namespace_with_alias_names():
         atask = tt.get_tasks_dict()["bar.foobar"]
         assert atask.group.name == "bar"
         assert atask.group == group
-        assert atask.get_full_task_name() == "bar.foobar"
+        assert atask.name == "bar.foobar"
         assert atask.get_namespaced_aliases() == ["ba1", "ba2"]
 
 
@@ -113,11 +113,11 @@ def test_group_alias_namespace():
         atask = tt.get_tasks_dict()["foobar"]
         assert atask.group.name == "bar"
         assert atask.group == group
-        assert atask.get_full_task_name() == "foobar"
+        assert atask.name == "foobar"
         assert atask.get_namespaced_aliases() == ["ba1", "ba2"]
 
     # same behavior when copying
     task_no_group = tt.get_tasks_dict()["tasknogroup"]
     task_no_group.add_namespace_from_group(group)
-    assert task_no_group.get_full_task_name() == "tasknogroup"
+    assert task_no_group.name == "tasknogroup"
     assert task_no_group.get_namespaced_aliases() == ["bt1", "bt2"]

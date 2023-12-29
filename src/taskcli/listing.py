@@ -200,7 +200,7 @@ def smart_task_lines(task: Task, settings: TaskRenderSettings) -> list[str]:  # 
     lines: list[str] = []
 
     param_line_prefix = "  "
-    name = task.get_full_task_name()
+    name = task.name
     name = format_colors(task.name_format, name=name)
 
     included_from_line = []

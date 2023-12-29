@@ -176,7 +176,7 @@ def _dispatch_unsafe(argv: list[str] | None = None, tasks_found: bool = True) ->
             sys.exit(1)
         else:
             for task in tasks:
-                if task.get_full_task_name() == argconfig.task:
+                if task.name == argconfig.task:
                     return _dispatch(task)
 
             # Not found, search aliases
@@ -267,7 +267,7 @@ def build_parser(tasks: list[Task]) -> argparse.ArgumentParser:
 
     log.debug("build_parser(): called for following tasks:")
     for task in tasks:
-        log.debug("  %s", task.get_full_task_name())
+        log.debug("  %s", task.name)
 
 
     root_parser = argparse.ArgumentParser()
@@ -288,9 +288,7 @@ def build_parser(tasks: list[Task]) -> argparse.ArgumentParser:
             subparser.set_defaults(task=group_name + GROUP_SUFFIX)
             added_subparsers += [group_name + GROUP_SUFFIX]
 
-        # > groupandtask = "." + group_name + "." + task.name
-        # > subparser = subparsers.add_parser(groupandtask)
-        # > subparser.set_defaults(task=task.name)
+
 
         all_names_of_task = task.get_all_task_names()
 
@@ -303,7 +301,7 @@ def build_parser(tasks: list[Task]) -> argparse.ArgumentParser:
                 if "conflicting subparser" in str(e):
                     reasons = " (conflicting subparser - try to rename the task, change its aliases, or include it under a different namespace)"
 
-                task_name = task.get_full_task_name()
+                task_name = task.name
                 import_location=""
                 if task._included_from:
                     import_location = f"Included from: {task._included_from.__file__}"
