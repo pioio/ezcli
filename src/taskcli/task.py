@@ -174,8 +174,17 @@ class Task:
             utils.print_warning(text)
 
     def is_hidden(self) -> bool:
-        """Return True if the task is hidden."""
+        """Return True if the task is hidden.
+
+        Being in a hidden group does not, by itself, quality task as being hidden.
+        """
+        assert self.group is not None
         return self.hidden or self.func.__name__.startswith("_")
+
+    def is_in_hidden_group(self) -> bool:
+        """Return True if the task is in a hidden group."""
+        assert self.group is not None
+        return self.group.hidden
 
     @property
     def name(self) -> str:

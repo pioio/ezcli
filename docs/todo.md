@@ -13,7 +13,9 @@ Required TODO:
 - [ ] searching by tag should show hidden tasks, samel ike showing a group
 - [ ] num hidden tasks in each group
   - [ ] filter out hidden before filterting by tags
-- [ ]
+
+
+- [ ] allow showing tasks in hidden groups?
 - [ ] nice warning if no tags listed
 - [ ] separate defaults for tt mode on per fiel basis
 - [ ] unit test for searching when some matching tasks are hidden

@@ -105,7 +105,7 @@ def test_list_everything_works(capsys):
         == """# default
 hidden-task
 not-hidden-task
-# hidden-group
+# hidden-group HIDDEN
 task-in-hidden-group
 """
     )
@@ -229,7 +229,7 @@ def test_list_with_tags():
 foobar
 # groupB
 foobar2a
-1 hidden tasks, {constants.HELP_TEXT_USE_H_TO_SHOW_HIDDEN}
+1 hidden
 """.strip().splitlines()
     )
 
@@ -244,7 +244,7 @@ foobar2a
 foobar
 # groupB
 foobar2a
-1 hidden tasks, {constants.HELP_TEXT_USE_H_TO_SHOW_HIDDEN}
+1 hidden
 """.strip().splitlines()
     )
 

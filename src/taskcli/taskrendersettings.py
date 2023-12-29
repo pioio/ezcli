@@ -53,4 +53,9 @@ def new_settings(config: TaskCLIConfig) -> TaskRenderSettings:
 
     s.search = config.search
 
+    # Always show hidden tasks and groups when filtering by tags or searching.
+    if config.tags or config.search:
+        s.show_hidden_tasks = True
+        s.show_hidden_groups = True
+
     return s

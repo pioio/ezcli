@@ -1,5 +1,6 @@
 import inspect
 import logging
+
 from typing import Any, final
 from venv import logger
 
@@ -64,12 +65,18 @@ def _sort_tasks(tasks: list[Task], sort: str, sort_important_first: bool) -> lis
 
     return tasks
 
-
+from .constants import GROUP_SUFFIX
 log = logging.getLogger(__name__)
 
 
 def list_tasks(tasks: list[Task], settings: TaskRenderSettings | None = None) -> list[str]:  # noqa: C901
-    """Return a list of lines to be printed to the console."""
+    """Return a list of lines to be printed to the console.
+
+    In a nutshell this works like this:
+    - First, filter tasks based on the settings.
+        (this removes e.g. hidden tasks, or tasks in hidden group, or tasks not matching search criteria)
+    - whatever tasks list, print them and their corresponding groups
+    """
     assert len(tasks) > 0, "No tasks found"
 
     if not tasks:
@@ -82,48 +89,44 @@ def list_tasks(tasks: list[Task], settings: TaskRenderSettings | None = None) ->
     if not filtered_tasks:
         raise UserError("\n".join([f"{colors.red}No tasks found!{colors.end}", *filter_result.progress]))
 
-    # TODO: extract groups info
+    # Get the list groups from the remaining tasks (after filtering)
     groups = create_groups(tasks=tasks, group_order=configuration.config.group_order)
 
     for line in filter_result.progress:
         log.debug(line)
-    # first, prepare rows, row can how more than one line
+
+    # Prepare the output buffer.
+    # Note that a tasks can result in more than one line.
     lines: list[str] = []
 
-    num_visible_groups = len(
-        [group.name for group in groups if group.name not in taskcli.core.get_runtime().hidden_groups]
-    )
 
-    num_hidden_groups = 0
-    num_hidden_tasks = 0
     for group in groups:
-        GROUP_IS_HIDDEN = group.hidden or group.name in taskcli.core.get_runtime().hidden_groups
-
-        if not settings.show_hidden_groups and GROUP_IS_HIDDEN:
-            num_hidden_groups += 1
-            continue
 
         tasks_to_show = [group_task for group_task in group.tasks if group_task in filtered_tasks]
-        from .parser import GROUP_SUFFIX
+        if not tasks_to_show:
+            # if a group is hidden (and we're hiding hidden group), tasks_to_show will be empty
+            continue
 
-        if len(tasks_to_show) > 0:
-            num_tasks = group.render_num_shown_hidden_tasks()
-            group_name_rendered = format_colors(
-                config.render_format_of_group_name,
-                name=group.name,
-                name_with_suffix=group.name + GROUP_SUFFIX,
-                desc=group.desc,
-                num_tasks=num_tasks,
-            )
-            lines += [group_name_rendered]
+        num_hidden_in_this_group = filter_result.num_hidden_per_group[group.name]
+        # print the group header
+        num_tasks = group.render_num_shown_hidden_tasks()
+        format = config.render_format_of_group_name if not group.hidden else config.render_format_of_group_name_hidden
+        group_name_rendered = format_colors(
+            format,
+            name=group.name,
+            name_with_suffix=group.name + GROUP_SUFFIX,
+            desc=group.desc,
+            num_tasks=num_tasks,
+        )
+        lines += [group_name_rendered]
 
-        tasks = _sort_tasks(tasks_to_show, sort=config.sort, sort_important_first=config.sort_important_first)
 
-        for task in tasks:
-            if task.is_hidden() and not settings.show_hidden_tasks:
-                num_hidden_tasks += 1
-                continue
+        tasks_to_show = _sort_tasks(tasks_to_show, sort=config.sort, sort_important_first=config.sort_important_first)
+        for task in tasks_to_show:
             lines.extend(smart_task_lines(task, settings=settings))
+        if num_hidden_in_this_group:
+            lines += [f"{colors.dark_gray}{num_hidden_in_this_group} hidden{colors.end}"]
+
     lines = [line.rstrip() for line in lines]
 
     FIRST_LINE_STARTS_WITH_NEW_LINE = lines and lines[0] and lines[0][0] == "\n"
@@ -131,20 +134,38 @@ def list_tasks(tasks: list[Task], settings: TaskRenderSettings | None = None) ->
         # This can happen if user prefixes the custom group format with a "\n" to separate groups with whitesapce
         lines[0] = lines[0][1:]
 
-    from . import parser
 
+
+    num_hidden_groups = len(filter_result.hidden_groups)
+    num_hidden_tasks = filter_result.num_total_hidden_in_hidden_groups
     final_line = []
     if num_hidden_groups or num_hidden_tasks:
         if num_hidden_groups:
-            final_line.append(f"{num_hidden_groups} hidden groups")
+            final_line.append(f"Also {num_hidden_groups} hidden groups")
         if num_hidden_tasks:
-            final_line.append(f"{num_hidden_tasks} hidden tasks")
+            final_line.append(f"with {num_hidden_tasks} tasks in them")
         final_line.append(HELP_TEXT_USE_H_TO_SHOW_HIDDEN)
     if final_line:
         line = f"{configuration.colors.dark_gray}{', '.join(final_line)}{configuration.colors.end}"
         lines.append(line)
     return lines
 
+from .tasktools import FilterResult
+def _render_summary_line(filter_result: FilterResult) -> str:
+    """Return a string with a summary of the filtering."""
+    num_tasks = len(filter_result.tasks)
+    num_hidden_groups = len(filter_result.hidden_groups)
+    num_hidden_tasks = filter_result.num_total_hidden
+    num_tasks_in_hidden_groups = filter_result.num_total_hidden_in_hidden_groups
+
+    summary = f"{num_tasks} tasks"
+    if num_hidden_groups:
+        summary += f", {num_hidden_groups} hidden groups"
+    if num_hidden_tasks:
+        summary += f", {num_hidden_tasks} hidden tasks"
+    if num_tasks_in_hidden_groups:
+        summary += f", {num_tasks_in_hidden_groups} tasks in hidden groups"
+    return summary
 
 def _render_tags(tags: list[str]) -> str:
     """Return a string with all tags, formatted for the console."""

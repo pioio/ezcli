@@ -27,7 +27,7 @@ TODO:
 
 """
 
-GROUP_SUFFIX = "/"
+from .constants import GROUP_SUFFIX
 
 log = logging.getLogger(__name__)
 
