@@ -10,11 +10,11 @@ Required TODO:
 - [x] add unit tests with "-" task names
 - [x] improve listing tabs in group,  name[group] is clumsy
 - [ ] auto-adding short-flags for params. Show them in -L
+- [ ] spacing between one-line-arg and summary
 - [ ] add unit testing example
 - [x] per-group setting to sort hidden last
-- [ ] custom_name/desc to name/desc
-- [ ] unit test that changing dir via function call works
-- [ ] spacing between one-line-arg and summary
+- [x] custom_name/desc to name/desc
+- [ ] better unit test that changing dir via function call works
 - [ ] optional flags are not gray (disk usage example)
 - [ ] unit test hide-not-read
 - [ ] searching by tag should show hidden tasks, samel ike showing a group
