@@ -116,8 +116,8 @@ def _include_tasks_json(cmd: str, json_string: str, dir: str = ".") -> bool:
         taskcli.task(
             change_dir=False,
             group=group,
-            custom_name=prefix + name,
-            custom_desc=desc,
+            name=prefix + name,
+            desc=desc,
             is_go_task=True,
         )(run_task)
 

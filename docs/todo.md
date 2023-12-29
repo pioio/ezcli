@@ -11,7 +11,7 @@ Required TODO:
 - [x] improve listing tabs in group,  name[group] is clumsy
 - [ ] auto-adding short-flags for params. Show them in -L
 - [ ] add unit testing example
-- [ ] per-group setting to sort hidden last
+- [x] per-group setting to sort hidden last
 - [ ] custom_name/desc to name/desc
 - [ ] spacing between one-line-arg and summary
 - [ ] optional flags are not gray (disk usage example)

@@ -33,11 +33,27 @@ class TaskCodeLocation:
         return f"TaskCodeLocation(file={self.file!r}, line={self.line!r})"
 
 
-def task(*args: Any, **kwargs: Any) -> AnyFunction:
+def task(
+        *args: Any,
+        change_dir: bool = True,
+        # ------------ args below are copy-pasted from the Task.__init__
+        name: str = "",
+        desc: str = "",
+        group: Group | None = None,
+        hidden: bool = False,
+        aliases: Iterable[str]|str | None = None,
+        important: bool = False,
+        env: list[str] | None = None,
+        format: str = "{name}",
+        customize_parser: Callable[[Any], None] | None = None,
+        is_go_task: bool = False,
+        suppress_warnings: bool = False,
+        tags: list[str] | None = None,
+    ) -> AnyFunction:
     """Decorate a function as a task."""
     # currentframe is much(!) faster than inspect.stack()
-
-    kwargs["code_location"] = _get_code_location()
+    kwargs = locals()
+    del kwargs["args"]
 
     if len(args) == 1 and callable(args[0]):
         # Decorator is used without arguments
@@ -100,20 +116,23 @@ class Task:
         return f"Task(name={self.name!r}, group={self.group.name!r}, important={self.important}, hidden={self.hidden})"
     def __init__(
         self,
+        # Args below can be copy-pasted to the `def task` decorator
+
         func: AnyFunction,
-        custom_name: str = "",
-        custom_desc: str = "",
+        name: str = "",
+        desc: str = "",
         group: Group | None = None,
         hidden: bool = False,
-        aliases: Iterable[str] | None = None,
+        aliases: Iterable[str]|str | None = None,
         important: bool = False,
         env: list[str] | None = None,
         format: str = "{name}",
         customize_parser: Callable[[Any], None] | None = None,
         is_go_task: bool = False,
         suppress_warnings: bool = False,
-        code_location: TaskCodeLocation | None = None,
         tags: list[str] | None = None,
+        # ------------ don't include those in dev tasks
+        code_location: TaskCodeLocation | None = None,
     ):
         """Create a new Task.
 
@@ -121,11 +140,14 @@ class Task:
         hidden: If True, the task will not be listed in the help by default.
         important: If True, the task will be listed in the help in a way which stands out. See config for details.
         """
-        self.custom_name = custom_name  # entirely optional
-        self.custom_desc = custom_desc  # entirely optional
+        self._name = name  # entirely optional
+        self._desc = desc  # entirely optional
         self.func = func
         self._extra_summary:list[str] = []
+        if isinstance(aliases, str):
+            aliases = [aliases]
         self.aliases = aliases or []
+
         self.tags = tags or []
         self.env = env or []
         self.hidden = hidden
@@ -195,8 +217,8 @@ class Task:
 
     def get_full_task_name(self) -> str:
         """Return the full name of the task, including the group."""
-        if self.custom_name:
-            return self.custom_name
+        if self._name:
+            return self._name
         out = self.func.__name__.replace("_", "-")
         out.lstrip("-")  # for _private functions
 
@@ -211,8 +233,8 @@ class Task:
         extra_summary = " ".join(self._extra_summary)
 
         basic_summary = ""
-        if self.custom_desc:
-            basic_summary = self.custom_desc
+        if self._desc:
+            basic_summary = self._desc
         elif self.func.__doc__ is not None:
             basic_summary = self.func.__doc__.split("\n")[0]
 
@@ -298,12 +320,13 @@ class Task:
 
 def _get_wrapper(  # noqa: C901
     func: AnyFunction,
+    change_dir: bool = True,
+    # ----------
     group: Group | None = None,
     hidden: bool = False,
     prefix: str = "",
     important: bool = False,
     aliases: Iterable[str] | None = None,
-    change_dir: bool = True,
     env: list[str] | None = None,
     **other_kwargs: Any,
 ) -> AnyFunction:

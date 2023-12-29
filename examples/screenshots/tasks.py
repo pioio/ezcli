@@ -16,7 +16,7 @@ with tt.Group("Weather"):
         run(f"curl wttr.in/{city}")
 
     for city in ["Boston", "Sydney", "London", "Yokohama"]:
-        @task(hidden=True, custom_name=f"weather-{city.lower()}", custom_desc=f"Check weather in {city}.")
+        @task(hidden=True, name=f"weather-{city.lower()}", desc=f"Check weather in {city}.")
         def weather_in_a_city(city=city): # we need the arg to bind the loop variable
             weather_in(city)
 
