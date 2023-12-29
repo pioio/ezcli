@@ -92,9 +92,11 @@ def get_argv() -> list[str]:
     """
     from taskcli import tt
     if utils.is_basename_tt():
+        builtin_tt_options = ["--show-hidden"]
         argv = ["--show-hidden"] + tt.config.default_options_tt + sys.argv[1:]
         if tt.config.default_options_tt:
-            log.debug(f"Using custom default options (tt): {tt.config.default_options_tt}")
+            log.debug(f"Using custom default options (tt): {tt.config.default_options_tt}, "
+                      f"plus built-in options: {builtin_tt_options}")
     else:
         argv = tt.config.default_options + sys.argv[1:]
         if tt.config.default_options:

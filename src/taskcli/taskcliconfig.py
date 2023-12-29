@@ -134,22 +134,23 @@ class TaskCLIConfig:
         )
         self.no_go_task: bool = self._add_bool(self.field_no_go_task)
 
-        self.field_examples = ConfigField(False, "examples", help="Show code examples of how to use taskcli.")
+
+        self.field_examples = ConfigField(False, "examples", help="Print code examples of how to use taskcli.")
         self.examples: bool = self._add_bool(self.field_examples)
 
-        self.field_show_hidden_groups = ConfigField(False, "show_hidden_groups", help="")
+        self.field_show_hidden_groups = ConfigField(False, "show_hidden_groups", help="Listing will show groups that were marked with hidden=True")
         self.show_hidden_groups: bool = self._add_bool(self.field_show_hidden_groups)
 
-        self.field_show_hidden_tasks = ConfigField(False, "show_hidden_tasks", help="")
+        self.field_show_hidden_tasks = ConfigField(False, "show_hidden_tasks", help="Listing will show tasks that are marked with hidden=True")
         self.show_hidden_tasks: bool = self._add_bool(self.field_show_hidden_tasks)
 
-        self.field_show_tags = ConfigField(True, "show_tags", help="Show tags of each task when listing tasks.")
+        self.field_show_tags = ConfigField(True, "show_tags",  help="Listing will show tags of each task.")
         self.show_tags: bool = self._add_bool(self.field_show_tags)
 
-        self.field_show_optional_args = ConfigField(False, "show_optional_args", help="")
+        self.field_show_optional_args = ConfigField(False, "show_optional_args",  help="Listing will show optional arguments of each task.")
         self.show_optional_args: bool = self._add_bool(self.field_show_optional_args)
 
-        self.field_show_default_values = ConfigField(False, "show_default_values", help="")
+        self.field_show_default_values = ConfigField(False, "show_default_values",  help=f"Listing will show default values of optional arguments when listing tasks. {self.field_show_optional_args.cli_arg_flag} must be set.")
         self.show_default_values: bool = self._add_bool(self.field_show_default_values)
 
         self.field_show_ready_info = ConfigField(
@@ -201,6 +202,7 @@ class TaskCLIConfig:
         )
         self.list_all: bool = self._add_bool(self.field_list_all)
 
+
         self.default_options: list[str] = []
         self.default_options_tt:list[str] = []
 
@@ -215,8 +217,6 @@ class TaskCLIConfig:
             field: ConfigField = getattr(self, "field_" + name)
             assert isinstance(field, ConfigField)
             envtxt = ""
-            if field.env:
-                envtxt = f" (env: {field.env_var_name})"
 
             out += [f"{name}='{getattr(self, name)}'{envtxt}"]
         return "\n".join(out)
@@ -253,9 +253,8 @@ class TaskCLIConfig:
             nonlocal field
             help = field.help
             help += f" (default: {field.default}{set_from})"
-            if field.env:
-                help += f" (env: {field.env_var_name})"
-            act: Any = argparse.BooleanOptionalAction if not field.action else field.action
+            act: Any = "store_true" if not field.action else field.action
+            #> act: Any = argparse.BooleanOptionalAction if not field.action else field.action
             parser.add_argument(*args, action=act, default=None, help=help)
 
         def read_argument(config: TaskCLIConfig, args: argparse.Namespace) -> None:
@@ -291,8 +290,6 @@ class TaskCLIConfig:
         def add_argument(parser: argparse.ArgumentParser) -> None:
             nonlocal help
             help += f" (default: {new_default}{set_from})"
-            if env:
-                help += f" (env: {self._to_env_var_name(name)})"
             parser.add_argument(*args, default=None, help=help)
 
         def read_argument(config: TaskCLIConfig, args: argparse.Namespace) -> None:
@@ -329,8 +326,6 @@ class TaskCLIConfig:
         def add_argument(parser: argparse.ArgumentParser) -> None:
             nonlocal help
             help += f" (default: {new_default}{set_from})"
-            if env:
-                help += f" (env: {self._to_env_var_name(name)})"
             parser.add_argument(*args, nargs=nargs, default=None, help=help)
 
         def read_argument(config: TaskCLIConfig, args: argparse.Namespace) -> None:
