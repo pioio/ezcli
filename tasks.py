@@ -151,10 +151,6 @@ def pc():
 
 
 
-for t in tt.get_tasks():
-    t.important = True
-    t.tags += ["prod"]
-    t.name_format = "{red}{name}{clear}"
 
 if __name__ == "__main__":
     tt.dispatch()

@@ -72,6 +72,11 @@ if typing.TYPE_CHECKING:
 def get_tasks() -> list["Task"]:
     """Return the list of all tasks defined in the current module. Can be used to customize many tasks at ones.
 
+    This function should be called after all tasks are defined.
+    It must only be called from the ./tasks.py file defining the tasks.
+
+    TODO: consider allowing it to return included tasks as well.
+
     Example:
         ```
         @task
