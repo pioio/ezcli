@@ -24,12 +24,14 @@ def include(object: Module | AnyFunction | "Task",
             namespace:str="",
             alias_namespace:str="",
             **kwargs: Any) -> list["Task"]:
-    """Include tasks from the specified object into the module which calling this function. Return included Tasks.
+    """Include Tasks from the specified object into the module which calling this function. Return included Tasks.
 
     This function is meant to be called directly from a ./tasks.py file.
     This function is a convenience wrapper around include_module() and include_function().
 
     For more control you can call the lower level include_module() or include_function() directly.
+
+    For more on including tasks see, see docs.
     """
     if to_module is None:
         to_module = utils.get_callers_module()
@@ -113,6 +115,7 @@ def include_function(function: AnyFunction, *, to_module:Module|None=None, skip_
 def _include_task(task:Task,
                    from_module:Module, to_module:Module,
                      skip_include_info:bool=False, namespace:str="", alias_namespace:str="", **kwargs: Any) -> Task:
+    """Shared code for including a task from one module to another."""
     if not hasattr(from_module, "decorated_functions"):
         from_module.decorated_functions = []  # type: ignore[attr-defined]
 
@@ -138,9 +141,6 @@ def _include_task(task:Task,
 
     if namespace:
         copy.add_namespace(namespace, alias_namespace=alias_namespace)
-
-#    if from_module != to_module:
-        # the two module can be one and the same when running 'include' for the go tasks
 
     existing_tasks = [t for t in to_module.decorated_functions if t.name == copy.name]
     if existing_tasks:
