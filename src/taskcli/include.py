@@ -1,4 +1,4 @@
-"""Logic for including tasks from other places."""
+"""Logic for including Tasks from other modules."""
 
 import inspect
 import logging
@@ -23,12 +23,34 @@ def include(
     alias_namespace: str = "",
     **kwargs: Any,
 ) -> list["Task"]:
-    """Include Tasks from the specified object into the module which calling this function. Return included Tasks.
+    """Include Tasks from the specified object into the module which is calling this function. Returns included Tasks.
 
     This function is meant to be called directly from a ./tasks.py file.
-    This function is a convenience wrapper around include_module() and include_function().
+    This function is a convenience wrapper around `include_module()` and `include_function()`.
 
-    For more control you can call the lower level include_module() or include_function() directly.
+    For more control, call the lower level `include_module()` or `include_function()` directly.
+
+    Example:
+    ```
+        # Most basic usage - import entire module
+        import mysubmodule
+        tt.include(mysubmodule)
+
+        # Most basic usage - import one task
+        import mysubmodule
+        tt.include(mysubmodule.mytask)
+
+        # Import module or fun and prefix with a namespace
+        import mysubmodule
+        tt.include(mysubmodule, namespace="mysubmodule", alias_namespace="s")
+
+        # Import tasks based on custom criteria (e.g, names, tags, etc)
+        import mysubmodule
+        tt.include(mysubmodule, filter=lambda t: t.important)
+    ```
+
+    Passing a already existing Task object is less common, but possible.
+    It will copy it to the calling module.
 
     For more on including tasks see, see docs.
     """
@@ -36,6 +58,9 @@ def include(
         to_module = utils.get_callers_module()
 
     from .tt import Task
+    if "filter" in kwargs and not isinstance(object, Module):
+        msg = "include(): 'filter' parameter is only supported when including entire modules"
+        raise Exception(msg)
 
     if isinstance(object, Module):
         return include_module(
@@ -119,7 +144,25 @@ def include_function(
     alias_namespace: str = "",
     **kwargs: Any,
 ) -> Task:
-    """Include a function as a task."""
+    """Include a function as a task. The function must have been decorated with @task.
+
+    Typically you include a imported function from another module.
+    You can laso include tasks from the same module to e.g. copy them to a different group.
+
+    Example:
+    ```
+        from module import mytask
+        tt.include_function(mytask)
+    ```
+
+    Example:
+    ```
+        # This will prefix included function with a namespace
+        from module import mytask
+        with tt.group("othergroup", namespace="group"):
+            tt.include_function(mytask)
+    ```
+    """
     if to_module is None:
         to_module = utils.get_callers_module()
 
