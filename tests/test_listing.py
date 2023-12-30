@@ -102,6 +102,7 @@ def test_list_everything_works(capsys):
         == """# default
 not-hidden-task
 hidden-task
+
 # hidden-group HIDDEN
 task-in-hidden-group
 """
@@ -224,6 +225,7 @@ def test_list_with_tags():
         == """
 # groupA
 foobar
+
 # groupB
 foobar2a
 1 hidden
@@ -239,6 +241,7 @@ foobar2a
         == """
 # groupA
 foobar
+
 # groupB
 foobar2a
 1 hidden
@@ -251,8 +254,7 @@ foobar2a
         lines = list_tasks(tasks, render_settings)
     assert (
         lines
-        == """
-# groupA
+        == """# groupA
 foobar
-""".strip().splitlines()
+""".split("\n")
     )

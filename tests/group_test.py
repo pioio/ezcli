@@ -1,3 +1,4 @@
+from operator import le
 import taskcli
 from taskcli import Group, task, tt
 from taskcli.listing import list_tasks
@@ -26,6 +27,7 @@ def test_groups_basic():
 
     assert """# default
 foobar1
+
 # magical tasks
 magic""" in "\n".join(lines)
 
@@ -42,6 +44,24 @@ def test_group_context_manager():
         atask = tools.include_tasks()[0]
         assert atask.group.name == "bar"
         assert atask.group == group
+
+
+
+def test_group_has_children_works():
+
+    with Group("bar") as group:
+        with Group("bar2") :
+            @task
+            def foobar():
+                pass
+        @task
+        def foobar2():
+            pass
+
+    for t in tt.get_tasks():
+        assert group
+    assert len(tt.get_tasks()) == 2
+
 
 
 def test_group_namespace_but_no_alias_names():

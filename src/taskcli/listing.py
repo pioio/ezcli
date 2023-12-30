@@ -107,8 +107,8 @@ def list_tasks(tasks: list[Task], settings: TaskRenderSettings | None = None) ->
     if not filtered_tasks:
         raise UserError("\n".join([f"{colors.red}No tasks found!{colors.end}", *filter_result.progress]))
 
-    # Get the list groups from the remaining tasks (after filtering)
-    groups = create_groups(tasks=tasks, group_order=configuration.config.group_order)
+    # Get the list TOP-LEVEL groups from the remaining tasks (after filtering)
+    top_groups = create_groups(tasks=tasks, group_order=configuration.config.group_order)
 
     for line in filter_result.progress:
         log.debug(line)
@@ -117,35 +117,14 @@ def list_tasks(tasks: list[Task], settings: TaskRenderSettings | None = None) ->
     # Note that a tasks can result in more than one line.
     lines: list[str] = []
 
-    for group in groups:
-        tasks_to_show = [group_task for group_task in group.tasks if group_task in filtered_tasks]
-        if not tasks_to_show:
-            # if a group is hidden (and we're hiding hidden group), tasks_to_show will be empty
-            continue
+    for idx, group in enumerate(top_groups):
+        before = len(lines)
+        render_group(group=group, filtered_tasks=filtered_tasks, lines=lines, filter_result=filter_result, settings=settings, indent=0)
 
-        num_hidden_in_this_group = filter_result.num_hidden_per_group[group.name]
-        # print the group header
-        num_tasks = group.render_num_shown_hidden_tasks()
-        format = config.render_format_of_group_name if not group.hidden else config.render_format_of_group_name_hidden
-        group_name_rendered = format_colors(
-            format,
-            name=group.name,
-            name_with_suffix=group.name + GROUP_SUFFIX,
-            desc=group.desc,
-            num_tasks=num_tasks,
-        )
-        lines += [group_name_rendered]
+        if len(lines) > before and idx < len(top_groups) - 1:
+            # blan line between top level group, but only between top-level groups
+            lines.append("")
 
-        tasks_to_show = _sort_tasks(
-            tasks_to_show,
-            sort=config.sort,
-            sort_important_first=group.sort_important_first,
-            sort_hidden_last=group.sort_hidden_last,
-        )
-        for task in tasks_to_show:
-            lines.extend(smart_task_lines(task, settings=settings))
-        if num_hidden_in_this_group:
-            lines += [f"{colors.dark_gray}{num_hidden_in_this_group} hidden{colors.end}"]
 
     lines = [line.rstrip() for line in lines]
 
@@ -167,6 +146,62 @@ def list_tasks(tasks: list[Task], settings: TaskRenderSettings | None = None) ->
         line = f"{configuration.colors.dark_gray}{', '.join(final_line)}{configuration.colors.end}"
         lines.append(line)
     return lines
+
+indent_increase = 2
+
+def render_group(group:Group, lines:list[str], filtered_tasks:list[Task], filter_result,settings, indent:int):
+    indent_str = " " * indent
+
+    tasks_directly_in_group_to_show = [group_task for group_task in group.tasks if group_task in filtered_tasks]
+
+    # anywhere within the family tree
+    has_children_tasks_to_show = group.has_children_recursive(filtered_tasks)
+    if not has_children_tasks_to_show:
+        # if a group is hidden (and we're hiding hidden group), tasks_to_show will be empty
+
+        # group mightnot have any tasks, but it might have children group
+        for child in group.children:
+            render_group(child, lines, filtered_tasks, filter_result, settings, indent+indent_increase)
+        return
+
+    num_hidden_in_this_group = filter_result.num_hidden_per_group[group.name]
+    # print the group header
+    num_tasks = group.render_num_shown_hidden_tasks()
+    format = config.render_format_of_group_name if not group.hidden else config.render_format_of_group_name_hidden
+    group_name_rendered = format_colors(
+        format,
+        name=group.name,
+        name_with_suffix=group.name + GROUP_SUFFIX,
+        desc=group.desc,
+        num_tasks=num_tasks,
+    )
+
+    group_name_indent = indent_str
+    # if group_name_indent:
+    #     group_name_indent = group_name_indent[:-2] + "└─"
+    lines += [group_name_indent + group_name_rendered]
+
+    # for child in group.children:
+    #     render_group(child, lines, filtered_tasks, filter_result, settings, indent+indent_increase)
+
+    tasks_directly_in_group_to_show = _sort_tasks(
+        tasks_directly_in_group_to_show,
+        sort=config.sort,
+        sort_important_first=group.sort_important_first,
+        sort_hidden_last=group.sort_hidden_last,
+    )
+    for task in tasks_directly_in_group_to_show:
+        task_lines = smart_task_lines(task, settings=settings)
+
+        line_indent = indent_str
+        for tl in task_lines:
+            lines.append(line_indent + tl)
+    if num_hidden_in_this_group:
+        lines += [indent_str + f"{colors.dark_gray}{num_hidden_in_this_group} hidden{colors.end}"]
+
+    for child in group.children:
+        render_group(child, lines, filtered_tasks, filter_result, settings, indent+indent_increase)
+
 
 
 def _render_summary_line(filter_result: FilterResult) -> str:
@@ -313,28 +348,59 @@ def smart_task_lines(task: Task, settings: TaskRenderSettings) -> list[str]:  # 
     return lines
 
 
-def create_groups(tasks: list[Task], group_order: list[str]) -> list[Group]:
+# def create_groups(tasks: list[Task], group_order: list[str]) -> list[Group]:
+#     """Return a dict of group_name -> list of tasks, ordered per group_order, group not listed there will be last."""
+#     groups: list[Group] = []
+#     remaining_tasks: list[Task] = list()
+
+#     for expected_group_name in group_order:
+#         for task in tasks:
+#             already_present = task.group in groups
+
+#             if task.group.name == expected_group_name and not already_present:
+#                 groups.append(task.group)
+#             else:
+#                 remaining_tasks.append(task)
+
+#     for task in remaining_tasks:
+#         if task.group not in groups:
+#             groups.append(task.group)
+
+#     before = [group.name for group in groups]
+#     after = list({group.name for group in groups})
+#     assert sorted(before) == sorted(after), f"Duplicate groups found, {before} != {after}"
+
+#     # Return only top-level groups
+#     return [group for group in groups if not group.parent]
+
+
+def create_groups(tasks: list[Task], group_order: list[str]=[]) -> list[Group]:
     """Return a dict of group_name -> list of tasks, ordered per group_order, group not listed there will be last."""
     groups: list[Group] = []
-    remaining_tasks: list[Task] = list()
+    del group_order
 
-    for expected_group_name in group_order:
-        for task in tasks:
-            already_present = task.group in groups
+    top_level_groups = []
+    for task in tasks:
+        tlg = task.get_top_level_group()
+        if tlg and tlg not in top_level_groups:
+            top_level_groups.append(tlg)
 
-            if task.group.name == expected_group_name and not already_present:
-                groups.append(task.group)
-            else:
-                remaining_tasks.append(task)
 
-    for task in remaining_tasks:
-        if task.group not in groups:
-            groups.append(task.group)
+    return top_level_groups
+    # groups = []
+    # for task in tasks:
+    #     if task.group not in groups:
+    #         groups.append(task.group)
 
-    before = [group.name for group in groups]
-    after = list({group.name for group in groups})
-    assert sorted(before) == sorted(after), f"Duplicate groups found, {before} != {after}"
-    return groups
+    # # top_level = []
+    # # for task in tasks:
+    # #     if not task.group.parent and task.group not in top_level:
+    # #         top_level.append(task.group)
+
+    # for group in groups:
+    #     print (f"parent of {group.name} is {group.parent}")
+    # return [group for group in groups if not group.parent]
+
 
 
 def build_pretty_param_string(task: Task, include_optional: bool = True, include_defaults: bool = True) -> str:

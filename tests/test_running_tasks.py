@@ -17,6 +17,7 @@ def test_groups_are_listed():
     assert lines == [
         "# default",
         "task4",
+        "",
         "# foobar",
         "task1",
         "task2",

@@ -72,7 +72,6 @@ if typing.TYPE_CHECKING:
 
 
 def get_callers_module() -> Module:
-    """Return the module of the function calling this function."""
     offset = 3
     return get_module(offset=offset)
 
@@ -188,6 +187,8 @@ def reset_tasks() -> None:
     for module in sys.modules.values():
         if hasattr(module, "decorated_functions"):
             module.decorated_functions = []  # type: ignore[attr-defined]
+        if hasattr(module, "taskcli_top_level_groups"):
+            module.taskcli_top_level_groups = []
 
     # Clear global configuration (some tests might modify it)
     from taskcli import tt

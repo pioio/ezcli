@@ -18,6 +18,7 @@ from .tags import TAG_IMPORTANT
 from .types import Any, AnyFunction, Module
 
 
+
 class UserError(Exception):
     """Print nice error to the user."""
 
@@ -350,6 +351,19 @@ class Task:
         else:
             res = dispatch([name], sysexit_on_user_error=sysexit_on_user_error)
         return res
+
+    def get_top_level_group(self) -> Group|None:
+        """Return the top-most group.
+
+        Used when listing tasks to determine top-most groups from list of filtered tasks.
+        """
+        g = self.group
+        while g is not None:
+            if g.parent is None:
+                return g
+            g = g.parent
+        return None
+
 
     def copy(self, group: Group, included_from: Module | None) -> "Task":
         """Return a copy of the task."""

@@ -3,9 +3,14 @@
 
 - [x] mark included task with^
 - [x] task init is broken
+- [ ] nested groups
+  - [ ] top-level group with no tasks BUT with groups which have tasks should be shown (unit test)
+  - [ ]  hidden groups with not-hidden groups should still show, summary should include it
+  - [ ]
 - [ ] optional flags are not gray (disk usage example)
 - [x] test init.py
 - [ ] unit test hide-not-read
+- [ ] Module - add custom class to represent module, with my custom per-module fields
 - [ ] unit test: searching by tag should show hidden tasks, samel ike showing a group - unit
 - [ ] unit test- broken get hidden
 - [ ] reduve -v noise

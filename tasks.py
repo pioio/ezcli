@@ -98,35 +98,53 @@ def _get_lint_paths():
 
 with tt.Group("lint", desc="Code cleanup tasks") as x:
 
-    @task(aliases="r")
-    def ruff(paths: Paths, example_arg: str = "foobar", example_arg2: str = "foobar"):
-        """Run ruff linter."""
-        del example_arg
-        del example_arg2
-        path_txt = " ".join(paths)
-        run(f"ruff format {path_txt}")
-        run(f"ruff check {path_txt} --fix")
+    with tt.Group("lintinternal", desc="Code cleanup tasks"):
+        @task
+        def testingnesting():
+            """Summary docstring"""
+            pass
+        @task
+        def testingnesting2():
+            pass
+    with tt.Group("lintinternal2", desc="Code cleanup tasks"):
+        @task
+        def testingnesting3(myarg):
+            """Summary"""
+            pass
+        @task
+        def testingnesting4(myarg="xxxx", myotherarg=23232):
+            pass
 
-    @task(important=True, aliases=("l"))
-    def lint(paths: Paths):
-        """Run all linting tasks."""
-        isort(paths)
-        ruff(paths)
-        mypy(paths)
+    with tt.Group("otherrr", desc="Code cleanup tasks") as xx:
+        @task(aliases="r")
+        def ruff(paths: Paths, example_arg: str = "foobar", example_arg2: str = "foobar"):
+            """Run ruff linter."""
+            del example_arg
+            del example_arg2
+            path_txt = " ".join(paths)
+            run(f"ruff format {path_txt}")
+            run(f"ruff check {path_txt} --fix")
 
-    @task
-    def mypy(paths: Paths):
-        """Detect code issues."""
-        paths.pop(paths.index("tasks.py"))
-        paths.pop(paths.index("tests"))
-        path_txt = " ".join(paths)
-        run(f"mypy {path_txt} --strict")
+        @task(important=True, aliases=("l"))
+        def lint(paths: Paths):
+            """Run all linting tasks."""
+            isort(paths)
+            ruff(paths)
+            mypy(paths)
 
-    @task
-    def isort(paths: Paths):
-        """Reorder imports, float them to top."""
-        path_txt = " ".join(paths)
-        run(f"isort {path_txt} --float-to-top")
+        @task
+        def mypy(paths: Paths):
+            """Detect code issues."""
+            paths.pop(paths.index("tasks.py"))
+            paths.pop(paths.index("tests"))
+            path_txt = " ".join(paths)
+            run(f"mypy {path_txt} --strict")
+
+        @task
+        def isort(paths: Paths):
+            """Reorder imports, float them to top."""
+            path_txt = " ".join(paths)
+            run(f"isort {path_txt} --float-to-top")
 
 
 @task
