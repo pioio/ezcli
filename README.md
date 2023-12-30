@@ -67,6 +67,8 @@ That's it! All the flags are generated automatically, including the `--no-*` boo
 - `t -t imp` list all tags marked as important.
 - `t -H` list all the tasks, even the ones marked as hidden and the onces in hidden group.
 
+The overall CLI format is:
+`t <taskcli-options> task-name <task-specific-options>`
 
 ## What is it for?
 `taskcli` is designed for automating tasks. Any tasks.
@@ -109,6 +111,14 @@ tt.config.default_options_tt = ["--show-optional-args"]
 ## Disclaimer
 This library is still in early development. API will continue to rapidly evolve. Be sure to pin the version.
 If you need a more mature, less rapidly changing solution, consider using [pyinvoke](https://www.pyinvoke.org/) or Taskfile.dev.
+
+## Roadmap and major TODOs
+- post/pre task hooks that run only once
+- chaining tasks  `taskcli task1 --task-arg1 task2 --arg-for-task2`
+- including files via HTTP
+- config file support
+
+
 
 ## Prior art and comparison
 ### pyinvoke
