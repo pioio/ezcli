@@ -46,7 +46,7 @@ def format_colors(template: str, **kwargs: Any) -> str:
 def _sort_tasks(  # noqa: C901
     tasks: list[Task], sort_important_first: bool, sort_hidden_last: bool = True, sort: str = ORDER_TYPE_ALPHA
 ) -> list[Task]:
-    """Sort into 3 buckets - important, regular, hidden."""
+    """Sort into 3 buckets - from_parent, important, regular, hidden."""
     presorted = []
 
     # Pre-sorting determines the order of items within each bucket
@@ -57,9 +57,16 @@ def _sort_tasks(  # noqa: C901
         presorted = tasks
 
     out = []
+    tasks = []
+
+    # Bubble the ones from directory above to the top
+    for task in presorted:
+        if task.from_above and task not in out:
+
+            out.append(task)
+
     if sort_important_first:
         # Bubble the important ones to the top
-        tasks = []
         for task in presorted:
             if task.important:
                 out.append(task)
@@ -81,6 +88,7 @@ def _sort_tasks(  # noqa: C901
         if task in out:
             continue
         out.append(task)
+
     return out
 
 from .logging import get_logger

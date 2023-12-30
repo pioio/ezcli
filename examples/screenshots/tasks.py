@@ -3,7 +3,15 @@ from taskcli import task, tt, run
 import requests
 
 tt.config.merge_with_parent = True
-tt.config.merge_with_parent_filter = lambda t: t.important
+tt.config.merge_with_parent_filter = lambda t: t.important or t.name in ["pc", "print-cwd"]
+
+
+@task()
+def eweather_here3():
+    """auto-determine the current city, and check weather there."""
+    city = requests.get("https://ipinfo.io").json()["city"]
+    weather_in(city) # call the other task
+    run("pwd")
 
 with tt.Group("Weather"):
     @task(aliases="here")

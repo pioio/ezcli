@@ -2,6 +2,7 @@
 - [ ] loading ./tasks.py from dir above, merging them with the local one.
   - [ ] How to handle A importing B, importing A?
   - [ ] t .  # list only tasks from local dir
+  - [ ] crashes if added 'dev' section in screenshots/tasks.py
   - [ ] # TODO: have task have internal sort key, combination of digit + name for easier sorting
   - [ ] rename 'filter' to filterfun?
   - [ ] t .. # list only one level (not dir) up

@@ -75,11 +75,12 @@ def main() -> None:  # noqa: C901
                                          alias_namespace=alias_namespace,
                                          filter=filter)
 
+        # TODO: fixme, this is needed for sortin those tasks to top. but right now they get duplicated
+        # for task in tasks:
+        #     task.from_above = True
         if mark_them:
             for task in tasks:
                 task.name_format = f">{task.name_format}"
-                magenta = "\033[35m"
-                yellow = "\033[33m"
                 blue = "\033[34m"
                 task.name_format = blue +"⬆ {clear}{name}{clear}"
 
@@ -114,7 +115,8 @@ def main() -> None:  # noqa: C901
                     else:
                         # might have
                         filterfun = tt.config.merge_with_parent_filter
-                        include_from_file(f"{dir_filepath}/{random_lowercase}.py", namespace="p", alias_namespace="p", mark_them=True, filter=filterfun)
+                        #> include_from_file(f"{dir_filepath}/{random_lowercase}.py", namespace="p", alias_namespace="p", mark_them=True, filter=filterfun)
+                        include_from_file(f"{dir_filepath}/{random_lowercase}.py", namespace="p", mark_them=True, filter=filterfun)
                 finally:
                     os.remove(f"{dir_filepath}/{random_lowercase}.py")
                 break # for now only ones
