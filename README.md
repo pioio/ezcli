@@ -24,7 +24,7 @@ And you can run it: `t hello` or `t hello -n Alice` or `t hello --name Alice`
 
 ## Key features
 - You can group, highlight, tag, hide, list, regex-search your tasks.
-- Import and reuse(!) tasks from other modules/dirs  (`tt.include(module_name)`). Directories will be switched automtically as needed.
+- Import and reuse(!) tasks from other modules/dirs  (`tt.include(module_name)`). Directories will be switched automatically if needed.
 - Less noise -- auto hide tasks which are not ready to be run (e.g. due to missing env vars) (`tt.config.hide_not_ready = True`)
 - Quickly see the overview of all the tasks, along with optional and mandatory arguments.
 - Customize the way your tasks are listed. Customize it on per-project basis, or globally for many projects.
@@ -48,9 +48,9 @@ def eat():
     print("Yum yum!")
 
 ```
-And run it, e.g.: `t bake` or `t b` or `t b -f vanilla --no-eat`
+And run it, e.g.: `t bake` or `t bake --frosting cream` or `t b` or `t b -f vanilla --no-eat`, etc.
 
-That's it!
+That's it! All the flags are generated automatically, including the `--no-*` bool variants.
 
 
 ## Basic usage
