@@ -22,6 +22,9 @@ def hello(name="Bob"):
 ```
 And you can run it: `t hello` or `t hello -n Alice` or `t hello --name Alice`
 
+
+
+
 ## Key features
 - Automatic generation of CLI interfaces from signatures of simple Python functions.
 - You can group, highlight, tag, hide, list, regex-search your tasks.
@@ -36,6 +39,9 @@ And you can run it: `t hello` or `t hello -n Alice` or `t hello --name Alice`
 
 ## Screenshot
 TODO
+
+## Documentation
+- [For more detailed docs, see here](docs/)
 
 ## Another example:
 ```
