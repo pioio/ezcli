@@ -11,6 +11,7 @@ with tt.Group("Weather"):
         """auto-determine the current city, and check weather there."""
         city = requests.get("https://ipinfo.io").json()["city"]
         weather_in(city) # call the other task
+        run("pwd")
 
     @task
     def weather_in(city):

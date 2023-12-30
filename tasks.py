@@ -13,7 +13,17 @@ tt.config.default_options = ["--no-go-task"]
 tt.config.default_options_tt = ["--no-go-task"]
 #tt.config.hide_not_ready = True
 
+#with tt.Group("Weather", desc="child import test"):
+from examples.screenshots import tasks as weather_tasks
+tt.include(weather_tasks.weather_here)
+
+
 with tt.Group("dev", desc="Development tasks"):
+
+    @task
+    def cwd():
+        """Print the current working directory."""
+        run("pwd")
 
     @task(aliases="cov")
     def coverage():

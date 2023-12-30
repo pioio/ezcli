@@ -11,6 +11,8 @@ created = []
 _is_init = True
 
 
+from .logging import get_logger
+log = get_logger(__name__)
 class Group:
     """A group of tasks."""
 
@@ -50,7 +52,9 @@ class Group:
         # TODO: this will fail if moduls define groups of same names
         if name in created:
             msg = f"Group {name} already exists"
-            raise ValueError(msg)
+            log.debug(msg)
+         # > need to disable, otherwise triggers when merge with parents whcih imports from child
+         #>        raise ValueError(msg)
         created += [name]
 
         self.parent: Group | None = None

@@ -49,10 +49,12 @@ def print_warning(text: str) -> None:
 def change_dir(path: str) -> typing.Iterator[None]:
     """Context manager to change the current working directory."""
     old_dir = os.getcwd()
+    log.debug(f"change_dir(): Changing to: {path}")
     os.chdir(path)
     try:
         yield
     finally:
+        log.debug(f"change_dir(): Changing back {old_dir}   (from {path})")
         os.chdir(old_dir)
 
 

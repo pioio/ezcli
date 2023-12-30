@@ -9,7 +9,11 @@
     - [ ] included tasks
           included...docs.generate-all-docs ^ i.dgd
           included...docs.test-documentation ^ i.dt
-  - [ ] 't'
+  - [ ] add unit tests
+  - [ ] add unit test that it changes to the parent dir of merged in parent file
+  - [ ] marke the ones from the parent, sort separtely to first?
+    - [ ] add separator between them?
+    - [ ] tt.config.merge_parent_filter = lambda task: task.name.startswith("parent_")
 
 
 - [ ] hide_not_ready unit test

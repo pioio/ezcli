@@ -40,7 +40,7 @@ def main() -> None:  # noqa: C901
     already_loaded = set()
 
 
-    def include_from_file(filename, namespace="", alias_namespace=""):
+    def include_from_file(filename, namespace="", alias_namespace="", mark_them=False):
         log.separator(f"Importing objects from {filename}")
 
         absolute_filepath = os.path.abspath(filename)
@@ -65,7 +65,15 @@ def main() -> None:  # noqa: C901
         start_include = time.time() # FIXME: called for extra includes
 
         # This includes the tasks from 'sometasks' into THIS module (main)
-        taskcli.include.include(imported_module, skip_include_info=True, namespace=namespace, alias_namespace=alias_namespace)
+        tasks = taskcli.include.include(imported_module, skip_include_info=True, namespace=namespace, alias_namespace=alias_namespace)
+
+        if mark_them:
+            for task in tasks:
+                task.name_format = f">{task.name_format}"
+                magenta = "\033[35m"
+                yellow = "\033[33m"
+                task.name_format = "⬆ {name}{clear}"
+
         nonlocal include_took, tasks_found
         include_took = time.time() - start_include
         tasks_found = True
@@ -94,9 +102,9 @@ def main() -> None:  # noqa: C901
                     shutil.copy(abs_filepath, f"{dir_filepath}/{random_lowercase}.py")
 
                     if not tasks_found: # not local tasks.py, it's not merging, so no namespace
-                        include_from_file(f"{dir_filepath}/{random_lowercase}.py",)
+                        include_from_file(f"{dir_filepath}/{random_lowercase}.py", mark_them=True)
                     else:
-                        include_from_file(f"{dir_filepath}/{random_lowercase}.py", namespace="p", alias_namespace="p")
+                        include_from_file(f"{dir_filepath}/{random_lowercase}.py", namespace="p", alias_namespace="p", mark_them=True)
                 finally:
                     os.remove(f"{dir_filepath}/{random_lowercase}.py")
                 #include_from_file(f"{dir_filepath}/{random_lowercase}.py")
