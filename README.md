@@ -1,6 +1,7 @@
 # `taskcli` - a novel way of creating complex, real-life CLI interfaces from python functions
 
 A `t` CLI tool for **fast**, real-life, task automation for fans of the Linux command shell.
+
 Save time - Create snappy, powerful, and reusable CLI interfaces from simple Python functions.
 
 Manage and automate any project (not only Python) with ease.
@@ -12,7 +13,7 @@ Manage and automate any project (not only Python) with ease.
 - Auto hide tasks which are not ready to be run (e.g. due to missing env vars) (`tt.config.hide_not_ready = True`)
 - Quickly see the overview of all the tasks, along with optional and mandatory arguments.
 - Customize the way your tasks are listed. Customize it on per-project basis, or globally for many projects.
-- simple to start, but power and suitable for managing larger projects.
+- Simple to start, but power and suitable for managing larger projects.
 - Automatically switch directories when running tasks imported from other directories (can be disabled).
 
 
@@ -48,14 +49,14 @@ And run it, e.g.: `t bake` or `t b` or `t b -f vanilla --no-eat`
 That's it!
 
 ## Basic usage
-`t --init` create a blank `tasks.py` file in the current directory with example content
-`t` list all the tasks defined by the `tasks.py` located in current directory (or in parent directory - auto discovery)
-`t <task_name> [args]` run a task (tool will automatically switch directories if needed), `[args]` are passed directly to the task function
-`t <group_name>` list all the tasks in a group of tasks (also the hidden ones)
-`t -s <search_term>` list all the tasks matching the regex search term
-`t -t tags` list all the tasks with the given tags
-`t -t imp` list all tags marked as important
-`t -H` list all the tasks, even the ones marked as hidden and the onces in hidden group
+- `t --init` creates a blank `tasks.py` file in the current directory with example content.
+- `t` list all the tasks defined by the `tasks.py` located in current directory (or in parent directory - auto discovery).
+- `t <task_name> [args]` run a task (tool will automatically switch directories if needed), `[args]` are passed directly to the task function.
+- `t <group_name>` list all the tasks in a group of tasks (also the hidden ones).
+- `t -s <search_term>` list all the tasks matching the regex search term.
+- `t -t tags` list all the tasks with the given tags.
+- `t -t imp` list all tags marked as important.
+- `t -H` list all the tasks, even the ones marked as hidden and the onces in hidden group.
 
 
 ## What is it for?
