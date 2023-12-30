@@ -193,3 +193,10 @@ def search_for_tasks(tasks: list[Task], search: str) -> list[Task]:
             out.append(task)
 
     return out
+
+
+def get_task_breadcrumbs() -> str:
+    """Return the breadcrumbs for the current task. Used for logging messages."""
+    from taskcli import tt
+
+    return " > ".join([t.name for t in tt.get_runtime().current_tasks])

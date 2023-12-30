@@ -9,7 +9,8 @@ SEPARATOR = "### "
 def _border(text: str) -> str:
     import os
 
-    terminal_width = min(os.get_terminal_size().columns, 120)
+    columns = 120 if not os.isatty(1) else os.get_terminal_size().columns
+    terminal_width = min(columns, 120)
     text = f"{SEPARATOR}{text}         ".ljust(terminal_width - 1, " ")
     return f"{configuration.colors.green}{configuration.colors.underline}{text} {configuration.colors.end}"
 

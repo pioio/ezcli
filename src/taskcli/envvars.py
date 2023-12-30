@@ -45,6 +45,7 @@ TASKCLI_GOTASK_TASK_BINARY_FILEPATH = EnvVar(
     ),
 )
 
+
 TASKCLI_GOTASK_TASKFILE_FILENAMES = EnvVar(
     default_value="Taskfile.yaml,Taskfile.yml,taskfile.yaml,taskfile.yml",
     desc=(

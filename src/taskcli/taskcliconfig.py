@@ -180,6 +180,13 @@ class TaskCLIConfig:
         )
         self.show_hidden: bool = self._add_bool(self.field_show_hidden)
 
+        self.field_run_show_location: ConfigField = ConfigField(
+            False,
+            "run_show_location",
+            desc="When true, each call to tt.run() also logs the code location from which it was called",
+        )
+        self.run_show_location: bool = self._add_bool(self.field_run_show_location)
+
         self.field_no_go_task = ConfigField(
             False,
             "no_go_task",
@@ -227,7 +234,6 @@ class TaskCLIConfig:
         self.field_task_start_message = ConfigField(
             False,
             "task_start_message",
-            action=argparse.BooleanOptionalAction,
             desc=("Whether to print a log.info log message to stderr whenever a task starts."),
         )
         self.task_start_message: bool = self._add_bool(self.field_task_start_message)

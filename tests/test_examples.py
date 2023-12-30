@@ -4,7 +4,7 @@
 import taskcli
 
 
-def test_all_example():
+def test_all_examples():
     """Test that examples listed with --examples do not have any obvious typos/errors in them.
 
     This does NOT test if the examples actually do what they promised.
@@ -31,3 +31,7 @@ if __name__ == "__main__":
             # chmod
         taskcli.run(f"chmod +x {filename}")
         taskcli.run(f"python {filename}")
+
+
+def test_print_examples():
+    taskcli.examples.print_examples()

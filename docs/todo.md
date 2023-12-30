@@ -3,8 +3,10 @@
 - [ ] def lint(paths: Paths): Cannot call from CLI without the path
 
 - [ ] move building from taskfile to tasks.py
-
+- [ ] code location of merged module is wrong @ coverage report (/Users/p/code/mygithub/taskcli/taskcli_import_dribzrel.py:36)
 - [ ] loading ./tasks.py from dir above, merging them with the local one.
+  - [ ] unit tests for merging tasks
+  - [ ] cleanup main
   - [ ] How to handle A importing B, importing A?
   - [ ] t .  # list only tasks from local dir
   - [ ] crashes if added 'dev' section in screenshots/tasks.py

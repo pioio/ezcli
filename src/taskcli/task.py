@@ -16,6 +16,7 @@ from .group import DEFAULT_GROUP, Group
 from .parameter import Parameter
 from .tags import TAG_IMPORTANT
 from .types import Any, AnyFunction, Module
+from taskcli import configuration
 
 
 class UserError(Exception):
@@ -471,7 +472,9 @@ def _get_wrapper(  # noqa: C901
     @functools.wraps(func)
     def wrapper_for_changing_directory(*args: list[Any], **kwargs: dict[str, Any]) -> Any:
         tt.get_runtime().current_tasks.append(task)
-        breadcrumbs = " > ".join([t.name for t in tt.get_runtime().current_tasks])
+        from taskcli import tasktools
+
+        breadcrumbs = tasktools.get_task_breadcrumbs()
         try:
             if tt.config.task_start_message:
                 width = 80
@@ -487,7 +490,9 @@ def _get_wrapper(  # noqa: C901
                 return func(*args, **kwargs)
         finally:
             if tt.config.task_start_message:
-                msg = f"-- taskcli [finished: {breadcrumbs}]"
+                black = configuration.colors.dark_gray
+                clear = configuration.colors.end
+                msg = f"{black}-- taskcli [finished: {breadcrumbs}]{clear}"
                 utils.print_to_stderr(msg, color="")
             tt.get_runtime().current_tasks.pop()
 

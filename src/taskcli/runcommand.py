@@ -41,16 +41,17 @@ class RunError(Exception):
 
 def run(cmd: str, check: bool = True) -> RunResult:
     """Run a command."""
+    from taskcli import tasktools, tt
+
     try:
-        BLUE = "\033[94m"
+        GREEN = "\033[92m"
         END = "\033[0m"
         BLACK = "\033[30m"
-        if not os.environ.get("TASKCLI_LOCATION", "") == "1":
+        if tt.config.run_show_location:
             location = f" {BLACK}({_get_location()}){END}"
         else:
             location = ""
-
-            print(f"{BLUE}@@ {cmd}{END}{location}", flush=True, file=stderr)  # noqa: T201
+        print(f"{GREEN}@@ {END}{GREEN}{cmd}{END}{location}", flush=True, file=stderr)  # noqa: T201
 
         popen = subprocess.Popen(cmd, shell=True)
         popen.communicate()

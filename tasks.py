@@ -5,6 +5,7 @@
 
 import taskcli.include
 import testing
+from docsgenerator import tasks as docgentasks
 
 # with tt.Group("Weather", desc="child import test"):
 from examples.screenshots import tasks as weather_tasks
@@ -15,10 +16,10 @@ important = tt.Group("Important", desc="Development tasks")
 tt.config.default_options = ["--no-go-task"]
 tt.config.default_options_tt = ["--no-go-task"]
 tt.config.task_start_message = True
+tt.config.run_show_location = True
 
 tt.include(weather_tasks.weather_here)
 
-from docsgenerator import tasks as docgentasks
 
 with tt.Group("dev", desc="Development tasks"):
 
@@ -162,7 +163,7 @@ def argparse():
 
 
 @task(aliases="pc", important=True)
-def pre_commit(*, do_lint: bool = False, do_test: bool = True):
+def pre_commit(*, do_lint: bool = True, do_test: bool = True):
     """Run pre-commit hooks."""
     if do_lint:
         lint()
