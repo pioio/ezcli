@@ -280,6 +280,7 @@ class Task:
     def add_namespace(self, namespace: str = "", alias_namespace: str = "") -> None:
         """Add a namespace to the task."""
         if namespace:
+
             self.namespaces = [namespace, *self.namespaces]
 
         new_aliases = []

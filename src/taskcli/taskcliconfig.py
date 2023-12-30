@@ -132,6 +132,8 @@ class TaskCLIConfig:
         )
         self.search: str = self._add_str(self.field_search)
 
+        self.merge_with_parent: bool = False
+
         default_show_hidden = False
 
         self.field_show_hidden: ConfigField = ConfigField(

@@ -2,6 +2,8 @@ from argh import aliases
 from taskcli import task, tt, run
 import requests
 
+tt.config.merge_with_parent = True
+
 
 with tt.Group("Weather"):
     @task(aliases="here")
@@ -14,6 +16,11 @@ with tt.Group("Weather"):
     def weather_in(city):
         """Curl wttr.in to check the weather in the given city. Mandatory argument."""
         run(f"curl wttr.in/{city}")
+
+    @task
+    def test():
+        """Conflicting name""" # TODO: remove me
+        run("Hello, tst")
 
     for city in ["Boston", "Sydney", "London", "Yokohama"]:
         @task(hidden=True, name=f"weather-{city.lower()}", desc=f"Check weather in {city}.")

@@ -52,7 +52,6 @@ def main() -> None:  # noqa: C901
         basename = os.path.basename(absolute_filepath)
         start_import = time.time()
 
-
         module_name = basename.replace(".py", "").replace("-", "_")
         log.debug(f"Importing module: {module_name}")
         imported_module = __import__(module_name)
@@ -77,13 +76,31 @@ def main() -> None:  # noqa: C901
         if os.path.exists(filename):
             include_from_file(filename)
 
-    if not tasks_found:
+    from taskcli import tt
+    if tasks_found and tt.config.merge_with_parent or not tasks_found:
         for filename in envvars.TASKCLI_EXTRA_TASKS_PY_FILENAMES.value.split(","):
             filename = filename.strip()
             if os.path.exists(filename):
                 #include_from_file(filename, namespace=".", alias_namespace="..")
-                include_from_file(filename)
-                break # for now only one
+                import random, string
+                random_lowercase = random.choice(string.ascii_lowercase)
+                random_lowercase = "taskcli_import_" + random_lowercase
+                abs_filepath = os.path.abspath(filename)
+                dir_filepath = os.path.dirname(abs_filepath)
+                basename = os.path.basename(abs_filepath)
+                import shutil
+                log.debug(f"Copying {abs_filepath} to {dir_filepath}/{random_lowercase}.py")
+                try:
+                    shutil.copy(abs_filepath, f"{dir_filepath}/{random_lowercase}.py")
+
+                    if not tasks_found: # not local tasks.py, it's not merging, so no namespace
+                        include_from_file(f"{dir_filepath}/{random_lowercase}.py",)
+                    else:
+                        include_from_file(f"{dir_filepath}/{random_lowercase}.py", namespace="p", alias_namespace="p")
+                finally:
+                    os.remove(f"{dir_filepath}/{random_lowercase}.py")
+                #include_from_file(f"{dir_filepath}/{random_lowercase}.py")
+                break # for now only ones
 
     log.separator(f"Finished include and imports")
     # This part be right after importing the default ./task.p and before anything else
@@ -93,6 +110,7 @@ def main() -> None:  # noqa: C901
 
     this_module = sys.modules[__name__]
     taskfile_took = INVALID_TIME
+
     if taskfiledev.should_include_taskfile_dev(argv=argv):
         log.separator("Initializing go-task")
         start_taskfile = time.time()

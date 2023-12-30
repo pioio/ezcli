@@ -1,4 +1,17 @@
 
+- [ ] loading ./tasks.py from dir above, merging them with the local one.
+  - [ ] How to handle A importing B, importing A?
+  - [ ] t .  # list only tasks from local dir
+  - [ ] t .. # list only one level (not dir) up
+  - [ ] would have to use importlib, tried it once, but is tricky. Maybe not worth it
+  - [ ] allow preventing merging with the one from above? Or make it explcii?  tt.config.merge_with_parent = False
+  - [ ] Namespace added in wrong place: that's `t` in examples/screenshot
+    - [ ] included tasks
+          included...docs.generate-all-docs ^ i.dgd
+          included...docs.test-documentation ^ i.dt
+  - [ ] 't'
+
+
 - [ ] hide_not_ready unit test
 - [ ] --init still not working - add unit test
 - [ ] unit test hide-not-read
@@ -42,12 +55,6 @@
 
 
 # Long-term TODOs
-- [ ] loading ./tasks.py from dir above, merging them with the local one.
-  - [ ] How to handle A importing B, importing A?
-  - [ ] t .  # list only tasks from local dir
-  - [ ] t .. # list only one level (not dir) up
-  - [ ] would have to use importlib, tried it once, but is tricky. Maybe not worth it
-  - [ ]
 - [ ] pre/post hooks
 - [ ] list of optional arg names to always mark as important?  add imperative, as Cookbook example.
 - [ ] hidden tasks: _foobar: use "named" decorator?
