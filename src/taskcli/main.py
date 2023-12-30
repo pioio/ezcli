@@ -15,7 +15,7 @@ from . import envvars, task, taskfiledev, utils
 from .logging import get_logger
 from .parser import build_initial_parser
 from .task import Task, UserError
-from .utils import print_err, print_error
+from .utils import print_to_stderr, print_error
 
 log = get_logger(__name__)
 

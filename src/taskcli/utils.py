@@ -22,10 +22,12 @@ def print_stderr(text: str) -> None:
     print(text, file=sys.stderr, flush=True)  # noqa: T201
 
 
-def print_err(text: str) -> None:
+def print_to_stderr(text: str,color:str|None=None) -> None:
     """Print to stderr."""
-    GREEN = configuration.colors.green
-    text = f"{GREEN}{text}{ENDC}"
+
+    if color is None:
+        color = configuration.colors.green
+    text = f"{color}{text}{ENDC}"
 
     print(text, file=sys.stderr, flush=True)  # noqa: T201
 

@@ -479,17 +479,25 @@ def _get_wrapper(
     # DecoratedFunction
     @functools.wraps(func)
     def wrapper_for_changing_directory(*args: list[Any], **kwargs: dict[str, Any]) -> Any:
+        tt.get_runtime().current_tasks.append(task)
+        breadcrumbs = " > ".join([t.name for t in tt.get_runtime().current_tasks])
         try:
             if tt.config.task_start_message:
-                pass
-            print(f"----- task [{task.name}]", file=sys.stderr)
-            tt.get_runtime().current_tasks.append(task)
+                width = 80
+                if os.isatty(sys.stderr.fileno()):
+                    width = os.get_terminal_size().columns
+                msg = f"-- taskcli [{breadcrumbs}] -----------".ljust(width, "-")
+                utils.print_to_stderr(msg)
+
             if change_dir:
                 with utils.change_dir(task.get_taskfile_dir()):  # type: ignore[attr-defined]
                     return func(*args, **kwargs)
             else:
                 return func(*args, **kwargs)
         finally:
+            if tt.config.task_start_message:
+                msg = f"-- taskcli [finished: {breadcrumbs}]"
+                utils.print_to_stderr(msg, color="")
             tt.get_runtime().current_tasks.pop()
 
     del kwargs["group"]
