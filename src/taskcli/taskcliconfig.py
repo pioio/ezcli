@@ -45,7 +45,7 @@ class ConfigField:
 
     def __init__(
         self,
-        default: str | bool | int | list[str],
+        default: str | bool | int | list[str]|None,
         name: str = "",
         short: str = "",
         /,
@@ -114,9 +114,9 @@ class TaskCLIConfig:
         self._addded_env_vars: list[EnvVar] = []
 
         self.field_init: ConfigField = ConfigField(
-            "", "init", env=False, desc="Create a new tasks.py file in the current directory"
+            False, "init", env=False, desc="Create a new tasks.py file in the current directory",
         )
-        self.init: str = self._add_str(self.field_init)
+        self.init: bool = self._add_bool(self.field_init)
 
         self.tags: list[str] = self._add_list(
             [], "tags", "-t", nargs="+", help="Only show tasks matching any of these tags"

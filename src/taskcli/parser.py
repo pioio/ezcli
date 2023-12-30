@@ -100,8 +100,8 @@ def _dispatch_unsafe(argv: list[str] | None = None, tasks_found: bool = True) ->
 
     taskcli.core.get_runtime().parsed_args = argconfig
 
-    if config.init:
-        create_tasks_file(config.init)
+    if config.init is True:
+        create_tasks_file()
         return
     if config.print_env:
         envvars.show_env(verbose=False, extra_vars=config.get_env_vars())
