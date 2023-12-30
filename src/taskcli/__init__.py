@@ -15,7 +15,8 @@ from .parameter import Parameter
 from .parametertype import ParameterType
 from .parser import dispatch
 from .runcommand import run
-from .task import Task, task
+from .task import Task
+from .task import task_decorator as task
 
 from typing import Annotated as ann  # noqa: N813 # isort: skip
 

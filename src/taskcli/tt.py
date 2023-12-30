@@ -29,7 +29,8 @@ from .include import include, include_function, include_module
 from .parameter import Parameter
 from .parser import dispatch
 from .runcommand import run
-from .task import Task, task
+from .task import Task
+from .task import task_decorator as task
 from .taskcliconfig import runtime_config as config
 from .types import Any, AnyFunction, Module
 from .utils import get_task, get_tasks, get_tasks_dict

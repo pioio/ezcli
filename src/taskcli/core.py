@@ -7,7 +7,7 @@ import typing
 import taskcli
 
 from .group import Group
-from .task import task
+from .task import task_decorator as task
 from .taskcli import TaskCLI
 
 if typing.TYPE_CHECKING:

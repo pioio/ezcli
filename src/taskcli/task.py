@@ -36,7 +36,7 @@ class TaskCodeLocation:
         return f"TaskCodeLocation(file={self.file!r}, line={self.line!r})"
 
 
-def task(
+def task_decorator(
     *args: Any,
     change_dir: bool = True,
     # ------------ args below are copy-pasted from the Task.__init__
@@ -481,7 +481,7 @@ def _get_wrapper(  # noqa: C901
                 utils.print_to_stderr(msg)
 
             if change_dir:
-                with utils.change_dir(task.get_taskfile_dir()):  # type: ignore[attr-defined]
+                with utils.change_dir(task.get_taskfile_dir()):
                     return func(*args, **kwargs)
             else:
                 return func(*args, **kwargs)
