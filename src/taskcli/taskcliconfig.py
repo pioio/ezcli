@@ -227,9 +227,11 @@ class TaskCLIConfig:
         self.field_task_start_message = ConfigField(
             False,
             "task_start_message",
+            action=argparse.BooleanOptionalAction,
             desc=("Whether to print a log.info log message to stderr whenever a task starts."),
         )
         self.task_start_message: bool = self._add_bool(self.field_task_start_message)
+        """Whether to print a log.info log message to stderr whenever a task starts."""
 
         self.field_show_ready_info = ConfigField(
             False,

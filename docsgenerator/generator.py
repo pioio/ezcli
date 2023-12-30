@@ -11,6 +11,7 @@ def autogen_header():
 def generate_settings() -> str:
     config = taskcliconfig.TaskCLIConfig()
 
+
     out = "# Configuration fields\n"
     out += autogen_header()
     BR = "  "

@@ -5,7 +5,6 @@
 
 import taskcli.include
 import testing
-from docsgenerator import tasks as docgentasks
 
 # with tt.Group("Weather", desc="child import test"):
 from examples.screenshots import tasks as weather_tasks
@@ -19,6 +18,7 @@ tt.config.task_start_message = True
 
 tt.include(weather_tasks.weather_here)
 
+from docsgenerator import tasks as docgentasks
 
 with tt.Group("dev", desc="Development tasks"):
 

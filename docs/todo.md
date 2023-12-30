@@ -47,7 +47,7 @@
   - [ ] per module task list
   - [ ] include(child_tasks.child1)
   - [ ] include to group
-  - [ ]
+
   - [ ] add warning if function name overwridden
   - [ ] include(group, newgroupname)
   - [ ] include(group.task, new-task-name-in-current-group)
@@ -59,7 +59,8 @@
             pass
 
         include(xxx)
-
+- [ ] Stop adding '.' to namespace?
+- [ ] rename namespace to namenamespace
 - [ ] FIXME: optional flags are not gray (disk usage example)
 - [ ] FIXME: doing `t -f ../../tasks.py TAB` results in wrong tab completion
 - [ ] unit test for duplicate task names
