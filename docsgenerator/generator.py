@@ -15,7 +15,7 @@ def generate_settings() -> str:
     out += autogen_header()
     BR = "  "
     for field in config.get_fields():
-        out += f"## {field.name}\n"
+        out += f"#### {field.name}\n"
         out += f"{field.desc}{BR}\n"
         if field.env:
             out += f"{field.env_var_name}{BR}\n"

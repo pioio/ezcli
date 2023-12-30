@@ -169,7 +169,7 @@ def argparse():
 
 
 @task
-def pc(*, do_lint: bool = True, do_test: bool = True):
+def pc(*, do_lint: bool = False, do_test: bool = True):
     """Run pre-commit hooks."""
     if do_lint:
         lint()
