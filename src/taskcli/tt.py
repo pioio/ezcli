@@ -1,18 +1,25 @@
-"""Exposes all the commonly used functions and classes.
+"""The public API of taskcli library.
 
-This module is the public API of the library.
+Objects exposed via this module change rarely, and are reasonably well documented.
 
 Example:
 ```
+    # Recommended usage:
+    #  - `task` and `run` are used often, so import them directly
+    #  - `tt` contains all the other public API functions and Object you might need
     from taskcli import task, run, tt
-
     @task
-    def foobar():
+    def mytask():
         run("date")
+
+    # Alternative usage
+    from taskcli import tt
+    @tt.task
+    def mytask():
+        tt.run("date")
 ```
 
 """
-
 
 from . import core
 from .arg import arg
