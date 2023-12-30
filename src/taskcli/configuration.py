@@ -42,7 +42,8 @@ class Colors:
     blue: str = "\033[94m"
     red: str = "\033[91m"
     underline: str = COLOR_UNDERLINE
-    bold:str = "\033[1m"
+    bold: str = "\033[1m"
+
 
 colors = Colors()
 
@@ -89,14 +90,9 @@ class Config:
 
     # Prefix with "\n" to separate group names with a newline
     # use {NAME} instead of {name} to print group name in uppercase
-    #render_format_of_group_name: str = "\n{white}{underline}{white}{name_with_suffix:<22}{white}{desc:<40}{clear}"
-
 
     render_format_of_group_name: str = "\n{bold}{name:<22}{desc:<40}{clear}"
-    render_format_of_group_name_hidden: str = (
-        #"\n{dark_gray}{underline}{dark_gray}{name_with_suffix:<22}{dark_gray}{desc:<40}{clear}"
-        "\n{dark_gray}{bold}{name:<22}{desc:<40}{clear}"
-    )
+    render_format_of_group_name_hidden: str = "\n{dark_gray}{bold}{name:<22}{desc:<40}{clear}"
 
     render_format_num_hidden_tasks: str = "{dark_gray}({num_hidden_tasks} hidden){clear}"
     # Some other example
@@ -112,10 +108,8 @@ class Config:
     # Increaase it if you prefer your summaries to be more to the right.
     render_min_left_column_width: int = 22
 
-
     # any tasks with more rendered params then this will be split into multiple lines
     render_max_params_per_line: int = 5
-
 
     # The column with the task name will never be shorter than this
     # Increasing this will the start of arg listing to the right.

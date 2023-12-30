@@ -67,7 +67,10 @@ def test_group_namespace_but_no_alias_names():
     task_no_group = tt.get_tasks_dict()["tasknogroup"]
     task_no_group.add_namespace_from_group(group)
     assert task_no_group.name == "bar.tasknogroup"
-    assert task_no_group.aliases == ["t1", "t2"], "group has no alias namespace, so task aliases should not be namespaced"
+    assert task_no_group.aliases == [
+        "t1",
+        "t2",
+    ], "group has no alias namespace, so task aliases should not be namespaced"
 
 
 def test_group_namespace_with_alias_names():
@@ -88,7 +91,6 @@ def test_group_namespace_with_alias_names():
         assert atask.group == group
         assert atask.name == "bar.foobar"
         assert atask.aliases == ["ba1", "ba2"]
-
 
     # same behavior when copying
     task_no_group = tt.get_tasks_dict()["tasknogroup"]

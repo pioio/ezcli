@@ -34,8 +34,10 @@ def get_parsed_args() -> argparse.Namespace:
         raise RuntimeError(msg)
     return task_cli.parsed_args
 
+
 if typing.TYPE_CHECKING:
     from .tt import Task
+
 
 def get_runtime() -> "TaskCLI":
     """Return the TaskCLI runtime. It contains the context of the current execution."""

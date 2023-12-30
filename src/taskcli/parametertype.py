@@ -3,7 +3,6 @@ from types import UnionType
 from typing import Any, Union, get_args, get_origin
 
 
-
 class ParameterType:
     """A class to represent the type of a parameter."""
 

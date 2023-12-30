@@ -30,7 +30,6 @@ def main() -> None:  # noqa: C901
     argv = sys.argv[1:]
     argconfig, _ = parser.parse_known_args(argv or sys.argv[1:])
 
-
     tasks_found = False
     import_took = INVALID_TIME
     include_took = INVALID_TIME

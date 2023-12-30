@@ -3,10 +3,8 @@ from typing import Annotated, Any, Iterable, Sequence, TypeVar
 
 import taskcli
 import taskcli.core
-#from .include import include
-from . import include
 
-from . import configuration, examples, listing, utils
+from . import configuration, examples, include, listing, utils
 from .annotations import Arg
 from .arg import arg
 from .configuration import config

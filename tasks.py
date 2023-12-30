@@ -4,8 +4,8 @@
 
 import taskcli.include
 import testing
-from taskcli import run, task, tt
 from docsgenerator import tasks as docgentasks
+from taskcli import run, task, tt
 
 important = tt.Group("Important", desc="Development tasks")
 
@@ -45,7 +45,6 @@ with tt.Group("dev", desc="Development tasks"):
     @task
     def runcompletion():
         run("_ARGCOMPLETE=1 ./tasks.py")
-
 
 
 # TODO: instead of important, use a not-important, and hide them explicitly instead
@@ -135,9 +134,10 @@ def rufftwice():
     ruff()
     ruff()
 
+
 with tt.Group("included tasks", namespace="included", alias_namespace="i"):
     tt.include(docgentasks, namespace="docs", alias_namespace="d")
-    assert tt.get_task("included.docs.test-documentation")._included_from
+    assert tt.get_task("included.docs.test-documentation").included_from
 
 
 @task

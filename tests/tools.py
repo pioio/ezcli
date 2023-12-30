@@ -73,6 +73,7 @@ def include_tasks(module: Module | None = None) -> list[Task]:
         raise Exception(msg)
 
     from taskcli.include import load_tasks_from_module_to_runtime
+
     assert module_from_which_this_function_was_called is not None
     load_tasks_from_module_to_runtime(module_from_which_this_function_was_called)
     return taskcli.core.get_runtime().tasks

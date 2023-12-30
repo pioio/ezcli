@@ -1,12 +1,20 @@
+import sys
 from os import name
+
+import pytest
+
 from taskcli import task, tt
 from taskcli.include import include
+from taskcli.task import UserError
+
 from .tools import reset_context_before_each_test
+
 
 def test_include_module_via_groups_with_aliases():
     """Test including a module."""
     # TODO: remove this unit test? replaced with other tests below
     from tests.includesandaliases import modulea
+
     tt.include(modulea)
 
     tasks = tt.get_tasks()
@@ -23,6 +31,7 @@ def test_include_module_via_groups_with_aliases():
 def test_include_module_via_groups_with_aliases_and_import_namespaces():
     # TODO: remove this unit test? replaced with other tests below
     from tests.includesandliases2 import modulea
+
     tt.include(modulea)
 
     tasks = tt.get_tasks()
@@ -36,9 +45,6 @@ def test_include_module_via_groups_with_aliases_and_import_namespaces():
     assert len(full_names) == 3
 
 
-
-
-
 def test_simple_include_with_aliases():
     # TODO: remove this unit test? replaced with other tests below
     @task
@@ -46,6 +52,7 @@ def test_simple_include_with_aliases():
         pass
 
     from tests.includesandliases2 import simpleinclude
+
     with tt.Group("group1", namespace="group1", alias_namespace="g1") as group1:
         tt.include(simpleinclude)
 
@@ -53,7 +60,7 @@ def test_simple_include_with_aliases():
     tasksdict = tt.get_tasks_dict()
     assert "group1.task1" in tasksdict
     group1task1 = tasksdict["group1.task1"]
-    assert group1task1._included_from
+    assert group1task1.included_from
     assert "g1t1" in group1task1.aliases, "alias namespace from should have been appended to the task's aliases"
 
     assert "group1.task2" in tasksdict
@@ -69,6 +76,7 @@ def test_simple_include_with_aliases_from_a_group():
     """Import to a namespaced group via namespaced include, from a namespaces group"""
 
     from tests.includesandliases2 import simpleinclude2
+
     with tt.Group("group1", namespace="group1", alias_namespace="g1") as group1:
         tt.include(simpleinclude2, namespace="namespace1", alias_namespace="ns1")
 
@@ -82,7 +90,7 @@ def test_simple_include_with_aliases_from_a_group():
     # Task0 is not in the groupS
     assert "group1.namespace1.task0" in tasksdict
     group1task0 = tasksdict["group1.namespace1.task0"]
-    assert  "g1ns1t0" in group1task0.aliases
+    assert "g1ns1t0" in group1task0.aliases
 
 
 def test_include_from_same_module_with_namespace():
@@ -102,8 +110,6 @@ def test_include_from_same_module_with_namespace():
     assert len(tasks) == 2, f"tasks: {tasks}"
     t = tasks["ns1.foobar"]
 
-import pytest
-from taskcli.task import UserError
 
 def test_include_from_same_module_no_namespace():
     """Important for unit tests"""
@@ -115,10 +121,12 @@ def test_include_from_same_module_no_namespace():
     with pytest.raises(UserError, match="already exists in"):
         tt.include(foobar)
 
+
 def test_include_from_same_module_groups_no_namespace():
     """Important for unit tests"""
 
     with tt.Group("group") as group:
+
         @task
         def foobar():
             pass
@@ -145,14 +153,11 @@ def test_include_from_same_module_no_namespace_but_to_a_group():
         assert len(t.aliases) == 0
 
 
-
-
-
-
 def test_include_from_a_group_via_group():
     """If this works within the same module, it will make unit testing incuding easier"""
 
     with tt.Group("group1", namespace="group1", alias_namespace="g1") as group:
+
         @task
         def foobar():
             pass
@@ -166,6 +171,7 @@ def test_include_from_a_group_via_group_with_include_namesapce():
     """If this works within the same module, it will make unit testing incuding easier"""
 
     with tt.Group("group1", namespace="group1", alias_namespace="g1") as group:
+
         @task(aliases=["f"])
         def foobar():
             pass
@@ -175,8 +181,6 @@ def test_include_from_a_group_via_group_with_include_namesapce():
         t = tt.get_tasks_dict()["group2.include1.group1.foobar"]
         assert ["g2i1g1f"] == t.aliases
 
-
-import sys
 
 def test_include_module_from_same_module_raises_without_namespace():
     """Important for unit tests"""
@@ -211,10 +215,9 @@ def test_include_module_from_same_module_works_with_include_namespace():
     tt.include(this_module, namespace="ns")
 
 
-
-
 def test_include_task():
     """Ability to include task is important for unit tests - allows us to chain include calls"""
+
     @task
     def foobar1():
         pass
@@ -241,15 +244,15 @@ def test_include_task_long_chain():
     include(foobar, namespace="ns1")
     thetask = tt.get_tasks_dict()["ns1.foobar"]
 
-    thetask = tt.get_task("ns1.foobar") # quick test of "get_task()", dont remove
+    thetask = tt.get_task("ns1.foobar")  # quick test of "get_task()", dont remove
 
     include(thetask, namespace="ns2")
     thetask = tt.get_tasks_dict()["ns2.ns1.foobar"]
 
-
     with tt.Group("group", namespace="group") as group:
         tt.include(thetask)
         t = tt.get_tasks_dict()["group.ns2.ns1.foobar"]
+
 
 def test_include_by_default_skips_hidden_tasks():
     @task(hidden=True)
@@ -266,8 +269,8 @@ def test_include_by_default_skips_hidden_tasks():
     tasks = tt.get_tasks_dict()
     assert "foobar1" in tasks  # original one
     assert "foobar2" in tasks  # original one
-    assert "ns1.foobar1" not in tasks #
-    assert "ns1.foobar2" in tasks # include
+    assert "ns1.foobar1" not in tasks  #
+    assert "ns1.foobar2" in tasks  # include
 
 
 def test_include_via_custom_filter():
@@ -287,6 +290,6 @@ def test_include_via_custom_filter():
     tasks = tt.get_tasks_dict()
     assert "foobar1" in tasks  # original one
     assert "foobar2" in tasks  # original one
-    assert "ns1.foobar1" in tasks #
-    assert "ns1.foobar2" not in tasks # include
-    assert tasks["ns1.foobar1"]._included_from
+    assert "ns1.foobar1" in tasks  #
+    assert "ns1.foobar2" not in tasks  # include
+    assert tasks["ns1.foobar1"].included_from

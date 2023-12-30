@@ -104,10 +104,7 @@ class TaskCLIConfig:
         self._addded_env_vars: list[EnvVar] = []
 
         self.field_init: ConfigField = ConfigField(
-            "",
-            "init",
-            env=False,
-            help="Create a new tasks.py file in the current directory"
+            "", "init", env=False, help="Create a new tasks.py file in the current directory"
         )
         self.init: str = self._add_str(self.field_init)
 
@@ -318,12 +315,13 @@ class TaskCLIConfig:
         """Add a str flag to the parser."""
         args = self._shared_init_field(field)
 
-
         def add_argument(parser: argparse.ArgumentParser) -> None:
             nonlocal field
             help = field.help
             help += f" (default: {field.default})"
-            parser.add_argument(*args, default=None, help=field.help, type=str, nargs=None if not field.nargs else field.nargs)
+            parser.add_argument(
+                *args, default=None, help=field.help, type=str, nargs=None if not field.nargs else field.nargs
+            )
 
         def read_argument(config: TaskCLIConfig, args: argparse.Namespace) -> None:
             value = getattr(args, field.name)

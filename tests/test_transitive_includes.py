@@ -1,6 +1,5 @@
-from taskcli import task, tt
 import taskcli.include
-
+from taskcli import task, tt
 
 
 def test_transitive_includes():
@@ -9,9 +8,11 @@ def test_transitive_includes():
     In the end we should have 3 tasks, one from each of those modules.
     """
     import os
+
     print(os.getcwd())
 
     from tests.transitiveincludes import modulea
+
     taskcli.include.include(modulea)
     tasks = tt.get_tasks()
 

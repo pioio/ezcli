@@ -1,29 +1,28 @@
 """Logic for including tasks from other places."""
 
+import inspect
+import logging
 import sys
 from typing import Callable
 from unicodedata import name
 
-from . import utils
-from .task import Task
-
-
-import inspect
+from . import core, utils
 from .group import get_current_group
-from . import core
 from .task import Task, UserError
 from .types import Any, AnyFunction, Module
 
-import logging
 log = logging.getLogger(__name__)
 
 
-def include(object: Module | AnyFunction | "Task",
-            /, *,
-            to_module:Module|None=None,
-            namespace:str="",
-            alias_namespace:str="",
-            **kwargs: Any) -> list["Task"]:
+def include(
+    object: Module | AnyFunction | "Task",
+    /,
+    *,
+    to_module: Module | None = None,
+    namespace: str = "",
+    alias_namespace: str = "",
+    **kwargs: Any,
+) -> list["Task"]:
     """Include Tasks from the specified object into the module which calling this function. Return included Tasks.
 
     This function is meant to be called directly from a ./tasks.py file.
@@ -39,23 +38,43 @@ def include(object: Module | AnyFunction | "Task",
     from .tt import Task
 
     if isinstance(object, Module):
-        return include_module(object, to_module=to_module, namespace=namespace, alias_namespace=alias_namespace, **kwargs)
+        return include_module(
+            object, to_module=to_module, namespace=namespace, alias_namespace=alias_namespace, **kwargs
+        )
     elif inspect.isfunction(object):
-        return [include_function(object, to_module=to_module, namespace=namespace, alias_namespace=alias_namespace, **kwargs)]
+        return [
+            include_function(
+                object, to_module=to_module, namespace=namespace, alias_namespace=alias_namespace, **kwargs
+            )
+        ]
     elif isinstance(object, Task):
-        from_module:Module = sys.modules[object.func.__module__]
+        from_module: Module = sys.modules[object.func.__module__]
         from .include import _include_task
-        return [_include_task(object, from_module=from_module, to_module=to_module, namespace=namespace, alias_namespace=alias_namespace, **kwargs)]
+
+        return [
+            _include_task(
+                object,
+                from_module=from_module,
+                to_module=to_module,
+                namespace=namespace,
+                alias_namespace=alias_namespace,
+                **kwargs,
+            )
+        ]
     else:
         msg = f"include(): Unsupported type: {type(object)}"
         raise Exception(msg)
 
 
-def include_module(from_module: Module, *, to_module:Module|None=None, skip_include_info:bool=False,
-                    namespace:str="",
-                    alias_namespace:str="",
-                    filter:Callable[[Task],bool]=lambda t: not t.hidden,
-                    ) -> list[Task]:
+def include_module(
+    from_module: Module,
+    *,
+    to_module: Module | None = None,
+    skip_include_info: bool = False,
+    namespace: str = "",
+    alias_namespace: str = "",
+    filter: Callable[[Task], bool] = lambda t: not t.hidden,
+) -> list[Task]:
     """Include all tasks from the specified python module.
 
     When including the main module, we skip the include info, as then all the
@@ -72,28 +91,41 @@ def include_module(from_module: Module, *, to_module:Module|None=None, skip_incl
 
     # make a copy, as we will the original list in _include_task if from_module==to_module,
     tasks = from_module.decorated_functions[:]
-    out:list[Task] = []
+    out: list[Task] = []
     for task in tasks:
-        if not skip_include_info: # otherwise we will filter out the ones included from root module
+        if not skip_include_info:  # otherwise we will filter out the ones included from root module
             if not filter(task):
                 continue
         # copy the task to the current module
-        out.append(_include_task(task=task,from_module=from_module,
-                  to_module=to_module,
-                    skip_include_info=skip_include_info,
-                      namespace=namespace,
-                        alias_namespace=alias_namespace))
+        out.append(
+            _include_task(
+                task=task,
+                from_module=from_module,
+                to_module=to_module,
+                skip_include_info=skip_include_info,
+                namespace=namespace,
+                alias_namespace=alias_namespace,
+            )
+        )
     return out
 
 
-def include_function(function: AnyFunction, *, to_module:Module|None=None, skip_include_info:bool=False, namespace:str="", alias_namespace:str="", **kwargs: Any) -> Task:
+def include_function(
+    function: AnyFunction,
+    *,
+    to_module: Module | None = None,
+    skip_include_info: bool = False,
+    namespace: str = "",
+    alias_namespace: str = "",
+    **kwargs: Any,
+) -> Task:
     """Include a function as a task."""
     if to_module is None:
         to_module = utils.get_callers_module()
 
     fun = function
     module_of_fun = sys.modules[fun.__module__]
-    task:None|Task = None
+    task: None | Task = None
     for atask in module_of_fun.decorated_functions:
         if atask.func == fun:
             task = atask
@@ -104,17 +136,25 @@ def include_function(function: AnyFunction, *, to_module:Module|None=None, skip_
         msg = "included function was not decorated with @task"
         raise Exception(msg)
 
-    return _include_task(task=task,from_module=module_of_fun,
-                  to_module=to_module,
-                    skip_include_info=skip_include_info,
-                      namespace=namespace,
-                        alias_namespace=alias_namespace,
-                          **kwargs)
+    return _include_task(
+        task=task,
+        from_module=module_of_fun,
+        to_module=to_module,
+        skip_include_info=skip_include_info,
+        namespace=namespace,
+        alias_namespace=alias_namespace,
+        **kwargs,
+    )
 
 
-def _include_task(task:Task,
-                   from_module:Module, to_module:Module,
-                     skip_include_info:bool=False, namespace:str="", alias_namespace:str="", **kwargs: Any) -> Task:
+def _include_task(
+    task: Task,
+    from_module: Module,
+    to_module: Module,
+    skip_include_info: bool = False,
+    namespace: str = "",
+    alias_namespace: str = "",
+) -> Task:
     """Shared code for including a task from one module to another."""
     if not hasattr(from_module, "decorated_functions"):
         from_module.decorated_functions = []  # type: ignore[attr-defined]
@@ -122,22 +162,21 @@ def _include_task(task:Task,
     if not hasattr(to_module, "decorated_functions"):
         to_module.decorated_functions = []  # type: ignore[attr-defined]
 
-
     assert isinstance(task, Task), f"Expected Task, got {type(task)}"
 
     if not skip_include_info:
         group = get_current_group()
         copy = task.copy(group=group, included_from=from_module)
         copy.add_namespace_from_group(task.group)
-        copy._included_from = from_module # ensure is set
+        copy.included_from = from_module  # ensure is set
     else:
         # We're including the root module, preserve the group info, otherwise we would move all tasks to 'default'
         group = task.group
         copy = task.copy(group=group, included_from=None)
 
         # So that those which were included into the root module continue to be marked as included
-        if task._included_from:
-            copy._included_from = task._included_from
+        if task.included_from:
+            copy.included_from = task.included_from
 
     if namespace:
         copy.add_namespace(namespace, alias_namespace=alias_namespace)
@@ -169,4 +208,3 @@ def load_tasks_from_module_to_runtime(module: Module) -> None:
     for task in module.decorated_functions:
         log.debug(f"load_tasks_from_module_to_runtime(): including task {task.name} from {module} to runtime")
         runtime.tasks.append(task)
-

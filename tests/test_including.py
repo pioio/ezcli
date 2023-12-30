@@ -6,6 +6,7 @@ import pytest
 import taskcli
 from taskcli import Task, dispatch, task
 from taskcli.include import include
+from taskcli.task import UserError
 from tests import tools
 
 from .tools import reset_context_before_each_test, run_tasks
@@ -86,32 +87,6 @@ def test_include_cwd_change_child1_via_parent():
     assert stdout.strip().endswith("tests/includetest1/subdir"), "should have changed dir"
 
 
-# def test_include_cwd_change_child1_via_parent_with_no_change():
-#     """Here we're calling a task which initially does not change dir, which then calls fun/task which does change it."""
-#     stdout, _ = run_tasks("tests/includetest1/parent_test_1.py child1-via-parent-no-change-dir")
-#     assert stdout.strip().endswith("tests/includetest1/subdir"), "should have changed dir"
-
-# def test_include_cwd_change_child2_via_parent_with_no_change():
-#     """Here we're calling a task which initially does not change dir, which then calls fun/task which does NOT change it."""
-#     cwd = os.getcwd()
-#     stdout, _ = run_tasks("tests/includetest1/parent_test_1.py child2-via-parent-no-change-dir")
-#     assert stdout.strip().endswith(cwd), "should have NOT changed dir"
-
-# def test_calling_sibling_with_change_via_parent_with_no_change_should_change_dir():
-#     """Call a task with change_dir=False which then calls a sibling task which does change dir."""
-
-#     stdout, _ = run_tasks("tests/includetest1/parent_test_1.py parent-no-change-child2-via-parent-no-change-dir")
-#     assert stdout.strip().endswith("tests/includetest1/")
-
-
-# def test_calling_sibling_with_no_change_via_parent_with_no_change_should_not_change_dir():
-#     """Call a task with change_dir=False which then calls a sibling task with change_dir=False"""
-
-#     cwd = os.getcwd()
-#     stdout, _ = run_tasks("tests/includetest1/parent_test_1.py child2-via-parent-no-change-dir")
-#     assert stdout.strip().endswith("tests/includetest1/")
-
-
 # child2 does not change dir upon entering the task
 def test_include_cwd_change_child2():
     import os
@@ -166,7 +141,7 @@ def test_including_not_decorated_function_name_change():
     taskcli.dispatch(["xxx"])
     assert done == 42
 
-from taskcli.task import UserError
+
 def test_including_decorated_function():
     done = 0
 

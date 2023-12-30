@@ -96,13 +96,6 @@ class Parameter:
         """Return True if the parameter has a default value."""
         return self.default is not Parameter.Empty
 
-    def get_preffered_short_flags(self) -> list[str]:
-        assert self.is_positional() is False, "short flags are only for options, not for positional parameters"
-        out = []
-        out += [self.name[0].lower()]
-        out += [self.name[0].upper()]
-        return out
-
     def get_argparse_names(self, known_short_args: set[str]) -> list[str]:
         """Return the names for argparse, in order of precedence."""
         # TODO: return single flag params also

@@ -1,27 +1,27 @@
 import argparse
 import inspect
-from json import load
 import logging
 import os
 import sys
 from ast import arg
+from json import load
 from typing import Any, Iterable
 
 import taskcli
 import taskcli.core
-from .include import load_tasks_from_module_to_runtime
 from taskcli.task import UserError
 
 from . import configuration, envvars, examples, taskfiledev, utils
 from .constants import GROUP_SUFFIX
 from .envvar import EnvVar
+from .include import load_tasks_from_module_to_runtime
 from .init import create_tasks_file
 from .listing import list_tasks
 from .parameter import Parameter
 from .task import Task
 from .taskcli import TaskCLI
 from .taskrendersettings import TaskRenderSettings
-from .types import AnyFunction
+from .types import AnyFunction, Module
 from .utils import param_to_cli_option, print_warning
 
 """"
@@ -47,9 +47,14 @@ def _extract_extra_args(argv: list[str], task_cli: TaskCLI) -> list[str]:
         task_cli.extra_args_list = argv[first_double_hyphen + 1 :]
         return argv[:first_double_hyphen]
 
-from .types import Module
 
-def dispatch(argv: list[str] | None = None, *, module:Module|None=None, tasks_found: bool = True, sysexit_on_user_error: bool = True) -> Any:
+def dispatch(
+    argv: list[str] | None = None,
+    *,
+    module: Module | None = None,
+    tasks_found: bool = True,
+    sysexit_on_user_error: bool = True,
+) -> Any:
     """Dispatch the command line arguments to the correct function."""
     # Initial parser, only used to find the tasks file
     log.debug("Dispatching with argv=%s", argv)
@@ -58,8 +63,6 @@ def dispatch(argv: list[str] | None = None, *, module:Module|None=None, tasks_fo
         module = utils.get_callers_module()
 
     load_tasks_from_module_to_runtime(module)
-
-
 
     try:
         return _dispatch_unsafe(argv, tasks_found)
@@ -262,13 +265,11 @@ def _add_initial_tasks_to_parser(parser: argparse.ArgumentParser) -> None:
     )
 
 
-def build_parser(tasks: list[Task]) -> argparse.ArgumentParser:
+def build_parser(tasks: list[Task]) -> argparse.ArgumentParser:  # noqa: C901
     """Build the parser."""
-
     log.debug("build_parser(): called for following tasks:")
     for task in tasks:
         log.debug("  %s", task.name)
-
 
     root_parser = argparse.ArgumentParser()
 
@@ -288,23 +289,24 @@ def build_parser(tasks: list[Task]) -> argparse.ArgumentParser:
             subparser.set_defaults(task=group_name + GROUP_SUFFIX)
             added_subparsers += [group_name + GROUP_SUFFIX]
 
-
-
         all_names_of_task = task.get_all_task_names()
 
         for name in all_names_of_task:
-            log.debug(f"build_parser(): Adding parser for {name}")  # noqa: T201
+            log.debug(f"build_parser(): Adding parser for {name}")
             try:
                 subparser = subparsers.add_parser(name)
             except argparse.ArgumentError as e:
                 reasons = ""
                 if "conflicting subparser" in str(e):
-                    reasons = " (conflicting subparser - try to rename the task, change its aliases, or include it under a different namespace)"
+                    reasons = (
+                        " (conflicting subparser - try to rename the task, change its aliases, "
+                        "or include it under a different namespace)"
+                    )
 
                 task_name = task.name
-                import_location=""
-                if task._included_from:
-                    import_location = f"Included from: {task._included_from.__file__}"
+                import_location = ""
+                if task.included_from:
+                    import_location = f"Included from: {task.included_from.__file__}"
 
                 utils.print_error(f"Failed to add command '{name}' (task: {task_name}). {reasons} {import_location}")
                 sys.exit(1)
@@ -315,7 +317,7 @@ def build_parser(tasks: list[Task]) -> argparse.ArgumentParser:
             if task.customize_parser:
                 task.customize_parser(subparser)
 
-            known_short_args = set()
+            known_short_args: set[str] = set()
             for param in task.params:
                 args = param.get_argparse_names(known_short_args)
                 if len(args) == 2:

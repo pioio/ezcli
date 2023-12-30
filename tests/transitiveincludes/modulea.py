@@ -1,9 +1,11 @@
-from taskcli import task, include
+from taskcli import include, task
+
+from . import moduleb
 
 
 @task
 def task_a():
     pass
 
-from . import moduleb
+
 include.include(moduleb)

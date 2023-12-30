@@ -2,15 +2,12 @@ import contextlib
 import os
 import re
 import sys
-
 import typing
 
 import taskcli
 
-
-from .types import Module
-
 from . import configuration, constants
+from .types import Module
 
 ENDC = configuration.get_end_color()
 UNDERLINE = configuration.get_underline()
@@ -69,25 +66,29 @@ def param_to_cli_option(arg: str) -> str:
     else:
         return "--" + arg.replace("_", "-")
 
+
 if typing.TYPE_CHECKING:
     from .task import Task
+
 
 def get_callers_module() -> Module:
     """Return the module of the function calling this function."""
     offset = 3
     return get_module(offset=offset)
 
-def get_module(offset) -> Module:
+
+def get_module(offset: int) -> Module:
     """Return the module of the caller.
 
     Args:
-        offset (int): 0 for the current module (invalid), 1 for the caller of this function, 2 for the caller's caller,
+        offset (int): 0 - invalid, 1 for the caller of this function, 2 for the caller's caller,
 
     Example:
             when calling from ./tasks,py, use offset=1.
             when calling from a taskcli.utils, which was called from ./tasks.py, use offset=2.
     """
     import inspect
+
     assert offset >= 1
 
     frame = inspect.currentframe()
@@ -102,27 +103,32 @@ def get_module(offset) -> Module:
 
 
 def get_imported_tasks() -> list["Task"]:
-    """Returns the list of tasks imported from other modules."""
-    raise NotImplementedError("TODO: implement this")
+    """Return the list of tasks imported from other modules."""
+    msg = "TODO: implement this"
+    raise NotImplementedError(msg)
 
 
-def get_task(name:str) -> "Task":
+def get_task(name: str) -> "Task":
+    """Get task from the current module by name."""
     module = get_callers_module()
     tasks = get_tasks(module=module)
-    d = {t._get_full_task_name(): t for t in tasks}
+    d = {t.name: t for t in tasks}
     from .task import UserError
+
     if name not in d:
-        raise UserError(f"get_task(): Task '{name}' not found in module {module.__file__}")
+        msg = f"get_task(): Task '{name}' not found in module {module.__file__}"
+        raise UserError(msg)
     return d[name]
 
 
-
-def get_tasks_dict() -> dict[str,"Task"]:
+def get_tasks_dict() -> dict[str, "Task"]:
+    """Get all tasks in the current module as a dictionary."""
     module = get_callers_module()
     tasks = get_tasks(module=module)
-    return {t._get_full_task_name(): t for t in tasks}
+    return {t.name: t for t in tasks}
 
-def get_tasks(module:Module|None=None, also_included=True) -> list["Task"]:
+
+def get_tasks(module: Module | None = None, also_included: bool = True) -> list["Task"]:
     """Return the list of all tasks defined in the specified module. Including any included tasks.
 
     If no module is specified, the module of the caller is used.
@@ -155,15 +161,17 @@ def get_tasks(module:Module|None=None, also_included=True) -> list["Task"]:
     if hasattr(module, "decorated_functions") and len(module.decorated_functions):
         out = []
         for task in module.decorated_functions:
-            if task._included_from and not also_included:
+            if task.included_from and not also_included:
                 # skipping included tasks
                 continue
             out.append(task)
 
         return out
     else:
-        print_error(f"get_tasks(): No tasks found in the current module ({module_path}). "
-                    "Make sure to use the @task decorator first.")
+        print_error(
+            f"get_tasks(): No tasks found in the current module ({module_path}). "
+            "Make sure to use the @task decorator first."
+        )
         sys.exit(1)
 
 

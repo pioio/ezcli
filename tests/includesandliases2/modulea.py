@@ -1,9 +1,7 @@
-
-from taskcli import task, tt
 import taskcli.include
+from taskcli import task, tt
 
 from . import moduleb
-
 
 with tt.Group("groupA", namespace="group_nsA"):
     taskcli.include.include(moduleb, namespace="include_nsA")
@@ -11,4 +9,3 @@ with tt.Group("groupA", namespace="group_nsA"):
     @task
     def taska() -> str:
         return "a"
-

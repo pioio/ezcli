@@ -14,17 +14,17 @@ Example:
 """
 
 
-from .include import include, include_module, include_function
 from . import core
 from .arg import arg
 from .core import get_extra_args, get_extra_args_list, get_runtime
 from .group import Group
+from .include import include, include_function, include_module
 from .parameter import Parameter
 from .parser import dispatch
 from .runcommand import run
 from .task import Task, task
 from .taskcliconfig import runtime_config as config
 from .types import Any, AnyFunction, Module
-from .utils import get_tasks, get_tasks_dict, get_task
+from .utils import get_task, get_tasks, get_tasks_dict
 
-__all__ = ["config"]
+__all__ = ["config", "Task"]

@@ -102,7 +102,6 @@ def list_tasks(tasks: list[Task], settings: TaskRenderSettings | None = None) ->
 
     settings = settings or TaskRenderSettings()
 
-
     filter_result = filter_before_listing(tasks=tasks, settings=settings)
     filtered_tasks = filter_result.tasks
     if not filtered_tasks:
@@ -205,10 +204,13 @@ def smart_task_lines(task: Task, settings: TaskRenderSettings) -> list[str]:  # 
 
     included_from_line = []
     include_color = configuration.colors.blue
-    if task._included_from:
+    if task.included_from:
         name += f"{include_color} ^{configuration.colors.end}"
         if settings.show_include_info:
-            included_from_line += [param_line_prefix + f"{include_color}Included from:{configuration.colors.end} {task._included_from.__file__}"]
+            included_from_line += [
+                param_line_prefix
+                + f"{include_color}Included from:{configuration.colors.end} {task.included_from.__file__}"
+            ]
 
     not_ready_lines = []
     not_ready_text = ""
@@ -223,7 +225,6 @@ def smart_task_lines(task: Task, settings: TaskRenderSettings) -> list[str]:  # 
                 f"{param_line_prefix}{configuration.colors.red}{line}{configuration.colors.end}"
                 for line in not_ready_lines
             ]
-
 
     aliases = ",".join(task.aliases)
     aliases_color = configuration.colors.pink
@@ -259,8 +260,6 @@ def smart_task_lines(task: Task, settings: TaskRenderSettings) -> list[str]:  # 
     one_line_params = build_pretty_param_string(
         task, include_optional=settings.show_optional_args, include_defaults=settings.show_default_values
     )
-
-
 
     # padd the task name to certain minimum width so that
     # any arguments are left-aligned
