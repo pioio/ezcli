@@ -223,6 +223,9 @@ This happen both when you run the task via `taskcli`, and when you call the pyth
 The section below outlines how that works.
 Note, `@task(change_dir=False)` will disable this behavior, and preserve whatever CWD was set right before the task function was called.
 
+See `TASKCLI_EXTRA_TASKS_PY_FILENAMES` to customize where `taskcli` looks for `tasks.py` files in directories above the current one.
+
+
 ### Simple project
 project/
 - tasks.py                # let's say this one haas 3 tasks

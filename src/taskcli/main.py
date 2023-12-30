@@ -101,7 +101,8 @@ def main() -> None:  # noqa: C901
             if os.path.exists(filename):
                 #include_from_file(filename, namespace=".", alias_namespace="..")
                 import random, string
-                random_lowercase = random.choice(string.ascii_lowercase)
+                random_lowercase = "".join(random.choices(string.ascii_lowercase, k=8))
+
                 random_lowercase = "taskcli_import_" + random_lowercase
                 abs_filepath = os.path.abspath(filename)
                 dir_filepath = os.path.dirname(abs_filepath)

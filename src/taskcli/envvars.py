@@ -25,8 +25,9 @@ TASKCLI_TASKS_PY_FILENAMES = EnvVar(
 )
 
 TASKCLI_EXTRA_TASKS_PY_FILENAMES = EnvVar(
-    default_value="../tasks.py, ../../tasks.py, ../../../tasks.py, ../../../../tasks.py",
-    desc="Comma separated list of filenames which 'taskcli' tool should include by default.",
+    default_value="../tasks.py,../../tasks.py,../../../tasks.py,../../../../tasks.py,../../../../../tasks.py,../../../../../../tasks.py ",
+    desc=("Comma separated list of filepaths which 'taskcli' tool should include "
+           "by default, and combine with tasks from the locally-present `task.py` file."),
 )
 
 
@@ -41,8 +42,9 @@ TASKCLI_GOTASK_TASK_BINARY_FILEPATH = EnvVar(
 TASKCLI_GOTASK_TASKFILE_FILENAMES = EnvVar(
     default_value="Taskfile.yaml,Taskfile.yml,taskfile.yaml,taskfile.yml",
     desc=(
-        "Comman separated list of Taskfiles.dev filenames form which to include tasks. "
-        "TASKCLI_GOTASK_TASK_BINARY_FILEPATH must be set for this to work."
+        "Comma separated list of Taskfiles.dev filenames from which to include additional tasks. "
+        "TASKCLI_GOTASK_TASK_BINARY_FILEPATH must be set for this to work. "
+        "This is useful if you already have some tasks in Taskfile.yaml format, and want to run them with `taskcli`."
     ),
 )
 
