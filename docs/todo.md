@@ -9,8 +9,6 @@
 - [ ] unit test: searching by tag should show hidden tasks, samel ike showing a group - unit
 - [ ] unit test- broken get hidden
 - [ ] reduve -v noise
-- [ ] num hidden tasks in each group
-  - [ ] filter out hidden before filterting by tags
 
 - [ ] make .include return included tasks
 - [ ] allow showing tasks in hidden groups?
@@ -69,28 +67,10 @@
 
         include(xxx)
 
+- [ ] unit test for duplicate task names
+- [ ] nesting groups should simply create an indent
+
 #### groups
-
-Each task has one namespace,
-foo.bar.ns.task
-Typing namespace can be optional
-
-Each task has tags
-
-task groupped based on tags
-
-group desc should say how many hidden tasks there are
-
-
-
-- [ ] auto-override  certain aliases, so that one tasks.py can be shared by many people
-- groups in the order they were defined
-  - tasks in a group in the order in which they wer eadded
-- changing to task file dir also when invoking a function via python. But make it configurable.
-- add separattors to task list, or group
-  @separator("dev tasks - use)
-  def dev():
-    fooo
 - sort order
 - auto-prefix task names with group prefix if ns=True
 - print group name on the same line as task, dimmed out, but don't require it
@@ -110,45 +90,19 @@ Features:
 - list of optional arg names to always hide from listing
 
 
-# Later
-- [ ] add Group(ns="prefix.")
+# Long-term TODOs
 - [ ] chaining tasks  `taskcli task1 task2`
 - [ ] pre/post hooks
 - [ ] --hide-regexp
+- [ ] add default task
 - [ ] make "t gr*oof" auto enter search mode - will require custom argparse validator
-- [ ] -S search through docstrings, include matching line?
+- [ ] `t -S` to search through docstrings, include matching line?
 - [ ] ability to exclude certain arguments from parser (task(exclude)), the arg must have a default)
-- dict type, accepting key=value, or json
-- [ ] tt.set_overview, this will require storing overview on per-module basis (or storing it only for current one), and loading
-- ability to customize the parser with custom flags
-  - @task(customize_parser=lambda parser: parser.add_argument('--foo')
-    then taskcli.get_args() would return the parsed argparse namespace
-- show missing env vars in task list
-- JSON format
-- Include Taskfile
-- converting list[int] from str to list of ints
-- add to groups based on tags?
-- [ ] Tags
-  - [ ] list tasks based on tags
-  - [ ] auto add tags based on argument nam or task regex, or envvars
-  - [ ] decorate tags based on tags
-
-- use field doctstring to fill out the help field in ConfigField, and then run _add_boola utomatically
+- [ ] tt.set_overview for the entire taskfile. This will require storing overview on per-module basis (or storing it only for current one), and loading
+- [ ] JSON output format
+- [x] Include Taskfile
+- Improve config system - use field's doctstring to fill out the help field in ConfigField, and then run _add_boola utomatically
     self.field_hide_not_ready = ConfigField(False, "hide_not_ready",  help=f"Tasks which are not ready to run (e.g. due to missing env vars) will be automatically marked as hidden.")
     self.hide_not_ready: bool = False
     """Docstring"""
     ...
-
-# FIXME
-- [ ] Text in help output broken - does include task name. We should modify parser's print-usage to include task name
-
-# TODOs
-
-- [ ] also print env vars in help
-- [ ] add -v to help
-- [ ] support 'help' syntax
-- [ ] add auto short flags
-- [ ] add default subtask
-- [ ] allow importing tasks from other modules, even with same names
-  - [ ] Right now, this will likely break task_data_args[func_name][main_name]
-- [ ] Consider support file with functions prefixed with "task_", and use "main" as the default task by default
