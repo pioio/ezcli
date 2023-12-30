@@ -47,6 +47,8 @@ Rationale for many entrypoints: in practice I found simply switching between `t`
 - Automatically switch directories when running tasks imported from other directories (can be disabled).
 
 
+## Docs
+[docs/settings.md](Settings)
 
 ## Tab completion
 Install `argcomplete` package. It's an optional dependency of taskcli
@@ -224,6 +226,8 @@ The section below outlines how that works.
 Note, `@task(change_dir=False)` will disable this behavior, and preserve whatever CWD was set right before the task function was called.
 
 See `TASKCLI_EXTRA_TASKS_PY_FILENAMES` to customize where `taskcli` looks for `tasks.py` files in directories above the current one.
+
+
 
 
 ### Simple project
