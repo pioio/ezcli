@@ -113,6 +113,14 @@ def _get_lint_paths():
 
 with tt.Group("lints", desc="Code cleanup tasks"):
 
+    @task(important=True, aliases=("l"))
+    def lint(paths: Paths = DEF_LINT_PATHS):
+        """Run all linting tasks."""
+
+        isort(paths)
+        ruff(paths)
+        mypy(paths)
+
     @task(aliases="r")
     def ruff(paths: Paths, example_arg: str = "foobar", example_arg2: str = "foobar"):
         """Run ruff linter."""
@@ -122,14 +130,6 @@ with tt.Group("lints", desc="Code cleanup tasks"):
         run(f"ruff format {path_txt}")
         run(f"ruff check {path_txt} --fix")
 
-    @task(important=True, aliases=("l"))
-    def lint(paths: Paths = DEF_LINT_PATHS):
-        """Run all linting tasks."""
-        # paths = paths or DEF_LINT_PATHS
-
-        isort(paths)
-        ruff(paths)
-        mypy(paths)
 
     @task
     def mypy(paths: Paths):
@@ -168,7 +168,7 @@ def argparse():
     print(parser.parse_args(["a", "b"]))
 
 
-@task(aliases="pc")
+@task(aliases="pc", important=True)
 def pre_commit(*, do_lint: bool = False, do_test: bool = True):
     """Run pre-commit hooks."""
     if do_lint:
