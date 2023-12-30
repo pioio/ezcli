@@ -6,12 +6,15 @@ import sys
 from typing import Callable
 from unicodedata import name
 
+
 from . import core, utils
 from .group import get_current_group
 from .task import Task, UserError
 from .types import Any, AnyFunction, Module
 
-log = logging.getLogger(__name__)
+import taskcli
+from .logging import get_logger
+log = get_logger(__name__)
 
 
 def include(
@@ -232,7 +235,8 @@ def _include_task(
         raise UserError(msg)
 
     to_module.decorated_functions.append(copy)
-    log.debug(f"include_module(): including task {task.name} from {from_module.__file__} to {to_module.__file__}")
+
+    log.trace(f"include_module(): including task {task.name} from {from_module.__file__} to {to_module.__file__}")
     return copy
 
 
@@ -251,5 +255,5 @@ def load_tasks_from_module_to_runtime(module: Module) -> None:
         return
 
     for task in module.decorated_functions:
-        log.debug(f"load_tasks_from_module_to_runtime(): including task {task.name} from {module} to runtime")
+        log.trace(f"load_tasks_from_module_to_runtime(): including task {task.name} from {module} to runtime")
         runtime.tasks.append(task)

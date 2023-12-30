@@ -16,7 +16,8 @@ from taskcli import configuration
 
 from .envvar import EnvVar
 
-log = logging.getLogger(__name__)
+from .logging import get_logger
+log = get_logger(__name__)
 
 TASKCLI_TASKS_PY_FILENAMES = EnvVar(
     default_value="tasks.py",

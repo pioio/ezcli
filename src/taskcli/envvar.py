@@ -1,7 +1,9 @@
 import logging
 import os
 
-log = logging.getLogger(__name__)
+
+from .logging import get_logger
+log = get_logger(__name__)
 
 
 class EnvVar:

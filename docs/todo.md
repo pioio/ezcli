@@ -6,8 +6,6 @@
 
 - [ ] optional flags are not gray (disk usage example)
 - [ ] hide_not_ready unit test
-
-- [x] test init.py
 - [ ] unit test hide-not-read
 - [ ] Module - add custom class to represent module, with my custom per-module fields
 - [ ] unit test: searching by tag should show hidden tasks, samel ike showing a group - unit
@@ -95,6 +93,8 @@ Features:
 
 
 # Long-term TODOs
+- [ ] --show to show a specific group or task in full detail
+- [ ] tags for groups
 - [ ] will setting a tt.config.foobar in a imported module overwrite the global one? should we have tt.config.reset() to call after imports are done?
 - [ ] run: print the task being run,, along with a chain of calls, but only when running via taskcli
 - [ ] chaining tasks  `taskcli task1 task2`

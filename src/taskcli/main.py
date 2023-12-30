@@ -6,13 +6,15 @@ import os
 import sys
 import time
 
+
 import taskcli.include
 
 from . import envvars, task, taskfiledev, utils
 from .parser import build_initial_parser
 from .utils import print_err, print_error
 
-log = logging.getLogger(__name__)
+from .logging import get_logger
+log = get_logger(__name__)
 
 
 def main() -> None:  # noqa: C901
@@ -33,6 +35,7 @@ def main() -> None:  # noqa: C901
     tasks_found = False
     import_took = INVALID_TIME
     include_took = INVALID_TIME
+
     for filename in argconfig.file.split(","):
         filename = filename.strip()
         if os.path.exists(filename):
@@ -44,7 +47,10 @@ def main() -> None:  # noqa: C901
             sometasks = __import__(basename.replace(".py", "").replace("-", "_"))
             import_took = time.time() - start_import
 
-            log.debug(f"Including tasks from {filename}")
+            log.separator(f"Including tasks from {filename}")
+            fullpath = os.path.abspath(filename)
+            log.debug(f"Full filepath: {fullpath}")
+
             start_include = time.time()
 
             # This includes the tasks from 'sometasks' into THIS module (main)
@@ -60,6 +66,7 @@ def main() -> None:  # noqa: C901
     this_module = sys.modules[__name__]
     taskfile_took = INVALID_TIME
     if taskfiledev.should_include_taskfile_dev(argv=argv):
+        log.separator("Initializing go-task")
         start_taskfile = time.time()
         tasks_were_included = taskfiledev.include_tasks(to_module=this_module)
         if tasks_were_included:
@@ -69,6 +76,7 @@ def main() -> None:  # noqa: C901
     dispatch_took = INVALID_TIME
     try:
         start_dispatch = time.time()
+        log.separator("Dispatching tasks")
         taskcli.dispatch(argv=argv, tasks_found=tasks_found)
         dispatch_took = time.time() - start_dispatch
     finally:

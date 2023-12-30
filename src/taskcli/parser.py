@@ -24,6 +24,7 @@ from .taskcli import TaskCLI
 from .taskrendersettings import TaskRenderSettings
 from .types import AnyFunction, Module
 from .utils import param_to_cli_option, print_warning
+from .logging import get_logger
 
 """"
 TODO:
@@ -31,13 +32,8 @@ TODO:
 
 """
 
+log = get_logger(__name__)
 
-log = logging.getLogger(__name__)
-
-if "-v" in sys.argv or "--verbose" in sys.argv:
-    logging.basicConfig(level=logging.DEBUG, format="%(asctime)s %(levelname)s|  %(message)s")
-else:
-    logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s|  %(message)s")
 
 
 def _extract_extra_args(argv: list[str], task_cli: TaskCLI) -> list[str]:
@@ -59,6 +55,7 @@ def dispatch(
     """Dispatch the command line arguments to the correct function."""
     # Initial parser, only used to find the tasks file
     log.debug("Dispatching with argv=%s", argv)
+
 
     if module is None:
         module = utils.get_callers_module()
@@ -276,9 +273,9 @@ def _add_initial_tasks_to_parser(parser: argparse.ArgumentParser) -> None:
 
 def build_parser(tasks: list[Task]) -> argparse.ArgumentParser:  # noqa: C901
     """Build the parser."""
-    log.debug("build_parser(): called for following tasks:")
+    log.trace("build_parser(): called for following tasks:")
     for task in tasks:
-        log.debug("  %s", task.name)
+        log.trace(f"  {task}")
 
     root_parser = argparse.ArgumentParser()
 
@@ -307,7 +304,6 @@ def build_parser(tasks: list[Task]) -> argparse.ArgumentParser:  # noqa: C901
         all_names_of_task = task.get_all_task_names()
 
         for name in all_names_of_task:
-            log.debug(f"build_parser(): Adding parser for {name}")
             try:
                 subparser = subparsers.add_parser(name)
             except argparse.ArgumentError as e:

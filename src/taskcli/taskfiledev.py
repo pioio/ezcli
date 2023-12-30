@@ -13,7 +13,8 @@ from taskcli import task
 from . import envvars, parser, utils
 from .types import Module
 
-log = logging.getLogger(__name__)
+from .logging import get_logger
+log = get_logger(__name__)
 
 go_task_project_name = "Taskfile.dev"
 

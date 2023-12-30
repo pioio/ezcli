@@ -28,7 +28,8 @@ from . import constants, envvars, utils
 from .envvar import EnvVar
 from .task import UserError
 
-log = logging.getLogger(__name__)
+from .logging import get_logger
+log = get_logger(__name__)
 
 
 class ConfigField:

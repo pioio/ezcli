@@ -15,9 +15,11 @@ from .parametertype import ParameterType
 from .parser import dispatch
 from .runcommand import run
 from .task import Task, task
-
 from typing import Annotated as ann  # noqa: N813 # isort: skip
 
+from . import taskcliconfig
+from .logging import configure_logging
+configure_logging()
 
 def hide_group(group: str) -> None:
     """Hide a group from the help message."""

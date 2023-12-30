@@ -83,8 +83,9 @@ def _sort_tasks(  # noqa: C901
         out.append(task)
     return out
 
+from .logging import get_logger
 
-log = logging.getLogger(__name__)
+log = get_logger(__name__)
 
 
 def list_tasks(tasks: list[Task], settings: TaskRenderSettings | None = None) -> list[str]:  # noqa: C901
