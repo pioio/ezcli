@@ -58,6 +58,7 @@ def include(
         to_module = utils.get_callers_module()
 
     from .tt import Task
+
     if "filter" in kwargs and not isinstance(object, Module):
         msg = "include(): 'filter' parameter is only supported when including entire modules"
         raise Exception(msg)
@@ -214,12 +215,13 @@ def _include_task(
         copy.included_from = from_module  # ensure is set
     else:
         # We're including the root module, preserve the group info, otherwise we would move all tasks to 'default'
-        group = task.group
-        copy = task.copy(group=group, included_from=None)
+        copy = task  # dont copy at all, just ues the group
+        # group = task.group
+        # copy = task.copy(group=group, included_from=None)
 
-        # So that those which were included into the root module continue to be marked as included
-        if task.included_from:
-            copy.included_from = task.included_from
+        # # So that those which were included into the root module continue to be marked as included
+        # if task.included_from:
+        #     copy.included_from = task.included_from
 
     if namespace:
         copy.add_namespace(namespace, alias_namespace=alias_namespace)

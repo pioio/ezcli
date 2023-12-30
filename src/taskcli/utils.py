@@ -217,3 +217,11 @@ def get_root_module() -> str:
 def some_test_function(a: int, b: int) -> None:
     """Test function, ignore it."""
     print("Hello from inside taskcli:", str(a + b))  # noqa: T201
+
+
+def assert_no_dup_by_name(container: list[typing.Any]) -> None:
+    """Assert that there are no duplicates in the list by name."""
+    seen = []
+    for item in container:
+        assert item.name not in seen
+        seen.append(item.name)

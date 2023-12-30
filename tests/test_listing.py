@@ -6,7 +6,8 @@ from argh import dispatch
 import taskcli
 from taskcli import Group, Task, arg, constants, listing, task
 from taskcli.listing import list_tasks
-from taskcli.taskrendersettings import TaskRenderSettings
+from taskcli.taskcliconfig import TaskCLIConfig
+from taskcli.taskrendersettings import TaskRenderSettings, new_settings
 
 from . import tools
 from .test_including import clean_stdout
@@ -169,7 +170,6 @@ def test_list_important_optional_args_are_always_shown():
         r"foobar\s+NAME\s+This is the first task", lines[1]
     ), "Text is optional, but not important, so it should not be shown. Name is optional, but important, so show it."
 
-from taskcli.taskcliconfig import TaskCLIConfig
 
 def test_hidden_tasks_dont_show_up_by_default():
     @task
@@ -200,8 +200,6 @@ def test_hidden_tasks_dont_show_up_by_default():
     lines = list_tasks(tasks, settings=render_settings)
     assert "hidden-task" in "\n".join(lines), "Hidden task should be in the task listing when high verbose"
 
-
-from taskcli.taskrendersettings import TaskRenderSettings, new_settings
 
 def test_list_with_tags():
     groupa = Group("groupA")
@@ -238,7 +236,7 @@ foobar2a
         config = TaskCLIConfig()
         config.tags = ["tag1", "tag2"]
         config.show_tags = False
-        render_settings = new_settings(config=config) # to translate config into render settings
+        render_settings = new_settings(config=config)  # to translate config into render settings
         with tools.simple_list_format():
             lines = list_tasks(tasks, settings=render_settings)
     assert (
@@ -256,7 +254,7 @@ foobar2b
         config = TaskCLIConfig()
         config.tags = ["tag2"]
         config.show_tags = False
-        render_settings = new_settings(config=config) # to translate config into render settings
+        render_settings = new_settings(config=config)  # to translate config into render settings
         with tools.simple_list_format():
             lines = list_tasks(tasks, render_settings)
     assert (
@@ -266,12 +264,11 @@ foobar2a
 foobar2b""".split("\n")
     )
 
-
     with tools.simple_list_format():
         config = TaskCLIConfig()
         config.tags = ["tag1"]
         config.show_tags = False
-        render_settings = new_settings(config=config) # to translate config into render settings
+        render_settings = new_settings(config=config)  # to translate config into render settings
         with tools.simple_list_format():
             lines = list_tasks(tasks, render_settings)
     assert (

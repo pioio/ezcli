@@ -8,7 +8,8 @@ if typing.TYPE_CHECKING:
 
 
 created = []
-_is_init=True
+_is_init = True
+
 
 class Group:
     """A group of tasks."""
@@ -52,7 +53,7 @@ class Group:
             raise ValueError(msg)
         created += [name]
 
-        self.parent:Group|None = None
+        self.parent: Group | None = None
         self.children: list[Group] = []
 
     # Make it a context managet
@@ -60,12 +61,11 @@ class Group:
         global _stack
 
         # nested groups
-        if len(_stack) > 1: # one (default) is always there
+        if len(_stack) > 1:  # one (default) is always there
             self.parent = _stack[-1]
             self.parent.children.append(self)
 
         _stack.append(self)
-
 
         return self
 
@@ -89,7 +89,7 @@ class Group:
         else:
             return f"{num_shown}/{num_shown+num_hidden}"
 
-    def has_children_recursive(self, tasks:list["Task"]) -> bool:
+    def has_children_recursive(self, tasks: list["Task"]) -> bool:
         """Return True if this group, or any of its children, has any of the given tasks.
 
         Used for selecting groups to show in the list.
@@ -101,6 +101,7 @@ class Group:
                 return True
 
         return False
+
 
 # Default group for new tasks
 NULL_GROUP = Group("null-group")
@@ -114,3 +115,22 @@ def get_current_group() -> "Group":
     """Return the current group."""
     assert len(_stack) > 0
     return _stack[-1]
+
+
+def get_all_groups_from_tasks(tasks: list["Task"]) -> list["Group"]:
+    """Return a list of groups that contain any of the given tasks. Including any grandparent groups."""
+    groups = []
+    for task in tasks:
+        for group in task.groups:
+            if group not in groups:
+                groups.append(group)
+    return groups
+
+
+def get_all_tasks_in_group(group: "Group", tasks: list["Task"]) -> None:
+    """Recursive populate the given list of tasks with all tasks in the given group (inc grandchildren)."""
+    for task in group.tasks:
+        if task not in tasks:
+            tasks.append(task)
+    for child in group.children:
+        get_all_tasks_in_group(child, tasks)

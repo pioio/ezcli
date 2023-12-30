@@ -14,6 +14,7 @@ from taskcli.task import UserError
 from . import configuration, envvars, examples, taskfiledev, utils
 from .constants import GROUP_SUFFIX
 from .envvar import EnvVar
+from .group import get_all_groups_from_tasks
 from .include import load_tasks_from_module_to_runtime
 from .init import create_tasks_file
 from .listing import list_tasks
@@ -77,6 +78,7 @@ def dispatch(
 
 def _dispatch_unsafe(argv: list[str] | None = None, tasks_found: bool = True) -> Any:  # noqa: C901
     tasks: list[Task] = taskcli.core.get_runtime().tasks
+
     parser = build_parser(tasks)
 
     # Must happen before tab completion
@@ -163,20 +165,23 @@ def _dispatch_unsafe(argv: list[str] | None = None, tasks_found: bool = True) ->
             print(ret_value)  # noqa: T201
         return ret_value
 
+    from .group import get_all_tasks_in_group
+
     if hasattr(argconfig, "task"):
         if argconfig.task.endswith(GROUP_SUFFIX):
-            tasks_in_group = [
-                task for task in tasks if task.group.get_name_for_cli() == argconfig.task[: -len(GROUP_SUFFIX)]
-            ]
+            groups = get_all_groups_from_tasks(tasks)
+            for group in groups:
+                if group.get_name_for_cli() == argconfig.task[: -len(GROUP_SUFFIX)]:
+                    all_children = []
+                    get_all_tasks_in_group(group, all_children)
+                    utils.assert_no_dup_by_name(all_children)
 
-            group_name = tasks_in_group[0].group.name
-            num_tasks = len(tasks_in_group)
-            hidden_tasks = len([x for x in tasks_in_group if x.hidden])
-            hidden_tasks_str = f" ({hidden_tasks} hidden)" if hidden_tasks > 0 else ""
-            taskcli.utils.print_err(f"Tasks in group {group_name} ({num_tasks}) {hidden_tasks_str}")
-
-            print_listed_tasks(tasks_in_group, render_settings=render_settings)
-            sys.exit(1)
+                    render_settings.show_hidden_groups = True
+                    render_settings.show_hidden_tasks = True
+                    print_listed_tasks(all_children, render_settings=render_settings)
+                    sys.exit(1)
+            # should never happen
+            sys.exit(9)
         else:
             for task in tasks:
                 if task.name == argconfig.task:
@@ -187,12 +192,16 @@ def _dispatch_unsafe(argv: list[str] | None = None, tasks_found: bool = True) ->
                 if argconfig.task in task.aliases:
                     return _dispatch(task)
 
-            # not found, search group name without a suffix
-            groups = [task.group for task in tasks if task.group]
-            groups = list(set(groups))
+            # task not found, fallback to search group name without a suffix
+            groups = get_all_groups_from_tasks(tasks)
             for group in groups:
                 if group.get_name_for_cli() == argconfig.task:
-                    print_listed_tasks(group.tasks, render_settings=render_settings)
+                    all_children = []
+                    get_all_tasks_in_group(group, all_children)
+                    utils.assert_no_dup_by_name(all_children)
+                    render_settings.show_hidden_groups = True
+                    render_settings.show_hidden_tasks = True
+                    print_listed_tasks(all_children, render_settings=render_settings)
                     sys.exit(1)
 
             print(f"Task {argconfig.task} not found")  # noqa: T201
@@ -281,13 +290,19 @@ def build_parser(tasks: list[Task]) -> argparse.ArgumentParser:  # noqa: C901
     added_subparsers = []
     for task in tasks:
         # add group names
-
-        group_name = task.group.name.replace(" ", "-").lower()
-        if task.group not in groups:
-            groups.append(task.group)
-            subparser = subparsers.add_parser(group_name + GROUP_SUFFIX)
-            subparser.set_defaults(task=group_name + GROUP_SUFFIX)
-            added_subparsers += [group_name + GROUP_SUFFIX]
+        for group in task.groups:
+            group_name = group.name.replace(" ", "-").lower()
+            if group not in groups:
+                groups.append(group)
+                subparser = subparsers.add_parser(group_name + GROUP_SUFFIX)
+                subparser.set_defaults(task=group_name + GROUP_SUFFIX)
+                added_subparsers += [group_name + GROUP_SUFFIX]
+            # group_name = task.group.name.replace(" ", "-").lower()
+            # if task.group not in groups:
+            #     groups.append(task.group)
+            #     subparser = subparsers.add_parser(group_name + GROUP_SUFFIX)
+            #     subparser.set_defaults(task=group_name + GROUP_SUFFIX)
+            #     added_subparsers += [group_name + GROUP_SUFFIX]
 
         all_names_of_task = task.get_all_task_names()
 
@@ -330,11 +345,12 @@ def build_parser(tasks: list[Task]) -> argparse.ArgumentParser:  # noqa: C901
     # if group-name and task-name have the same name, expecting here the task to take precedence
     # TODO: add unit test for this case
     for task in tasks:
-        group_name = task.group.name.replace(" ", "-").lower()
-        if group_name not in added_subparsers:
-            subparser = subparsers.add_parser(group_name)
-            subparser.set_defaults(task=group_name)
-            added_subparsers += [group_name]
+        for group in task.groups:
+            group_name = group.name.replace(" ", "-").lower()
+            if group_name not in added_subparsers:
+                subparser = subparsers.add_parser(group_name)
+                subparser.set_defaults(task=group_name)
+                added_subparsers += [group_name]
 
     return root_parser
 

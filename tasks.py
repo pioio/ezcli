@@ -96,26 +96,29 @@ def _get_lint_paths():
     return tt.get_extra_args() or "src/"
 
 
-with tt.Group("lint", desc="Code cleanup tasks") as x:
+with tt.Group("lints", desc="Code cleanup tasks"):
+    with tt.Group("lintinternal1", desc="Code cleanup tasks"):
 
-    with tt.Group("lintinternal", desc="Code cleanup tasks"):
         @task
         def testingnesting():
             """Summary docstring"""
-            pass
+
         @task
         def testingnesting2():
             pass
+
     with tt.Group("lintinternal2", desc="Code cleanup tasks"):
+
         @task
         def testingnesting3(myarg):
             """Summary"""
-            pass
+
         @task
         def testingnesting4(myarg="xxxx", myotherarg=23232):
             pass
 
     with tt.Group("otherrr", desc="Code cleanup tasks") as xx:
+
         @task(aliases="r")
         def ruff(paths: Paths, example_arg: str = "foobar", example_arg2: str = "foobar"):
             """Run ruff linter."""

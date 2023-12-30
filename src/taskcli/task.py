@@ -18,7 +18,6 @@ from .tags import TAG_IMPORTANT
 from .types import Any, AnyFunction, Module
 
 
-
 class UserError(Exception):
     """Print nice error to the user."""
 
@@ -92,6 +91,9 @@ def task(
         return decorator
 
 
+created = []
+
+
 class Task:
     """Represents a single task. Gets created via the `@task` decorator."""
 
@@ -160,6 +162,13 @@ class Task:
         self.soft_validate_task()
         self.included_from: Module | None = included_from
 
+        # debug
+        # name = self.name
+        # if name in created:
+        #     msg = f"Task {name} already exists"
+        #     raise ValueError(msg)
+        # created.append(name)
+
     @property
     def name(self) -> str:
         """Return the name of the task, including all task namespaces and group namespace."""
@@ -176,6 +185,11 @@ class Task:
                 ns_alias = alias
             out += [ns_alias]
         return out
+
+    @property
+    def groups(self) -> list[Group]:
+        """Return all parent groups."""
+        return self.get_all_parent_groups()
 
     def is_valid(self) -> bool:
         """Return True if the task is valid."""
@@ -218,8 +232,7 @@ class Task:
 
         return False
 
-
-    def get_all_parent_groups(self)->list[Group]:
+    def get_all_parent_groups(self) -> list[Group]:
         out = []
         g = self.group
         while g is not None:
@@ -368,7 +381,7 @@ class Task:
             res = dispatch([name], sysexit_on_user_error=sysexit_on_user_error)
         return res
 
-    def get_top_level_group(self) -> Group|None:
+    def get_top_level_group(self) -> Group | None:
         """Return the top-most group.
 
         Used when listing tasks to determine top-most groups from list of filtered tasks.
@@ -379,7 +392,6 @@ class Task:
                 return g
             g = g.parent
         return None
-
 
     def copy(self, group: Group, included_from: Module | None) -> "Task":
         """Return a copy of the task."""

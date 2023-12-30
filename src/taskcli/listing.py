@@ -119,12 +119,18 @@ def list_tasks(tasks: list[Task], settings: TaskRenderSettings | None = None) ->
 
     for idx, group in enumerate(top_groups):
         before = len(lines)
-        render_group(group=group, filtered_tasks=filtered_tasks, lines=lines, filter_result=filter_result, settings=settings, indent=0)
+        render_group(
+            group=group,
+            filtered_tasks=filtered_tasks,
+            lines=lines,
+            filter_result=filter_result,
+            settings=settings,
+            indent=0,
+        )
 
         if len(lines) > before and idx < len(top_groups) - 1:
             # blan line between top level group, but only between top-level groups
             lines.append("")
-
 
     lines = [line.rstrip() for line in lines]
 
@@ -152,9 +158,13 @@ def list_tasks(tasks: list[Task], settings: TaskRenderSettings | None = None) ->
             lines = lines[:-1]
     return lines
 
+
 indent_increase = 2
 
-def render_group(group:Group, lines:list[str], filtered_tasks:list[Task], filter_result,settings:TaskRenderSettings, indent:int):
+
+def render_group(
+    group: Group, lines: list[str], filtered_tasks: list[Task], filter_result, settings: TaskRenderSettings, indent: int
+):
     if group.hidden and not settings.show_hidden_groups:
         return
 
@@ -173,7 +183,7 @@ def render_group(group:Group, lines:list[str], filtered_tasks:list[Task], filter
 
         # group mightnot have any tasks, but it might have children group
         for child in group.children:
-            render_group(child, lines, filtered_tasks, filter_result, settings, indent+indent_increase)
+            render_group(child, lines, filtered_tasks, filter_result, settings, indent + indent_increase)
         return
 
     # print the group header
@@ -211,8 +221,7 @@ def render_group(group:Group, lines:list[str], filtered_tasks:list[Task], filter
         lines += [indent_str + f"{colors.dark_gray}{num_hidden_in_this_group} hidden{colors.end}"]
 
     for child in group.children:
-        render_group(child, lines, filtered_tasks, filter_result, settings, indent+indent_increase)
-
+        render_group(child, lines, filtered_tasks, filter_result, settings, indent + indent_increase)
 
 
 def _render_summary_line(filter_result: FilterResult) -> str:
@@ -385,7 +394,7 @@ def smart_task_lines(task: Task, settings: TaskRenderSettings) -> list[str]:  # 
 #     return [group for group in groups if not group.parent]
 
 
-def create_groups(tasks: list[Task], group_order: list[str]=[]) -> list[Group]:
+def create_groups(tasks: list[Task], group_order: list[str] = []) -> list[Group]:
     """Return a dict of group_name -> list of tasks, ordered per group_order, group not listed there will be last."""
     groups: list[Group] = []
     del group_order
@@ -395,7 +404,6 @@ def create_groups(tasks: list[Task], group_order: list[str]=[]) -> list[Group]:
         tlg = task.get_top_level_group()
         if tlg and tlg not in top_level_groups:
             top_level_groups.append(tlg)
-
 
     return top_level_groups
     # groups = []
@@ -411,7 +419,6 @@ def create_groups(tasks: list[Task], group_order: list[str]=[]) -> list[Group]:
     # for group in groups:
     #     print (f"parent of {group.name} is {group.parent}")
     # return [group for group in groups if not group.parent]
-
 
 
 def build_pretty_param_string(task: Task, include_optional: bool = True, include_defaults: bool = True) -> str:
