@@ -41,11 +41,12 @@ def get_parsed_args() -> argparse.Namespace:
 from . import utils
 if typing.TYPE_CHECKING:
     from .tt import Task
+
 def include(object: Module | AnyFunction | "Task",
             to_module:Module|None=None,
             namespace:str="",
             alias_namespace:str="",
-            **kwargs: Any) -> None:
+            **kwargs: Any) -> list["Task"]:
     """Include tasks from the specified object into the module which calling this function.
 
     This function is meant to be called directly from a ./tasks.py file.
@@ -56,13 +57,16 @@ def include(object: Module | AnyFunction | "Task",
     from .tt import Task
 
     if isinstance(object, Module):
-        include_module(object, to_module=to_module, namespace=namespace, alias_namespace=alias_namespace, **kwargs)
+        return include_module(object, to_module=to_module, namespace=namespace, alias_namespace=alias_namespace, **kwargs)
     elif inspect.isfunction(object):
-        include_function(object, to_module=to_module, namespace=namespace, alias_namespace=alias_namespace, **kwargs)
+        return [include_function(object, to_module=to_module, namespace=namespace, alias_namespace=alias_namespace, **kwargs)]
     elif isinstance(object, Task):
         from_module:Module = sys.modules[object.func.__module__]
         from .include import _include_task
-        _include_task(object, from_module=from_module, to_module=to_module, namespace=namespace, alias_namespace=alias_namespace, **kwargs)
+        return [_include_task(object, from_module=from_module, to_module=to_module, namespace=namespace, alias_namespace=alias_namespace, **kwargs)]
+    else:
+        msg = f"include(): Unsupported type: {type(object)}"
+        raise Exception(msg)
 
 
 def get_runtime() -> "TaskCLI":

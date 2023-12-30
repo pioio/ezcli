@@ -279,7 +279,9 @@ def test_include_via_custom_filter():
         pass
 
     this_module = sys.modules[__name__]
-    include(this_module, namespace="ns1", filter=lambda t: t.important)
+    included = include(this_module, namespace="ns1", filter=lambda t: t.important)
+    assert len(included) == 1
+    assert isinstance(included[0], tt.Task)
 
     tasks = tt.get_tasks_dict()
     assert "foobar1" in tasks  # original one

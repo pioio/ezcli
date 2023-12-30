@@ -12,7 +12,7 @@
 - [ ] num hidden tasks in each group
   - [ ] filter out hidden before filterting by tags
 
-
+- [ ] make .include return included tasks
 - [ ] allow showing tasks in hidden groups?
 - [ ] nice warning if no tags listed
 - [ ] separate defaults for tt mode on per fiel basis
