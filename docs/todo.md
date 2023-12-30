@@ -2,6 +2,7 @@
 - [ ] loading ./tasks.py from dir above, merging them with the local one.
   - [ ] How to handle A importing B, importing A?
   - [ ] t .  # list only tasks from local dir
+  - [ ] # TODO: have task have internal sort key, combination of digit + name for easier sorting
   - [ ] t .. # list only one level (not dir) up
   - [ ] would have to use importlib, tried it once, but is tricky. Maybe not worth it
   - [ ] allow preventing merging with the one from above? Or make it explcii?  tt.config.merge_with_parent = False

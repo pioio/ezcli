@@ -213,6 +213,11 @@ def render_group(
         sort_important_first=group.sort_important_first,
         sort_hidden_last=group.sort_hidden_last,
     )
+
+    # TODO: sort the ones from the parent to the top?
+    # TODO: have task have internal sort key, combination of digit + name
+
+
     for task in tasks_directly_in_group_to_show:
         task_lines = smart_task_lines(task, settings=settings)
 
