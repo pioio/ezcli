@@ -23,6 +23,7 @@ def hello(name="Bob"):
 And you can run it: `t hello` or `t hello -n Alice` or `t hello --name Alice`
 
 ## Key features
+- Automatic generation of CLI interfaces from signatures of simple Python functions.
 - You can group, highlight, tag, hide, list, regex-search your tasks.
 - See at a glance which tasks can be simply run, which require additional env vars, and which require specifying mandatory arguments.
 - Import and reuse(!) tasks from other modules/dirs  (`tt.include(module_name)`). Directories will be switched automatically if needed.
@@ -31,7 +32,7 @@ And you can run it: `t hello` or `t hello -n Alice` or `t hello --name Alice`
 - Customize the way your tasks are listed. Customize it on per-project basis, or globally for many projects.
 - Simple to start, but power and suitable for managing larger projects.
 - Automatically switch directories when running tasks imported from other directories (can be disabled).
-- Easier collaboration with others - customize the behavior and the look and feel of `tasks` using env vars.
+- Easier collaboration with others - customize the behavior and the look and feel of `taskcli` using env vars. Make it work for you.
 
 ## Screenshot
 TODO
