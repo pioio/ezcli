@@ -8,6 +8,7 @@ from . import utils
 from .task import Task
 
 
+import inspect
 from .group import get_current_group
 from . import core
 from .task import Task, UserError
@@ -15,10 +16,10 @@ from .types import Any, AnyFunction, Module
 
 import logging
 log = logging.getLogger(__name__)
-import inspect
 
 
 def include(object: Module | AnyFunction | "Task",
+            /, *,
             to_module:Module|None=None,
             namespace:str="",
             alias_namespace:str="",
@@ -26,8 +27,9 @@ def include(object: Module | AnyFunction | "Task",
     """Include tasks from the specified object into the module which calling this function. Return included Tasks.
 
     This function is meant to be called directly from a ./tasks.py file.
+    This function is a convenience wrapper around include_module() and include_function().
 
-    Alternatively, you can call the lower level include_module() or include_function() directly.
+    For more control you can call the lower level include_module() or include_function() directly.
     """
     if to_module is None:
         to_module = utils.get_callers_module()
@@ -47,7 +49,7 @@ def include(object: Module | AnyFunction | "Task",
         raise Exception(msg)
 
 
-def include_module(from_module: Module, to_module:Module, skip_include_info:bool=False,
+def include_module(from_module: Module, *, to_module:Module|None=None, skip_include_info:bool=False,
                     namespace:str="",
                     alias_namespace:str="",
                     filter:Callable[[Task],bool]=lambda t: not t.hidden,
@@ -57,6 +59,9 @@ def include_module(from_module: Module, to_module:Module, skip_include_info:bool
     When including the main module, we skip the include info, as then all the
     tasks would be marked as included.
     """
+    if to_module is None:
+        to_module = utils.get_callers_module()
+
     if not hasattr(from_module, "decorated_functions"):
         from_module.decorated_functions = []  # type: ignore[attr-defined]
 
@@ -79,8 +84,11 @@ def include_module(from_module: Module, to_module:Module, skip_include_info:bool
     return out
 
 
-def include_function(function: AnyFunction,to_module:Module, skip_include_info:bool=False, namespace:str="", alias_namespace:str="", **kwargs: Any) -> Task:
+def include_function(function: AnyFunction, *, to_module:Module|None=None, skip_include_info:bool=False, namespace:str="", alias_namespace:str="", **kwargs: Any) -> Task:
     """Include a function as a task."""
+    if to_module is None:
+        to_module = utils.get_callers_module()
+
     fun = function
     module_of_fun = sys.modules[fun.__module__]
     task:None|Task = None
