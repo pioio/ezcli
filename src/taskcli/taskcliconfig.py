@@ -22,6 +22,7 @@ import argparse
 import logging
 import os
 from typing import Any, Callable
+import typing
 from webbrowser import get
 
 from . import constants, envvars, utils
@@ -32,6 +33,8 @@ from .logging import get_logger
 log = get_logger(__name__)
 
 
+if typing.TYPE_CHECKING:
+    from .task import Task
 class ConfigField:
     """A metadata field describing a configuration option.
 
@@ -133,6 +136,7 @@ class TaskCLIConfig:
         self.search: str = self._add_str(self.field_search)
 
         self.merge_with_parent: bool = False
+        self.merge_with_parent_filter: Callable[["Task"], bool]|None = None
 
         default_show_hidden = False
 

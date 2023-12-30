@@ -3,7 +3,7 @@ from taskcli import task, tt, run
 import requests
 
 tt.config.merge_with_parent = True
-
+tt.config.merge_with_parent_filter = lambda t: t.important
 
 with tt.Group("Weather"):
     @task(aliases="here")

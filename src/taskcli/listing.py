@@ -392,8 +392,6 @@ def sort_groups_before_listing(groups: list[Group], order:list[str]) -> list[Gro
 
     out = []
 
-
-
     for expected_group_pattern in order:
         try:
             for group in groups:
