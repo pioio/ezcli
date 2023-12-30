@@ -10,12 +10,12 @@
 - [ ] Module - add custom class to represent module, with my custom per-module fields
 - [ ] unit test: searching by tag should show hidden tasks, samel ike showing a group - unit
 - [ ] unit test- broken get hidden
-- [ ] reduve -v noise
-
-- [ ] make .include return included tasks
-- [ ] allow showing tasks in hidden groups?
+- [x] reduve -v noise
+- [ ] print custom clir
+- [x] make .include return included tasks
 - [ ] nice warning if no tags listed
 - [ ] separate defaults for tt mode on per fiel basis
+- [ ]
 - [ ] unit test for searching when some matching tasks are hidden
 - [ ] unit test for error if no tasks detected
 - [ ] combine listing with specifying a task
