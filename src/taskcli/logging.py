@@ -8,12 +8,13 @@ verbose the logging will be.
 """
 
 import logging
+from typing import Any
 
 class Logger(logging.Logger):
     """Custom logger which adds a trace method."""
 
-    def trace(self, msg, level:int=3, *args, **kwargs):
-        """Log message to debug, but only if verbose level hish enough.
+    def trace(self, msg:Any, level:int=3, *args, **kwargs):
+        """Log message to debug, but only if verbose level high enough.
 
         Args:
             msg: message to log
@@ -42,8 +43,10 @@ def get_logger(name: str) -> Logger:
 _logger = Logger("taskcli")
 
 def configure_logging():
-    """Configure logging for taskcli."""
+    """Configure logging for taskcli.
 
+    Should be called only once.
+    """
     import argparse
     parser = argparse.ArgumentParser(add_help=False)
     parser.add_argument("-v", "--verbose", action="count", default=0)
