@@ -16,6 +16,7 @@ from .utils import print_err, print_error
 from .logging import get_logger
 log = get_logger(__name__)
 
+import importlib.util
 
 def main() -> None:  # noqa: C901
     """Entrypoint for the 'taskcli' command."""
@@ -36,28 +37,55 @@ def main() -> None:  # noqa: C901
     import_took = INVALID_TIME
     include_took = INVALID_TIME
 
+    already_loaded = set()
+
+
+    def include_from_file(filename, namespace="", alias_namespace=""):
+        log.separator(f"Importing objects from {filename}")
+
+        absolute_filepath = os.path.abspath(filename)
+        log.debug(f"Absolute filepath: {absolute_filepath}")
+
+        dir = os.path.dirname(absolute_filepath)
+        sys.path.append(dir)
+        # import module by name
+        basename = os.path.basename(absolute_filepath)
+        start_import = time.time()
+
+
+        module_name = basename.replace(".py", "").replace("-", "_")
+        log.debug(f"Importing module: {module_name}")
+        imported_module = __import__(module_name)
+
+        nonlocal import_took
+        import_took = time.time() - start_import
+
+        log.separator(f"Including tasks from {filename}")
+        already_loaded.add(filename)
+
+        start_include = time.time() # FIXME: called for extra includes
+
+        # This includes the tasks from 'sometasks' into THIS module (main)
+        taskcli.include.include(imported_module, skip_include_info=True, namespace=namespace, alias_namespace=alias_namespace)
+        nonlocal include_took, tasks_found
+        include_took = time.time() - start_include
+        tasks_found = True
+
+
     for filename in argconfig.file.split(","):
         filename = filename.strip()
         if os.path.exists(filename):
-            dir = os.path.dirname(filename)
-            sys.path.append(dir)
-            # import module by name
-            basename = os.path.basename(filename)
-            start_import = time.time()
-            sometasks = __import__(basename.replace(".py", "").replace("-", "_"))
-            import_took = time.time() - start_import
+            include_from_file(filename)
 
-            log.separator(f"Including tasks from {filename}")
-            fullpath = os.path.abspath(filename)
-            log.debug(f"Full filepath: {fullpath}")
+    if not tasks_found:
+        for filename in envvars.TASKCLI_EXTRA_TASKS_PY_FILENAMES.value.split(","):
+            filename = filename.strip()
+            if os.path.exists(filename):
+                #include_from_file(filename, namespace=".", alias_namespace="..")
+                include_from_file(filename)
+                break # for now only one
 
-            start_include = time.time()
-
-            # This includes the tasks from 'sometasks' into THIS module (main)
-            taskcli.include.include(sometasks, skip_include_info=True)
-            include_took = time.time() - start_include
-            tasks_found = True
-
+    log.separator(f"Finished include and imports")
     # This part be right after importing the default ./task.p and before anything else
     # this way we allow ./tasks.py to change the default config, which in turn
     # might impact the output of get_argv()   (the default argument)

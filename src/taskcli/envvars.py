@@ -24,6 +24,11 @@ TASKCLI_TASKS_PY_FILENAMES = EnvVar(
     desc="Comma separated list of filenames which 'taskcli' tool should include by default.",
 )
 
+TASKCLI_EXTRA_TASKS_PY_FILENAMES = EnvVar(
+    default_value="../tasks.py, ../../tasks.py, ../../../tasks.py, ../../../../tasks.py",
+    desc="Comma separated list of filenames which 'taskcli' tool should include by default.",
+)
+
 
 TASKCLI_GOTASK_TASK_BINARY_FILEPATH = EnvVar(
     default_value="",

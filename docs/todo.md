@@ -1,6 +1,6 @@
 
-- [ ] FIXME: optional flags are not gray (disk usage example)
 - [ ] hide_not_ready unit test
+- [ ] --init still not working - add unit test
 - [ ] unit test hide-not-read
 - [ ] Module - add custom class to represent module, with my custom per-module fields
 - [ ] unit test: searching by tag should show hidden tasks, samel ike showing a group - unit
@@ -9,7 +9,7 @@
 - [ ] unit test for searching when some matching tasks are hidden
 - [ ] unit test for error if no tasks detected
 - [ ] combine listing with specifying a task
-- [ ] unit test for   @task(important=True, format="{name} {clear}{red}(PROD!)")
+- [ ] unit test for  @task(important=True, format="{name} {clear}{red}(PROD!)")
 - [ ] allow one task to be in more than one group - add unit tests
 - [ ] run task binary regardless of taskfile being found or not
 
@@ -33,6 +33,8 @@
 
         include(xxx)
 
+- [ ] FIXME: optional flags are not gray (disk usage example)
+- [ ] FIXME: doing `t -f ../../tasks.py TAB` results in wrong tab completion
 - [ ] unit test for duplicate task names
 - [x] nesting groups should simply create an indent
 
@@ -40,10 +42,11 @@
 
 
 # Long-term TODOs
-- [ ] loading ./tasks.py from dir above, merging it with current one.
+- [ ] loading ./tasks.py from dir above, merging them with the local one.
   - [ ] How to handle A importing B, importing A?
   - [ ] t .  # list only tasks from local dir
   - [ ] t .. # list only one level (not dir) up
+  - [ ] would have to use importlib, tried it once, but is tricky. Maybe not worth it
   - [ ]
 - [ ] pre/post hooks
 - [ ] list of optional arg names to always mark as important?  add imperative, as Cookbook example.
