@@ -1,5 +1,5 @@
 
-- [ ] optional flags are not gray (disk usage example)
+- [ ] FIXME: optional flags are not gray (disk usage example)
 - [ ] hide_not_ready unit test
 - [ ] unit test hide-not-read
 - [ ] Module - add custom class to represent module, with my custom per-module fields
