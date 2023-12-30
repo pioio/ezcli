@@ -97,8 +97,10 @@ class Parameter:
         return self.arg_annotation.important if self.arg_annotation else default_arg_annotation.important
 
     def has_supported_type(self) -> bool:
-        """In the context of adding the parameter to argparse, return True if the type is supported by taskcli."""
+        """Check if the parameter has a supported type (can be added to argparse).
 
+        If not supported, the param will not be added to argparse. But execution will continue.
+        """
         if self.kind == inspect.Parameter.VAR_KEYWORD:
             # ** kwargs
             return False
