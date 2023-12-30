@@ -145,9 +145,10 @@ def rufftwice():
     ruff()
 
 
-with tt.Group("included tasks", namespace="included", alias_namespace="i"):
-    tt.include(docgentasks, namespace="docs", alias_namespace="d")
-    assert tt.get_task("included.docs.test-documentation").included_from
+with tt.Group("included tasks"):
+    tt.include(docgentasks, namespace="docs", alias_namespace="doc.")
+    #tt.include()
+    #assert tt.get_task("included.docs.test-documentation").included_from
 
 
 @task

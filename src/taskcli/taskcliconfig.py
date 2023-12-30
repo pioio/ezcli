@@ -48,7 +48,7 @@ class ConfigField:
         short: str = "",
         /,
         *,
-        help: str = "",
+        desc: str = "",
         env: bool = True,
         env_var_name: str = "",
         cli:bool = True,
@@ -61,7 +61,7 @@ class ConfigField:
         self.metavar = metavar or name.upper().replace("-", "_")
         self.short = short
         self.env = env
-        self.help = help
+        self.desc = desc
         self.cli = cli # whether to add to the CLI parser
         self.cli_arg_flag = "--" + name.replace("_", "-")
         self.env_var_name = env_var_name.upper() or "TASKCLI_CFG_" + name.upper()
@@ -111,7 +111,7 @@ class TaskCLIConfig:
         self._addded_env_vars: list[EnvVar] = []
 
         self.field_init: ConfigField = ConfigField(
-            "", "init", env=False, help="Create a new tasks.py file in the current directory"
+            "", "init", env=False, desc="Create a new tasks.py file in the current directory"
         )
         self.init: str = self._add_str(self.field_init)
 
@@ -134,7 +134,7 @@ class TaskCLIConfig:
             "",
             "search",
             "-s",
-            help="Only show tasks whose name or description is matching this python regex seach pattern.",
+            desc="Only show tasks whose name or description is matching this python regex seach pattern.",
         )
         self.search: str = self._add_str(self.field_search)
 
@@ -145,7 +145,7 @@ class TaskCLIConfig:
             "p",
             "extra_tasks_name_namespace",
             cli=False,
-            help=("What task namespace to prefix to tasks when merging tasks from a upper directory level tasks.py. "
+            desc=("What task namespace to prefix to tasks when merging tasks from a upper directory level tasks.py. "
                   "See also: " + envvars.TASKCLI_EXTRA_TASKS_PY_FILENAMES.name
                   )
         )
@@ -155,7 +155,7 @@ class TaskCLIConfig:
             "",
             "extra_tasks_alias_namespace",
             cli=False,
-            help=(
+            desc=(
                 "What string to prefix to task aliases when merging tasks with a different tasks.py. "
                 "See also: " + envvars.TASKCLI_EXTRA_TASKS_PY_FILENAMES.name
             )
@@ -168,14 +168,14 @@ class TaskCLIConfig:
             default_show_hidden,
             "show_hidden",
             constants.ARG_SHOW_HIDDEN_SHORT,
-            help="Show all tasks and groups, even the hidden ones.",
+            desc="Show all tasks and groups, even the hidden ones.",
         )
         self.show_hidden: bool = self._add_bool(self.field_show_hidden)
 
         self.field_no_go_task = ConfigField(
             False,
             "no_go_task",
-            help=(
+            desc=(
                 "Disable automatic inclusion of tasks from 'task' binary. "
                 "Note, for this automaic inclusion to work, "
                 f"{envvars.TASKCLI_GOTASK_TASK_BINARY_FILEPATH.name} must first be set."
@@ -184,31 +184,31 @@ class TaskCLIConfig:
         )
         self.no_go_task: bool = self._add_bool(self.field_no_go_task)
 
-        self.field_examples = ConfigField(False, "examples", help="Print code examples of how to use taskcli.")
+        self.field_examples = ConfigField(False, "examples", desc="Print code examples of how to use taskcli.")
         self.examples: bool = self._add_bool(self.field_examples)
 
         self.field_show_hidden_groups = ConfigField(
-            False, "show_hidden_groups", help="Listing will show groups that were marked with hidden=True"
+            False, "show_hidden_groups", desc="Listing will show groups that were marked with hidden=True"
         )
         self.show_hidden_groups: bool = self._add_bool(self.field_show_hidden_groups)
 
         self.field_show_hidden_tasks = ConfigField(
-            False, "show_hidden_tasks", help="Listing will show tasks that are marked with hidden=True"
+            False, "show_hidden_tasks", desc="Listing will show tasks that are marked with hidden=True"
         )
         self.show_hidden_tasks: bool = self._add_bool(self.field_show_hidden_tasks)
 
-        self.field_show_tags = ConfigField(True, "show_tags", help="Listing will show tags of each task.")
+        self.field_show_tags = ConfigField(True, "show_tags", desc="Listing will show tags of each task.")
         self.show_tags: bool = self._add_bool(self.field_show_tags)
 
         self.field_show_optional_args = ConfigField(
-            False, "show_optional_args", help="Listing will show optional arguments of each task."
+            False, "show_optional_args", desc="Listing will show optional arguments of each task."
         )
         self.show_optional_args: bool = self._add_bool(self.field_show_optional_args)
 
         self.field_show_default_values = ConfigField(
             False,
             "show_default_values",
-            help=(
+            desc=(
                 f"Listing will show default values of any arguments that are shown. "
                 f"Use with {self.field_show_optional_args.cli_arg_flag} to also show values of "
                 "the optional arguments."
@@ -220,7 +220,7 @@ class TaskCLIConfig:
             False,
             "show_ready_info",
             "-r",
-            help=(
+            desc=(
                 "Listing tasks will show detailed info about the task's readiness to be run. "
                 "For example, it will list any required but missing environment variables. "
             ),
@@ -230,14 +230,14 @@ class TaskCLIConfig:
         self.field_hide_not_ready = ConfigField(
             False,
             "hide_not_ready",
-            help=(
+            desc=(
                 "Tasks which are not ready to run (e.g. due to missing env vars) "
                 "will be automatically marked as hidden."
             ),
         )
         self.hide_not_ready: bool = self._add_bool(self.field_hide_not_ready)
 
-        self.field_print_env = ConfigField(False, "print_env", action="store_true", env=False, help="List the supported env vars")
+        self.field_print_env = ConfigField(False, "print_env", action="store_true", env=False, desc="List the supported env vars")
         self.print_env: bool = self._add_bool(self.field_print_env)
 
         self.field_print_env_detailed = ConfigField(
@@ -245,7 +245,7 @@ class TaskCLIConfig:
             "print_env_detailed",
             action="store_true",
             env=False,
-            help=f"Like {self.field_print_env.cli_arg_flag}, but also include descriptions.",
+            desc=f"Like {self.field_print_env.cli_arg_flag}, but also include descriptions.",
         )
         self.print_env_detailed: bool = self._add_bool(self.field_print_env_detailed)
 
@@ -261,7 +261,7 @@ class TaskCLIConfig:
             False,
             "print_return_value",
             "-P",
-            help=(
+            desc=(
                 "Advanced: print return value of the task function to stdout. Useful when the task "
                 "is a regular function which by itself does not print, and only returns a value."
             ),
@@ -272,7 +272,7 @@ class TaskCLIConfig:
             False,
             "list_all",
             "-L",
-            help=("Listing tasks shows all possible infomation. Extremely very verbose output."),
+            desc=("Listing tasks shows all possible infomation. Extremely very verbose output."),
         )
         self.list_all: bool = self._add_bool(self.field_list_all)
 
@@ -321,7 +321,7 @@ class TaskCLIConfig:
 
         def add_argument(parser: argparse.ArgumentParser) -> None:
             nonlocal field
-            help = field.help
+            help = field.desc
             help += f" (default: {field.default}{set_from})"
             act: Any = "store_true" if not field.action else field.action
             # > act: Any = argparse.BooleanOptionalAction if not field.action else field.action
@@ -335,7 +335,7 @@ class TaskCLIConfig:
         def read_from_env(config: TaskCLIConfig) -> None:
             if field.env_var_name in os.environ:
                 new_default = EnvVar(
-                    default_value=str(field.default), desc=field.help, name=field.env_var_name
+                    default_value=str(field.default), desc=field.desc, name=field.env_var_name
                 ).is_true()
                 setattr(config, field.name, new_default)
 
@@ -351,7 +351,7 @@ class TaskCLIConfig:
     def _shared_init_field(self, field: ConfigField) -> list[str]:
         self._store_name(field.name)
         if field.env:
-            self._store_env_var(name=field.name, default_value=field.default, help=field.help)
+            self._store_env_var(name=field.name, default_value=field.default, help=field.desc)
         args = self._get_args(field.name, field.short)
         return args
 
@@ -361,10 +361,10 @@ class TaskCLIConfig:
 
         def add_argument(parser: argparse.ArgumentParser) -> None:
             nonlocal field
-            help = field.help
+            help = field.desc
             help += f" (default: {field.default})"
             parser.add_argument(
-                *args, default=None, help=field.help, type=str, nargs=None if not field.nargs else field.nargs
+                *args, default=None, help=field.desc, type=str, nargs=None if not field.nargs else field.nargs
             )
 
         def read_argument(config: TaskCLIConfig, args: argparse.Namespace) -> None:
@@ -375,7 +375,7 @@ class TaskCLIConfig:
         def read_from_env(config: TaskCLIConfig) -> None:
             env_var_name = self._to_env_var_name(field.name)
             if env_var_name in os.environ:
-                new_default = EnvVar(default_value=str(field.default), desc=field.help, name=env_var_name)
+                new_default = EnvVar(default_value=str(field.default), desc=field.desc, name=env_var_name)
                 setattr(config, field.name, new_default)
 
         if field.cli:
@@ -491,5 +491,14 @@ class TaskCLIConfig:
         for f in self._read_from_env:
             f(self)
 
+    def get_fields(self) -> list[ConfigField]:
+        """Return a list of all fields."""
+
+        all_fields = []
+        for field in self.__dict__.values():
+            if isinstance(field, ConfigField):
+                all_fields.append(field)
+        return all_fields
+        ##return [getattr(self, "field_" + name) for name in self._addded_names]
 
 runtime_config = TaskCLIConfig()  # modified with CLI arguments
