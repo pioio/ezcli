@@ -74,6 +74,7 @@ def configure_logging():
     handler.setFormatter(formatter)
 
     # Add the handler to the logger
+    log.handlers.clear()
     log.addHandler(handler)
 
     log.debug("Logging configured.")

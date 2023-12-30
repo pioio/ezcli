@@ -6,6 +6,8 @@ from types import UnionType
 from typing import Any, List, TypeVar, Union, get_args, get_origin
 from webbrowser import get
 
+from .logging import get_logger
+
 from . import annotations
 from .parametertype import ParameterType
 from .utils import param_to_cli_option
@@ -13,6 +15,7 @@ from .utils import param_to_cli_option
 # So that we don't duplicate the default value of arg annotation
 default_arg_annotation = annotations.Arg()
 
+log = get_logger(__name__)
 
 class Parameter:
     """A wrapper around inspect.Parameter to make it easier to work with."""
@@ -84,6 +87,7 @@ class Parameter:
         return self.kind in [
             inspect.Parameter.POSITIONAL_ONLY,
             inspect.Parameter.POSITIONAL_OR_KEYWORD,
+            inspect.Parameter.VAR_POSITIONAL,  #   *args
             inspect.Parameter.VAR_KEYWORD,  # ??? not sure ...
         ]
 
@@ -91,6 +95,15 @@ class Parameter:
     def important(self) -> bool:
         """Return True if the parameter is marked as important."""
         return self.arg_annotation.important if self.arg_annotation else default_arg_annotation.important
+
+    def has_supported_type(self) -> bool:
+        """In the context of adding the parameter to argparse, return True if the type is supported by taskcli."""
+
+        if self.kind == inspect.Parameter.VAR_KEYWORD:
+            # ** kwargs
+            return False
+
+        return self.type.has_supported_type()
 
     def has_default(self) -> bool:
         """Return True if the parameter has a default value."""

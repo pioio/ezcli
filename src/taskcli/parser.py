@@ -139,7 +139,11 @@ def _dispatch_unsafe(argv: list[str] | None = None, tasks_found: bool = True) ->
             raise UserError(msg)
 
         # convert parsed arguments to kwargs we can pass to the function
+        variable_args = None
         for param in task.params:
+            if not param.has_supported_type():
+                log.debug(f"Not dispatching param {param.name} as it has unsupported type")
+                continue
             if not param.type.has_supported_type():
                 # Skip it
                 assert (
@@ -154,10 +158,15 @@ def _dispatch_unsafe(argv: list[str] | None = None, tasks_found: bool = True) ->
                 print(argconfig, sys.stderr)  # noqa: T201, debug
                 raise
 
-            value = _convert_types_from_str_to_function_type(param, value)
-            kwargs[name] = value
-
-        ret_value = task.func(**kwargs)
+            if param.kind == inspect.Parameter.VAR_POSITIONAL:
+                variable_args = value
+            else:
+                value = _convert_types_from_str_to_function_type(param, value)
+                kwargs[name] = value
+        if variable_args is not None:
+            ret_value = task.func(*variable_args, **kwargs)
+        else:
+            ret_value = task.func(**kwargs)
         if config.print_return_value:
             print(ret_value)  # noqa: T201
         return ret_value
@@ -286,6 +295,10 @@ def build_parser(tasks: list[Task]) -> argparse.ArgumentParser:  # noqa: C901
     groups = []
     added_subparsers = []
     for task in tasks:
+        res = task.has_supported_type()
+        if res != "ok":
+            raise UserError(f"Task {task.name} {task.code_location} has currently unsupported type: {res}")
+
         # add group names
         for group in task.groups:
             group_name = group.name.replace(" ", "-").lower()
@@ -330,6 +343,10 @@ def build_parser(tasks: list[Task]) -> argparse.ArgumentParser:  # noqa: C901
 
             known_short_args: set[str] = set()
             for param in task.params:
+                if not param.has_supported_type():
+                    log.debug(f"Not adding {param.name} to parsers as it has unsupported type")
+                    continue
+
                 args = param.get_argparse_names(known_short_args)
                 if len(args) == 2:
                     # store the short flag for later, to prevent conflicts
@@ -403,8 +420,17 @@ def _add_param_to_subparser(args: list[str], param: Parameter, subparser: argpar
     elif param.type.raw in [int, float, str]:
         # to make argparse's internal type conversion work so that "choices=[111,222]" work
         kwargs["type"] = param.type.raw
+
+    elif param.kind == inspect.Parameter.VAR_POSITIONAL:
+        kwargs["nargs"] = "*"
+        if param.has_default():
+            kwargs["default"] = param.default
+
+
     elif param.type.raw == taskcli.parametertype.ParameterType.Empty:
+
         pass
+
 
     else:
         # Assuming here that error will be printed when we try to run the task
@@ -424,6 +450,7 @@ def _add_param_to_subparser(args: list[str], param: Parameter, subparser: argpar
     if param.arg_annotation:
         kwargs = kwargs | param.arg_annotation.get_argparse_fields()
 
+    log.trace(f"  subparser.add_argument: {args} {kwargs}")
     subparser.add_argument(*args, **kwargs)
 
 

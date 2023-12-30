@@ -11,18 +11,15 @@
 - [ ] unit test: searching by tag should show hidden tasks, samel ike showing a group - unit
 - [ ] unit test- broken get hidden
 - [x] reduve -v noise
-- [ ] print custom clir
 - [x] make .include return included tasks
-- [ ] nice warning if no tags listed
-- [ ] separate defaults for tt mode on per fiel basis
-- [ ]
 - [ ] unit test for searching when some matching tasks are hidden
 - [ ] unit test for error if no tasks detected
 - [ ] combine listing with specifying a task
-- [ ] tt should have bigger tab completion than t
-- [ ] proper typed interface to @task
-- [ ] make metavar work in task list
+
+- [x] proper typed interface to @task
+- [ ] *args and **kwargs support and unit tests
 - [ ] unit test for   @task(important=True, format="{name} {clear}{red}(PROD!)")
+- [ ] allow one task to be in more than one group - add unit tests
 
 - [x] make type work with user defined functions
 - [x] add unit test for args passed to argparse from 'arg'
@@ -40,17 +37,10 @@
 - [x] task -L should show ALL info
 - [x] add auto conversion to int/float from string
 - [ ] task .dev   to list item in group, including hidden groups
-- [ ] groups having unique namespace
-- [ ] task op
-- [ ] examples: parts "call with" in docstring and try to call the example with that
 - [ ] extend with a c
 - [ ] groups having namespacesby default, but optionally not  Group(ns=False)
   - [ ] always print group, but if ns is optional, print it dimmed ou
-- [ ] Make bools works when no type present.
-- [ ] allow one task to be in more than one group?
-- [ ] allow certain tasks in group to not be namespaced?
-- [ ] Make sure importing a module does not add its tasks to the global default group by default
-- [ ] *args and **kwargs support and unit tests
+- [x] Make bools works when no type present.
 
 - [ ]
   - [ ] per module task list
@@ -93,7 +83,10 @@ Features:
 
 
 # Long-term TODOs
+- [ ] examples: parts "call with" in docstring and try to call the example with that
+- [ ] tt should have bigger set of tab completion than t
 - [ ] --show to show a specific group or task in full detail
+- [ ] make metavar work in task list
 - [ ] tags for groups
 - [ ] will setting a tt.config.foobar in a imported module overwrite the global one? should we have tt.config.reset() to call after imports are done?
 - [ ] run: print the task being run,, along with a chain of calls, but only when running via taskcli

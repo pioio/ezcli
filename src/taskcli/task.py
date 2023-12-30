@@ -418,6 +418,14 @@ class Task:
     def __repr__(self) -> str:
         return f"Task(name={self.name!r}, group={self.group.name!r}, important={self.important}, hidden={self.hidden})"
 
+    def has_supported_type(self) -> str:
+        """TODO: in the future we could ass validation for function signatures.
+
+        (I.e. if we ever find any not working, and need to explicitly prevent using them)
+        """
+        return "ok"
+
+
 
 def _get_wrapper(
     func: AnyFunction,

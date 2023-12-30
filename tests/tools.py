@@ -30,6 +30,10 @@ def reset_context_before_each_test() -> None:
 ########################################################################################################################
 # Other
 
+def enable_verbose_logging() -> None:
+    tt.config.verbose = 4
+    from taskcli.logging import configure_logging
+    configure_logging()
 
 def include_task() -> Task:
     current_frame = inspect.currentframe()

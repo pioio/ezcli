@@ -334,6 +334,15 @@ def test_bool_flag_works():
     assert t.dispatch("--force")
     assert not t.dispatch("--no-force")
 
+def test_bools_without_type():
+    @task
+    def foo(*, force= False):
+        return force
+
+    t = tools.include_task()
+    assert t.dispatch("--force")
+    assert not t.dispatch("--no-force")
+
 
 def test_complex_argument_example():
     Paths = tt.arg(list[str], default=[".", "src"])
@@ -410,3 +419,92 @@ def test_choices_int(capsys):
     assert t.dispatch("222") == 222
     with pytest.raises(SystemExit, match="2"):
         t.dispatch("333")
+
+
+
+def test_support_for_vargs(capsys):
+
+    # tt.config.verbose = 4
+    # from taskcli.logging import configure_logging
+    # configure_logging()
+
+    @task
+    def foo_bar(*args):
+        return args
+
+    t = tools.include_task()
+    assert t.dispatch(["1", "2", "foo"]) == ("1", "2", "foo")
+
+
+def test_support_for_vargs_with_type_are_strings():
+    """TODO: convert them  ref:LIMITATION"""
+
+    @task
+    def foo_bar(*args:list[int]):
+        return args
+
+    t = tools.include_task()
+    assert t.dispatch(["1", "2", "3"]) == ("1","2","3")
+
+
+def test_support_for_vargs_with_arg():
+    """In this case foobar gets parsed as kw-only arg, because *args eats up all positional args."""
+    @task
+    def foo_bar(*args, foobar: int):
+        return args, foobar
+
+    t = tools.include_task()
+    import inspect
+    assert t.params[1].kind == inspect.Parameter.KEYWORD_ONLY
+
+    t.dispatch(["1", "2", "111", "--foobar", "22"], sysexit_on_user_error=False)
+
+
+def test_support_for_vargs_with_arg_with_kwargs():
+    """In this case foobar gets parsed as kw-only arg, because *args eats up all positional args."""
+    @task
+    def foo_bar(*args, foobar: int=22, **kwargs):
+        return args, foobar, kwargs
+
+    t = tools.include_task()
+    import inspect
+    assert t.params[0].kind == inspect.Parameter.VAR_POSITIONAL
+    assert t.params[1].kind == inspect.Parameter.KEYWORD_ONLY
+    assert t.params[2].kind == inspect.Parameter.VAR_KEYWORD
+
+    t.dispatch(["1", "2", "111"], sysexit_on_user_error=False)
+
+
+def test_support_for_kwargs_basic():
+    """Kwargs should be ignored by the parser"""
+    @task
+    def foo_bar(**kwargs):
+        return kwargs
+
+    t = tools.include_task()
+    assert t.dispatch() == {}
+
+
+
+def test_support_for_kwargs_and_args():
+    """Kwargs should be ignored by the parser"""
+    @task
+    def foo_bar(*, force:bool=True, **kwargs):
+        return force, kwargs
+
+    t = tools.include_task()
+    assert t.dispatch() == (True, {})
+
+    assert t.dispatch("--no-force") == (False, {})
+
+
+def test_support_for_vargs_and_kwargs():
+    """args should be added to parses, kwargs should be ignored."""
+
+    @task
+    def foo_bar(*args, **kwargs):
+        return args, kwargs
+
+    t = tools.include_task()
+    assert t.dispatch(["1", "2", "3"]) == (("1","2","3"), {})
+

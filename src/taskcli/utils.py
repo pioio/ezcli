@@ -202,6 +202,11 @@ def reset_tasks() -> None:
     for key, value in new_config.__dict__.items():
         setattr(tt.config, key, value)
 
+    # # reset any logging configuration set by previous tests
+    assert tt.config.verbose == 0
+    from .logging import configure_logging
+    configure_logging()
+
 
 def get_basename() -> str:
     """Return the name of the taskcli executable."""
