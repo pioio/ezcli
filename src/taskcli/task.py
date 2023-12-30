@@ -466,14 +466,19 @@ def _get_wrapper(
     if isinstance(aliases, str):
         aliases = [aliases]
 
+    from taskcli import tt
     # DecoratedFunction
     @functools.wraps(func)
     def wrapper_for_changing_directory(*args: list[Any], **kwargs: dict[str, Any]) -> Any:
-        if change_dir:
-            with utils.change_dir(task.get_taskfile_dir()):  # type: ignore[attr-defined]
+        try:
+            tt.get_runtime().current_tasks.append(task)
+            if change_dir:
+                with utils.change_dir(task.get_taskfile_dir()):  # type: ignore[attr-defined]
+                    return func(*args, **kwargs)
+            else:
                 return func(*args, **kwargs)
-        else:
-            return func(*args, **kwargs)
+        finally:
+            tt.get_runtime().current_tasks.pop()
 
     del kwargs["group"]
     del kwargs["aliases"]

@@ -3,6 +3,8 @@
 
 - [x] mark included task with^
 - [x] task init is broken
+- [ ] print the task being run,, along with a chain of calls, but only when running via taskcli
+- [ ] run should print the current task
 - [ ] nested groups
   - [ ] default group should be first
 - [ ] optional flags are not gray (disk usage example)

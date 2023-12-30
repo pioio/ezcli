@@ -19,5 +19,7 @@ class TaskCLI:
 
         self.overview: str = ""
 
+        self.current_tasks: list[Task] = []
+
     # Any extra arguments passed to the script after a "--"
     # They can be retrieved later to easily inject them to commands being run.
