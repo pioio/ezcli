@@ -2,8 +2,8 @@ from argh import aliases
 from taskcli import task, tt, run
 import requests
 
-tt.config.merge_with_parent = True
-tt.config.merge_with_parent_filter = lambda t: t.important or t.name in ["pc", "print-cwd"]
+tt.config.include_extra_tasks = True
+tt.config.extra_tasks_filter = lambda t: t.important or t.name in ["pc", "print-cwd"]
 
 
 @task()

@@ -114,7 +114,7 @@ def show_env(verbose: int, extra_vars: list[EnvVar] | None = None) -> None:
 
             desc = ""
             if value.desc and verbose:
-                desc = f" {dark}{value.desc}{clear}"
+                desc = f"  {dark}# {value.desc}{clear}"
             print(f"{green}{name}{clear}={color}{value.value}{clear}{desc}")  # noqa: T201
 
 

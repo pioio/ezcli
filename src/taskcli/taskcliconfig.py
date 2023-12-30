@@ -138,8 +138,8 @@ class TaskCLIConfig:
         )
         self.search: str = self._add_str(self.field_search)
 
-        self.merge_with_parent: bool = False
-        self.merge_with_parent_filter: Callable[["Task"], bool]|None = None
+        self.include_extra_tasks: bool = False
+        self.extra_tasks_filter: Callable[["Task"], bool]|None = None
 
         self.field_extra_tasks_name_namespace = ConfigField(
             "p",
@@ -155,7 +155,10 @@ class TaskCLIConfig:
             "",
             "extra_tasks_alias_namespace",
             cli=False,
-            help="What string to prefix to task aliases when merging tasks with a different tasks.py."
+            help=(
+                "What string to prefix to task aliases when merging tasks with a different tasks.py. "
+                "See also: " + envvars.TASKCLI_EXTRA_TASKS_PY_FILENAMES.name
+            )
         )
         self.extra_tasks_alias_namespace:str = self._add_str(self.field_extra_tasks_alias_namespace)
 
@@ -234,13 +237,14 @@ class TaskCLIConfig:
         )
         self.hide_not_ready: bool = self._add_bool(self.field_hide_not_ready)
 
-        self.field_print_env = ConfigField(False, "print_env", action="store_true", help="List the supported env vars")
+        self.field_print_env = ConfigField(False, "print_env", action="store_true", env=False, help="List the supported env vars")
         self.print_env: bool = self._add_bool(self.field_print_env)
 
         self.field_print_env_detailed = ConfigField(
             False,
             "print_env_detailed",
             action="store_true",
+            env=False,
             help=f"Like {self.field_print_env.cli_arg_flag}, but also include descriptions.",
         )
         self.print_env_detailed: bool = self._add_bool(self.field_print_env_detailed)

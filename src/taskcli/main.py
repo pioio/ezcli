@@ -96,7 +96,7 @@ def main() -> None:  # noqa: C901
             include_from_file(filename)
 
     from taskcli import tt
-    if tasks_found and tt.config.merge_with_parent or not tasks_found:
+    if tasks_found and tt.config.include_extra_tasks or not tasks_found:
         for filename in envvars.TASKCLI_EXTRA_TASKS_PY_FILENAMES.value.split(","):
             filename = filename.strip()
             if os.path.exists(filename):
@@ -117,7 +117,7 @@ def main() -> None:  # noqa: C901
                         include_from_file(target_filepath, mark_them=False)
                     else:
                         # might have
-                        filterfun = tt.config.merge_with_parent_filter
+                        filterfun = tt.config.extra_tasks_filter
                         alias_namespace:str = tt.config.extra_tasks_alias_namespace
                         name_namespace:str = tt.config.extra_tasks_name_namespace
                         # By default no
