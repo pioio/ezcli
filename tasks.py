@@ -2,8 +2,8 @@
 
 
 # iterate over all functions
+import os
 
-import taskcli.include
 import testing
 from docsgenerator import tasks as docgentasks
 
@@ -31,9 +31,13 @@ with tt.Group("dev", desc="Development tasks"):
     @task(aliases="cov")
     def coverage():
         """Compute test coverage."""
-        test(extraargs="--cov=taskcli --cov-report=html")
+        test(extraargs=f"--cov=taskcli --cov-report=html {tt.get_extra_args()}")
         # print summary:
         run("coverage report")
+
+        cwd = os.getcwd()
+        report_path = os.path.join(cwd, "htmlcov", "index.html")
+        print(f"file://{report_path}")
 
     @task(aliases="t", env=["FOOBAR"], important=True)
     def test(extraargs: str = ""):

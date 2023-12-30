@@ -1,265 +1,131 @@
 # `taskcli` - a novel way of creating complex, real-life CLI interfaces from python functions
 
-A tool for turning Python functions into powerful CLI interfaces for **fast** real-life task automation.
+A `t` CLI tool for **fast**, real-life, task automation for fans of the Linux command shell.
+Save time - Create snappy, powerful, and reusable CLI interfaces from simple Python functions.
 
-It's kind of like a Makefile, but in Python, and on steroids (search, tags, grouping, highlighting, etc).
-
-The guiding design principles of taskcli are:
-- encapsulate complexity of managing many tasks: show only what's needed, but make it easy to reveal more.
-- make running and navigating between groups of tasks fast, but powerful.
-- make the most important tasks stand out. Hide the less frequently used ones.
-
-`taskcli` is not only for Python project.
-
-It can be used for any sort of project, with Python as the glue.
-
-## Basic usage overview
-`t` list all the tasks defined by the `tasks.py` in current directory (you can import tasks from other directories)
-`t <task_name> [args]` run a task (tool will automaticlly switch directories if needed)
-`t <group_name>` list all the tasks in a group of tasks (also the hidden ones)
-`t -s <search_term>` list all the tasks matching the regex search term
-`t -t tags` list all the tasks with the given tags
-`t -t imp` list all tags maked as important
-`t -H` list all the tasks, even the onces marked as hidden and the onces in hidden group
-
-(You can also use `taskcli` instead of `t`)
-
-
-## The entrypoints - `t` vs `tt` - less vs more
-By default `taskcli` installs these entrypoints: `t`, `tt`, `taskcli`
-- `t` and `taskcli` are equivalent; they are the default entrypoints to the tool.
-- `tt` is an alternative entrypoint designed to show a bit more info by default. By default it's the equivalent of running `t --show-hidden` (i.e. `t -H`), so, by default it shows all the hidden tasks and groups.
-
-This distinction also impacts tab completion. Tab completion for `t` only shows not hidden groups/tasks, while tab completion for `tt` shows all groups/tasks.
-You can customize either entrypoint by adding more default flags (e.g. to make `tt` also show values of default arguments) by customizing `tt.config` object in your `tasks.py`.
-
-Rationale for many entrypoints: in practice I found simply switching between `t` and `tt` to be the fastest way of toggling between showing some, vs. all, tasks. Wasteful? A bit, maybe. Handy? You bet!
-
+Manage and automate any project (not only Python) with ease.
 
 ## Key features
-- Pythonic way of defining tasks - simply create a function.
-- Easily manage, group, highlight, tag, list your tasks.
+- Aliases, namespace, groups
+- You can group, highlight, tag, hide, list, regex-search your tasks.
+- Import and reuse(!) tasks from other modules/dirs  (`tt.include(module_name)`). Directories will be switched automtically as needed.
 - Auto hide tasks which are not ready to be run (e.g. due to missing env vars) (`tt.config.hide_not_ready = True`)
-- Import and reuse tasks from other modules/dirs  (`tt.include(module_name)`). Directories will be switch autmtically as needed.
 - Quickly see the overview of all the tasks, along with optional and mandatory arguments.
 - Customize the way your tasks are listed. Customize it on per-project basis, or globally for many projects.
-- Configurable: easy to start, but also easy to customize for larger projects.
+- simple to start, but power and suitable for managing larger projects.
 - Automatically switch directories when running tasks imported from other directories (can be disabled).
 
 
-## Docs
-[Configuration Settings](docs/settings.md)
+## Quickstack
+Install: `pip install taskcli`
 
-## Tab completion
-Install `argcomplete` package. It's an optional dependency of taskcli
-
-Add this to your `.bashrc`
+Then, all you need is a `tasks.py` file with a single simple function:
 ```
-eval "$(register-python-argcomplete taskcli)"
-eval "$(register-python-argcomplete tt)"
+$ cat tasks.py
+from taskcli import task
+@task
+def hello(name="Bob"):
+    print(f"Hello, {name}!")
 ```
+And you can run it: `t hello` or `t hello -n Alice` or `t hello --name Alice`
 
-## Installation and basic usage
+Another example:
 ```
-# Install the package
-pip install taskcli
+$ cat tasks.py
+from taskcli import task, run
+@task(aliases="b")
+def bake(frosting: str = "chocolate", *, eat: bool = True):
+    run(f"bake-my-care --cake {frosting} && eat")
+    if eat:
+        consume()
+@task
+def eat():
+    print("Yum yum!")
 
-# Create a ./tasks.py file in the current directory with example content
-taskcli --init
-
-# list the tasks in tasks.py
-taskcli <task_name>
-
-# Instead of `taskcli` you can also use the `t` script, eg:
-t
-t <task_name>
 ```
+And run it, e.g.: `t bake` or `t b` or `t b -f vanilla --no-eat`
 
-## Overview
-All projects revolve around performing small tasks.
-Be it complication, deployment, testing, making an API call, or anything else, it's all just a task.
-As projects grow, so does the number of tasks.
-Over time, it becomes harder and harder to organize them.
+That's it!
 
-This tool aims to solve this problem by providing means of not only easily creating tasks,
-but also easily navigating them later on.
-You can group tasks, highlight the important ones, combine tasks from many files and directories.
-
-
-
-### Tasks
-A task can be important, hidden, both, or neither
-
-Important tasks
-
-Hidden tasks are not listed by default. Those are tasks that are meant to be ran relatiely inferequently.
-Hidden tasks can be listed either by
-- with `--show-hidden|-H` flag, or with `--list-all|-L` flag
-- or by listing all tasks in specific group.
-
-Important tasks are just that, important.
-The reason depends on the cotext.
-Important tasks have a special formatting (customizable)
-
-### Tasks and groups
-Each task is always in one specific group.
-By defaylt, thats the default group.
-You can create custom groups.
-
-Each task has a namespace.
-TODO: explain
-
-## Typical usage
-- run `t` to list all the (not hidden) tasks in local `./tasks.py` file. Some info is hidden from this overview.
-- run `t <task_name>` to run a task.
-- run `t <group_name>` to list only tasks in that group. This view includes more detailed info than the full listing.
-
-The goal of `t` is to get a quick overview of all the tasks.
-You can always include `t -L` to view all the info for all the groups. But note that for large projects
-this can result in a lot of output
-
-## Listing tasks
-- `tt` is equivalent to `tt --list|-l` -- only shows mandatory and important parameters.
-- `tt -ll` lists tasks in more detail  -- includes all parameter, even optional ones.
-- `tt -lll` list tasks in even more detauls -- include all parameters, shows default values of optional parameters.
+## Basic usage
+`t --init` create a blank `tasks.py` file in the current directory with example content
+`t` list all the tasks defined by the `tasks.py` located in current directory (or in parent directory - auto discovery)
+`t <task_name> [args]` run a task (tool will automatically switch directories if needed), `[args]` are passed directly to the task function
+`t <group_name>` list all the tasks in a group of tasks (also the hidden ones)
+`t -s <search_term>` list all the tasks matching the regex search term
+`t -t tags` list all the tasks with the given tags
+`t -t imp` list all tags marked as important
+`t -H` list all the tasks, even the ones marked as hidden and the onces in hidden group
 
 
+## What is it for?
+
+`taskcli` is designed for automating tasks. Any tasks.
+
+It can work with any type of project -- it's definately not only for Python.
+The `taskcli` tasks simply happen to be defined in Python, instead of than in YAML.
+This makes them **easier to work it, refactor, test, and maintain.**
+
+If you ever tried to maintain and refactor large YAML codebases file, you know **exactly** what I mean.
+
+The tasks, once defined, can do whatever you want.
+Often, they will be a mix Python calls/flow, and running shell commands and external tools using e.g. provided `run` functions.
+It's up to you whether you want to lean more towards Python, or more towards shell commands.
+
+The guiding design principles of `taskcli` are:
+- make running and navigating between tasks easy fast.
+- show only what's needed, but make it easy to drill down and reveal more info.
+- make the most important tasks stand out. Hide the less frequently used ones, but make them easy to find and use.
 
 
-## Main features
-- Optimized for fast startup (majority of startup time is python interpreter startup). Benchmark with `TASKCLI_ADV_PRINT_RUNTIME=1`
-- Easy to start, flexible when needed (access to underlying `argparse` parser)
--
+## The entrypoints - `t` vs `tt` - see less vs more
+By default `taskcli` installs these three entrypoints: `t`, `tt`, `taskcli`
+- `t` and `taskcli` are equivalent; they are the canonical entrypoints to the tool.
+- `tt` is an alternative entrypoint designed to show a bit more info by default.
+  By default it's the equivalent of running `t --show-hidden`.
+  Meaning that `tt` shows all the hidden tasks and groups.
 
-## Other features
-- Expose regular python function into a task, print their output to stdout  (`-P` flag.)
+Why two ways of running the command?
+Switching between `t` and `tt` is be the fastest way of toggling between showing less vs more info
 
-- Integration with go-task (http://taskfile.dev).  If `TASKCLI_GOTASK_TASK_BINARY_FILEPATH` is set, any local Taskfile.yaml files are loaded automatically.
-
-- Support for exotic parameters types. Parameters with types which cannot be converted from argparse will be gracefully ignores (so long as they have a deafult value). Future work: support for custom conversion functions.
-
-## Customisation
-`taskcli` comes with sane defaults out of the box, but it can be
-
-### Customize Argparse parser
-TODO: see cookbook
-
-
-### Make certain tasks stand out by marking them as important
+You can customize both `t` and `tt` entrypoints on per-project basis by adding more default flags.
+For example, you can make `tt` also show values of default arguments:
 ```
-@task(important=True)
-def do_something():
-    ...
+from taskcli import tt
+tt.config.default_options_tt = ["--show-optional-args"]
 ```
-
-### Hide tasks from default listing
-```
-@task(hidden=True)
-def do_something():
-    ...
-```
-
-### Customize the way tasks are listed, e.g. add a red "prod!" suffix to some
-```
-prod_warning = "name {red}(production!){clear}"
-@task(format=prod_warning)
-def do_something():
-    pass
-```
-
-### other
-- customize default formatting string
-- ...
-
-## Design consideration
-- `taskcli` shows if your env is ready to run a task. Many tasks need special env variables set.
-   It's useful to see at a glance which tasks are ready to run, and which are not.
-   Specify either env var names, or  for advanced cases, a function that returns a string.
-
-## Roadmap
-- Custom env validation functions
+(the 'taskcli.tt' python module contains the public API of the library, it just happens to be called like `tt` cli tool).
 
 
 ## Disclaimer
-This library is still in early development and API will continue to change.
+This library is still in early development and API will continue to rapidly evolve.
 If you need a more mature solution, consider using [pyinvoke](https://www.pyinvoke.org/) or Taskfile.dev.
 
 ## Prior art and comparison
 ### pyinvoke
 `taskcli` is very similar to pyinvoke, and builds on many of its ideas.
 
+Differences
 - `taskcli` automatically assumes real-life tasks often come with co-located files, so by default it automatically switches directories
     when running tasks imported from other directories. This can be disabled.
-- Unlike pyinvoke, `taskcli` does way with explitic context object that needs to be passed around. This makes defining tasks a bit easier.
+- Unlike pyinvoke, `taskcli` does away with explitic context object that needs to be passed around. This makes defining tasks easier.
 - `taskcli` aims to provides a richer task list output and overview out of the box.
-- `taskcli` infers more information from type annotations, relying less on duplicating information in decorators.
+- `taskcli` infers more information from type annotations, this means less duplicating information in decorators.
 - `taskcli` offers more elaborate include capability, and hierarchical discovery of tasks.
 - `taskcli` user experience is more opinionated, aiming to out of the box reduce the amount of keystrokes needed to navigate and tasks.
-
-Note, unlike pyinvoke, taskcli is still in development.
+- `pyinvoke` is older, much more mature, and more battle tested.
 
 ### Taskfile.dev
-Unlike Taskfile, `taskcli` does not rely on YAML. It's pure python.
-YAML has its benefits, but also drawbacks.
+Unlike Taskfile, `taskcli` does not rely on YAML.
+YAML has its benefits, but also drawbacks. Refactoring YAML is hard, and it's easy to make mistakes.
 
 ### argh
 `argh` is a great library for creating CLI interfaces from python functions.
 It can also be used for creating simple tasks.
-
+Similarly to `taskcli` it also builds on top of `argparse` using type annotations and function signatures.
+Unlike `argh`, `taskcli` is designed for creating and manaing more complex libraries of reusable tasks.
 
 ## Acknowledgements
-- The idea was inspired by Taskfile.dev and `Justfile`
-- This library builds on many ideas from the excellent `argh` project. If you like the idea of building CLI interfaces from python function signatures, but don't need the advanced task-like features, check `argh` out.
-- The library uses `argparse` and `argcomplete` behing the scenes.
-
-
-
-## FAQ
-Q: why no namespace by default?
-A: in most cases it just requires additional unnecessary keystrokes. If you feel you need namespaces, you can add them manually.
-
-## Automatic Directory switching
-
-By default running a task will switch to the directory where the task is defined.
-This happen both when you run the task via `taskcli`, and when you call the python function decorated with `@task` yourself.
-The section below outlines how that works.
-Note, `@task(change_dir=False)` will disable this behavior, and preserve whatever CWD was set right before the task function was called.
-
-See `TASKCLI_EXTRA_TASKS_PY_FILENAMES` to customize where `taskcli` looks for `tasks.py` files in directories above the current one.
-
-
-
-
-### Simple project
-project/
-- tasks.py                # let's say this one haas 3 tasks
-    * upload-files
-    * deploy-to-prod
-    * deploy-to-staging
-
-Those 3 actions are available anywhere within the `project/` dir tree.
-This mean you can run
-$ project/foo1/foo2/foo2 $ t deploy-to-prod
-without needing to switch to the root of the project first.
-
-### Advanced project
-```
-project/
-- tasks.py     # let's say this one has the same 3 task, and one new included one.
-    * upload-files
-    * deploy-to-prod        # tagged as "important" within this file
-    * deploy-to-staging
-    * bake-cake             # included by name from  project/foo/bakery/tasks.py
-
-
-project/foo/bakery/
-- tasks.py                 # chooses to auto-include all 'important' tasks from project/tasks.py
-    * bake-cake            # defined here, running it from anywhere switches to project/foo/bakery/
-    ⬆ deploy-to-prod      # auto-included from project/tasks.py, running it switches to project/ dir
-
-
-For example, running
-project/some/other/directory $ t bake-cake
-will find the task in project/tasks.py , notice it was imported from project/foo/bar/tasks.py,
-will switch to project/foo/bar/ dir, and run the task in there
-```
+- The idea for `taskcli` was inspired by Taskfile.dev and `Justfile` projects.
+- This library builds on many ideas from the excellent `argh` project. If you like the idea of building CLI interfaces from python function signatures, and don't need the advanced task-like features of `taskcli`, you should check `argh` out.
+- `taskcli` library uses `argparse` and `argcomplete` (optional dependency for tab completion).

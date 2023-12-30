@@ -1,7 +1,10 @@
+import pytest
+
 from taskcli import envvars
 from taskcli.envvar import EnvVar
-import pytest
-@pytest.mark.skip
+
+
+@pytest.mark.skip()
 def test_envvars():
     envvars.show_env(1)
     envvars.show_env(0)

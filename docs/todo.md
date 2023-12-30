@@ -1,7 +1,8 @@
 
 
 - [ ] def lint(paths: Paths): Cannot call from CLI without the path
-
+- [ ] consider 'f' as entrypoint
+- [ ] test shortened args
 - [ ] move building from taskfile to tasks.py
 - [ ] code location of merged module is wrong @ coverage report (/Users/p/code/mygithub/taskcli/taskcli_import_dribzrel.py:36)
 - [ ] loading ./tasks.py from dir above, merging them with the local one.
@@ -76,6 +77,7 @@
 - [ ] argparse add_argument_group
 - [ ] print warning if TASKCLI env var is set which is not known
 - [ ] pre/post hooks
+- [ ] t --env - print bash env of the project, e.g. tcd -> goes to project t --env
 - [ ] list of optional arg names to always mark as important?  add imperative, as Cookbook example.
 - [ ] hidden tasks: _foobar: use "named" decorator?
 - [ ] interactive confirmaiton before running a task (confirm only once)

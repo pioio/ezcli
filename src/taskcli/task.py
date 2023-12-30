@@ -8,6 +8,7 @@ from hmac import new
 from typing import Callable, Iterable
 
 import taskcli.core
+from taskcli import configuration
 
 from . import utils
 from .configuration import config
@@ -16,7 +17,6 @@ from .group import DEFAULT_GROUP, Group
 from .parameter import Parameter
 from .tags import TAG_IMPORTANT
 from .types import Any, AnyFunction, Module
-from taskcli import configuration
 
 
 class UserError(Exception):
