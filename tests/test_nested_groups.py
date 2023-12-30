@@ -1,3 +1,4 @@
+from taskcli import constants
 from taskcli import task, tt
 from taskcli.listing import create_groups, list_tasks
 from . import tools
@@ -76,3 +77,124 @@ def test_parent_with_children_but_no_tasks_of_its_own():
 
 # foobar
 task-in-foobar"""
+
+
+
+
+def test_parent_with_all_hidden_children():
+    with tt.Group("parent1") as g1: # NOT hidden
+        with tt.Group("child1", hidden=True):
+            @task
+            def task_in_child1():
+                pass
+        with tt.Group("child2", hidden=True):
+            @task
+            def task_in_child2():
+                pass
+
+    # we need at least one visible
+    @task
+    def task_in_child2():
+        pass
+
+    tasks = tt.get_tasks()
+    assert len(tasks) == 3
+    with tools.simple_list_format():
+        lines = list_tasks(tasks)
+
+    output = "\n".join(lines)
+    assert output == f"""# default
+task-in-child2
+Also 2 hidden groups, with 2 tasks in them, {constants.HELP_TEXT_USE_H_TO_SHOW_HIDDEN}"""
+
+
+def test_parent_with_all_hidden_children2():
+    with tt.Group("parent1",hidden=True) as g1:
+        @task(hidden=False)
+        def sometask():
+            pass
+        with tt.Group("child1", hidden=True):
+            @task
+            def task_in_child1():
+                pass
+        with tt.Group("child2", hidden=True):
+            @task
+            def task_in_child2():
+                pass
+
+    # we need at least one visible
+    @task
+    def task_in_child2():
+        pass
+
+    tasks = tt.get_tasks()
+    assert len(tasks) == 4
+    with tools.simple_list_format():
+        lines = list_tasks(tasks)
+
+    expected = f"""# default
+task-in-child2
+Also 3 hidden groups, with 3 tasks in them, {constants.HELP_TEXT_USE_H_TO_SHOW_HIDDEN}""".split("\n")
+
+    assert lines == expected
+
+
+def test_parent_with_all_hidden_children3():
+
+
+    with tt.Group("parent1",hidden=False) as g1: # <<--- NOT hidden !!
+        @task(hidden=True)
+        def sometask():
+            pass
+        with tt.Group("child1", hidden=True):
+            @task
+            def task_in_child1():
+                pass
+        with tt.Group("child2", hidden=True):
+            @task
+            def task_in_child2():
+                pass
+
+    # we need at least one visible
+    @task
+    def task_in_child2():
+        pass
+
+    tasks = tt.get_tasks()
+    assert len(tasks) == 4
+    with tools.simple_list_format():
+        lines = list_tasks(tasks)
+
+    # FIXME: this test is a bit buggy, but not worth fixing right now
+    # Edge case. parent1 is not hidden, but it's only child is
+
+    expected = f"""# default
+task-in-child2
+Also 2 hidden groups, with 2 tasks in them, {constants.HELP_TEXT_USE_H_TO_SHOW_HIDDEN}""".split("\n")
+
+    assert lines == expected
+
+
+def test_parent_with_only_hidden_child():
+    """FIXME: In this case I would expect to see the group, with 'hidden 1' entry."""
+
+    with tt.Group("parent1",hidden=False) as g1: # <<--- NOT hidden !!
+        @task(hidden=True)
+        def sometask():
+            pass
+
+    # we need at least one visible
+    @task
+    def task_in_child2():
+        pass
+
+    tasks = tt.get_tasks()
+    assert len(tasks) == 2
+    with tools.simple_list_format():
+        lines = list_tasks(tasks)
+
+
+    expected = f"""# default
+task-in-child2""".split("\n")
+
+    assert lines == expected

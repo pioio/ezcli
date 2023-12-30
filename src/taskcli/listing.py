@@ -145,6 +145,11 @@ def list_tasks(tasks: list[Task], settings: TaskRenderSettings | None = None) ->
     if final_line:
         line = f"{configuration.colors.dark_gray}{', '.join(final_line)}{configuration.colors.end}"
         lines.append(line)
+
+    # remove any last empety line
+    if lines:
+        if lines[-1] == "":
+            lines = lines[:-1]
     return lines
 
 indent_increase = 2
@@ -154,17 +159,21 @@ def render_group(group:Group, lines:list[str], filtered_tasks:list[Task], filter
 
     tasks_directly_in_group_to_show = [group_task for group_task in group.tasks if group_task in filtered_tasks]
 
+    num_hidden_in_this_group = filter_result.num_hidden_per_group[group.name]
+
     # anywhere within the family tree
     has_children_tasks_to_show = group.has_children_recursive(filtered_tasks)
-    if not has_children_tasks_to_show:
+
+    NOTHING_TO_SHOW_DIRECTLY = not has_children_tasks_to_show and not tasks_directly_in_group_to_show
+    if NOTHING_TO_SHOW_DIRECTLY:
         # if a group is hidden (and we're hiding hidden group), tasks_to_show will be empty
 
         # group mightnot have any tasks, but it might have children group
         for child in group.children:
             render_group(child, lines, filtered_tasks, filter_result, settings, indent+indent_increase)
+        #print(f"Nothing to show in {group.name} {filter_result.num_hidden_per_group[group.name]}")
         return
 
-    num_hidden_in_this_group = filter_result.num_hidden_per_group[group.name]
     # print the group header
     num_tasks = group.render_num_shown_hidden_tasks()
     format = config.render_format_of_group_name if not group.hidden else config.render_format_of_group_name_hidden

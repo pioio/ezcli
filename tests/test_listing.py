@@ -255,6 +255,5 @@ foobar2a
     assert (
         lines
         == """# groupA
-foobar
-""".split("\n")
+foobar""".split("\n")
     )
