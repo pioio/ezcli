@@ -1,20 +1,12 @@
 # `taskcli` - a novel way of creating complex, real-life CLI interfaces from python functions
 
-A `t` CLI tool for **fast**, real-life, task automation for fans of the Linux command shell.
+The `t` (`taskcli`) CLI tool for **fast**, real-life, task automation for fans of the Linux command shell.
 
-Save time - Create snappy, powerful, and reusable CLI interfaces from simple Python functions.
+Save time - create snappy, powerful, and reusable CLI interfaces from simple Python functions.
 
-Manage and automate any project (not only Python) with ease.
+Navigate & use your task with ease, also in large projects -- tags, search, imports, aliases, namespace, groups!
 
-## Key features
-- Aliases, namespace, groups
-- You can group, highlight, tag, hide, list, regex-search your tasks.
-- Import and reuse(!) tasks from other modules/dirs  (`tt.include(module_name)`). Directories will be switched automtically as needed.
-- Auto hide tasks which are not ready to be run (e.g. due to missing env vars) (`tt.config.hide_not_ready = True`)
-- Quickly see the overview of all the tasks, along with optional and mandatory arguments.
-- Customize the way your tasks are listed. Customize it on per-project basis, or globally for many projects.
-- Simple to start, but power and suitable for managing larger projects.
-- Automatically switch directories when running tasks imported from other directories (can be disabled).
+Manage and automate task of any project (not only Python)!
 
 
 ## Quickstack
@@ -30,10 +22,22 @@ def hello(name="Bob"):
 ```
 And you can run it: `t hello` or `t hello -n Alice` or `t hello --name Alice`
 
-Another example:
+## Key features
+- You can group, highlight, tag, hide, list, regex-search your tasks.
+- Import and reuse(!) tasks from other modules/dirs  (`tt.include(module_name)`). Directories will be switched automtically as needed.
+- Less noise -- auto hide tasks which are not ready to be run (e.g. due to missing env vars) (`tt.config.hide_not_ready = True`)
+- Quickly see the overview of all the tasks, along with optional and mandatory arguments.
+- Customize the way your tasks are listed. Customize it on per-project basis, or globally for many projects.
+- Simple to start, but power and suitable for managing larger projects.
+- Automatically switch directories when running tasks imported from other directories (can be disabled).
+- Easier collaboration with others - customize the behavior and the look and feel of `tasks` using env vars.
+
+
+## Another example:
 ```
 $ cat tasks.py
 from taskcli import task, run
+
 @task(aliases="b")
 def bake(frosting: str = "chocolate", *, eat: bool = True):
     run(f"bake-my-care --cake {frosting} && eat")
@@ -48,6 +52,7 @@ And run it, e.g.: `t bake` or `t b` or `t b -f vanilla --no-eat`
 
 That's it!
 
+
 ## Basic usage
 - `t --init` creates a blank `tasks.py` file in the current directory with example content.
 - `t` list all the tasks defined by the `tasks.py` located in current directory (or in parent directory - auto discovery).
@@ -60,12 +65,11 @@ That's it!
 
 
 ## What is it for?
-
 `taskcli` is designed for automating tasks. Any tasks.
 
 It can work with any type of project -- it's definately not only for Python.
 The `taskcli` tasks simply happen to be defined in Python, instead of than in YAML.
-This makes them **easier to work it, refactor, test, and maintain.**
+This makes `taskcli` tasks **easier to work it, refactor, test, and maintain.**
 
 If you ever tried to maintain and refactor large YAML codebases file, you know **exactly** what I mean.
 
@@ -119,6 +123,7 @@ Differences
 ### Taskfile.dev
 Unlike Taskfile, `taskcli` does not rely on YAML.
 YAML has its benefits, but also drawbacks. Refactoring YAML is hard, and it's easy to make mistakes.
+A key benefit of the https://Taskfile.dev project is that it ships as a single portable `task` GO binary.
 
 ### argh
 `argh` is a great library for creating CLI interfaces from python functions.
