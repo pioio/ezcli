@@ -216,7 +216,12 @@ It can also be used for creating simple tasks.
 Q: why no namespace by default?
 A: in most cases it just requires additional unnecessary keystrokes. If you feel you need namespaces, you can add them manually.
 
-## Directory visualisation
+## Automatic Directory switching
+
+By default running a task will switch to the directory where the task is defined.
+This happen both when you run the task via `taskcli`, and when you call the python function decorated with `@task` yourself.
+The section below outlines how that works.
+Note, `@task(change_dir=False)` will disable this behavior, and preserve whatever CWD was set right before the task function was called.
 
 ### Simple project
 project/

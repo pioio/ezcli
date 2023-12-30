@@ -25,6 +25,12 @@ def hello_world() -> None:
     run("date")
 
 @task
+def print_cwd() -> None:
+    import os
+    print("Current working dir:", os.getcwd())
+
+
+@task
 def say_hello(name:str, *, repeat:int=1) -> None:
     '''Usage: tt say-hello NAME [--repeat=REPEAT]'''
     for x in range(repeat):
