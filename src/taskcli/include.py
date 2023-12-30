@@ -32,25 +32,25 @@ def include(
 
     Example:
     ```
-        # Most basic usage - import entire module
+        # Most basic usage - include tasks defined in an external module
         import mysubmodule
         tt.include(mysubmodule)
 
-        # Most basic usage - import one task
+        # Most basic usage - include one task
         import mysubmodule
         tt.include(mysubmodule.mytask)
 
-        # Import module or fun and prefix with a namespace
+        # Include a module or function, and prefix them with a namespace afterwards
         import mysubmodule
         tt.include(mysubmodule, namespace="mysubmodule", alias_namespace="s")
 
-        # Import tasks based on custom criteria (e.g, names, tags, etc)
+        # Include tasks selectively, based on custom criteria (e.g, names, tags, etc)
         import mysubmodule
         tt.include(mysubmodule, filter=lambda t: t.important)
     ```
 
     Passing a already existing Task object is less common, but possible.
-    It will copy it to the calling module.
+    Doing so will simply copy that task it to the calling module.
 
     For more on including tasks see, see docs.
     """
