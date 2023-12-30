@@ -136,16 +136,16 @@ Differences
 
 ### Taskfile.dev
 Unlike Taskfile, `taskcli` does not rely on YAML.
-YAML has its benefits, but also drawbacks. Refactoring YAML is hard, and it's easy to make mistakes.
-A key benefit of the https://Taskfile.dev project is that it ships as a single portable `task` GO binary.
+YAML has its benefits, but also drawbacks. Refactoring large YAML collections it's not easy.
+That said, a key benefit of the https://Taskfile.dev project is that it ships as a single portable `task` GO binary.
 
 ### argh
-`argh` is a great library for creating CLI interfaces from python functions.
+`argh` is a great, lesser knonw, library for creating CLI interfaces from python functions.
 It can also be used for creating simple tasks.
 Similarly to `taskcli` it also builds on top of `argparse` using type annotations and function signatures.
-Unlike `argh`, `taskcli` is designed for creating and manaing more complex libraries of reusable tasks.
+Unlike `argh`, `taskcli` is designed for creating and interfacing with more complex collections of reusable tasks.
 
 ## Acknowledgements
 - The idea for `taskcli` was inspired by Taskfile.dev and `Justfile` projects.
-- This library builds on many ideas from the excellent `argh` project. If you like the idea of building CLI interfaces from python function signatures, and don't need the advanced task-like features of `taskcli`, you should check `argh` out.
-- `taskcli` library uses `argparse` and `argcomplete` (optional dependency for tab completion).
+- This library builds on many ideas from the excellent `argh` project. If you like the idea of building CLI interfaces from python function signatures, and don't need the advanced task management features of `taskcli`, you should check `argh` out.
+- `taskcli` library uses `argparse` and `argcomplete` (argcomplete is an optional dependency for tab completion).
