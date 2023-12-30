@@ -1,6 +1,7 @@
 import re
 from json import tool
 
+
 from argh import dispatch
 
 import taskcli
@@ -276,3 +277,21 @@ foobar2b""".split("\n")
         == """# groupA
 foobar""".split("\n")
     )
+
+from taskcli import tt
+
+def test_default_group_always_first():
+    with tt.Group("GroupA"):
+        @task
+        def task_in_group_a() -> None:
+            pass
+
+    @task
+    def task_in_default_group() -> None:
+        pass
+
+    with tools.simple_list_format():
+        config = TaskCLIConfig()
+        settings = new_settings(config=TaskCLIConfig())
+        lines = list_tasks(tools.include_tasks(), settings=settings)
+        assert lines[0] == "# default"

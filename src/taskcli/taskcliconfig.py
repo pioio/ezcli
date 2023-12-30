@@ -112,6 +112,17 @@ class TaskCLIConfig:
             [], "tags", "-t", nargs="+", help="Only show tasks matching any of these tags"
         )
 
+        # The order of groups of tasks when list
+        # All tasks are by default in the "default" group unless task(group="foo") is used
+        # Any group not listed here will be shown last, in the order they were defined.
+
+        self.group_order: list[str] =self._add_list(
+            ["default"], "group_order", nargs="*",
+            help="Regex re.match patterns of the order in which top-level groups are shown. "
+                 "Any top-level group the name of which matches any of the patterns will be listed first."
+                 )
+
+
         self.field_search: ConfigField = ConfigField(
             "",
             "search",

@@ -108,7 +108,8 @@ def list_tasks(tasks: list[Task], settings: TaskRenderSettings | None = None) ->
         raise UserError("\n".join([f"{colors.red}No tasks found!{colors.end}", *filter_result.progress]))
 
     # Get the list TOP-LEVEL groups from the remaining tasks (after filtering)
-    top_groups = create_groups(tasks=tasks, group_order=configuration.config.group_order)
+    top_groups = create_groups(tasks=tasks)
+    top_groups = sort_groups_before_listing(top_groups, order=settings.group_order)
 
     for line in filter_result.progress:
         log.debug(line)
@@ -368,36 +369,9 @@ def smart_task_lines(task: Task, settings: TaskRenderSettings) -> list[str]:  # 
     return lines
 
 
-# def create_groups(tasks: list[Task], group_order: list[str]) -> list[Group]:
-#     """Return a dict of group_name -> list of tasks, ordered per group_order, group not listed there will be last."""
-#     groups: list[Group] = []
-#     remaining_tasks: list[Task] = list()
 
-#     for expected_group_name in group_order:
-#         for task in tasks:
-#             already_present = task.group in groups
-
-#             if task.group.name == expected_group_name and not already_present:
-#                 groups.append(task.group)
-#             else:
-#                 remaining_tasks.append(task)
-
-#     for task in remaining_tasks:
-#         if task.group not in groups:
-#             groups.append(task.group)
-
-#     before = [group.name for group in groups]
-#     after = list({group.name for group in groups})
-#     assert sorted(before) == sorted(after), f"Duplicate groups found, {before} != {after}"
-
-#     # Return only top-level groups
-#     return [group for group in groups if not group.parent]
-
-
-def create_groups(tasks: list[Task], group_order: list[str] = []) -> list[Group]:
+def create_groups(tasks: list[Task]) -> list[Group]:
     """Return a dict of group_name -> list of tasks, ordered per group_order, group not listed there will be last."""
-    groups: list[Group] = []
-    del group_order
 
     top_level_groups = []
     for task in tasks:
@@ -406,6 +380,28 @@ def create_groups(tasks: list[Task], group_order: list[str] = []) -> list[Group]
             top_level_groups.append(tlg)
 
     return top_level_groups
+
+import re
+def sort_groups_before_listing(groups: list[Group], order:list[str]) -> list[Group]:
+
+    out = []
+
+
+
+    for expected_group_pattern in order:
+        try:
+            for group in groups:
+                    if re.match(expected_group_pattern, group.name):
+                        out.append(group)
+        except re.error:
+            utils.print_error(f"Invalid regex: {expected_group_pattern}")
+
+    for group in groups:
+        if group not in out:
+            out.append(group)
+    return out
+
+
     # groups = []
     # for task in tasks:
     #     if task.group not in groups:

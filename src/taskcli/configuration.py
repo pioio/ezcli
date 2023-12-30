@@ -60,10 +60,10 @@ if not ENABLE_COLORS:
 class Config:
     """The main runtime config of the library."""
 
-    # The order of groups of tasks when list
-    # All tasks are by default in the "default" group unless task(group="foo") is used
-    # Any group not listed here will be shown last, in the order they were defined.
-    group_order: list[str] = dataclasses.field(default_factory=lambda: ["default"])
+    # # The order of groups of tasks when list
+    # # All tasks are by default in the "default" group unless task(group="foo") is used
+    # # Any group not listed here will be shown last, in the order they were defined.
+    # group_order: list[str] = dataclasses.field(default_factory=lambda: ["default"])
 
     render_color_mandatory_arg: str = colors.yellow
     render_color_optional_arg: str = colors.dark_gray

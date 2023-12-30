@@ -3,11 +3,10 @@
 
 - [x] mark included task with^
 - [x] task init is broken
-- [ ] print the task being run,, along with a chain of calls, but only when running via taskcli
-- [ ] run should print the current task
-- [ ] nested groups
-  - [ ] default group should be first
+
 - [ ] optional flags are not gray (disk usage example)
+- [ ] hide_not_ready unit test
+
 - [x] test init.py
 - [ ] unit test hide-not-read
 - [ ] Module - add custom class to represent module, with my custom per-module fields
@@ -96,6 +95,8 @@ Features:
 
 
 # Long-term TODOs
+- [ ] will setting a tt.config.foobar in a imported module overwrite the global one? should we have tt.config.reset() to call after imports are done?
+- [ ] run: print the task being run,, along with a chain of calls, but only when running via taskcli
 - [ ] chaining tasks  `taskcli task1 task2`
 - [ ] pre/post hooks
 - [ ] --hide-regexp

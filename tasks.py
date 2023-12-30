@@ -10,7 +10,7 @@ from taskcli import run, task, tt
 important = tt.Group("Important", desc="Development tasks")
 
 tt.config.default_options = ["--no-go-task"]
-tt.config.hide_not_ready = True
+#tt.config.hide_not_ready = True
 
 with tt.Group("dev", desc="Development tasks"):
 
