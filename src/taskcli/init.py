@@ -2,9 +2,8 @@ import os
 import sys
 
 
-def create_tasks_file(filepath:str="tasks.py") -> None:
+def create_tasks_file(filepath: str = "tasks.py") -> None:
     """Create a new baisc tasks.py file."""
-
     if os.path.exists(filepath):
         print(f"File already exists: {filepath}")  # noqa: T201
         sys.exit(1)

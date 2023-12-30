@@ -91,9 +91,6 @@ def task(
         return decorator
 
 
-created = []
-
-
 class Task:
     """Represents a single task. Gets created via the `@task` decorator."""
 
@@ -163,13 +160,6 @@ class Task:
         self.soft_validate_task()
         self.included_from: Module | None = included_from
 
-        # debug
-        # name = self.name
-        # if name in created:
-        #     msg = f"Task {name} already exists"
-        #     raise ValueError(msg)
-        # created.append(name)
-
     @property
     def name(self) -> str:
         """Return the name of the task, including all task namespaces and group namespace."""
@@ -234,8 +224,9 @@ class Task:
         return False
 
     def get_all_parent_groups(self) -> list[Group]:
+        """Return all parent groups."""
         out = []
-        g = self.group
+        g: Group | None = self.group
         while g is not None:
             out.append(g)
             g = g.parent
@@ -427,7 +418,7 @@ class Task:
         return "ok"
 
 
-def _get_wrapper(
+def _get_wrapper(  # noqa: C901
     func: AnyFunction,
     change_dir: bool = True,
     # ----------
@@ -504,7 +495,7 @@ def _get_wrapper(
     del kwargs["aliases"]
     del kwargs["env"]
 
-    task = Task(wrapper_for_changing_directory, env=env, group=group, aliases=aliases, **kwargs)
+    task: Task = Task(wrapper_for_changing_directory, env=env, group=group, aliases=aliases, **kwargs)
 
     if not hasattr(module_which_defines_task, "decorated_functions"):
         module_which_defines_task.decorated_functions = []  # type: ignore[attr-defined]

@@ -14,7 +14,7 @@ from typing import Any
 class Logger(logging.Logger):
     """Custom logger which adds a trace method."""
 
-    def trace(self, msg: Any, level: int = 3, *args, **kwargs):
+    def trace(self, msg: Any, level: int = 3, *args: Any, **kwargs: Any) -> None:
         """Log message to debug, but only if verbose level high enough.
 
         Args:
@@ -30,7 +30,7 @@ class Logger(logging.Logger):
             msg = "TRACE: " + msg
             self.debug(msg, *args, **kwargs)
 
-    def separator(self, msg: str = ""):
+    def separator(self, msg: str = "") -> None:
         """Print a separator line to the log."""
         green = "\033[92m"
         clear = "\033[0m"
@@ -47,7 +47,7 @@ def get_logger(name: str) -> Logger:
 _logger = Logger("taskcli")
 
 
-def configure_logging():
+def configure_logging() -> None:
     """Configure logging for taskcli.
 
     Should be called only once.

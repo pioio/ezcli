@@ -1,7 +1,7 @@
 from operator import le
 
 import taskcli
-from taskcli import Group, group, task, tt
+from taskcli import Group, task, tt
 from taskcli.listing import list_tasks, sort_groups_before_listing
 
 from . import tools
@@ -60,7 +60,7 @@ def test_group_has_children_works():
             pass
 
     for t in tt.get_tasks():
-        assert group
+        assert t.group
     assert len(tt.get_tasks()) == 2
 
 

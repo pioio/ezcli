@@ -22,9 +22,8 @@ def print_stderr(text: str) -> None:
     print(text, file=sys.stderr, flush=True)  # noqa: T201
 
 
-def print_to_stderr(text: str,color:str|None=None) -> None:
+def print_to_stderr(text: str, color: str | None = None) -> None:
     """Print to stderr."""
-
     if color is None:
         color = configuration.colors.green
     text = f"{color}{text}{ENDC}"
@@ -80,6 +79,7 @@ if typing.TYPE_CHECKING:
 
 
 def get_callers_module() -> Module:
+    """Return the module object of the caller."""
     offset = 3
     return get_module(offset=offset)
 
@@ -196,7 +196,7 @@ def reset_tasks() -> None:
         if hasattr(module, "decorated_functions"):
             module.decorated_functions = []  # type: ignore[attr-defined]
         if hasattr(module, "taskcli_top_level_groups"):
-            module.taskcli_top_level_groups = []
+            module.taskcli_top_level_groups = []  # type: ignore[attr-defined]
 
     # Clear global configuration (some tests might modify it)
     from taskcli import tt

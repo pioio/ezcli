@@ -11,11 +11,11 @@ from typing import Callable
 
 import taskcli.include
 
-from . import envvars, task, taskfiledev, utils
+from . import envvars, taskfiledev, utils
 from .logging import get_logger
 from .parser import build_initial_parser
 from .task import Task, UserError
-from .utils import print_to_stderr, print_error
+from .utils import print_error, print_to_stderr
 
 log = get_logger(__name__)
 
@@ -42,8 +42,12 @@ def main() -> None:  # noqa: C901
     already_loaded = set()
 
     def include_from_file(
-        filename, name_namespace="", alias_namespace="", mark_them=False, filter: Callable[[Task], bool] | None = None
-    ):
+        filename: str,
+        name_namespace: str = "",
+        alias_namespace: str = "",
+        mark_them: bool = False,
+        filter: Callable[[Task], bool] | None = None,
+    ) -> None:
         log.separator(f"Importing objects from {filename}")
         log.debug("Current working dir: " + os.getcwd())
         absolute_filepath = os.path.abspath(filename)
@@ -121,7 +125,7 @@ def main() -> None:  # noqa: C901
                         alias_namespace: str = tt.config.extra_tasks_alias_namespace
                         name_namespace: str = tt.config.extra_tasks_name_namespace
                         # By default no
-                        # > include_from_file(f"{dir_filepath}/{random_lowercase}.py", namespace="p", alias_namespace="p", mark_them=True, filter=filterfun)
+
                         include_from_file(
                             target_filepath,
                             name_namespace=name_namespace,

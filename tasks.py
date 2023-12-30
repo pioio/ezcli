@@ -17,9 +17,6 @@ tt.config.default_options = ["--no-go-task"]
 tt.config.default_options_tt = ["--no-go-task"]
 tt.config.task_start_message = True
 
-
-# tt.config.hide_not_ready = True
-
 tt.include(weather_tasks.weather_here)
 
 
@@ -116,7 +113,6 @@ with tt.Group("lints", desc="Code cleanup tasks"):
     @task(important=True, aliases=("l"))
     def lint(paths: Paths = DEF_LINT_PATHS):
         """Run all linting tasks."""
-
         isort(paths)
         ruff(paths)
         mypy(paths)
@@ -129,7 +125,6 @@ with tt.Group("lints", desc="Code cleanup tasks"):
         path_txt = " ".join(paths)
         run(f"ruff format {path_txt}")
         run(f"ruff check {path_txt} --fix")
-
 
     @task
     def mypy(paths: Paths):
@@ -154,8 +149,6 @@ def rufftwice():
 
 with tt.Group("included tasks"):
     tt.include(docgentasks, namespace="docs", alias_namespace="doc.")
-    # tt.include()
-    # assert tt.get_task("included.docs.test-documentation").included_from
 
 
 @task

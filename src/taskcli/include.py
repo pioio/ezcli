@@ -111,7 +111,11 @@ def include_module(
     """
     if filter is None and not skip_include_info:
         log.debug("No filter set, including all not hidden tasks")
-        filter = lambda t: not t.hidden
+
+        def filter_not_hidden(t: Task) -> bool:
+            return not t.hidden
+
+        filter = filter_not_hidden
     else:
         log.debug("Using custom filter")
 
@@ -225,12 +229,6 @@ def _include_task(
     else:
         # We're including the root module, preserve the group info, otherwise we would move all tasks to 'default'
         copy = task  # dont copy at all, just ues the group
-        # group = task.group
-        # copy = task.copy(group=group, included_from=None)
-
-        # # So that those which were included into the root module continue to be marked as included
-        # if task.included_from:
-        #     copy.included_from = task.included_from
 
     if namespace:
         copy.add_namespace(namespace, alias_namespace=alias_namespace)

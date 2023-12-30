@@ -2,7 +2,7 @@
 
 - [ ] def lint(paths: Paths): Cannot call from CLI without the path
 
-
+- [ ] move building from taskfile to tasks.py
 
 - [ ] loading ./tasks.py from dir above, merging them with the local one.
   - [ ] How to handle A importing B, importing A?
@@ -69,6 +69,7 @@
 
 
 # Long-term TODOs
+- [ ] Settings page - highlight important switches
 - [ ] argparse add_argument_group
 - [ ] print warning if TASKCLI env var is set which is not known
 - [ ] pre/post hooks

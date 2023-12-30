@@ -173,8 +173,14 @@ indent_increase = 2
 
 
 def render_group(
-    group: Group, lines: list[str], filtered_tasks: list[Task], filter_result, settings: TaskRenderSettings, indent: int
-):
+    group: Group,
+    lines: list[str],
+    filtered_tasks: list[Task],
+    filter_result: FilterResult,
+    settings: TaskRenderSettings,
+    indent: int,
+) -> None:
+    """Render a group and its children to the lines list."""
     if group.hidden and not settings.show_hidden_groups:
         return
 
@@ -208,12 +214,8 @@ def render_group(
     )
 
     group_name_indent = indent_str
-    # if group_name_indent:
-    #     group_name_indent = group_name_indent[:-2] + "└─"
-    lines += [group_name_indent + group_name_rendered]
 
-    # for child in group.children:
-    #     render_group(child, lines, filtered_tasks, filter_result, settings, indent+indent_increase)
+    lines += [group_name_indent + group_name_rendered]
 
     tasks_directly_in_group_to_show = _sort_tasks(
         tasks_directly_in_group_to_show,
@@ -394,6 +396,7 @@ def create_groups(tasks: list[Task]) -> list[Group]:
 
 
 def sort_groups_before_listing(groups: list[Group], order: list[str]) -> list[Group]:
+    """Return a list of groups, sorted according to the order list."""
     out = []
 
     for expected_group_pattern in order:
@@ -409,19 +412,19 @@ def sort_groups_before_listing(groups: list[Group], order: list[str]) -> list[Gr
             out.append(group)
     return out
 
-    # groups = []
-    # for task in tasks:
-    #     if task.group not in groups:
-    #         groups.append(task.group)
+    # > groups = []
+    # > for task in tasks:
+    # >     if task.group not in groups:
+    # >         groups.append(task.group)
 
-    # # top_level = []
-    # # for task in tasks:
-    # #     if not task.group.parent and task.group not in top_level:
-    # #         top_level.append(task.group)
+    # > # top_level = []
+    # > # for task in tasks:
+    # > #     if not task.group.parent and task.group not in top_level:
+    # > #         top_level.append(task.group)
 
-    # for group in groups:
-    #     print (f"parent of {group.name} is {group.parent}")
-    # return [group for group in groups if not group.parent]
+    # > for group in groups:
+    # >     print (f"parent of {group.name} is {group.parent}")
+    # > return [group for group in groups if not group.parent]
 
 
 def build_pretty_param_string(task: Task, include_optional: bool = True, include_defaults: bool = True) -> str:

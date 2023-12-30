@@ -45,7 +45,7 @@ class ConfigField:
 
     def __init__(
         self,
-        default: str | bool | int | list[str]|None,
+        default: str | bool | int | list[str],
         name: str = "",
         short: str = "",
         /,
@@ -114,7 +114,10 @@ class TaskCLIConfig:
         self._addded_env_vars: list[EnvVar] = []
 
         self.field_init: ConfigField = ConfigField(
-            False, "init", env=False, desc="Create a new tasks.py file in the current directory",
+            False,
+            "init",
+            env=False,
+            desc="Create a new tasks.py file in the current directory",
         )
         self.init: bool = self._add_bool(self.field_init)
 
@@ -512,7 +515,6 @@ class TaskCLIConfig:
             if isinstance(field, ConfigField):
                 all_fields.append(field)
         return all_fields
-        ##return [getattr(self, "field_" + name) for name in self._addded_names]
 
 
 runtime_config = TaskCLIConfig()  # modified with CLI arguments

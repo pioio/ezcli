@@ -24,14 +24,18 @@ TASKCLI_TASKS_PY_FILENAMES = EnvVar(
     desc="Comma separated list of filenames which 'taskcli' tool should include by default.",
 )
 
+_def_value = []
+for x in range(10):
+    _def_value += [f"../{'../' * x}tasks.py,"]
+
 TASKCLI_EXTRA_TASKS_PY_FILENAMES = EnvVar(
-    default_value="../tasks.py,../../tasks.py,../../../tasks.py,../../../../tasks.py,../../../../../tasks.py,../../../../../../tasks.py ",
+    default_value=(",".join(_def_value)),
     desc=(
         "Comma separated list of filepaths which 'taskcli' tool should include "
         "by default, and combine with tasks from the locally-present `task.py` file."
     ),
 )
-
+del _def_value
 
 TASKCLI_GOTASK_TASK_BINARY_FILEPATH = EnvVar(
     default_value="",

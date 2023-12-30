@@ -423,10 +423,6 @@ def test_choices_int(capsys):
 
 
 def test_support_for_vargs(capsys):
-    # tt.config.verbose = 4
-    # from taskcli.logging import configure_logging
-    # configure_logging()
-
     @task
     def foo_bar(*args):
         return args

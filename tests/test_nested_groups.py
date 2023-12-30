@@ -104,7 +104,7 @@ def test_parent_with_all_hidden_children():
 
     # we need at least one visible
     @task
-    def task_in_child2():
+    def task_in_child3():
         pass
 
     tasks = tt.get_tasks()
@@ -116,7 +116,7 @@ def test_parent_with_all_hidden_children():
     assert (
         output
         == f"""# default
-task-in-child2
+task-in-child3
 Also 2 hidden groups, with 2 tasks in them, {constants.HELP_TEXT_USE_H_TO_SHOW_HIDDEN}"""
     )
 
@@ -142,7 +142,7 @@ def test_parent_with_all_hidden_children2():
 
     # we need at least one visible
     @task
-    def task_in_child2():
+    def task_in_child3():
         pass
 
     tasks = tt.get_tasks()
@@ -151,7 +151,7 @@ def test_parent_with_all_hidden_children2():
         lines = list_tasks(tasks)
 
     expected = f"""# default
-task-in-child2
+task-in-child3
 Also 3 hidden groups, with 3 tasks in them, {constants.HELP_TEXT_USE_H_TO_SHOW_HIDDEN}""".split("\n")
 
     assert lines == expected
@@ -178,7 +178,7 @@ def test_parent_with_all_hidden_children3():
 
     # we need at least one visible
     @task
-    def task_in_child2():
+    def task_in_child3():
         pass
 
     tasks = tt.get_tasks()
@@ -190,7 +190,7 @@ def test_parent_with_all_hidden_children3():
 1 hidden
 
 # default
-task-in-child2
+task-in-child3
 Also 2 hidden groups, with 2 tasks in them, {constants.HELP_TEXT_USE_H_TO_SHOW_HIDDEN}""".split("\n")
 
     assert lines == expected

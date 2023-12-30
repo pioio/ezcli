@@ -176,13 +176,13 @@ def _dispatch_unsafe(argv: list[str] | None = None, tasks_found: bool = True) ->
             groups = get_all_groups_from_tasks(tasks)
             for group in groups:
                 if group.get_name_for_cli() == argconfig.task[: -len(GROUP_SUFFIX)]:
-                    all_children = []
-                    get_all_tasks_in_group(group, all_children)
-                    utils.assert_no_dup_by_name(all_children)
+                    all_children_tasks: list[Task] = []
+                    get_all_tasks_in_group(group, all_children_tasks)
+                    utils.assert_no_dup_by_name(all_children_tasks)
 
                     render_settings.show_hidden_groups = True
                     render_settings.show_hidden_tasks = True
-                    print_listed_tasks(all_children, render_settings=render_settings)
+                    print_listed_tasks(all_children_tasks, render_settings=render_settings)
                     sys.exit(1)
             # should never happen
             sys.exit(9)
@@ -200,12 +200,12 @@ def _dispatch_unsafe(argv: list[str] | None = None, tasks_found: bool = True) ->
             groups = get_all_groups_from_tasks(tasks)
             for group in groups:
                 if group.get_name_for_cli() == argconfig.task:
-                    all_children = []
-                    get_all_tasks_in_group(group, all_children)
-                    utils.assert_no_dup_by_name(all_children)
+                    all_children_tasks = []
+                    get_all_tasks_in_group(group, all_children_tasks)
+                    utils.assert_no_dup_by_name(all_children_tasks)
                     render_settings.show_hidden_groups = True
                     render_settings.show_hidden_tasks = True
-                    print_listed_tasks(all_children, render_settings=render_settings)
+                    print_listed_tasks(all_children_tasks, render_settings=render_settings)
                     sys.exit(1)
 
             print(f"Task {argconfig.task} not found")  # noqa: T201
@@ -295,7 +295,8 @@ def build_parser(tasks: list[Task]) -> argparse.ArgumentParser:  # noqa: C901
     for task in tasks:
         res = task.has_supported_type()
         if res != "ok":
-            raise UserError(f"Task {task.name} {task.code_location} has currently unsupported type: {res}")
+            msg = f"Task {task.name} {task.code_location} has currently unsupported type: {res}"
+            raise UserError(msg)
 
         # add group names
         for group in task.groups:
@@ -305,12 +306,6 @@ def build_parser(tasks: list[Task]) -> argparse.ArgumentParser:  # noqa: C901
                 subparser = subparsers.add_parser(group_name + GROUP_SUFFIX)
                 subparser.set_defaults(task=group_name + GROUP_SUFFIX)
                 added_subparsers += [group_name + GROUP_SUFFIX]
-            # group_name = task.group.name.replace(" ", "-").lower()
-            # if task.group not in groups:
-            #     groups.append(task.group)
-            #     subparser = subparsers.add_parser(group_name + GROUP_SUFFIX)
-            #     subparser.set_defaults(task=group_name + GROUP_SUFFIX)
-            #     added_subparsers += [group_name + GROUP_SUFFIX]
 
         all_names_of_task = task.get_all_task_names()
 
