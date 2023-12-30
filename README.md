@@ -4,13 +4,13 @@ The `t` (or `taskcli`) CLI tool for **fast**, real-life, task automation for fan
 
 Save time - create snappy, powerful, and reusable CLI interfaces from simple Python functions.
 
-Navigate & use your task with ease, also in large projects -- tags, search, imports, aliases, namespace, groups!
+Navigate & use your task with ease, also in large projects:
+- tags, search, external imports, aliases, namespaces and hierarchical groups!
 
 Manage and automate task of any project (not only Python)!
 
-
 ## Quickstack
-Install: `pip install taskcli`
+`pip install taskcli`
 
 Then, all you need is a `tasks.py` file with a single simple function:
 ```
@@ -24,6 +24,7 @@ And you can run it: `t hello` or `t hello -n Alice` or `t hello --name Alice`
 
 ## Key features
 - You can group, highlight, tag, hide, list, regex-search your tasks.
+- See at a glance which tasks can be simply run, which require additional env vars, and which require specifying mandatory arguments.
 - Import and reuse(!) tasks from other modules/dirs  (`tt.include(module_name)`). Directories will be switched automatically if needed.
 - Less noise -- auto hide tasks which are not ready to be run (e.g. due to missing env vars) (`tt.config.hide_not_ready = True`)
 - Quickly see the overview of all the tasks, along with optional and mandatory arguments.
@@ -32,6 +33,8 @@ And you can run it: `t hello` or `t hello -n Alice` or `t hello --name Alice`
 - Automatically switch directories when running tasks imported from other directories (can be disabled).
 - Easier collaboration with others - customize the behavior and the look and feel of `tasks` using env vars.
 
+## Screenshot
+TODO
 
 ## Another example:
 ```
@@ -68,17 +71,17 @@ That's it! All the flags are generated automatically, including the `--no-*` boo
 `taskcli` is designed for automating tasks. Any tasks.
 
 It can work with any type of project -- it's definately not only for Python.
-The `taskcli` tasks simply happen to be defined in Python, instead of than in YAML.
+The `taskcli` tasks simply happen to be defined in Python, instead of in YAML.
 This makes `taskcli` tasks **easier to work it, refactor, test, and maintain.**
 
 If you ever tried to maintain and refactor large YAML codebases file, you know **exactly** what I mean.
 
 The tasks, once defined, can do whatever you want.
-Often, they will be a mix Python calls/flow, and running shell commands and external tools using e.g. provided `run` functions.
+Often, they will be a mix Python, and running shell commands and external tools using e.g. provided `run` functions.
 It's up to you whether you want to lean more towards Python, or more towards shell commands.
 
 The guiding design principles of `taskcli` are:
-- make running and navigating between tasks easy fast.
+- make running and navigating between tasks easy & fast.
 - show only what's needed, but make it easy to drill down and reveal more info.
 - make the most important tasks stand out. Hide the less frequently used ones, but make them easy to find and use.
 
@@ -86,7 +89,7 @@ The guiding design principles of `taskcli` are:
 ## The entrypoints - `t` vs `tt` - see less vs more
 By default `taskcli` installs these three entrypoints: `t`, `tt`, `taskcli`
 - `t` and `taskcli` are equivalent; they are the canonical entrypoints to the tool.
-- `tt` is an alternative entrypoint designed to show a bit more info by default.
+- `tt` is an alternative entrypoint. It's designed to show a bit more info by default.
   By default it's the equivalent of running `t --show-hidden`.
   Meaning that `tt` shows all the hidden tasks and groups.
 
@@ -103,8 +106,8 @@ tt.config.default_options_tt = ["--show-optional-args"]
 
 
 ## Disclaimer
-This library is still in early development and API will continue to rapidly evolve.
-If you need a more mature solution, consider using [pyinvoke](https://www.pyinvoke.org/) or Taskfile.dev.
+This library is still in early development. API will continue to rapidly evolve. Be sure to pin the version.
+If you need a more mature, less rapidly changing solution, consider using [pyinvoke](https://www.pyinvoke.org/) or Taskfile.dev.
 
 ## Prior art and comparison
 ### pyinvoke
