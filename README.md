@@ -48,7 +48,7 @@ Rationale for many entrypoints: in practice I found simply switching between `t`
 
 
 ## Docs
-[docs/settings.md](Settings)
+[Configuration Settings](docs/settings.md)
 
 ## Tab completion
 Install `argcomplete` package. It's an optional dependency of taskcli
