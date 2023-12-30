@@ -2,7 +2,6 @@ import inspect
 from types import UnionType
 from typing import Any, Union, get_args, get_origin
 
-from nox import param
 
 
 class ParameterType:

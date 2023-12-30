@@ -1,13 +1,14 @@
 
 - [x] Include from module by filter
 
-- [ ] mark included task with^
-- [ ] task init is broken
+- [x] mark included task with^
+- [x] task init is broken
 - [ ] optional flags are not gray (disk usage example)
 - [x] test init.py
 - [ ] unit test hide-not-read
 - [ ] unit test: searching by tag should show hidden tasks, samel ike showing a group - unit
 - [ ] unit test- broken get hidden
+- [ ] reduve -v noise
 - [ ] num hidden tasks in each group
   - [ ] filter out hidden before filterting by tags
 
@@ -49,7 +50,7 @@
 - [ ] allow one task to be in more than one group?
 - [ ] allow certain tasks in group to not be namespaced?
 - [ ] Make sure importing a module does not add its tasks to the global default group by default
-
+- [ ] *args and **kwargs support and unit tests
 
 - [ ]
   - [ ] per module task list

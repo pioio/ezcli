@@ -42,7 +42,7 @@ class Colors:
     blue: str = "\033[94m"
     red: str = "\033[91m"
     underline: str = COLOR_UNDERLINE
-
+    bold:str = "\033[1m"
 
 colors = Colors()
 
@@ -68,7 +68,7 @@ class Config:
     render_color_optional_arg: str = colors.dark_gray
     render_color_optional_and_important_arg: str = ""
     render_color_default_arg = colors.dark_gray + colors.underline
-    render_color_summary: str = colors.white
+    render_color_summary: str = colors.end
     render_extra_line_indent: str = "    "
 
     render_format_important_tasks: str = "{green}{underline}{name}{clear}"
@@ -89,9 +89,13 @@ class Config:
 
     # Prefix with "\n" to separate group names with a newline
     # use {NAME} instead of {name} to print group name in uppercase
-    render_format_of_group_name: str = "\n{white}{underline}{white}{name_with_suffix:<22}{white}{desc:<40}{clear}"
+    #render_format_of_group_name: str = "\n{white}{underline}{white}{name_with_suffix:<22}{white}{desc:<40}{clear}"
+
+
+    render_format_of_group_name: str = "\n{bold}{name:<22}{desc:<40}{clear}"
     render_format_of_group_name_hidden: str = (
-        "\n{dark_gray}{underline}{dark_gray}{name_with_suffix:<22}{dark_gray}{desc:<40}{clear}"
+        #"\n{dark_gray}{underline}{dark_gray}{name_with_suffix:<22}{dark_gray}{desc:<40}{clear}"
+        "\n{dark_gray}{bold}{name:<22}{desc:<40}{clear}"
     )
 
     render_format_num_hidden_tasks: str = "{dark_gray}({num_hidden_tasks} hidden){clear}"

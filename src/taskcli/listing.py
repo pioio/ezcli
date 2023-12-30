@@ -367,19 +367,18 @@ def build_pretty_param_list(  # noqa: C901
         elif param.kind in [inspect.Parameter.KEYWORD_ONLY]:
             rendered = param_to_cli_option(rendered)
 
-        if not param.has_default():
-            rendered = f"{config.render_color_mandatory_arg}{rendered}{end_color}"
-        else:
+        if param.has_default():
             if param.important:
                 rendered = f"{config.render_color_optional_and_important_arg}{rendered}{end_color}"
             else:
                 rendered = f"{config.render_color_optional_arg}{rendered}{end_color}"
+        else:
+            rendered = f"{config.render_color_mandatory_arg}{rendered}{end_color}"
 
         if param.kind in [inspect.Parameter.POSITIONAL_ONLY, inspect.Parameter.POSITIONAL_OR_KEYWORD]:
             rendered = rendered
-
         elif param.kind in [inspect.Parameter.KEYWORD_ONLY]:
-            rendered = param_to_cli_option(param.name)
+            pass
         elif param.kind in [inspect.Parameter.VAR_POSITIONAL]:
             rendered = f"*{param.name}"
         elif param.kind in [inspect.Parameter.VAR_KEYWORD]:
