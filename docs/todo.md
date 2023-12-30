@@ -14,6 +14,7 @@
           included...docs.generate-all-docs ^ i.dgd
           included...docs.test-documentation ^ i.dt
   - [ ] add unit tests
+  - [ ] fix time keeping in main()
   - [ ] add unit test that it changes to the parent dir of merged in parent file
   - [ ] marke the ones from the parent, sort separtely to first?
     - [ ] add separator between them?
@@ -63,6 +64,8 @@
 
 
 # Long-term TODOs
+- [ ] argparse add_argument_group
+- [ ] print warning if TASKCLI env var is set which is not known
 - [ ] pre/post hooks
 - [ ] list of optional arg names to always mark as important?  add imperative, as Cookbook example.
 - [ ] hidden tasks: _foobar: use "named" decorator?

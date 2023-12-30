@@ -51,6 +51,7 @@ class ConfigField:
         help: str = "",
         env: bool = True,
         env_var_name: str = "",
+        cli:bool = True,
         action: str = "",
         nargs: str = "",
         metavar: str = "",
@@ -61,6 +62,7 @@ class ConfigField:
         self.short = short
         self.env = env
         self.help = help
+        self.cli = cli # whether to add to the CLI parser
         self.cli_arg_flag = "--" + name.replace("_", "-")
         self.env_var_name = env_var_name.upper() or "TASKCLI_CFG_" + name.upper()
         self.action = action
@@ -90,6 +92,7 @@ class TaskCLIConfig:
     - CLI arguments
     Because, ideally, when adding a new switch we don't want to have to define it in 4 different places.
     """
+    NO_CLI_FLAGS = "no-cli-flags"
 
     def __init__(self, load_from_env: bool = True):
         """Create a new TaskCLIConfig object.
@@ -137,6 +140,24 @@ class TaskCLIConfig:
 
         self.merge_with_parent: bool = False
         self.merge_with_parent_filter: Callable[["Task"], bool]|None = None
+
+        self.field_extra_tasks_name_namespace = ConfigField(
+            "p",
+            "extra_tasks_name_namespace",
+            cli=False,
+            help=("What task namespace to prefix to tasks when merging tasks from a upper directory level tasks.py. "
+                  "See also: " + envvars.TASKCLI_EXTRA_TASKS_PY_FILENAMES.name
+                  )
+        )
+        self.extra_tasks_name_namespace = self._add_str(self.field_extra_tasks_name_namespace)
+
+        self.field_extra_tasks_alias_namespace = ConfigField(
+            "",
+            "extra_tasks_alias_namespace",
+            cli=False,
+            help="What string to prefix to task aliases when merging tasks with a different tasks.py."
+        )
+        self.extra_tasks_alias_namespace:str = self._add_str(self.field_extra_tasks_alias_namespace)
 
         default_show_hidden = False
 
@@ -314,8 +335,9 @@ class TaskCLIConfig:
                 ).is_true()
                 setattr(config, field.name, new_default)
 
-        self._configure_parser.append(add_argument)
-        self._read_parsed_args.append(read_argument)
+        if field.cli:
+            self._configure_parser.append(add_argument)
+            self._read_parsed_args.append(read_argument)
         if field.env:
             self._read_from_env.append(read_from_env)
 
@@ -352,8 +374,9 @@ class TaskCLIConfig:
                 new_default = EnvVar(default_value=str(field.default), desc=field.help, name=env_var_name)
                 setattr(config, field.name, new_default)
 
-        self._configure_parser.append(add_argument)
-        self._read_parsed_args.append(read_argument)
+        if field.cli:
+            self._configure_parser.append(add_argument)
+            self._read_parsed_args.append(read_argument)
         if field.env:
             self._read_from_env.append(read_from_env)
 
@@ -391,6 +414,7 @@ class TaskCLIConfig:
                 new_default_list = [x.strip() for x in new_default_list]
                 setattr(config, name, new_default_list)
 
+        # TODO if field.cli:
         self._configure_parser.append(add_argument)
         self._read_parsed_args.append(read_argument)
         if env:
@@ -437,6 +461,7 @@ class TaskCLIConfig:
                     raise UserError(msg) from e
                 setattr(config, name, new_default_int)
 
+        # TODO if field.cli:
         self._configure_parser.append(add_argument)
         self._read_parsed_args.append(read_argument)
         if env:

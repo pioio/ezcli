@@ -1,24 +1,25 @@
 """Entrypoint for the 'taskcli' command."""
 
-import json
-import logging
+
 import os
 import sys
 import time
-
+import random
+import string
 
 import taskcli.include
 
 from . import envvars, task, taskfiledev, utils
 from .parser import build_initial_parser
 from .utils import print_err, print_error
+from .task import Task, UserError
+import importlib.util
+from typing import Callable
 
 from .logging import get_logger
 log = get_logger(__name__)
-from .task import Task
 
-import importlib.util
-from typing import Callable
+
 def main() -> None:  # noqa: C901
     """Entrypoint for the 'taskcli' command."""
     start = time.time()
@@ -27,7 +28,7 @@ def main() -> None:  # noqa: C901
     try:
         import taskcli
     except ImportError:
-        print("'taskcli' module is not installed, please install it with 'pip install taskcli'")  # noqa: T201
+        print("'taskcli' is not installed, please install it with 'pip install taskcli'")  # noqa: T201
         sys.exit(1)
 
     parser = build_initial_parser()
@@ -42,10 +43,10 @@ def main() -> None:  # noqa: C901
 
 
 
-    def include_from_file(filename, namespace="", alias_namespace="", mark_them=False,
+    def include_from_file(filename, name_namespace="", alias_namespace="", mark_them=False,
                           filter:Callable[[Task], bool]|None=None):
         log.separator(f"Importing objects from {filename}")
-
+        log.debug("Current working dir: " + os.getcwd())
         absolute_filepath = os.path.abspath(filename)
         log.debug(f"Absolute filepath: {absolute_filepath}")
 
@@ -71,13 +72,13 @@ def main() -> None:  # noqa: C901
 
         tasks = taskcli.include.include(imported_module,
                                          skip_include_info=True,
-                                         namespace=namespace,
+                                         namespace=name_namespace,
                                          alias_namespace=alias_namespace,
                                          filter=filter)
 
         # TODO: fixme, this is needed for sortin those tasks to top. but right now they get duplicated
-        # for task in tasks:
-        #     task.from_above = True
+        #>>> for task in tasks:
+        #>>>     task.from_above = True
         if mark_them:
             for task in tasks:
                 task.name_format = f">{task.name_format}"
@@ -99,8 +100,8 @@ def main() -> None:  # noqa: C901
         for filename in envvars.TASKCLI_EXTRA_TASKS_PY_FILENAMES.value.split(","):
             filename = filename.strip()
             if os.path.exists(filename):
-                #include_from_file(filename, namespace=".", alias_namespace="..")
-                import random, string
+
+
                 random_lowercase = "".join(random.choices(string.ascii_lowercase, k=8))
 
                 random_lowercase = "taskcli_import_" + random_lowercase
@@ -108,21 +109,36 @@ def main() -> None:  # noqa: C901
                 dir_filepath = os.path.dirname(abs_filepath)
                 import shutil
                 log.debug(f"Copying {abs_filepath} to {dir_filepath}/{random_lowercase}.py")
+                target_filepath = f"{dir_filepath}/{random_lowercase}.py"
                 try:
-                    shutil.copy(abs_filepath, f"{dir_filepath}/{random_lowercase}.py")
+                    shutil.copy(abs_filepath, target_filepath)
 
                     if not tasks_found: # not local tasks.py, it's not merging, so no namespace
-                        include_from_file(f"{dir_filepath}/{random_lowercase}.py", mark_them=False)
+                        include_from_file(target_filepath, mark_them=False)
                     else:
                         # might have
                         filterfun = tt.config.merge_with_parent_filter
+                        alias_namespace:str = tt.config.extra_tasks_alias_namespace
+                        name_namespace:str = tt.config.extra_tasks_name_namespace
+                        # By default no
                         #> include_from_file(f"{dir_filepath}/{random_lowercase}.py", namespace="p", alias_namespace="p", mark_them=True, filter=filterfun)
-                        include_from_file(f"{dir_filepath}/{random_lowercase}.py", namespace="p", mark_them=True, filter=filterfun)
+                        include_from_file(target_filepath,
+                                          name_namespace=name_namespace,
+                                            alias_namespace=alias_namespace,
+                                              mark_them=True,
+                                                filter=filterfun)
                 finally:
-                    os.remove(f"{dir_filepath}/{random_lowercase}.py")
+                    try:
+                        log.debug(f"Done! Now removing {target_filepath}.")
+                        os.remove(f"{dir_filepath}/{random_lowercase}.py")
+                    except UserError as e:
+                        msg = f"Failed to remove temporary file {target_filepath}: {e}"
+                        raise Exception(msg) from e
+
+                log.debug("Done!")
                 break # for now only ones
 
-    log.separator(f"Finished include and imports")
+    log.separator("Finished include and imports")
     # This part be right after importing the default ./task.p and before anything else
     # this way we allow ./tasks.py to change the default config, which in turn
     # might impact the output of get_argv()   (the default argument)
