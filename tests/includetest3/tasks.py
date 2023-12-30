@@ -1,7 +1,8 @@
 #!/usr/bin/env python
 from subdir import subtasks
 
-from taskcli import include, task
+from taskcli import task
+from taskcli.include import include
 
 include(subtasks)  # should include subtask and subsubtask
 

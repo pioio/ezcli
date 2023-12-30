@@ -1,1 +1,2 @@
-from taskcli import Group, include, task
+from taskcli import Group, task
+from taskcli.include import include

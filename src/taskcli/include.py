@@ -4,13 +4,48 @@ import sys
 from typing import Callable
 from unicodedata import name
 
+from . import utils
+from .task import Task
+
+
 from .group import get_current_group
 from . import core
-from .task import Task, UserError, task
+from .task import Task, UserError
 from .types import Any, AnyFunction, Module
 
 import logging
 log = logging.getLogger(__name__)
+import inspect
+
+
+def include(object: Module | AnyFunction | "Task",
+            to_module:Module|None=None,
+            namespace:str="",
+            alias_namespace:str="",
+            **kwargs: Any) -> list["Task"]:
+    """Include tasks from the specified object into the module which calling this function. Return included Tasks.
+
+    This function is meant to be called directly from a ./tasks.py file.
+
+    Alternatively, you can call the lower level include_module() or include_function() directly.
+    """
+    if to_module is None:
+        to_module = utils.get_callers_module()
+
+    from .tt import Task
+
+    if isinstance(object, Module):
+        return include_module(object, to_module=to_module, namespace=namespace, alias_namespace=alias_namespace, **kwargs)
+    elif inspect.isfunction(object):
+        return [include_function(object, to_module=to_module, namespace=namespace, alias_namespace=alias_namespace, **kwargs)]
+    elif isinstance(object, Task):
+        from_module:Module = sys.modules[object.func.__module__]
+        from .include import _include_task
+        return [_include_task(object, from_module=from_module, to_module=to_module, namespace=namespace, alias_namespace=alias_namespace, **kwargs)]
+    else:
+        msg = f"include(): Unsupported type: {type(object)}"
+        raise Exception(msg)
+
 
 def include_module(from_module: Module, to_module:Module, skip_include_info:bool=False,
                     namespace:str="",
@@ -55,8 +90,9 @@ def include_function(function: AnyFunction,to_module:Module, skip_include_info:b
             break
     if not task:
         # function has not been decorated with @task yet, decore it, so that we can include it
-        #task(fun, **kwargs)
-        raise Exception("included function was not decorated with @task")
+
+        msg = "included function was not decorated with @task"
+        raise Exception(msg)
 
     return _include_task(task=task,from_module=module_of_fun,
                   to_module=to_module,
@@ -125,3 +161,4 @@ def load_tasks_from_module_to_runtime(module: Module) -> None:
     for task in module.decorated_functions:
         log.debug(f"load_tasks_from_module_to_runtime(): including task {task.name} from {module} to runtime")
         runtime.tasks.append(task)
+

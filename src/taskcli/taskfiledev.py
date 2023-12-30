@@ -8,6 +8,7 @@ from re import sub
 
 import taskcli
 from taskcli import task
+import taskcli.include
 from .types import Module
 
 from . import envvars, parser, utils
@@ -63,7 +64,7 @@ def include_tasks( to_module:Module,path: str = ".") -> bool:
             this_module = sys.modules[__name__]
 
             skip_include_info=True # to not mark them as included
-            taskcli.include(this_module, to_module=to_module, skip_include_info=skip_include_info)
+            taskcli.include.include(this_module, to_module=to_module, skip_include_info=skip_include_info)
             return tasks_were_created
     except TaskfileDevError as e:
         to_disable = _to_disable_string()

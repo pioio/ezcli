@@ -1,4 +1,4 @@
-from taskcli import task, tt
+from taskcli import task, include
 
 from .subdir import modulec
 
@@ -6,4 +6,4 @@ from .subdir import modulec
 def task_b():
     pass
 
-tt.include(modulec)
+include.include(modulec)

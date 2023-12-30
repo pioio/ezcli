@@ -14,9 +14,10 @@ Example:
 """
 
 
+from .include import include, include_module, include_function
 from . import core
 from .arg import arg
-from .core import get_extra_args, get_extra_args_list, get_runtime, include
+from .core import get_extra_args, get_extra_args_list, get_runtime
 from .group import Group
 from .parameter import Parameter
 from .parser import dispatch

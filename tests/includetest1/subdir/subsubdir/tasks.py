@@ -1,6 +1,7 @@
 import os
 
-from taskcli import dispatch, include, task
+from taskcli import dispatch, task
+from taskcli.include import include
 
 
 @task

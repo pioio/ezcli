@@ -1,4 +1,5 @@
-from taskcli import include, task
+from taskcli import task
+from taskcli.include import include
 
 from .subsubdir import subsubtasks
 

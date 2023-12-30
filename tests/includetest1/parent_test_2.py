@@ -4,7 +4,8 @@ import os
 
 import subdir.subsubdir.tasks as child_tasks2
 
-from taskcli import dispatch, include, task
+from taskcli import dispatch, task
+from taskcli.include import include
 
 include(child_tasks2)
 

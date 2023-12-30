@@ -2,6 +2,7 @@
 
 # iterate over all functions
 
+import taskcli.include
 import testing
 from taskcli import run, task, tt
 from docsgenerator import tasks as docgentasks

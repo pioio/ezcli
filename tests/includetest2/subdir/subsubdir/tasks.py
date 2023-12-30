@@ -5,7 +5,8 @@ import os
 # add ../../ to sys
 import sys
 
-from taskcli import dispatch, include, task
+from taskcli import dispatch, task
+from taskcli.include import include
 
 sys.path.append(os.path.join(os.path.dirname(__file__), "..", ".."))
 

@@ -6,6 +6,8 @@ import os
 import sys
 import time
 
+import taskcli.include
+
 from . import envvars, task, taskfiledev, utils
 from .parser import build_initial_parser
 from .utils import print_err, print_error
@@ -47,7 +49,7 @@ def main() -> None:  # noqa: C901
             start_include = time.time()
 
             # This includes the tasks from 'sometasks' into THIS module (main)
-            taskcli.include(sometasks, skip_include_info=True)
+            taskcli.include.include(sometasks, skip_include_info=True)
             include_took = time.time() - start_include
             tasks_found = True
 

@@ -1,5 +1,6 @@
 from os import name
-from taskcli import include, task, tt
+from taskcli import task, tt
+from taskcli.include import include
 from .tools import reset_context_before_each_test
 
 def test_include_module_via_groups_with_aliases():

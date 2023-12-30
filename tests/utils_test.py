@@ -39,13 +39,13 @@ def test_get_tasks_with_current_module(capsys):
 @pytest.mark.skip("dummy task from tools decorator gets cleared by reset_context_before_each_test")
 def test_get_tasks_includes_included_tasks():
     from .tools import dummy_task_from_tools
-    import taskcli
+    import taskcli.include
 
     @task
     def dummy_task_from_here():
         pass
 
-    taskcli.include(dummy_task_from_tools)
+    taskcli.include.include(dummy_task_from_tools)
 
     tasks = utils.get_tasks(also_included=True)
     assert len(tasks) == 2

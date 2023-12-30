@@ -3,12 +3,14 @@ from typing import Annotated, Any, Iterable, Sequence, TypeVar
 
 import taskcli
 import taskcli.core
+#from .include import include
+from . import include
 
 from . import configuration, examples, listing, utils
 from .annotations import Arg
 from .arg import arg
 from .configuration import config
-from .core import get_extra_args, get_extra_args_list, get_runtime, include
+from .core import get_extra_args, get_extra_args_list, get_runtime
 from .group import Group
 from .parameter import Parameter
 from .parametertype import ParameterType
