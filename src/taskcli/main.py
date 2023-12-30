@@ -82,7 +82,7 @@ def main() -> None:  # noqa: C901
             for task in tasks:
                 task.name_format = f">{task.name_format}"
                 blue = "\033[34m"
-                task.name_format = blue +"⬆ {clear}{name}{clear}"
+                task.name_format = blue +"⬆ {green}{name}{clear}"
 
         nonlocal include_took, tasks_found
         include_took = time.time() - start_include

@@ -215,3 +215,39 @@ It can also be used for creating simple tasks.
 ## FAQ
 Q: why no namespace by default?
 A: in most cases it just requires additional unnecessary keystrokes. If you feel you need namespaces, you can add them manually.
+
+## Directory visualisation
+
+### Simple project
+project/
+- tasks.py                # let's say this one haas 3 tasks
+    * upload-files
+    * deploy-to-prod
+    * deploy-to-staging
+
+Those 3 actions are available anywhere within the `project/` dir tree.
+This mean you can run
+$ project/foo1/foo2/foo2 $ t deploy-to-prod
+without needing to switch to the root of the project first.
+
+### Advanced project
+```
+project/
+- tasks.py     # let's say this one has the same 3 task, and one new included one.
+    * upload-files
+    * deploy-to-prod        # tagged as "important" within this file
+    * deploy-to-staging
+    * bake-cake             # included by name from  project/foo/bakery/tasks.py
+
+
+project/foo/bakery/
+- tasks.py                 # chooses to auto-include all 'important' tasks from project/tasks.py
+    * bake-cake            # defined here, running it from anywhere switches to project/foo/bakery/
+    ⬆ deploy-to-prod      # auto-included from project/tasks.py, running it switches to project/ dir
+
+
+For example, running
+project/some/other/directory $ t bake-cake
+will find the task in project/tasks.py , notice it was imported from project/foo/bar/tasks.py,
+will switch to project/foo/bar/ dir, and run the task in there
+```

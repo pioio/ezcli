@@ -5,6 +5,7 @@
   - [ ] crashes if added 'dev' section in screenshots/tasks.py
   - [ ] # TODO: have task have internal sort key, combination of digit + name for easier sorting
   - [ ] rename 'filter' to filterfun?
+  - [ ] unit-test clash of aliases when merging - do not import aliases in such case
   - [ ] t .. # list only one level (not dir) up
   - [ ] would have to use importlib, tried it once, but is tricky. Maybe not worth it
   - [ ] allow preventing merging with the one from above? Or make it explcii?  tt.config.merge_with_parent = False
