@@ -157,8 +157,21 @@ def filter_tasks_by_tags(tasks: list[Task], tags: list[str]) -> list[Task]:
 
     filtered = []
     for task in tasks:
-        if task.tags:
-            for tag in task.tags:
+
+        # TODO clean up this bit, maybe even show special tags with -L,
+        # TODO: add unit tests
+        special_tags = []
+        if task.is_hidden():
+            special_tags.append("hidden")
+        if task.included_from:
+            special_tags.append("included")
+
+        all_task_tags = task.tags + special_tags
+
+        if all_task_tags:
+
+
+            for tag in all_task_tags:
                 if tag in tags:
                     filtered.append(task)
                     break
