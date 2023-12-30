@@ -72,7 +72,8 @@ def main() -> None:  # noqa: C901
                 task.name_format = f">{task.name_format}"
                 magenta = "\033[35m"
                 yellow = "\033[33m"
-                task.name_format = "⬆ {clear}{name}{clear}"
+                blue = "\033[34m"
+                task.name_format = blue +"⬆ {clear}{name}{clear}"
 
         nonlocal include_took, tasks_found
         include_took = time.time() - start_include
@@ -102,7 +103,7 @@ def main() -> None:  # noqa: C901
                     shutil.copy(abs_filepath, f"{dir_filepath}/{random_lowercase}.py")
 
                     if not tasks_found: # not local tasks.py, it's not merging, so no namespace
-                        include_from_file(f"{dir_filepath}/{random_lowercase}.py", mark_them=True)
+                        include_from_file(f"{dir_filepath}/{random_lowercase}.py", mark_them=False)
                     else:
                         include_from_file(f"{dir_filepath}/{random_lowercase}.py", namespace="p", alias_namespace="p", mark_them=True)
                 finally:
