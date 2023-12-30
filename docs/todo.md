@@ -6,7 +6,7 @@
 - [ ] nested groups
   - [ ] top-level group with no tasks BUT with groups which have tasks should be shown (unit test)
   - [ ]  hidden groups with not-hidden groups should still show, summary should include it
-  - [ ]
+  - [ ] default group should be first
 - [ ] optional flags are not gray (disk usage example)
 - [x] test init.py
 - [ ] unit test hide-not-read

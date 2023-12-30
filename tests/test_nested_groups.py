@@ -165,21 +165,22 @@ def test_parent_with_all_hidden_children3():
     with tools.simple_list_format():
         lines = list_tasks(tasks)
 
-    # FIXME: this test is a bit buggy, but not worth fixing right now
-    # Edge case. parent1 is not hidden, but it's only child is
 
-    expected = f"""# default
+    expected = f"""# parent1
+1 hidden
+
+# default
 task-in-child2
 Also 2 hidden groups, with 2 tasks in them, {constants.HELP_TEXT_USE_H_TO_SHOW_HIDDEN}""".split("\n")
 
     assert lines == expected
 
 
-def test_parent_with_only_hidden_child():
-    """FIXME: In this case I would expect to see the group, with 'hidden 1' entry."""
+def test_visible_group_with_only_hidden_child_should_be_shown_and_list_num_hidden():
+    """In this case, since group is not hidden, one would expect to see the group, with 'hidden 1' entry."""
 
     with tt.Group("parent1",hidden=False) as g1: # <<--- NOT hidden !!
-        @task(hidden=True)
+        @task(hidden=True) # <<<--- hidden
         def sometask():
             pass
 
@@ -194,7 +195,10 @@ def test_parent_with_only_hidden_child():
         lines = list_tasks(tasks)
 
 
-    expected = f"""# default
+    expected = f"""# parent1
+1 hidden
+
+# default
 task-in-child2""".split("\n")
 
     assert lines == expected

@@ -154,7 +154,10 @@ def list_tasks(tasks: list[Task], settings: TaskRenderSettings | None = None) ->
 
 indent_increase = 2
 
-def render_group(group:Group, lines:list[str], filtered_tasks:list[Task], filter_result,settings, indent:int):
+def render_group(group:Group, lines:list[str], filtered_tasks:list[Task], filter_result,settings:TaskRenderSettings, indent:int):
+    if group.hidden and not settings.show_hidden_groups:
+        return
+
     indent_str = " " * indent
 
     tasks_directly_in_group_to_show = [group_task for group_task in group.tasks if group_task in filtered_tasks]
@@ -164,14 +167,13 @@ def render_group(group:Group, lines:list[str], filtered_tasks:list[Task], filter
     # anywhere within the family tree
     has_children_tasks_to_show = group.has_children_recursive(filtered_tasks)
 
-    NOTHING_TO_SHOW_DIRECTLY = not has_children_tasks_to_show and not tasks_directly_in_group_to_show
+    NOTHING_TO_SHOW_DIRECTLY = not has_children_tasks_to_show and not num_hidden_in_this_group
     if NOTHING_TO_SHOW_DIRECTLY:
         # if a group is hidden (and we're hiding hidden group), tasks_to_show will be empty
 
         # group mightnot have any tasks, but it might have children group
         for child in group.children:
             render_group(child, lines, filtered_tasks, filter_result, settings, indent+indent_increase)
-        #print(f"Nothing to show in {group.name} {filter_result.num_hidden_per_group[group.name]}")
         return
 
     # print the group header

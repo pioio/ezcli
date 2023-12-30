@@ -209,7 +209,23 @@ class Task:
     def is_in_hidden_group(self) -> bool:
         """Return True if the task is in a hidden group."""
         assert self.group is not None
-        return self.group.hidden
+
+        # we must check all parents to be sure
+        groups = self.get_all_parent_groups()
+        for group in groups:
+            if group.hidden:
+                return True
+
+        return False
+
+
+    def get_all_parent_groups(self)->list[Group]:
+        out = []
+        g = self.group
+        while g is not None:
+            out.append(g)
+            g = g.parent
+        return out
 
     def get_base_name(self) -> str:
         """Return the base name of the task, sans namespaces.
