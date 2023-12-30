@@ -1,4 +1,4 @@
-# `taskcli` - a novel way of creating complex, real-life CLI interfaces from python functions
+# `taskcli` - powerful, reusable, and robust CLI interfaces from simple Python functions.
 
 The `t` (`taskcli`) CLI tool for **fast**, real-life, task automation for fans of the Linux command shell.
 
