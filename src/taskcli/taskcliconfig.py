@@ -21,20 +21,22 @@ Config load order
 import argparse
 import logging
 import os
-from typing import Any, Callable
 import typing
+from typing import Any, Callable
 from webbrowser import get
 
 from . import constants, envvars, utils
 from .envvar import EnvVar
+from .logging import get_logger
 from .task import UserError
 
-from .logging import get_logger
 log = get_logger(__name__)
 
 
 if typing.TYPE_CHECKING:
     from .task import Task
+
+
 class ConfigField:
     """A metadata field describing a configuration option.
 
@@ -51,7 +53,7 @@ class ConfigField:
         desc: str = "",
         env: bool = True,
         env_var_name: str = "",
-        cli:bool = True,
+        cli: bool = True,
         action: str = "",
         nargs: str = "",
         metavar: str = "",
@@ -62,7 +64,7 @@ class ConfigField:
         self.short = short
         self.env = env
         self.desc = desc
-        self.cli = cli # whether to add to the CLI parser
+        self.cli = cli  # whether to add to the CLI parser
         self.cli_arg_flag = "--" + name.replace("_", "-")
         self.env_var_name = env_var_name.upper() or "TASKCLI_CFG_" + name.upper()
         self.action = action
@@ -92,6 +94,7 @@ class TaskCLIConfig:
     - CLI arguments
     Because, ideally, when adding a new switch we don't want to have to define it in 4 different places.
     """
+
     NO_CLI_FLAGS = "no-cli-flags"
 
     def __init__(self, load_from_env: bool = True):
@@ -123,12 +126,13 @@ class TaskCLIConfig:
         # All tasks are by default in the "default" group unless task(group="foo") is used
         # Any group not listed here will be shown last, in the order they were defined.
 
-        self.group_order: list[str] =self._add_list(
-            ["default"], "group_order", nargs="*",
+        self.group_order: list[str] = self._add_list(
+            ["default"],
+            "group_order",
+            nargs="*",
             help="Regex re.match patterns of the order in which top-level groups are shown. "
-                 "Any top-level group the name of which matches any of the patterns will be listed first."
-                 )
-
+            "Any top-level group the name of which matches any of the patterns will be listed first.",
+        )
 
         self.field_search: ConfigField = ConfigField(
             "",
@@ -139,15 +143,16 @@ class TaskCLIConfig:
         self.search: str = self._add_str(self.field_search)
 
         self.include_extra_tasks: bool = False
-        self.extra_tasks_filter: Callable[["Task"], bool]|None = None
+        self.extra_tasks_filter: Callable[["Task"], bool] | None = None
 
         self.field_extra_tasks_name_namespace = ConfigField(
             "p",
             "extra_tasks_name_namespace",
             cli=False,
-            desc=("What task namespace to prefix to tasks when merging tasks from a upper directory level tasks.py. "
-                  "See also: " + envvars.TASKCLI_EXTRA_TASKS_PY_FILENAMES.name
-                  )
+            desc=(
+                "What task namespace to prefix to tasks when merging tasks from a upper directory level tasks.py. "
+                "See also: " + envvars.TASKCLI_EXTRA_TASKS_PY_FILENAMES.name
+            ),
         )
         self.extra_tasks_name_namespace = self._add_str(self.field_extra_tasks_name_namespace)
 
@@ -158,9 +163,9 @@ class TaskCLIConfig:
             desc=(
                 "What string to prefix to task aliases when merging tasks with a different tasks.py. "
                 "See also: " + envvars.TASKCLI_EXTRA_TASKS_PY_FILENAMES.name
-            )
+            ),
         )
-        self.extra_tasks_alias_namespace:str = self._add_str(self.field_extra_tasks_alias_namespace)
+        self.extra_tasks_alias_namespace: str = self._add_str(self.field_extra_tasks_alias_namespace)
 
         default_show_hidden = False
 
@@ -216,6 +221,13 @@ class TaskCLIConfig:
         )
         self.show_default_values: bool = self._add_bool(self.field_show_default_values)
 
+        self.field_task_start_message = ConfigField(
+            False,
+            "task_start_message",
+            desc=("Whether to print a log.info log message to stderr whenever a task starts."),
+        )
+        self.task_start_message: bool = self._add_bool(self.field_task_start_message)
+
         self.field_show_ready_info = ConfigField(
             False,
             "show_ready_info",
@@ -237,7 +249,9 @@ class TaskCLIConfig:
         )
         self.hide_not_ready: bool = self._add_bool(self.field_hide_not_ready)
 
-        self.field_print_env = ConfigField(False, "print_env", action="store_true", env=False, desc="List the supported env vars")
+        self.field_print_env = ConfigField(
+            False, "print_env", action="store_true", env=False, desc="List the supported env vars"
+        )
         self.print_env: bool = self._add_bool(self.field_print_env)
 
         self.field_print_env_detailed = ConfigField(
@@ -493,12 +507,12 @@ class TaskCLIConfig:
 
     def get_fields(self) -> list[ConfigField]:
         """Return a list of all fields."""
-
         all_fields = []
         for field in self.__dict__.values():
             if isinstance(field, ConfigField):
                 all_fields.append(field)
         return all_fields
         ##return [getattr(self, "field_" + name) for name in self._addded_names]
+
 
 runtime_config = TaskCLIConfig()  # modified with CLI arguments

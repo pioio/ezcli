@@ -7,9 +7,10 @@ import typing
 
 import taskcli
 
-from .logging import get_logger
 from . import configuration, constants
+from .logging import get_logger
 from .types import Module
+
 log = get_logger(__name__)
 
 ENDC = configuration.get_end_color()
@@ -42,7 +43,6 @@ def print_warning(text: str) -> None:
     YELLOW = configuration.colors.yellow
     text = f"{YELLOW}taskcli: Warning: {text}{ENDC}"
     print(text, file=sys.stderr, flush=True)  # noqa: T201
-
 
 
 @contextlib.contextmanager
@@ -207,6 +207,7 @@ def reset_tasks() -> None:
     # # reset any logging configuration set by previous tests
     assert tt.config.verbose == 0
     from .logging import configure_logging
+
     configure_logging()
 
 

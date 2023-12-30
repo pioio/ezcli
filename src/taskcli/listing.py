@@ -1,5 +1,6 @@
 import inspect
 import logging
+import re
 from typing import Any, final
 from venv import logger
 
@@ -10,6 +11,7 @@ from . import configuration, constants, utils
 from .configuration import colors, config
 from .constants import GROUP_SUFFIX, HELP_TEXT_USE_H_TO_SHOW_HIDDEN
 from .group import Group
+from .logging import get_logger
 from .task import Task, UserError
 from .taskrendersettings import TaskRenderSettings
 from .tasktools import FilterResult, filter_before_listing
@@ -62,7 +64,6 @@ def _sort_tasks(  # noqa: C901
     # Bubble the ones from directory above to the top
     for task in presorted:
         if task.from_above and task not in out:
-
             out.append(task)
 
     if sort_important_first:
@@ -91,7 +92,6 @@ def _sort_tasks(  # noqa: C901
 
     return out
 
-from .logging import get_logger
 
 log = get_logger(__name__)
 
@@ -224,7 +224,6 @@ def render_group(
 
     # TODO: sort the ones from the parent to the top?
     # TODO: have task have internal sort key, combination of digit + name
-
 
     for task in tasks_directly_in_group_to_show:
         task_lines = smart_task_lines(task, settings=settings)
@@ -383,10 +382,8 @@ def smart_task_lines(task: Task, settings: TaskRenderSettings) -> list[str]:  # 
     return lines
 
 
-
 def create_groups(tasks: list[Task]) -> list[Group]:
     """Return a dict of group_name -> list of tasks, ordered per group_order, group not listed there will be last."""
-
     top_level_groups = []
     for task in tasks:
         tlg = task.get_top_level_group()
@@ -395,16 +392,15 @@ def create_groups(tasks: list[Task]) -> list[Group]:
 
     return top_level_groups
 
-import re
-def sort_groups_before_listing(groups: list[Group], order:list[str]) -> list[Group]:
 
+def sort_groups_before_listing(groups: list[Group], order: list[str]) -> list[Group]:
     out = []
 
     for expected_group_pattern in order:
         try:
             for group in groups:
-                    if re.match(expected_group_pattern, group.name):
-                        out.append(group)
+                if re.match(expected_group_pattern, group.name):
+                    out.append(group)
         except re.error:
             utils.print_error(f"Invalid regex: {expected_group_pattern}")
 
@@ -412,7 +408,6 @@ def sort_groups_before_listing(groups: list[Group], order:list[str]) -> list[Gro
         if group not in out:
             out.append(group)
     return out
-
 
     # groups = []
     # for task in tasks:

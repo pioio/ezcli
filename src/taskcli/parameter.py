@@ -6,9 +6,8 @@ from types import UnionType
 from typing import Any, List, TypeVar, Union, get_args, get_origin
 from webbrowser import get
 
-from .logging import get_logger
-
 from . import annotations
+from .logging import get_logger
 from .parametertype import ParameterType
 from .utils import param_to_cli_option
 
@@ -16,6 +15,7 @@ from .utils import param_to_cli_option
 default_arg_annotation = annotations.Arg()
 
 log = get_logger(__name__)
+
 
 class Parameter:
     """A wrapper around inspect.Parameter to make it easier to work with."""

@@ -15,8 +15,8 @@ import sys
 from taskcli import configuration
 
 from .envvar import EnvVar
-
 from .logging import get_logger
+
 log = get_logger(__name__)
 
 TASKCLI_TASKS_PY_FILENAMES = EnvVar(
@@ -26,8 +26,10 @@ TASKCLI_TASKS_PY_FILENAMES = EnvVar(
 
 TASKCLI_EXTRA_TASKS_PY_FILENAMES = EnvVar(
     default_value="../tasks.py,../../tasks.py,../../../tasks.py,../../../../tasks.py,../../../../../tasks.py,../../../../../../tasks.py ",
-    desc=("Comma separated list of filepaths which 'taskcli' tool should include "
-           "by default, and combine with tasks from the locally-present `task.py` file."),
+    desc=(
+        "Comma separated list of filepaths which 'taskcli' tool should include "
+        "by default, and combine with tasks from the locally-present `task.py` file."
+    ),
 )
 
 

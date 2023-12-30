@@ -18,13 +18,13 @@ from .group import get_all_groups_from_tasks
 from .include import load_tasks_from_module_to_runtime
 from .init import create_tasks_file
 from .listing import list_tasks
+from .logging import get_logger
 from .parameter import Parameter
 from .task import Task
 from .taskcli import TaskCLI
 from .taskrendersettings import TaskRenderSettings
 from .types import AnyFunction, Module
 from .utils import param_to_cli_option, print_warning
-from .logging import get_logger
 
 """"
 TODO:
@@ -33,7 +33,6 @@ TODO:
 """
 
 log = get_logger(__name__)
-
 
 
 def _extract_extra_args(argv: list[str], task_cli: TaskCLI) -> list[str]:
@@ -55,7 +54,6 @@ def dispatch(
     """Dispatch the command line arguments to the correct function."""
     # Initial parser, only used to find the tasks file
     log.debug("Dispatching with argv=%s", argv)
-
 
     if module is None:
         module = utils.get_callers_module()
@@ -426,11 +424,8 @@ def _add_param_to_subparser(args: list[str], param: Parameter, subparser: argpar
         if param.has_default():
             kwargs["default"] = param.default
 
-
     elif param.type.raw == taskcli.parametertype.ParameterType.Empty:
-
         pass
-
 
     else:
         # Assuming here that error will be printed when we try to run the task

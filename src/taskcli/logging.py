@@ -10,10 +10,11 @@ verbose the logging will be.
 import logging
 from typing import Any
 
+
 class Logger(logging.Logger):
     """Custom logger which adds a trace method."""
 
-    def trace(self, msg:Any, level:int=3, *args, **kwargs):
+    def trace(self, msg: Any, level: int = 3, *args, **kwargs):
         """Log message to debug, but only if verbose level high enough.
 
         Args:
@@ -24,6 +25,7 @@ class Logger(logging.Logger):
             kwargs: passed through to logging.debug()
         """
         from . import tt
+
         if tt.config.verbose >= level:
             msg = "TRACE: " + msg
             self.debug(msg, *args, **kwargs)
@@ -35,12 +37,15 @@ class Logger(logging.Logger):
 
         self.debug(f"{green}=====================[{msg}]========================{clear}")
 
+
 def get_logger(name: str) -> Logger:
     """Return a logger with the specified name."""
     del name  # discard the name for now, always return the same logger.
     return _logger
 
+
 _logger = Logger("taskcli")
+
 
 def configure_logging():
     """Configure logging for taskcli.
@@ -48,13 +53,16 @@ def configure_logging():
     Should be called only once.
     """
     import argparse
+
     parser = argparse.ArgumentParser(add_help=False)
     parser.add_argument("-v", "--verbose", action="count", default=0)
     import sys
+
     args, _ = parser.parse_known_args(sys.argv[1:])
 
     from . import tt
-    tt.config.verbose = args.verbose # hack: set it early, as otherwise all taskcliconfig args are read only later
+
+    tt.config.verbose = args.verbose  # hack: set it early, as otherwise all taskcliconfig args are read only later
 
     log = get_logger("")
 
@@ -68,9 +76,9 @@ def configure_logging():
 
     # You can also format the handler output
     if args.verbose <= 1:
-        formatter = logging.Formatter('%(asctime)s %(levelname)-7s|  %(message)s')
+        formatter = logging.Formatter("%(asctime)s %(levelname)-7s|  %(message)s")
     else:
-        formatter = logging.Formatter('%(asctime)s %(levelname)-7s|  %(message)-100s  [%(filename)s:%(lineno)d]')
+        formatter = logging.Formatter("%(asctime)s %(levelname)-7s|  %(message)-100s  [%(filename)s:%(lineno)d]")
     handler.setFormatter(formatter)
 
     # Add the handler to the logger
@@ -80,5 +88,3 @@ def configure_logging():
     log.debug("Logging configured.")
     log.debug("Debug logging enabled.")
     log.trace("Trace logging enabled. Logs will be very verbose.")
-
-

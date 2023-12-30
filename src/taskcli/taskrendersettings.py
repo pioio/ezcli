@@ -18,7 +18,7 @@ class TaskRenderSettings:
     show_hidden_tasks = False
     show_ready_info = False
     show_include_info = False
-    group_order:list[str] = dataclasses.field(default_factory=list)
+    group_order: list[str] = dataclasses.field(default_factory=list)
     tags: list[str] = dataclasses.field(default_factory=list)
     search: str = ""
     verbose: int = 0

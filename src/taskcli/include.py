@@ -6,14 +6,14 @@ import sys
 from typing import Callable
 from unicodedata import name
 
+import taskcli
 
 from . import core, utils
 from .group import get_current_group
+from .logging import get_logger
 from .task import Task, UserError
 from .types import Any, AnyFunction, Module
 
-import taskcli
-from .logging import get_logger
 log = get_logger(__name__)
 
 
@@ -102,14 +102,13 @@ def include_module(
     skip_include_info: bool = False,
     namespace: str = "",
     alias_namespace: str = "",
-    filter: Callable[[Task], bool]|None=None
+    filter: Callable[[Task], bool] | None = None,
 ) -> list[Task]:
     """Include all tasks from the specified python module.
 
     When including the main module, we skip the include info, as then all the
     tasks would be marked as included.
     """
-
     if filter is None and not skip_include_info:
         log.debug("No filter set, including all not hidden tasks")
         filter = lambda t: not t.hidden
@@ -129,7 +128,7 @@ def include_module(
     tasks = from_module.decorated_functions[:]
     out: list[Task] = []
     for task in tasks:
-        #if not skip_include_info:  # otherwise we will filter out the ones included from root module
+        # if not skip_include_info:  # otherwise we will filter out the ones included from root module
         if filter and not filter(task):
             continue
         # copy the task to the current module

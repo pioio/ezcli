@@ -1,11 +1,10 @@
 import re
 from json import tool
 
-
 from argh import dispatch
 
 import taskcli
-from taskcli import Group, Task, arg, constants, listing, task
+from taskcli import Group, Task, arg, constants, listing, task, tt
 from taskcli.listing import list_tasks
 from taskcli.taskcliconfig import TaskCLIConfig
 from taskcli.taskrendersettings import TaskRenderSettings, new_settings
@@ -278,10 +277,10 @@ foobar2b""".split("\n")
 foobar""".split("\n")
     )
 
-from taskcli import tt
 
 def test_default_group_always_first():
     with tt.Group("GroupA"):
+
         @task
         def task_in_group_a() -> None:
             pass

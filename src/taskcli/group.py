@@ -1,6 +1,7 @@
 import dataclasses
 import typing
 
+from .logging import get_logger
 from .utils import get_callers_module
 
 if typing.TYPE_CHECKING:
@@ -11,8 +12,9 @@ created = []
 _is_init = True
 
 
-from .logging import get_logger
 log = get_logger(__name__)
+
+
 class Group:
     """A group of tasks."""
 
@@ -53,8 +55,8 @@ class Group:
         if name in created:
             msg = f"Group {name} already exists"
             log.debug(msg)
-         # > need to disable, otherwise triggers when merge with parents whcih imports from child
-         #>        raise ValueError(msg)
+        # > need to disable, otherwise triggers when merge with parents whcih imports from child
+        # >        raise ValueError(msg)
         created += [name]
 
         self.parent: Group | None = None

@@ -4,22 +4,23 @@ from typing import Annotated, Any, Iterable, Sequence, TypeVar
 import taskcli
 import taskcli.core
 
-from . import configuration, examples, include, listing, utils
+from . import configuration, examples, include, listing, taskcliconfig, utils
 from .annotations import Arg
 from .arg import arg
 from .configuration import config
 from .core import get_extra_args, get_extra_args_list, get_runtime
 from .group import Group
+from .logging import configure_logging
 from .parameter import Parameter
 from .parametertype import ParameterType
 from .parser import dispatch
 from .runcommand import run
 from .task import Task, task
+
 from typing import Annotated as ann  # noqa: N813 # isort: skip
 
-from . import taskcliconfig
-from .logging import configure_logging
 configure_logging()
+
 
 def hide_group(group: str) -> None:
     """Hide a group from the help message."""

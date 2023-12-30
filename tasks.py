@@ -1,20 +1,25 @@
 #!/usr/bin/env python
 
+
 # iterate over all functions
 
 import taskcli.include
 import testing
 from docsgenerator import tasks as docgentasks
+
+# with tt.Group("Weather", desc="child import test"):
+from examples.screenshots import tasks as weather_tasks
 from taskcli import run, task, tt
 
 important = tt.Group("Important", desc="Development tasks")
 
 tt.config.default_options = ["--no-go-task"]
 tt.config.default_options_tt = ["--no-go-task"]
-#tt.config.hide_not_ready = True
+tt.config.task_start_message = True
 
-#with tt.Group("Weather", desc="child import test"):
-from examples.screenshots import tasks as weather_tasks
+
+# tt.config.hide_not_ready = True
+
 tt.include(weather_tasks.weather_here)
 
 
@@ -59,7 +64,8 @@ with tt.Group("dev", desc="Development tasks"):
 
 
 # TODO: instead of important, use a not-important, and hide them explicitly instead
-Paths = tt.arg(list[str], "The paths to lint", default=["src", "tests", "tasks.py"], important=True)
+DEF_LINT_PATHS = ["src", "tests", "tasks.py"]
+Paths = tt.arg(list[str], "The paths to lint", default=DEF_LINT_PATHS, important=True)
 
 
 with tt.Group("Testing module"):
@@ -95,8 +101,6 @@ with tt.Group("HiddenGroup2", hidden=True):
         print("hello")
 
 
-DEFAULT_LINT_PATH = "src/"
-
 # >  TODO: fixme
 # >  def xxx():
 # >      pass
@@ -108,6 +112,7 @@ def _get_lint_paths():
 
 
 with tt.Group("lints", desc="Code cleanup tasks"):
+
     @task(aliases="r")
     def ruff(paths: Paths, example_arg: str = "foobar", example_arg2: str = "foobar"):
         """Run ruff linter."""
@@ -118,8 +123,10 @@ with tt.Group("lints", desc="Code cleanup tasks"):
         run(f"ruff check {path_txt} --fix")
 
     @task(important=True, aliases=("l"))
-    def lint(paths: Paths):
+    def lint(paths: Paths = DEF_LINT_PATHS):
         """Run all linting tasks."""
+        # paths = paths or DEF_LINT_PATHS
+
         isort(paths)
         ruff(paths)
         mypy(paths)
@@ -147,8 +154,8 @@ def rufftwice():
 
 with tt.Group("included tasks"):
     tt.include(docgentasks, namespace="docs", alias_namespace="doc.")
-    #tt.include()
-    #assert tt.get_task("included.docs.test-documentation").included_from
+    # tt.include()
+    # assert tt.get_task("included.docs.test-documentation").included_from
 
 
 @task
@@ -162,9 +169,15 @@ def argparse():
 
 
 @task
-def pc():
+def pc(*, do_lint: bool = True, do_test: bool = True):
     """Run pre-commit hooks."""
-    lint()
+    if do_lint:
+        lint()
+
+    if do_test:
+        test()
+
+    docgentasks.generate_all_docs()
 
 
 if __name__ == "__main__":

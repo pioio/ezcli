@@ -1,4 +1,9 @@
 
+
+- [ ] def lint(paths: Paths): Cannot call from CLI without the path
+
+
+
 - [ ] loading ./tasks.py from dir above, merging them with the local one.
   - [ ] How to handle A importing B, importing A?
   - [ ] t .  # list only tasks from local dir

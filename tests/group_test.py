@@ -1,8 +1,7 @@
 from operator import le
 
 import taskcli
-from taskcli import Group, task, tt
-from taskcli import group
+from taskcli import Group, group, task, tt
 from taskcli.listing import list_tasks, sort_groups_before_listing
 
 from . import tools
@@ -146,16 +145,12 @@ def test_group_alias_namespace():
     assert task_no_group.aliases == ["bt1", "bt2"]
 
 
-from taskcli import tt
 def test_sort_groups():
-
     g1 = Group("group1")
     g2 = Group("group2")
     g3 = Group("group3")
-    groups = [
-        g1,g2,g3
-    ]
+    groups = [g1, g2, g3]
 
-    assert sort_groups_before_listing(groups, order=[]) == [g1,g2,g3]
-    assert sort_groups_before_listing(groups, ["group3"]) == [g3,g1,g2]
-    assert sort_groups_before_listing(groups, [".*2"]) == [g2,g1,g3]
+    assert sort_groups_before_listing(groups, order=[]) == [g1, g2, g3]
+    assert sort_groups_before_listing(groups, ["group3"]) == [g3, g1, g2]
+    assert sort_groups_before_listing(groups, [".*2"]) == [g2, g1, g3]

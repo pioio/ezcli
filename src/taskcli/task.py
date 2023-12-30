@@ -210,7 +210,7 @@ class Task:
         for error in errors:
             text = error.msg
             if error.fatal:
-                text += " Attempting to run this task fill fail."
+                text += " Attempting to run this task will fail."
             utils.print_warning(text)
 
     def is_hidden(self) -> bool:
@@ -281,7 +281,6 @@ class Task:
     def add_namespace(self, namespace: str = "", alias_namespace: str = "") -> None:
         """Add a namespace to the task."""
         if namespace:
-
             self.namespaces = [namespace, *self.namespaces]
 
         new_aliases = []
@@ -428,7 +427,6 @@ class Task:
         return "ok"
 
 
-
 def _get_wrapper(
     func: AnyFunction,
     change_dir: bool = True,
@@ -477,10 +475,14 @@ def _get_wrapper(
         aliases = [aliases]
 
     from taskcli import tt
+
     # DecoratedFunction
     @functools.wraps(func)
     def wrapper_for_changing_directory(*args: list[Any], **kwargs: dict[str, Any]) -> Any:
         try:
+            if tt.config.task_start_message:
+                pass
+            print(f"----- task [{task.name}]", file=sys.stderr)
             tt.get_runtime().current_tasks.append(task)
             if change_dir:
                 with utils.change_dir(task.get_taskfile_dir()):  # type: ignore[attr-defined]

@@ -1,22 +1,22 @@
 """Entrypoint for the 'taskcli' command."""
 
 
+import importlib.util
 import os
-import sys
-import time
 import random
 import string
+import sys
+import time
+from typing import Callable
 
 import taskcli.include
 
 from . import envvars, task, taskfiledev, utils
-from .parser import build_initial_parser
-from .utils import print_err, print_error
-from .task import Task, UserError
-import importlib.util
-from typing import Callable
-
 from .logging import get_logger
+from .parser import build_initial_parser
+from .task import Task, UserError
+from .utils import print_err, print_error
+
 log = get_logger(__name__)
 
 
@@ -41,10 +41,9 @@ def main() -> None:  # noqa: C901
 
     already_loaded = set()
 
-
-
-    def include_from_file(filename, name_namespace="", alias_namespace="", mark_them=False,
-                          filter:Callable[[Task], bool]|None=None):
+    def include_from_file(
+        filename, name_namespace="", alias_namespace="", mark_them=False, filter: Callable[[Task], bool] | None = None
+    ):
         log.separator(f"Importing objects from {filename}")
         log.debug("Current working dir: " + os.getcwd())
         absolute_filepath = os.path.abspath(filename)
@@ -66,29 +65,30 @@ def main() -> None:  # noqa: C901
         log.separator(f"Including tasks from {filename}")
         already_loaded.add(filename)
 
-        start_include = time.time() # FIXME: called for extra includes
+        start_include = time.time()  # FIXME: called for extra includes
 
         # This includes the tasks from 'sometasks' into THIS module (main)
 
-        tasks = taskcli.include.include(imported_module,
-                                         skip_include_info=True,
-                                         namespace=name_namespace,
-                                         alias_namespace=alias_namespace,
-                                         filter=filter)
+        tasks = taskcli.include.include(
+            imported_module,
+            skip_include_info=True,
+            namespace=name_namespace,
+            alias_namespace=alias_namespace,
+            filter=filter,
+        )
 
         # TODO: fixme, this is needed for sortin those tasks to top. but right now they get duplicated
-        #>>> for task in tasks:
-        #>>>     task.from_above = True
+        # >>> for task in tasks:
+        # >>>     task.from_above = True
         if mark_them:
             for task in tasks:
                 task.name_format = f">{task.name_format}"
                 blue = "\033[34m"
-                task.name_format = blue +"⬆ {green}{name}{clear}"
+                task.name_format = blue + "⬆ {green}{name}{clear}"
 
         nonlocal include_took, tasks_found
         include_took = time.time() - start_include
         tasks_found = True
-
 
     for filename in argconfig.file.split(","):
         filename = filename.strip()
@@ -96,37 +96,39 @@ def main() -> None:  # noqa: C901
             include_from_file(filename)
 
     from taskcli import tt
+
     if tasks_found and tt.config.include_extra_tasks or not tasks_found:
         for filename in envvars.TASKCLI_EXTRA_TASKS_PY_FILENAMES.value.split(","):
             filename = filename.strip()
             if os.path.exists(filename):
-
-
                 random_lowercase = "".join(random.choices(string.ascii_lowercase, k=8))
 
                 random_lowercase = "taskcli_import_" + random_lowercase
                 abs_filepath = os.path.abspath(filename)
                 dir_filepath = os.path.dirname(abs_filepath)
                 import shutil
+
                 log.debug(f"Copying {abs_filepath} to {dir_filepath}/{random_lowercase}.py")
                 target_filepath = f"{dir_filepath}/{random_lowercase}.py"
                 try:
                     shutil.copy(abs_filepath, target_filepath)
 
-                    if not tasks_found: # not local tasks.py, it's not merging, so no namespace
+                    if not tasks_found:  # not local tasks.py, it's not merging, so no namespace
                         include_from_file(target_filepath, mark_them=False)
                     else:
                         # might have
                         filterfun = tt.config.extra_tasks_filter
-                        alias_namespace:str = tt.config.extra_tasks_alias_namespace
-                        name_namespace:str = tt.config.extra_tasks_name_namespace
+                        alias_namespace: str = tt.config.extra_tasks_alias_namespace
+                        name_namespace: str = tt.config.extra_tasks_name_namespace
                         # By default no
-                        #> include_from_file(f"{dir_filepath}/{random_lowercase}.py", namespace="p", alias_namespace="p", mark_them=True, filter=filterfun)
-                        include_from_file(target_filepath,
-                                          name_namespace=name_namespace,
-                                            alias_namespace=alias_namespace,
-                                              mark_them=True,
-                                                filter=filterfun)
+                        # > include_from_file(f"{dir_filepath}/{random_lowercase}.py", namespace="p", alias_namespace="p", mark_them=True, filter=filterfun)
+                        include_from_file(
+                            target_filepath,
+                            name_namespace=name_namespace,
+                            alias_namespace=alias_namespace,
+                            mark_them=True,
+                            filter=filterfun,
+                        )
                 finally:
                     try:
                         log.debug(f"Done! Now removing {target_filepath}.")
@@ -136,7 +138,7 @@ def main() -> None:  # noqa: C901
                         raise Exception(msg) from e
 
                 log.debug("Done!")
-                break # for now only ones
+                break  # for now only ones
 
     log.separator("Finished include and imports")
     # This part be right after importing the default ./task.p and before anything else
