@@ -363,17 +363,18 @@ import taskcli.core
 
 def customize_parser(parser):
     """Customize the argparse parser."""
-    parser.add_argument("--custom-arg",
+    parser.add_argument("--custom-arg", "-c",
                         help="Custom argument",
                         default=42,
                         type=int)
 
 
 @task(customize_parser=customize_parser)
-def foobar():
+def foobar(name:str="Alice") -> None:
     """Task which customizes the parser."""
     parsed_args = taskcli.core.get_runtime().parsed_args
     assert parsed_args is not None
+    print(f"Hello, {name=}!")
     print("Value of custom-arg (set with --custom-arg <value>):", parsed_args.custom_arg)
 ```
 ##### Output of the above:
@@ -387,17 +388,21 @@ foobar                Task which customizes the parser.
 ```sh
 ### show help output
 # t -f customize_parser.py foobar --help
-usage: t foobar [-h] [--custom-arg CUSTOM_ARG]
+usage: t foobar [-h] [--custom-arg CUSTOM_ARG] [name]
+
+positional arguments:
+  name
 
 options:
   -h, --help            show this help message and exit
-  --custom-arg CUSTOM_ARG
+  --custom-arg CUSTOM_ARG, -c CUSTOM_ARG
                         Custom argument
 ```
 
 ```sh
 ### use the custom argument we added
 # t -f customize_parser.py foobar  --custom-arg 123
+Hello, name='Alice'!
 Value of custom-arg (set with --custom-arg <value>): 123
 ```
 
