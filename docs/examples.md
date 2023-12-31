@@ -180,6 +180,7 @@ Tags: basic
 
 Run:
 - taskcli -f FILENAME                     # list tasks
+- taskcli -f FILENAME  -lll               # list, detailed view
 - taskcli -f FILENAME  task1  --help      # Show help output
 - taskcli -f FILENAME  task2  --help      # Show help output
 - taskcli -f FILENAME  task1  100         # task1 requires the first argument, but second one is optional
@@ -214,6 +215,16 @@ def task2(height: int = 42, *, name: str = "alice"):
 default               Default tasks
 task1   AGE           This task has two positional arguments, one of them is optional.
 task2                 This task has one positional, and one named optional argument.
+```
+
+```sh
+### list, detailed view
+# taskcli -f basic_using_arguments.py  -lll
+default               Default tasks
+task1                 This task has two positional arguments, one of them is optional.
+  AGE, NAME=alice
+task2                 This task has one positional, and one named optional argument.
+  HEIGHT=42, --name=alice
 ```
 
 ```sh

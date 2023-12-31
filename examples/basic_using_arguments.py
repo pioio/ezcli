@@ -7,6 +7,7 @@ Tags: basic
 
 Run:
 - taskcli -f FILENAME                     # list tasks
+- taskcli -f FILENAME  -lll               # list, detailed view
 - taskcli -f FILENAME  task1  --help      # Show help output
 - taskcli -f FILENAME  task2  --help      # Show help output
 - taskcli -f FILENAME  task1  100         # task1 requires the first argument, but second one is optional
