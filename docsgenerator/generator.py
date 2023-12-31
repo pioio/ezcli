@@ -79,7 +79,7 @@ def generate_example() -> str:
             fake_cmd_line = runcmd.cmd_orig.replace("FILENAME", simple_filename)
 
             desc = runcmd.desc
-            shell_command = f"/home/user/taskcli/examples:~ $ {fake_cmd_line}"
+            shell_command = f"~/taskcli/examples$ {fake_cmd_line}"
             if desc:
                 shell_command = f"### {desc}\n{shell_command}"
 
@@ -90,7 +90,7 @@ def generate_example() -> str:
 
             _assert_output_sane(output)
 
-            markdown_highlight_type = "console"
+            markdown_highlight_type = "sh"
             assert output.endswith("\n")
             out += f"```{markdown_highlight_type}\n{shell_command}\n{output}```\n\n"
 

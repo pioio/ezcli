@@ -52,17 +52,17 @@ def say_hello(name="alice"):
     """
     print(f"Hello from task2, {name=}", flush=True)
 ```
-```console
+```sh
 ### list tasks
-/home/user/taskcli/examples:~ $ taskcli -f basic_customize_settings.py
+~/taskcli/examples$ taskcli -f basic_customize_settings.py
 default               Default tasks
 say-hello             This task has one positional, and one named optional argument.
 task1                 This task has two positional arguments, one of them is optional.
 ```
 
-```console
+```sh
 ### will call second task several time
-/home/user/taskcli/examples:~ $ taskcli -f basic_customize_settings.py  task1
+~/taskcli/examples$ taskcli -f basic_customize_settings.py  task1
 -- taskcli [task1] -------------------------------------------------------------
 Starting the first task
 -- taskcli [task1 > say-hello] -------------------------------------------------
@@ -80,9 +80,9 @@ Hello from task2, name='dylan'
 --
 ```
 
-```console
+```sh
 ### call it directly
-/home/user/taskcli/examples:~ $ taskcli -f basic_customize_settings.py  say-hello yeti
+~/taskcli/examples$ taskcli -f basic_customize_settings.py  say-hello yeti
 -- taskcli [say-hello] ---------------------------------------------------------
 Hello from task2, name='yeti'
 --
@@ -129,9 +129,9 @@ def call_all_dynamic_foobars():
         if task.name.startswith("foobar"):
             task.func()
 ```
-```console
+```sh
 ### list tasks
-/home/user/taskcli/examples:~ $ taskcli -f dynamic_task_creation.py
+~/taskcli/examples$ taskcli -f dynamic_task_creation.py
 default               Default tasks
 call-all-dynamic-foobars Call all the dynamically created tasks.
 foobar-0              Task number 0
@@ -143,18 +143,18 @@ foobar-5              Task number 5
 foobar-6              Task number 6
 ```
 
-```console
-/home/user/taskcli/examples:~ $ taskcli -f dynamic_task_creation.py  foobar-1
+```sh
+~/taskcli/examples$ taskcli -f dynamic_task_creation.py  foobar-1
 Hello, Bob!         (x=1)
 ```
 
-```console
-/home/user/taskcli/examples:~ $ taskcli -f dynamic_task_creation.py  foobar-5 --person-name Lex
+```sh
+~/taskcli/examples$ taskcli -f dynamic_task_creation.py  foobar-5 --person-name Lex
 Hello, Lex!         (x=5)
 ```
 
-```console
-/home/user/taskcli/examples:~ $ taskcli -f dynamic_task_creation.py  call-all-dynamic-foobars
+```sh
+~/taskcli/examples$ taskcli -f dynamic_task_creation.py  call-all-dynamic-foobars
 Hello, Alice!       (x=0)
 Hello, Bob!         (x=1)
 Hello, Charlie!     (x=2)
@@ -198,39 +198,39 @@ def task2(height: int = 42, *, name: str = "alice"):
     """
     print(f"Hello from task2: {height=} {name=}")
 ```
-```console
+```sh
 ### list tasks
-/home/user/taskcli/examples:~ $ taskcli -f basic_using_arguments.py
+~/taskcli/examples$ taskcli -f basic_using_arguments.py
 default               Default tasks
 task1   AGE           This task has two positional arguments, one of them is optional.
 task2                 This task has one positional, and one named optional argument.
 ```
 
-```console
+```sh
 ### task1 requires the argument
-/home/user/taskcli/examples:~ $ taskcli -f basic_using_arguments.py  task1  100
+~/taskcli/examples$ taskcli -f basic_using_arguments.py  task1  100
 Hello from task1: age=100 name='alice'
 ```
 
-```console
+```sh
 ### task1 requires the argument
-/home/user/taskcli/examples:~ $ taskcli -f basic_using_arguments.py  task1  100  bruno
+~/taskcli/examples$ taskcli -f basic_using_arguments.py  task1  100  bruno
 Hello from task1: age=100 name='bruno'
 ```
 
-```console
+```sh
 ### task2 does not require any args
-/home/user/taskcli/examples:~ $ taskcli -f basic_using_arguments.py  task2
+~/taskcli/examples$ taskcli -f basic_using_arguments.py  task2
 Hello from task2: height=42 name='alice'
 ```
 
-```console
-/home/user/taskcli/examples:~ $ taskcli -f basic_using_arguments.py  task2  --name bob
+```sh
+~/taskcli/examples$ taskcli -f basic_using_arguments.py  task2  --name bob
 Hello from task2: height=42 name='bob'
 ```
 
-```console
-/home/user/taskcli/examples:~ $ taskcli -f basic_using_arguments.py  task2  --name bob 193
+```sh
+~/taskcli/examples$ taskcli -f basic_using_arguments.py  task2  --name bob 193
 Hello from task2: height=193 name='bob'
 ```
 
@@ -265,31 +265,31 @@ def hello_hidden():
     """
     print("Hello from the hidden task!")
 ```
-```console
+```sh
 ### list tasks
-/home/user/taskcli/examples:~ $ t -f basic.py
+~/taskcli/examples$ t -f basic.py
 default               Default tasks
 hello                 This line will become the summary for the task list output.
 1 hidden
 ```
 
-```console
+```sh
 ### list tasks, including hidden ones
-/home/user/taskcli/examples:~ $ tt -f basic.py
+~/taskcli/examples$ tt -f basic.py
 default               Default tasks
 hello                 This line will become the summary for the task list output.
 hello-hidden          This task is hidden by default.
 ```
 
-```console
+```sh
 ### run the hello taask
-/home/user/taskcli/examples:~ $ t -f basic.py hello
+~/taskcli/examples$ t -f basic.py hello
 Hello, World!
 ```
 
-```console
+```sh
 ### run the hidden task
-/home/user/taskcli/examples:~ $ t -f basic.py hello-hidden
+~/taskcli/examples$ t -f basic.py hello-hidden
 Hello from the hidden task!
 ```
 
