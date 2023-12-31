@@ -54,7 +54,7 @@ def say_hello(name="alice"):
 ```
 ```console
 # list tasks
-[dir] :~ $ taskcli -f basic_customize_settings.py
+~ $ taskcli -f basic_customize_settings.py
 default               Default tasks
 say-hello             This task has one positional, and one named optional argument.
 task1                 This task has two positional arguments, one of them is optional.
@@ -62,7 +62,7 @@ task1                 This task has two positional arguments, one of them is opt
 
 ```console
 # will call second task several time
-[dir] :~ $ taskcli -f basic_customize_settings.py  task1
+~ $ taskcli -f basic_customize_settings.py  task1
 -- taskcli [task1] -------------------------------------------------------------
 Starting the first task
 -- taskcli [task1 > say-hello] -------------------------------------------------
@@ -82,7 +82,7 @@ Hello from task2, name='dylan'
 
 ```console
 # call it directly
-[dir] :~ $ taskcli -f basic_customize_settings.py  say-hello yeti
+~ $ taskcli -f basic_customize_settings.py  say-hello yeti
 -- taskcli [say-hello] ---------------------------------------------------------
 Hello from task2, name='yeti'
 --
@@ -131,7 +131,7 @@ def call_all_dynamic_foobars():
 ```
 ```console
 # list tasks
-[dir] :~ $ taskcli -f dynamic_task_creation.py
+~ $ taskcli -f dynamic_task_creation.py
 default               Default tasks
 call-all-dynamic-foobars Call all the dynamically created tasks.
 foobar-0              Task number 0
@@ -144,17 +144,17 @@ foobar-6              Task number 6
 ```
 
 ```console
-[dir] :~ $ taskcli -f dynamic_task_creation.py  foobar-1
+~ $ taskcli -f dynamic_task_creation.py  foobar-1
 Hello, Bob!         (x=1)
 ```
 
 ```console
-[dir] :~ $ taskcli -f dynamic_task_creation.py  foobar-5 --person-name Lex
+~ $ taskcli -f dynamic_task_creation.py  foobar-5 --person-name Lex
 Hello, Lex!         (x=5)
 ```
 
 ```console
-[dir] :~ $ taskcli -f dynamic_task_creation.py  call-all-dynamic-foobars
+~ $ taskcli -f dynamic_task_creation.py  call-all-dynamic-foobars
 Hello, Alice!       (x=0)
 Hello, Bob!         (x=1)
 Hello, Charlie!     (x=2)
@@ -200,7 +200,7 @@ def task2(height: int = 42, *, name: str = "alice"):
 ```
 ```console
 # list tasks
-[dir] :~ $ taskcli -f basic_using_arguments.py
+~ $ taskcli -f basic_using_arguments.py
 default               Default tasks
 task1   AGE           This task has two positional arguments, one of them is optional.
 task2                 This task has one positional, and one named optional argument.
@@ -208,29 +208,29 @@ task2                 This task has one positional, and one named optional argum
 
 ```console
 # task1 requires the argument
-[dir] :~ $ taskcli -f basic_using_arguments.py  task1  100
+~ $ taskcli -f basic_using_arguments.py  task1  100
 Hello from task1: age=100 name='alice'
 ```
 
 ```console
 # task1 requires the argument
-[dir] :~ $ taskcli -f basic_using_arguments.py  task1  100  bruno
+~ $ taskcli -f basic_using_arguments.py  task1  100  bruno
 Hello from task1: age=100 name='bruno'
 ```
 
 ```console
 # task2 does not require any args
-[dir] :~ $ taskcli -f basic_using_arguments.py  task2
+~ $ taskcli -f basic_using_arguments.py  task2
 Hello from task2: height=42 name='alice'
 ```
 
 ```console
-[dir] :~ $ taskcli -f basic_using_arguments.py  task2  --name bob
+~ $ taskcli -f basic_using_arguments.py  task2  --name bob
 Hello from task2: height=42 name='bob'
 ```
 
 ```console
-[dir] :~ $ taskcli -f basic_using_arguments.py  task2  --name bob 193
+~ $ taskcli -f basic_using_arguments.py  task2  --name bob 193
 Hello from task2: height=193 name='bob'
 ```
 
@@ -267,7 +267,7 @@ def hello_hidden():
 ```
 ```console
 # list tasks
-[dir] :~ $ t -f basic.py
+~ $ t -f basic.py
 default               Default tasks
 hello                 This line will become the summary for the task list output.
 1 hidden
@@ -275,7 +275,7 @@ hello                 This line will become the summary for the task list output
 
 ```console
 # list tasks, including hidden ones
-[dir] :~ $ tt -f basic.py
+~ $ tt -f basic.py
 default               Default tasks
 hello                 This line will become the summary for the task list output.
 hello-hidden          This task is hidden by default.
@@ -283,13 +283,13 @@ hello-hidden          This task is hidden by default.
 
 ```console
 # run the hello taask
-[dir] :~ $ t -f basic.py hello
+~ $ t -f basic.py hello
 Hello, World!
 ```
 
 ```console
 # run the hidden task
-[dir] :~ $ t -f basic.py hello-hidden
+~ $ t -f basic.py hello-hidden
 Hello from the hidden task!
 ```
 
