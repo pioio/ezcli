@@ -17,7 +17,7 @@ See [README.md](../README.md) in project's root.
 - It's also suitable for managing multiple projects at once.
 - Or, use it as single-point-of-entry (a view) into multipe, loosely-coupled, projects spread across your filesystem
 
-Usecases are descibed in more detail [here](docs/usecases.md).
+Usecases are descibed in more detail [here](usecases.md).
 
 
 ## Background

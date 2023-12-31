@@ -14,11 +14,11 @@ This section discusses things like
 
 ## Tiny project
 The simplest scenario:
-- A single `tasks.py` containing both your task and their logic.
+- A single `tasks.py` containing both your task (i.e. the entrypoint defining the CLI) and the logic behind it.
 - All tasks are visible by default when running `t`.
 - Some tasks might be, optionally, marked as 'important'; this will make them stand out in the list of tasks.
 
-This project can be a sofware project where you need the typical sets build/test/ship tasks.
+This could be small a sofware project where you need the typical sets build/test/ship tasks.
 
 Or, it can be just a small collection of small unrelated automation tasks, like 'check-weather', 'brew-coffee', 'check-email', etc.
 
@@ -26,9 +26,10 @@ Or, it can be just a small collection of small unrelated automation tasks, like 
 ## Tiny project with hidden tasks
 Another simplest scenario:
 - A single `tasks.py` containing both your task and their logic.
-- Not all tasks are visible by default for `t` -- some are hidden. Use `tt` to show those.
+- Not all tasks are visible by default for the `t` command -- some tasks (or groups of tasks) are hidden.
+- you can use `tt` to show the hidden items. (`tt` == `t --show-hidden`)
 
-Useful when you typically only ever run small subset of tasks (e.g. `build-test-deploy()`` ), but still want to keep
+Useful when you typically only ever run small subset of tasks (e.g. `build-test-deploy()`), but still want to keep
 the other ones (`build()`, `test()`, `deploy()` around and easily accessible in case they are needed.
 
 
@@ -38,8 +39,10 @@ the other ones (`build()`, `test()`, `deploy()` around and easily accessible in 
 - Some logic might be in separate python files/modules imported with Python's `import` statement. This helps keep the `tasks.py` file small and readable. Those file could be co-located in the same subdirectory as the main `tasks.py`, or be in subdirectories.
 - Some tasks might be hidden, and are not shown by default. You can use `tt` to show them.
 - Some tasks might be marked as `important`, to make them stand out in the task list.
+- Some other related tasks might be grouped into groups (to easily find related ones). Groups can be nested.
+- Some tasks might have tags assigned to them, to easily show e.g. all the tasks related to a specific topic.
 
-your directory structure could be a collection if standalone files, or part of a bigger python package
+Your directory structure could be a collection if standalone files, or part of a bigger python package
 
 ## Use taskcli as a view into several other projects
 In this scenario you have mutliple distinct projects, some usings tasks.py each in their own own, some not using it all.k
@@ -52,8 +55,7 @@ This works exceptionally well since Tasks automatically change directories to wh
 
 (This way, when writing task for a project, you don't have worry about from where, relative, the task will be called.)
 
-
-## tasks.py and a Python package
+## tasks.py alongside a Python package
 Unlike other patterns, this one is specific to Python projects.
 
 In this case you have a repo with one, or more, python packages, and a tasks.py which might, or might not be, part of the package.
