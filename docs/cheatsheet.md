@@ -6,6 +6,7 @@ This document contains short, condensed, snippets of using `taskcli`.
 If you're looking for larger, executable, standalone examples, see the [examples](examples.md) document.
 
 ([click here to go the main index](../README.md))
+
 ## Basic usage
 ```python
 # The recommended way to import taskcli is the following.
@@ -51,21 +52,21 @@ def foobar():
 ```python
 # --------------------------------------------------------------------------
 # Create a group and a task in that group, using a context manager
-with tt.group("My Group"):
+with tt.Group("My Group"):
     @task
     def foobar():
         ...
 
 # --------------------------------------------------------------------------
 # Create a group and a task in that group, using a variable
-group = tt.group("My Group")
+group = tt.Group("My Group")
 @task(group=group)
 def foobar():
     ...
 
 # --------------------------------------------------------------------------
 # Create a group that also prefixes all tasks with a namespace
-with tt.group("My Group", name_namespace="mygroup"):
+with tt.Group("My Group", name_namespace="mygroup"):
     @task
     def foobar():
         ...
@@ -73,7 +74,7 @@ with tt.group("My Group", name_namespace="mygroup"):
 # --------------------------------------------------------------------------
 # Create a group that also prefixes all task names with a namespace
 # as well as any aliases with a separate (often shorter) namespace
-with tt.group("My Group", name_namespace="mygroup", alias_namespace="g"):
+with tt.Group("My Group", name_namespace="mygroup", alias_namespace="g"):
     @task(aliases="f")
     def foobar():
         ...
@@ -83,15 +84,15 @@ with tt.group("My Group", name_namespace="mygroup", alias_namespace="g"):
 
 # --------------------------------------------------------------------------
 # Create nested group hierarchy, task list will be appropriately indented
-with tt.group("My Group"):
+with tt.Group("My Group"):
     @task
     def foobar():
         ...
-    with tt.group("My Second Group"):
+    with tt.Group("My Second Group"):
         @task
         def bar():
             ...
-    with tt.group("My Third Group"):
+    with tt.Group("My Third Group"):
         @task
         def baz():
             ...
@@ -121,7 +122,7 @@ tt.include(mytask)
 # --------------------------------------------------------------------------
 # import tasks into to a group
 from package import module
-with tt.group("My Group"):
+with tt.Group("My Group"):
     tt.include(module)
 
 # --------------------------------------------------------------------------
@@ -137,7 +138,7 @@ tt.include(module, name_namespace="namespace")
 # --------------------------------------------------------------------------
 # import tasks into a group and into separate namespaces
 from package import module1, module2
-with tt.group("My Group"):
+with tt.Group("My Group"):
     tt.include(module1, name_namespace="one", alias_namespace="ns1")
     tt.include(module1, name_namespace="two", alias_namespace="ns2")
 ```

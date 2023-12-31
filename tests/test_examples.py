@@ -28,26 +28,30 @@ def test_one_example(example: Example):
         taskcli.examples.run_example(example, runcmd=runcmd)
 
 
-# def test_broken_example_raises():
-#     example = taskcli.examples.Example(
-#         title="broken",
-#         text="""
-# @task
-# def ok():
-#    assert True
+def test_broken_example_raises():
+    filepath = "/tmp/taskcli-unittest-broken-example.py"
+    example = taskcli.examples.Example(
+        title="broken",
+        filepath=filepath,
+        file_content="""
+@task
+def ok():
+   assert True
 
-# @task
-# def bad_assert():
-#     assert False
-# """,
-#     )
-#     taskcli.examples.run_example(example, argv=[])
-#     taskcli.examples.run_example(example, argv=["ok"])
+@task
+def bad_assert():
+    assert False
+""",
+    )
+    with open(filepath, "w") as f:
+        f.write(example.file_content)
 
-#     with pytest.raises(subprocess.CalledProcessError):
-#         taskcli.examples.run_example(example, argv=["bad_assert"])
-#     with pytest.raises(subprocess.CalledProcessError):
-#         taskcli.examples.run_example(example, argv=["nonexisting-task"])
+    runcmd = taskcli.examples.RunCommand(desc="run ok", cmd="taskcli -f " + example.filepath + " ok")
+    taskcli.examples.run_example(example, runcmd)
+    taskcli.examples.run_example(example, runcmd)
 
-# def test_print_examples():
-#     taskcli.examples.print_examples()
+    with pytest.raises(subprocess.CalledProcessError):
+        runcmd = taskcli.examples.RunCommand(desc="run ok", cmd="taskcli -f " + example.filepath + " bad-assert")
+    with pytest.raises(subprocess.CalledProcessError):
+        runcmd = taskcli.examples.RunCommand(desc="run ok", cmd="taskcli -f " + example.filepath + " non-existing-task")
+
