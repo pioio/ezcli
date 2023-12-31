@@ -2,9 +2,10 @@
 There's several ways in which you can use taskcli.
 How you spread your tasks depends on how you most often want to run them.
 
-(Note, when we say Task, we mean a python function annotated with `@task` decorator.)
+This section discusses things like
+- using `taskcli` for small, medium, and large projects
+- using `taskcli` to create a unified view to multiple separate projects
 
-Here's some examples:
 
 ## Tiny project
 The simplest scenario:
@@ -20,6 +21,8 @@ Another simplest scenario:
 Useful when you typically only ever run small subset of tasks (e.g. `build-test-deploy()`` ), but still want to keep
 the other ones (`build()`, `test()`, `deploy()` around and easily accessible in case they are needed.
 
+
+
 ## Small project
 - Still a single `tasks.py` containing all the Taskk.
 - Some logic might be in separate python files/modules imported with Python's `import` statement. This helps keep the `tasks.py` file small and readable. Those file could be co-located in the same subdirectory as the main `tasks.py`, or be in subdirectories.
@@ -27,6 +30,18 @@ the other ones (`build()`, `test()`, `deploy()` around and easily accessible in 
 - Some tasks might be marked as `important`, to make them stand out in the task list.
 
 your directory structure could be a collection if standalone files, or part of a bigger python package
+
+## Use taskcli as a view into several other projects
+In this scenario you have mutliple distinct projects, some usings tasks.py each in their own own, some not using it all.k
+
+You then create a separate `taskcli` which imports and includes select tasks from all of them. Possibly adding some custom tasks.
+For projects which don't use tskcli, you create new Task which forward the calls to the other projects scripts via the shell.
+
+This gives you a single point of entry for all of the included projects.
+This works exceptionally well since Tasks automatically change directories to wherever they are defined.
+
+(This way, when writing task for a project, you don't have worry about from where, relative, the task will be called.)
+
 
 ## tasks.py and a Python package
 Unlike other patterns, this one is specific to Python projects.
