@@ -1,10 +1,12 @@
 # TODOs for `taskcli`
 
 ## Short-term TODOs:
+- [ ] structure
 - [ ] add --color yes/no -- finish screenshot generation
 - [ ] rename tasks when including
 - [ ] print (tt.config) not working
-- [ ]
+
+- [ ] add task.__call__  unit tests
 - [ ] t shows hidden tasks
 - [ ] tt.include("../../tasks.py", filter=lambda task: task.important) -- relative paths in include should be anchored to the file! Disallow them for now?
 - [ ] BUG: dynamic task creation with  'x=x, person_name=person_name' does not allow to set person name from the CLI
