@@ -79,9 +79,9 @@ def generate_example() -> str:
             fake_cmd_line = runcmd.cmd_orig.replace("FILENAME", simple_filename)
 
             desc = runcmd.desc
-            shell_command = f"~ $ {fake_cmd_line}"
+            shell_command = f"/dir/ :~ $ {fake_cmd_line}"
             if desc:
-                shell_command = f"# {desc}\n{shell_command}"
+                shell_command = f"### {desc}\n{shell_command}"
 
             output = taskcli.examples.run_example(example, runcmd)
             if output.endswith("\n\n"):
@@ -92,7 +92,7 @@ def generate_example() -> str:
 
 
             assert output.endswith("\n")
-            out += f"```console\n{shell_command}\n{output}```\n\n"
+            out += f"```sh\n{shell_command}\n{output}```\n\n"
 
 
         out += "---\n"# horizontal line
