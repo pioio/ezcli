@@ -40,24 +40,6 @@ eval "$(register-python-argcomplete taskcli)"
 ```
 
 
-### Merging multiple `tasks.py` files
-- After finding `tasks.py` , the tool imports it.
-- If that file contains `tt.config.include_extra_tasks = True`, The tool will continue traversing up the directory tree, and if it encounters another `tasks.py` files it merge the tasks from it, with the current one.
-- You can use `tt.config.merge_parent_filter = my_filter_function` to customize which tasks are merged in.
-```python
-from taskcli import tt
-
-def my_filter_function(task):
-    return task.name.startswith("deploy") or "prod" in task.tags
-
-tt.config.merge_parent_filter = my_filter_function
-```
-
-
-This allows you to have a single `tasks.py` file in the root of your project, and then have additional `tasks.py` files in subdirectories, and have them all be merged together any way you like as you traverse the directory tree.
-
-
-
 
 ## Creating tasks
 

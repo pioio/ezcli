@@ -2,9 +2,11 @@
 
 ## Short-term TODOs:
 - [ ] add --color yes/no
+- [ ] rename tasks when including
 - [ ] print (tt.config) not working
 - [ ]
 - [ ] t shows hidden tasks
+- [ ] tt.include("../../tasks.py", filter=lambda task: task.important) -- relative paths in include should be anchored to the file! Disallow them for now?
 - [ ] BUG: dynamic task creation with  'x=x, person_name=person_name' does not allow to set person name from the CLI
 - [ ] wrap right column text, for screenshots
 - [ ] use "import_module" instead of "include" ?
