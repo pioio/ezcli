@@ -65,7 +65,7 @@ def generate_example() -> str:
 
     for example in examples:
         out += f"### {example.title}\n"
-
+        out += f"`examples/{example.filename}`{BR}\n"
         # TODO remove docstring
         out += "```python\n"
         out += example.file_content
@@ -73,7 +73,10 @@ def generate_example() -> str:
             out += "\n"
         out += "```\n"
 
-        for runcmd in get_run_commands(example, filename=example.filepath):
+        runcmds = get_run_commands(example, filename=example.filepath)
+        if runcmds:
+            out += "##### Output:\n"
+        for runcmd in runcmds:
 
             simple_filename = os.path.basename(example.filepath)
             fake_cmd_line = runcmd.cmd_orig.replace("FILENAME", simple_filename)

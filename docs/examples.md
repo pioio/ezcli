@@ -15,6 +15,7 @@ Also, [go here for a cheat sheet](cheatsheet.md) -- it's a more concise version 
 
 
 ### Basic Customize Settings
+`examples/basic_customize_settings.py`  
 ```python
 """Most basic example of a task.
 
@@ -52,6 +53,7 @@ def say_hello(name="alice"):
     """
     print(f"Hello from task2, {name=}", flush=True)
 ```
+##### Output:
 ```sh
 ### list tasks
 # taskcli -f basic_customize_settings.py
@@ -90,6 +92,7 @@ Hello from task2, name='yeti'
 
 ---
 ### Dynamic Task Creation
+`examples/dynamic_task_creation.py`  
 ```python
 """Create tasks dynamically.
 
@@ -129,6 +132,7 @@ def call_all_dynamic_foobars():
         if task.name.startswith("foobar"):
             task.func()
 ```
+##### Output:
 ```sh
 ### list tasks
 # taskcli -f dynamic_task_creation.py
@@ -166,6 +170,7 @@ Hello, Grace!       (x=6)
 
 ---
 ### Basic Using Arguments
+`examples/basic_using_arguments.py`  
 ```python
 """Most basic example of a task.
 
@@ -198,6 +203,7 @@ def task2(height: int = 42, *, name: str = "alice"):
     """
     print(f"Hello from task2: {height=} {name=}")
 ```
+##### Output:
 ```sh
 ### list tasks
 # taskcli -f basic_using_arguments.py
@@ -236,6 +242,7 @@ Hello from task2: height=193 name='bob'
 
 ---
 ### Basic
+`examples/basic.py`  
 ```python
 """Most basic example of a task.
 
@@ -265,6 +272,7 @@ def hello_hidden():
     """
     print("Hello from the hidden task!")
 ```
+##### Output:
 ```sh
 ### list tasks
 # t -f basic.py

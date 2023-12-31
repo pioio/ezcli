@@ -41,6 +41,9 @@ class Example:
     @property
     def dirpath(self):
         return os.path.dirname(self.filepath)
+    @property
+    def filename(self):
+        return os.path.basename(self.filepath)
 
 
 
