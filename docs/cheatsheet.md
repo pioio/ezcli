@@ -17,6 +17,14 @@ def foobar():
     print("Hello, World!")
 
 # --------------------------------------------------------------------------
+# Run a shell command, prints output to the current console
+@task
+def foobar():
+    run("ls -la /etc/* | grep passwd")
+    # Feel free to use other means of running commands, e.g. popen, or os.system
+
+
+# --------------------------------------------------------------------------
 # Create a simple task, with two aliases
 @task
 def foobar(aliases=["f", "foo"]): # also accepts a string:  aliases='f'
