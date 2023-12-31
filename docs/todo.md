@@ -1,4 +1,6 @@
+# TODOs for `taskcli`
 
+## Short-term TODOs:
 - [ ] add --color yes/no
 - [ ] print (tt.config) not working
 - [ ]
@@ -84,7 +86,7 @@
 
 
 
-# Long-term TODOs
+## Long-term TODOs:
 - [ ] Run doc generation in the doceker container (this will allow showing merged/extra task examples)
 - [ ] def lint(paths: Paths), with Paths having a default -- Cannot call from CLI without the path
   - [ ] Should a default be added to the function?
