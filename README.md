@@ -1,25 +1,31 @@
-# `taskcli` - powerful, reusable, and robust CLI interfaces from simple Python functions.
+# `taskcli` - simple, powerful, reusable, and browsable CLI interfaces from Python functions.
 
-The `t` (or `taskcli`) CLI tool for **fast**, real-life, task automation for fans of the Linux command shell.
+`taskcli` is a library and tool for creating and managing CLI interfaces for your projects and automation.
 
-Save time - create snappy, powerful, and reusable CLI interfaces from simple Python functions.
+At its core, `taskcli` is two things:
+- A `taskcli` Python library for exposing Python function as CLI interfaces (your Tasks are python functions)
+- a tool (`t`) for browsing and running your tasks (using tags, namespaces, hierarchical groups, custom filter functions, regex search, imports, aliases!)
 
-Navigate & use your task with ease, also in large projects:
-- tags, search, external imports, aliases, namespaces and hierarchical groups!
+`taskcli` can be use for any project, any language. Your Task entrypoints are defined in Python (which makes them flexible), but they can do whatever you want:
+- Build a Rust or Web app,
+- Ship a file.
+- Run ansible playbook, restart a server
+- make coffee
+- etc.
 
-Manage and automate task of any project (not only Python)!
+All this allows you to focus on your project, or on automating your Tasks and workflows, while keeping your tasks (cli entrypoints) organized, discoverable, and easy to use.
 
 
 ## Documentation Overview
-- Overview -- You're reading it.
+- Overview -- This document
 - [Introduction](docs/introduction.md) - How to use `taskcli` for your projects.
+- [Usecases](docs/usecases.md) - Different ways in which you can use `taskcli` for your projects.
 - [Examples](docs/examples.md) - Complete executable examples from the `examples/` dir, along with sample output.
 - [Cheat sheet](docs/cheatsheet.md) - Code snippets -- quick reference of the most important features.
 - [Settings](docs/settings.md) - List of all the settings that can be customized via env vars or CLI.
 - [Troubleshooting](docs/troubleshooting.md) - Tips and trick for troubleshooting common issues.
 - [TODOs](docs/todo.md) - List of ideas for future work, known issues, etc.
 - [Developer documentation](docs/dev.md) - nitty gritty implementation details for contributors.
-
 
 
 ## Quickstack example

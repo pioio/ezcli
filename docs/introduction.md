@@ -3,8 +3,31 @@
 `taskcli` (aka `t`) is a tool for automating tasks.
 It turns a pile of simple Python functions into a snappy, powerful, and reusable CLI interfaces.
 
+At its core, `taskcli` is two following things:
+- A low-overhead `taskcli` python library for exposing Python function as CLI interfaces.
+- a tool (`t`) for browsing and running your tasks (using tags, namespaces, hierarchical groups, custom filter functions, regex search, imports, aliases!)
+
+
 ## High-level Overview
 See [README.md](../README.md) in project's root.
+
+## Usecases
+- Taskcli is not only for creating standalone tasks
+- You can use it for managing both small and large projects.
+- It's also suitable for managing multiple projects at once.
+- Or, use it as single-point-of-entry (a view) into multipe, loosely-coupled, projects spread across your filesystem
+
+Usecases are descibed in more detail [here](docs/usecases.md).
+
+
+## Background
+The tool was created of out frustration of how challenging it was to keep my collection of automation tasks and software project organized, tidy, and easy to use whenever I needed to.
+- YAML file are super easy to start with, but quickly become hard to maintain, and are near-impossible to refactor in a automated manner.
+- tools like `click`, `argh` and `invoke` are great for creating complex CLIs, but lacked the ability to give me a quick overview of all the tasks across one, or many, project spanning different platforms/languages. At least not in the way I found personally useful.
+
+Hence, the need for `taskcli` was born.
+
+
 
 ## Basic usage
 

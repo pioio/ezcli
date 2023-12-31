@@ -1,10 +1,15 @@
 # `taskcli` Usage patterns
-There's several ways in which you can use taskcli.
-How you spread your tasks depends on how you most often want to run them.
+
+At its heart, `taskcli` is a tool for creating CLI entrypoints to your tasks (any tasks, any project)
+
+
+
+There's many ways in which you can use `taskcli`.
 
 This section discusses things like
-- using `taskcli` for small, medium, and large projects
-- using `taskcli` to create a unified view to multiple separate projects
+- using `taskcli` for managing automation tasks.
+- using `taskcli` for projects of varying sizes (from tiny to large).
+- using `taskcli` to create a new, overarching, view to multiple separate projects.
 
 
 ## Tiny project
@@ -12,6 +17,11 @@ The simplest scenario:
 - A single `tasks.py` containing both your task and their logic.
 - All tasks are visible by default when running `t`.
 - Some tasks might be, optionally, marked as 'important'; this will make them stand out in the list of tasks.
+
+This project can be a sofware project where you need the typical sets build/test/ship tasks.
+
+Or, it can be just a small collection of small unrelated automation tasks, like 'check-weather', 'brew-coffee', 'check-email', etc.
+
 
 ## Tiny project with hidden tasks
 Another simplest scenario:
