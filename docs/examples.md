@@ -53,7 +53,7 @@ def say_hello(name="alice"):
     print(f"Hello from task2, {name=}", flush=True)
 ```
 list tasks  
-```
+```bash
 [~/taskcli/examples]$ taskcli -f basic_customize_settings.py
 default               Default tasks
 say-hello             This task has one positional, and one named optional argument.
@@ -61,7 +61,7 @@ task1                 This task has two positional arguments, one of them is opt
 ```
 
 will call second task several time  
-```
+```bash
 [~/taskcli/examples]$ taskcli -f basic_customize_settings.py  task1
 -- taskcli [task1] -------------------------------------------------------------
 Starting the first task
@@ -81,7 +81,7 @@ Hello from task2, name='dylan'
 ```
 
 call it directly  
-```
+```bash
 [~/taskcli/examples]$ taskcli -f basic_customize_settings.py  say-hello yeti
 -- taskcli [say-hello] ---------------------------------------------------------
 Hello from task2, name='yeti'
@@ -130,7 +130,7 @@ def call_all_dynamic_foobars():
             task.func()
 ```
 list tasks  
-```
+```bash
 [~/taskcli/examples]$ taskcli -f dynamic_task_creation.py
 default               Default tasks
 call-all-dynamic-foobars Call all the dynamically created tasks.
@@ -144,19 +144,19 @@ foobar-6              Task number 6
 ```
 
   
-```
+```bash
 [~/taskcli/examples]$ taskcli -f dynamic_task_creation.py  foobar-1
 Hello, Bob!         (x=1)
 ```
 
   
-```
+```bash
 [~/taskcli/examples]$ taskcli -f dynamic_task_creation.py  foobar-5 --person-name Lex
 Hello, Lex!         (x=5)
 ```
 
   
-```
+```bash
 [~/taskcli/examples]$ taskcli -f dynamic_task_creation.py  call-all-dynamic-foobars
 Hello, Alice!       (x=0)
 Hello, Bob!         (x=1)
@@ -202,7 +202,7 @@ def task2(height: int = 42, *, name: str = "alice"):
     print(f"Hello from task2: {height=} {name=}")
 ```
 list tasks  
-```
+```bash
 [~/taskcli/examples]$ taskcli -f basic_using_arguments.py
 default               Default tasks
 task1   AGE           This task has two positional arguments, one of them is optional.
@@ -210,31 +210,31 @@ task2                 This task has one positional, and one named optional argum
 ```
 
 task1 requires the argument  
-```
+```bash
 [~/taskcli/examples]$ taskcli -f basic_using_arguments.py  task1  100
 Hello from task1: age=100 name='alice'
 ```
 
 task1 requires the argument  
-```
+```bash
 [~/taskcli/examples]$ taskcli -f basic_using_arguments.py  task1  100  bruno
 Hello from task1: age=100 name='bruno'
 ```
 
 task2 does not require any args  
-```
+```bash
 [~/taskcli/examples]$ taskcli -f basic_using_arguments.py  task2
 Hello from task2: height=42 name='alice'
 ```
 
   
-```
+```bash
 [~/taskcli/examples]$ taskcli -f basic_using_arguments.py  task2  --name bob
 Hello from task2: height=42 name='bob'
 ```
 
   
-```
+```bash
 [~/taskcli/examples]$ taskcli -f basic_using_arguments.py  task2  --name bob 193
 Hello from task2: height=193 name='bob'
 ```
@@ -271,7 +271,7 @@ def hello_hidden():
     print("Hello from the hidden task!")
 ```
 list tasks  
-```
+```bash
 [~/taskcli/examples]$ t -f basic.py
 default               Default tasks
 hello                 This line will become the summary for the task list output.
@@ -279,7 +279,7 @@ hello                 This line will become the summary for the task list output
 ```
 
 list tasks, including hidden ones  
-```
+```bash
 [~/taskcli/examples]$ tt -f basic.py
 default               Default tasks
 hello                 This line will become the summary for the task list output.
@@ -287,13 +287,13 @@ hello-hidden          This task is hidden by default.
 ```
 
 run the hello taask  
-```
+```bash
 [~/taskcli/examples]$ t -f basic.py hello
 Hello, World!
 ```
 
 run the hidden task  
-```
+```bash
 [~/taskcli/examples]$ t -f basic.py hello-hidden
 Hello from the hidden task!
 ```
