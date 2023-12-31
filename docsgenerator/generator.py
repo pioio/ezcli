@@ -40,13 +40,16 @@ def generate_settings() -> str:
 PAGE_EXAMPLES_TEXT = """
 Best way to learn is by example. Here are some ways of how to use `taskcli` along with the command output.
 
-To run a specific example from the `examples/` dir yourself
+All of the examples below can also be found in the `examples/` directory of the project.
+
+To run a specific example from the `examples/` dir yourself, do this:
 ```
 cd examples/
-t -f filename.py [args]
+t -f filename.py [optional-args]
 ```
 
-Also, [go here for the cheat sheet](cheatsheet.md) -- it's a more concise version of some of the examples below.
+Also, [go here for a cheat sheet](cheatsheet.md) -- it's a more concise version of some of the examples below.
+
 
 """
 
