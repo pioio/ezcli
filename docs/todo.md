@@ -1,7 +1,7 @@
 # TODOs for `taskcli`
 
 ## Short-term TODOs:
-- [ ] add --color yes/no
+- [ ] add --color yes/no -- finish screenshot generation
 - [ ] rename tasks when including
 - [ ] print (tt.config) not working
 - [ ]

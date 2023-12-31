@@ -1,24 +1,29 @@
 # `taskcli` - simple, powerful, reusable, and browsable CLI interfaces from Python functions.
 
-`taskcli` is a library and tool for creating and managing CLI interfaces for your projects and automation.
+`taskcli` is a library and a companion tool `t` for creating and browsing CLI interfaces for your projects and other automation.
 
 At its core, `taskcli` is two things:
-- The `taskcli` Python library for exposing Python function as powerful CLI interfaces (each function becomes a "Task" you can run)
-- The `t` CLI tool for browsing, grouping, and running your Tasks (using tags, namespaces, hierarchical groups, custom filter functions, regex search, imports, aliases!)
+- The `taskcli` Python library for quickly creating, grouping and exposing Python function as powerful CLI interfaces (each function becomes a "Task" you can run)
+- The `t` CLI tool for browsing, and running your Tasks (using tags, namespaces, hierarchical groups, custom filter functions, regex search, imports, aliases!)
 
-`taskcli` can be use for any project, any task, language.
+`taskcli` can be used for any project, any task, language.
 It's a replacement for chaotic collections of shell scripts, YAML files, and Makefiles.
 
 All this allows you to focus on your project, or on automating your Tasks and workflows.
 
-Your Task entrypoints are defined in Python (which makes them infinitely flexible), but they can do whatever you want:
-- Build a Rust or Node Web app,
-- Ship a file, build a container
-- Run an ansible playbook, restart a server,
-- make coffee, send a message, prepare a report
-- etc.
+Your Tasks are defined in Python (which makes them infinitely flexible), but they can do whatever you want - typically it's
+- run a shell script, make an API call, or call a Python function
+- parse the output,
+- decide what to do next,
+- rince and repeat.
 
-Taskcli keeps your tasks (cli entrypoints) organized, clean, discoverable, reusable, modular, self-documenting, and easy to use.
+Some example usecase:
+- Code: Build/test/ship your code (any language)
+- DevOps: build, ship a file, build a container, start a task,
+- Infra: Run an ansible playbook, restart a server,
+- Other: make coffee, send a message, prepare a report, automate a task, etc.
+
+Taskcli keeps your Tasks (the CLI entrypoints) organized, clean, discoverable, reusable, modular, self-documenting, and easy to use.
 
 See further below for comparions to other similar tools.
 
