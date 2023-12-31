@@ -1,6 +1,6 @@
 # Cheat sheet
 
-This document contains short minimal snippets.
+This document contains short, condensed, snippets of using `taskcli`.
 
 If you're looking for larger, executable, standalone examples, see the [examples](examples.md) document.
 
@@ -20,7 +20,7 @@ def foobar():
 # Create a simple task, with two aliases
 @task
 def foobar(aliases=["f", "foo"]): # also accepts a string:  aliases='f'
-    print("Hello, World!")
+    ...
 
 
 # --------------------------------------------------------------------------
