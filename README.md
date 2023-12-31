@@ -162,9 +162,9 @@ If you need a more mature, less rapidly changing solution, consider using [pyinv
 ### pyinvoke
 `taskcli` is very similar to `pyinvoke`, and builds on many of its ideas.
 
-Differences
+Some differences:
 - `taskcli` automatically assumes real-life tasks often come with co-located files, so by default it automatically switches directories
-    when running tasks imported from other directories. This can be disabled.
+    when running tasks imported from other directories (similarly to `Taskfile.dev`). This behaviour can be disabled.
 - Unlike pyinvoke, `taskcli` does away with explitic context object that needs to be passed around. This makes defining tasks easier.
 - `taskcli` aims to provides a richer task list output and overview out of the box.
 - `taskcli` infers more information from type annotations, this means less duplicating information in decorators.
@@ -178,13 +178,15 @@ YAML has its benefits, but also drawbacks. Refactoring large YAML collections it
 That said, a key benefit of the https://Taskfile.dev project is that it ships as a single portable `task` GO binary.
 
 ### argh
-`argh` is a great, lesser knonw, library for creating CLI interfaces from python functions.
+`argh` is a great library for creating CLI interfaces from python functions.
 It can also be used for creating simple tasks.
 Similarly to `taskcli` it also builds on top of `argparse` using type annotations and function signatures.
-Unlike `argh`, `taskcli` is designed for creating and interfacing with more complex collections of reusable tasks.
+Unlike `argh`, `taskcli` puts more focus on composing tasks from multiple files, and on creating easy to navigate task list.
 
 ## Acknowledgements
-- The idea for `taskcli` was inspired by Taskfile.dev and `Justfile` projects.
+- The idea for `taskcli` was inspired by Taskfile.dev, argh, and `Justfile` projects.
 - This library builds on many ideas from the excellent `argh` project. If you like the idea of building CLI interfaces from python function signatures, and don't need the advanced task management features of `taskcli`, you should check `argh` out.
 - `taskcli` library uses `argparse` and `argcomplete` (argcomplete is an optional dependency for tab completion).
 - markdown screenshots generated using  `ansitoimg` and `termtosvg`.
+
+If you have feature ideas or requests, drop me a note.
