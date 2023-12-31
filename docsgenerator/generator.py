@@ -64,8 +64,9 @@ def generate_example() -> str:
     out += PAGE_EXAMPLES_TEXT
 
     for example in examples:
+        fake_filepath =  f"examples/{example.filename}"
         out += f"### {example.title}\n"
-        out += f"`examples/{example.filename}`{BR}\n"
+        out += f"`{fake_filepath}`{BR}\n"
         # TODO remove docstring
         out += "```python\n"
         out += example.file_content
@@ -75,7 +76,7 @@ def generate_example() -> str:
 
         runcmds = get_run_commands(example, filename=example.filepath)
         if runcmds:
-            out += "##### Output:\n"
+            out += "##### Output of the above`:\n"
         for runcmd in runcmds:
 
             simple_filename = os.path.basename(example.filepath)
