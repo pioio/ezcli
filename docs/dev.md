@@ -2,6 +2,8 @@
 
 Internal documentation for developers.
 
+([click here to go the main index](../README.md))
+
 ## Working with the code
 ### Initializing the project
 ```bash

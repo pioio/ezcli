@@ -11,6 +11,7 @@ This section discusses things like
 - using `taskcli` for projects of varying sizes (from tiny to large).
 - using `taskcli` to create a new, overarching, view to multiple separate projects.
 
+([click here to go the main index](../README.md))
 
 ## Tiny project
 The simplest scenario:

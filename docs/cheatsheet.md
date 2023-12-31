@@ -1,9 +1,11 @@
 # Cheat sheet
 
+
 This document contains short, condensed, snippets of using `taskcli`.
 
 If you're looking for larger, executable, standalone examples, see the [examples](examples.md) document.
 
+([click here to go the main index](../README.md))
 ## Basic usage
 ```python
 # The recommended way to import taskcli is the following.

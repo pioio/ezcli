@@ -2,6 +2,8 @@
 
 This document gives an overview to customize `taskcli` to your liking.
 
+([click here to go the main index](../README.md))
+
 ## Customizing taskcli
 
 ### Customizing `t` and `tt`

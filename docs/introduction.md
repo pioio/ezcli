@@ -7,6 +7,7 @@ At its core, `taskcli` is two following things:
 - A low-overhead `taskcli` python library for exposing Python function as CLI interfaces.
 - a tool (`t`) for browsing and running your tasks (using tags, namespaces, hierarchical groups, custom filter functions, regex search, imports, aliases!)
 
+([click here to go the main index](../README.md))
 
 ## High-level Overview
 See [README.md](../README.md) in project's root.
