@@ -101,7 +101,17 @@ with tt.Group("My Group"):
 ## Importing, including, and reusing other `tasks.py` files
 ```python
 # --------------------------------------------------------------------------
-# Include all tasks from another file to the default group of the current tasks.py
+# Include all tasks from another python module, using a Path
+tt.include("/path/to/module.py")
+
+# --------------------------------------------------------------------------
+# List included Tasks
+for task in tt.include(obj):  # Obj can be any supported object, e.g. string, or a imported module
+    print(task.name, task.tags, task.aliases)
+
+
+# --------------------------------------------------------------------------
+# Include all tasks from another python module to the default group of the current tasks.py
 from package import module
 tt.include(module)
 
