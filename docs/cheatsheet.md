@@ -1,6 +1,6 @@
 # Cheat sheet
 
-This document contains short snippets, for quick refereance.
+This document contains short minimal snippets.
 
 If you're looking for larger, executable, examples, see the [examples](examples.md) document.
 
