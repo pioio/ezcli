@@ -153,7 +153,7 @@ def test_including_decorated_function():
     with pytest.raises(UserError, match="already exists in"):
         include(somefun)
 
-    include(somefun, namespace="foo")
+    include(somefun, name_namespace="foo")
 
     taskcli.dispatch(["foo.somefun"])
     assert done == 42

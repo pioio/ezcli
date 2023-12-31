@@ -1,5 +1,6 @@
 """Logic for including Tasks from other modules."""
 
+from genericpath import isdir
 import inspect
 import logging
 import sys
@@ -18,11 +19,11 @@ log = get_logger(__name__)
 
 
 def include(
-    object: Module | AnyFunction | "Task"|str,
+    object: Module | AnyFunction | "Task"| str,
     /,
     *,
     to_module: Module | None = None,
-    namespace: str = "",
+    name_namespace: str = "",
     alias_namespace: str = "",
     **kwargs: Any,
 ) -> list["Task"]:
@@ -66,32 +67,35 @@ def include(
         msg = "include(): 'filter' parameter is only supported when including entire modules"
         raise Exception(msg)
 
+    tasks:list[Task] = []
     if isinstance(object, Module):
-        return include_module(
-            object, to_module=to_module, namespace=namespace, alias_namespace=alias_namespace, **kwargs
+        tasks = include_module(
+            object, to_module=to_module, name_namespace=name_namespace, alias_namespace=alias_namespace, **kwargs
         )
     elif inspect.isfunction(object):
-        return [
+        tasks = [
             include_function(
-                object, to_module=to_module, namespace=namespace, alias_namespace=alias_namespace, **kwargs
+                object, to_module=to_module, namespace=name_namespace, alias_namespace=alias_namespace, **kwargs
             )
         ]
     elif isinstance(object, str):
         from_module = import_module_from_path(object, object)
-        return include_module(
-            from_module, to_module=to_module, namespace=namespace, alias_namespace=alias_namespace, **kwargs
+        log.debug(f"include(str): now including tasks from imported module.")
+        tasks = include_module(
+            from_module, to_module=to_module, name_namespace=name_namespace, alias_namespace=alias_namespace, **kwargs
         )
+
 
     elif isinstance(object, Task):
         from_module: Module = sys.modules[object.func.__module__]
         from .include import _include_task
 
-        return [
+        tasks = [
             _include_task(
                 object,
                 from_module=from_module,
                 to_module=to_module,
-                namespace=namespace,
+                namespace=name_namespace,
                 alias_namespace=alias_namespace,
                 **kwargs,
             )
@@ -100,14 +104,17 @@ def include(
         msg = f"include(): Unsupported type: {type(object)}"
         raise Exception(msg)
 
-
+    log.debug(f"include(): included {len(tasks)} tasks from {object} to module {to_module.__file__}")
+    for task in tasks:
+        log.debug(f"  include(): {task.name=}")
+    return tasks
 
 def include_module(
     from_module: Module,
     *,
     to_module: Module | None = None,
     skip_include_info: bool = False,
-    namespace: str = "",
+    name_namespace: str = "",
     alias_namespace: str = "",
     filter: Callable[[Task], bool] | None = None,
 ) -> list[Task]:
@@ -149,7 +156,7 @@ def include_module(
                 from_module=from_module,
                 to_module=to_module,
                 skip_include_info=skip_include_info,
-                namespace=namespace,
+                namespace=name_namespace,
                 alias_namespace=alias_namespace,
             )
         )
@@ -282,12 +289,51 @@ def add_to_sys_path(path):
     finally:
         sys.path = old_sys_path
 
+class TaskImportError(Exception):
+    pass
+
 # Define a function to import a module from a given path
-def import_module_from_path(module_name, path):
+def import_module_from_path(module_name, path) -> Module:
+    prefix = "import_module_from_path(): "
+    abspath = os.path.abspath(path)
+    log.debug(f"{prefix}: {module_name=} {path=} {abspath=}")
+    path = abspath
+
     module_dir = os.path.dirname(path)
+    if os.path.isdir(module_dir):
+        log.debug(f"{prefix}: path is a dir: {path}, looking for taskspy")
+        valid_taskspy = find_valid_taskspy_in_dir(module_dir)
+        to_import = valid_taskspy
+        if not valid_taskspy:
+            msg = f"{prefix}: Could not find a valid tasks.py file in {module_dir}"
+            raise TaskImportError(msg)
+        else:
+            log.debug(f"{prefix}: Found valid tasks.py file: {valid_taskspy}")
+            path = os.path.join(module_dir, valid_taskspy)
+
+    else:
+        log.debug(f"{prefix}: path is a file: {path}")
+        to_import = path
+
+    log.debug(f"{prefix}, proceeding with import")
     with add_to_sys_path(module_dir):
-        spec = importlib.util.spec_from_file_location(module_name, path)
+        spec = importlib.util.spec_from_file_location(module_name, to_import)
         module = importlib.util.module_from_spec(spec)
         sys.modules[module_name] = module
         spec.loader.exec_module(module)
+    log.debug(f"{prefix}: import of {path} complete")
     return module
+
+def get_valid_taskspy_filenames() -> list[str]:
+    """Return a list of valid filenames for the tasks.py file."""
+    from . import envvars
+    out = envvars.TASKCLI_TASKS_PY_FILENAMES.value.split(",")
+    return out
+
+def find_valid_taskspy_in_dir(dirpath) -> str:
+    """Returns absolute filepath"""
+    valid_filenames = get_valid_taskspy_filenames()
+    for filename in os.listdir(dirpath):
+        if filename in valid_filenames and os.path.isfile(filename):
+            return os.path.join(dirpath, filename)
+    return ""

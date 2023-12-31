@@ -21,6 +21,7 @@
 - [ ] loading ./tasks.py from dir above, merging them with the local one.
   - [ ] unit tests for merging tasks
   - [ ] cleanup main
+  - [ ] circular imports, prevent duplicates gracefully
   - [ ] How to handle A importing B, importing A?
   - [ ] t .  # list only tasks from local dir
   - [ ] crashes if added 'dev' section in screenshots/tasks.py

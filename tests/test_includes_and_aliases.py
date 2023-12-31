@@ -78,7 +78,7 @@ def test_simple_include_with_aliases_from_a_group():
     from tests.includesandliases2 import simpleinclude2
 
     with tt.Group("group1", namespace="group1", alias_namespace="g1") as group1:
-        tt.include(simpleinclude2, namespace="namespace1", alias_namespace="ns1")
+        tt.include(simpleinclude2, name_namespace="namespace1", alias_namespace="ns1")
 
     tasks = tt.get_tasks()
     tasksdict = {t.name: t for t in tasks}
@@ -104,7 +104,7 @@ def test_include_from_same_module_with_namespace():
     assert len(tasks) == 1, f"tasks: {tasks}"
     assert "foobar" in tasks
 
-    tt.include(foobar, namespace="ns1", alias_namespace="ns1")
+    tt.include(foobar, name_namespace="ns1", alias_namespace="ns1")
     tasks = tt.get_tasks_dict()
 
     assert len(tasks) == 2, f"tasks: {tasks}"
@@ -177,7 +177,7 @@ def test_include_from_a_group_via_group_with_include_namesapce():
             pass
 
     with tt.Group("group2", namespace="group2", alias_namespace="g2") as group:
-        tt.include(foobar, namespace="include1", alias_namespace="i1")
+        tt.include(foobar, name_namespace="include1", alias_namespace="i1")
         t = tt.get_tasks_dict()["group2.include1.group1.foobar"]
         assert ["g2i1g1f"] == t.aliases
 
@@ -212,7 +212,7 @@ def test_include_module_from_same_module_works_with_include_namespace():
 
     this_module = sys.modules[__name__]
 
-    tt.include(this_module, namespace="ns")
+    tt.include(this_module, name_namespace="ns")
 
 
 def test_include_task():
@@ -224,7 +224,7 @@ def test_include_task():
 
     assert "foobar1" in tt.get_tasks_dict()
     thetask = tt.get_tasks_dict()["foobar1"]
-    include(thetask, namespace="ns")
+    include(thetask, name_namespace="ns")
 
     tasks = tt.get_tasks_dict()
     assert "ns.foobar1" in tasks
@@ -241,12 +241,12 @@ def test_include_task_long_chain():
     def foobar():
         pass
 
-    include(foobar, namespace="ns1")
+    include(foobar, name_namespace="ns1")
     thetask = tt.get_tasks_dict()["ns1.foobar"]
 
     thetask = tt.get_task("ns1.foobar")  # quick test of "get_task()", dont remove
 
-    include(thetask, namespace="ns2")
+    include(thetask, name_namespace="ns2")
     thetask = tt.get_tasks_dict()["ns2.ns1.foobar"]
 
     with tt.Group("group", namespace="group") as group:
@@ -264,7 +264,7 @@ def test_include_by_default_skips_hidden_tasks():
         pass
 
     this_module = sys.modules[__name__]
-    include(this_module, namespace="ns1")
+    include(this_module, name_namespace="ns1")
 
     tasks = tt.get_tasks_dict()
     assert "foobar1" in tasks  # original one
@@ -283,7 +283,7 @@ def test_include_via_custom_filter():
         pass
 
     this_module = sys.modules[__name__]
-    included = include(this_module, namespace="ns1", filter=lambda t: t.important)
+    included = include(this_module, name_namespace="ns1", filter=lambda t: t.important)
     assert len(included) == 1
     assert isinstance(included[0], tt.Task)
 

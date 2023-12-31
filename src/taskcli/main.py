@@ -79,7 +79,7 @@ def main() -> None:  # noqa: C901
         tasks = taskcli.include.include(
             imported_module,
             skip_include_info=True,
-            namespace=name_namespace,
+            name_namespace=name_namespace,
             alias_namespace=alias_namespace,
             filter=filter,
         )

@@ -4,7 +4,7 @@
 # iterate over all functions
 import os
 
-import testing
+#import testing
 #from docsgenerator import tasks as docgentasks
 
 # with tt.Group("Weather", desc="child import test"):
@@ -71,7 +71,7 @@ Paths = tt.arg(list[str], "The paths to lint", default=DEF_LINT_PATHS, important
 
 
 with tt.Group("Testing module"):
-    tt.include(testing)
+    #tt.include(testing)
 
     @task
     def testing_foobar() -> int:
@@ -151,7 +151,8 @@ def rufftwice():
     ruff()
     ruff()
 
-
+with tt.Group("docs"):
+    tt.include("docsgenerator/tasks.py", name_namespace="docs", alias_namespace="d.")
 
 @task
 def argparse():
