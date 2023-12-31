@@ -63,6 +63,7 @@ def generate_example() -> str:
     out += PAGE_EXAMPLES_TEXT
 
     for example in examples:
+        log.info(f"Generating example: {example.filepath}")
         fake_filepath =  f"examples/{example.filename}"
         out += f"### {example.title}\n"
         out += f"`{fake_filepath}`{BR}\n"
