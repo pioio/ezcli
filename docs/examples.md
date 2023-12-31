@@ -181,6 +181,7 @@ Tags: basic
 Run:
 - taskcli -f FILENAME                     # list tasks
 - taskcli -f FILENAME  task1  --help      # Show help output
+- taskcli -f FILENAME  task2  --help      # Show help output
 - taskcli -f FILENAME  task1  100         # task1 requires the first argument, but second one is optional
 - taskcli -f FILENAME  task1  100  bruno  # task1 requires the first argument, but second one is optional
 - taskcli -f FILENAME  task2              # task2 does not require any args, both are optional
@@ -226,6 +227,19 @@ positional arguments:
 
 options:
   -h, --help  show this help message and exit
+```
+
+```sh
+### Show help output
+# taskcli -f basic_using_arguments.py  task2  --help
+usage: taskcli task2 [-h] [--name NAME] [height]
+
+positional arguments:
+  height
+
+options:
+  -h, --help            show this help message and exit
+  --name NAME, -n NAME
 ```
 
 ```sh

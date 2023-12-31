@@ -8,6 +8,7 @@ Tags: basic
 Run:
 - taskcli -f FILENAME                     # list tasks
 - taskcli -f FILENAME  task1  --help      # Show help output
+- taskcli -f FILENAME  task2  --help      # Show help output
 - taskcli -f FILENAME  task1  100         # task1 requires the first argument, but second one is optional
 - taskcli -f FILENAME  task1  100  bruno  # task1 requires the first argument, but second one is optional
 - taskcli -f FILENAME  task2              # task2 does not require any args, both are optional
