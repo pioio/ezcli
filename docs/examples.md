@@ -171,15 +171,19 @@ Hello, Grace!       (x=6)
 ### Basic Using Arguments
 `examples/basic_using_arguments.py`  
 ```python
-"""Most basic example of a task.
+"""Two tasks with arguments.
+
+The "*" in the function signature is the Python syntax for denoting keyword (i.e. named) only arguments.
+`taskcli` uses this same logic to distinguish between positional and named arguments.
 
 Tags: basic
 
 Run:
-- taskcli -f FILENAME               # list tasks
-- taskcli -f FILENAME  task1  100   # task1 requires the argument
-- taskcli -f FILENAME  task1  100  bruno  # task1 requires the argument
-- taskcli -f FILENAME  task2        # task2 does not require any args
+- taskcli -f FILENAME                     # list tasks
+- taskcli -f FILENAME  task1  --help      # Show help output
+- taskcli -f FILENAME  task1  100         # task1 requires the first argument, but second one is optional
+- taskcli -f FILENAME  task1  100  bruno  # task1 requires the first argument, but second one is optional
+- taskcli -f FILENAME  task2              # task2 does not require any args, both are optional
 - taskcli -f FILENAME  task2  --name bob
 - taskcli -f FILENAME  task2  --name bob 193
 
@@ -212,19 +216,32 @@ task2                 This task has one positional, and one named optional argum
 ```
 
 ```sh
-### task1 requires the argument
+### Show help output
+# taskcli -f basic_using_arguments.py  task1  --help
+usage: taskcli task1 [-h] age [name]
+
+positional arguments:
+  age
+  name
+
+options:
+  -h, --help  show this help message and exit
+```
+
+```sh
+### task1 requires the first argument, but second one is optional
 # taskcli -f basic_using_arguments.py  task1  100
 Hello from task1: age=100 name='alice'
 ```
 
 ```sh
-### task1 requires the argument
+### task1 requires the first argument, but second one is optional
 # taskcli -f basic_using_arguments.py  task1  100  bruno
 Hello from task1: age=100 name='bruno'
 ```
 
 ```sh
-### task2 does not require any args
+### task2 does not require any args, both are optional
 # taskcli -f basic_using_arguments.py  task2
 Hello from task2: height=42 name='alice'
 ```
@@ -298,6 +315,65 @@ Hello, World!
 ### run the hidden task
 # t -f basic.py hello-hidden
 Hello from the hidden task!
+```
+
+---
+### Customize Parser
+`examples/customize_parser.py`  
+```python
+"""Shows how to customize the underlying `argparse` parser.
+
+Tags: basic
+
+Run:
+- t -f FILENAME                 # list tasks
+- t -f FILENAME foobar --help          # show help output
+- t -f FILENAME foobar  --custom-arg 123   # use the custom argument we added
+
+"""
+
+import taskcli
+from taskcli import task
+import taskcli.core
+
+def customize_parser(parser):
+    """Customize the argparse parser."""
+    parser.add_argument("--custom-arg",
+                        help="Custom argument",
+                        default=42,
+                        type=int)
+
+
+@task(customize_parser=customize_parser)
+def foobar():
+    """Task which customizes the parser."""
+    parsed_args = taskcli.core.get_runtime().parsed_args
+    assert parsed_args is not None
+    print("Value of custom-arg (set with --custom-arg <value>):", parsed_args.custom_arg)
+```
+##### Output of the above:
+```sh
+### list tasks
+# t -f customize_parser.py
+default               Default tasks
+foobar                Task which customizes the parser.
+```
+
+```sh
+### show help output
+# t -f customize_parser.py foobar --help
+usage: t foobar [-h] [--custom-arg CUSTOM_ARG]
+
+options:
+  -h, --help            show this help message and exit
+  --custom-arg CUSTOM_ARG
+                        Custom argument
+```
+
+```sh
+### use the custom argument we added
+# t -f customize_parser.py foobar  --custom-arg 123
+Value of custom-arg (set with --custom-arg <value>): 123
 ```
 
 ---

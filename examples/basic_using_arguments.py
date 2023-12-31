@@ -1,12 +1,16 @@
-"""Most basic example of a task.
+"""Two tasks with arguments.
+
+The "*" in the function signature is the Python syntax for denoting keyword (i.e. named) only arguments.
+`taskcli` uses this same logic to distinguish between positional and named arguments.
 
 Tags: basic
 
 Run:
-- taskcli -f FILENAME               # list tasks
-- taskcli -f FILENAME  task1  100   # task1 requires the argument
-- taskcli -f FILENAME  task1  100  bruno  # task1 requires the argument
-- taskcli -f FILENAME  task2        # task2 does not require any args
+- taskcli -f FILENAME                     # list tasks
+- taskcli -f FILENAME  task1  --help      # Show help output
+- taskcli -f FILENAME  task1  100         # task1 requires the first argument, but second one is optional
+- taskcli -f FILENAME  task1  100  bruno  # task1 requires the first argument, but second one is optional
+- taskcli -f FILENAME  task2              # task2 does not require any args, both are optional
 - taskcli -f FILENAME  task2  --name bob
 - taskcli -f FILENAME  task2  --name bob 193
 
