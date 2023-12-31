@@ -1,0 +1,1 @@
+This dir2 pretends to be a python package.
