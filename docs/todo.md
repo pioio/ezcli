@@ -1,11 +1,14 @@
 # TODOs for `taskcli`
 
 ## Short-term TODOs:
-- [ ] structure
+- [ ] add unit tests for tests/includestests/structure* folders
+  - [ ] fix unit tests
+- [ ] add unit tests for including a task from a above dir - mark with arrow
+- [ ]  add ability to include module while preserving group
+  - [ ] Do I still need merging with parent? Probably not. Except for preserving groups.
 - [ ] add --color yes/no -- finish screenshot generation
 - [ ] rename tasks when including
 - [ ] print (tt.config) not working
-
 - [ ] add task.__call__  unit tests
 - [ ] t shows hidden tasks
 - [ ] tt.include("../../tasks.py", filter=lambda task: task.important) -- relative paths in include should be anchored to the file! Disallow them for now?
