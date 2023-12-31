@@ -25,7 +25,7 @@ Manage and automate task of any project (not only Python)!
 ## Quickstack example
 First, install it `pip install taskcli`
 
-Then, all you need is a `tasks.py` file with a single simple function:
+Then, all you need is a `tasks.py` file with one or more function decorated with `@task`:
 ```python
 $ cat tasks.py
 from taskcli import task
@@ -34,22 +34,29 @@ def hello(name="Bob", *, count=1):
     for i in count:
         print(f"Hello, {name}!")
 ```
-Now can run it: `t hello` or `t hello Alice` or `t hello Alice` or `t hello --count 10`, or `t hello -c 10 Alice`, etc.
+Now you can run it in one of several ways:
+- `t hello`
+- `t hello Alice`
+- `t hello Alice`
+- `t hello --count 10`
+- `t hello -c 10 Alice`, etc.
 
-(The `t` and `taskcli` commands are equivalent)
+The CLI arg syntax was auto-determined from the function signature.
 
-## Key features
+(Note: the `t` and `taskcli` commands are equivalent)
+
+## Key features of `taskcli`
 - Automatic generation of CLI interfaces from signatures of simple Python functions.
 - You can group, highlight, tag, hide, list, regex-search your tasks.
-- Write tasks by hand, programmatically, or both.
-- See at a glance which tasks can be simply run, which require additional env vars, and which require specifying mandatory arguments.
+- Write tasks by hand, or create them programmatically, or do a mix both.
+- See all your tasks at a glance -- see which tasks require additional env vars, and which require specifying mandatory arguments.
 - Import and reuse(!) tasks from other modules/dirs  (`tt.include(module_name)`). Directories will be switched automatically if needed.
 - Less noise -- auto hide tasks which are not ready to be run (e.g. due to missing env vars) (`tt.config.hide_not_ready = True`)
 - Quickly see the overview of all the tasks, along with optional and mandatory arguments.
 - Customize the way your tasks are listed. Customize it on per-project basis, or globally for many projects.
 - Simple to start, but power and suitable for managing larger projects.
 - Automatically switch directories when running tasks imported from other directories (can be disabled).
-- Easier collaboration with others - customize the behavior and the look and feel of `taskcli` using env vars. Make it work for you.
+- Easier collaboration - customize the behavior and the look and feel of `taskcli` using env vars. Make it work for you the way ***you*** like it, while keeping the shared project codebase generic.
 
 ## Basic usage quickstart
 - `pip install taskcli` - install it
@@ -67,7 +74,7 @@ Now can run it: `t hello` or `t hello Alice` or `t hello Alice` or `t hello --co
 TODO
 
 ## Another example:
-```
+```python
 $ cat tasks.py
 from taskcli import task, run
 
@@ -76,8 +83,6 @@ def bake(frosting: str = "chocolate", *, eat: bool = True):
     run(f"bake-my-care --cake {frosting} && eat")
     if eat:
         print("Yummy!")
-
-
 ```
 And run it, e.g.: `t bake` or `t bake --frosting cream` or `t b` or `t b -f vanilla --no-eat`, etc.
 
@@ -138,7 +143,7 @@ If you need a more mature, less rapidly changing solution, consider using [pyinv
 
 ## Prior art and comparison
 ### pyinvoke
-`taskcli` is very similar to pyinvoke, and builds on many of its ideas.
+`taskcli` is very similar to `pyinvoke`, and builds on many of its ideas.
 
 Differences
 - `taskcli` automatically assumes real-life tasks often come with co-located files, so by default it automatically switches directories
