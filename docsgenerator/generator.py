@@ -79,7 +79,7 @@ def generate_example() -> str:
             fake_cmd_line = runcmd.cmd_orig.replace("FILENAME", simple_filename)
 
             desc = runcmd.desc
-            shell_command = f"$ {fake_cmd_line}"
+            shell_command = f"[dir] :~ $ {fake_cmd_line}"
             if desc:
                 shell_command = f"# {desc}\n{shell_command}"
 
