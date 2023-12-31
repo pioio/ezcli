@@ -18,7 +18,7 @@ log = get_logger(__name__)
 
 
 def include(
-    object: Module | AnyFunction | "Task",
+    object: Module | AnyFunction | "Task"|str,
     /,
     *,
     to_module: Module | None = None,
@@ -62,7 +62,7 @@ def include(
 
     from .tt import Task
 
-    if "filter" in kwargs and not isinstance(object, Module):
+    if "filter" in kwargs and (not isinstance(object, Module) and not isinstance(object, str)):
         msg = "include(): 'filter' parameter is only supported when including entire modules"
         raise Exception(msg)
 
@@ -76,6 +76,12 @@ def include(
                 object, to_module=to_module, namespace=namespace, alias_namespace=alias_namespace, **kwargs
             )
         ]
+    elif isinstance(object, str):
+        from_module = import_module_from_path(object, object)
+        return include_module(
+            from_module, to_module=to_module, namespace=namespace, alias_namespace=alias_namespace, **kwargs
+        )
+
     elif isinstance(object, Task):
         from_module: Module = sys.modules[object.func.__module__]
         from .include import _include_task
@@ -93,6 +99,7 @@ def include(
     else:
         msg = f"include(): Unsupported type: {type(object)}"
         raise Exception(msg)
+
 
 
 def include_module(
@@ -261,3 +268,26 @@ def load_tasks_from_module_to_runtime(module: Module) -> None:
     for task in module.decorated_functions:
         log.trace(f"load_tasks_from_module_to_runtime(): including task {task.name} from {module} to runtime")
         runtime.tasks.append(task)
+
+from contextlib import contextmanager
+import os
+import importlib.util
+
+@contextmanager
+def add_to_sys_path(path):
+    old_sys_path = sys.path.copy()
+    sys.path.append(path)
+    try:
+        yield
+    finally:
+        sys.path = old_sys_path
+
+# Define a function to import a module from a given path
+def import_module_from_path(module_name, path):
+    module_dir = os.path.dirname(path)
+    with add_to_sys_path(module_dir):
+        spec = importlib.util.spec_from_file_location(module_name, path)
+        module = importlib.util.module_from_spec(spec)
+        sys.modules[module_name] = module
+        spec.loader.exec_module(module)
+    return module
