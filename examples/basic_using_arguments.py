@@ -7,7 +7,6 @@ Run:
 - taskcli -f FILENAME  task1  100   # task1 requires the argument
 - taskcli -f FILENAME  task1  100  bruno  # task1 requires the argument
 - taskcli -f FILENAME  task2        # task2 does not require any args
-
 - taskcli -f FILENAME  task2  --name bob
 - taskcli -f FILENAME  task2  --name bob 193
 

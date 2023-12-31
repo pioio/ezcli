@@ -32,10 +32,6 @@ TASKCLI_CFG_RUN_SHOW_LOCATION
 Disable automatic inclusion of tasks from 'task' binary. Note, for this automaic inclusion to work, TASKCLI_GOTASK_TASK_BINARY_FILEPATH must first be set.  
 TASKCLI_CFG_NO_GO_TASK  
 
-### examples
-Print code examples of how to use taskcli.  
-TASKCLI_CFG_EXAMPLES  
-
 ### show_hidden_groups
 Listing will show groups that were marked with hidden=True  
 TASKCLI_CFG_SHOW_HIDDEN_GROUPS  

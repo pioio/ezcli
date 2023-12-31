@@ -77,16 +77,22 @@ def generate_example() -> str:
 
             simple_filename = os.path.basename(example.filepath)
             fake_cmd_line = runcmd.cmd_orig.replace("FILENAME", simple_filename)
-            out += f"Example `$ {fake_cmd_line}`\n"
+            shell_command = f"[~/taskcli/examples]$ {fake_cmd_line}"
 
             out += f"{runcmd.desc}{BR}\n"
             output = taskcli.examples.run_example(example, runcmd)
+            if output.endswith("\n\n"):
+                output = output[:-1]
 
 
             _assert_output_sane(output)
 
 
-            out += f"```\n{output}\n```\n"
+            assert output.endswith("\n")
+            out += f"```\n{shell_command}\n{output}```\n\n"
+
+
+        out += "---\n"# horizontal line
     return out
 
 _forbidden_strings = [
