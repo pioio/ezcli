@@ -562,8 +562,6 @@ def get_validation_errors(task: Task) -> list[ValidationResult]:
                 fatal = True
             out += [ValidationResult(msg, fatal=fatal)]
 
-
-
     return out
 
 

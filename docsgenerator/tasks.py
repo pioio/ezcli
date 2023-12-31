@@ -17,6 +17,11 @@ def page_settings():
     path = "../docs/settings.md"
     generator.write_file(path, page)
 
+    page = generator.generate_example()
+    path = "../docs/examples.md"
+    generator.write_file(path, page)
+
+
 
 
 

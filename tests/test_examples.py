@@ -26,7 +26,8 @@ if __name__ == "__main__":
 
         filename = "/tmp/taskcli-example-unit-test.py"
         with open(filename, "w") as f:
-            content = shared_headers + example.text + shared_footers
+            code = taskcli.examples.format_text_strip_colors(example)
+            content = shared_headers + code + shared_footers
             f.write(content)
             # chmod
         taskcli.run(f"chmod +x {filename}")

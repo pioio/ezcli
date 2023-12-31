@@ -43,6 +43,7 @@
 - [ ] unit test for  @task(important=True, format="{name} {clear}{red}(PROD!)")
 - [ ] allow one task to be in more than one group - add unit tests
 - [ ] run task binary regardless of taskfile being found or not
+- [ ] auto-load files with _tasks.py in them? define pattern via regex?
 
 - [x] groups and tasks with tags  task -t op, also --show-tags
 - [ ] using -f to specify file in other dir still make taskfile be loaded locally

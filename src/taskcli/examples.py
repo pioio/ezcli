@@ -1,5 +1,19 @@
+"""Contains all the taskcli code examples.
+
+Code examples are defined as classes.
+
+- code of each example is integration tested for basic functionality (written to a tasks.py, and ran).
+  (this might also adds some common headers/footers to the code to make it runnable, to keep the example short)
+- the documentation
+- the `taskcli --examples` output
+
+
+"""
+
 import dataclasses
+from codecs import replace_errors
 from dataclasses import dataclass
+from os import replace
 
 from . import configuration
 
@@ -20,6 +34,10 @@ def print_examples() -> None:
     lines = ""
     for example in get_examples():
         lines += _border(example.title) + "\n"
+
+        if example.desc:
+            for line in example.desc.split("\n"):
+                lines += "# " + line + "\n"
         lines += example.text + "\n"
 
     color = configuration.colors
@@ -43,6 +61,45 @@ class Example:
 
     title: str
     text: str
+    desc: str = ""
+
+
+PINK = "@@PINK@@"
+BLUE = "@@BLUE@@"
+HL = "@@HL@@"
+END = "@@END@@"
+
+
+def format_text_to_console(example: Example) -> str:
+    """Format the text to console."""
+    return _replace_colors(_get_terminal_colors(), example.text)
+
+def format_text_strip_colors(example: Example) -> str:
+    no_colors = _get_terminal_colors()
+    no_colors = {k: "" for k in no_colors}
+    return _replace_colors(no_colors, example.text)
+
+
+def format_text_to_markdown(example: Example) -> str:
+    return format_text_strip_colors(example)
+
+
+def _get_terminal_colors():
+    terminal_colormap = {
+        PINK: configuration.colors.pink,
+        BLUE: configuration.colors.blue,
+        HL: configuration.colors.yellow + configuration.colors.underline,
+        END: configuration.colors.end,
+    }
+    return terminal_colormap
+
+
+def _replace_colors(colormap: dict[str, str], text: str) -> str:
+    """Replace colors in text."""
+    for m in colormap:
+        text = text.replace(m, colormap[m])
+        text = text.replace(m.lower(), colormap[m])
+    return text
 
 
 def get_examples() -> list[Example]:
@@ -51,10 +108,6 @@ def get_examples() -> list[Example]:
     All examples are unit tested for basic functionality.
 
     """
-    HL = configuration.colors.yellow + configuration.colors.underline
-    BLUE = configuration.colors.blue
-    PINK = configuration.colors.pink
-    END = configuration.colors.end
     return [
         Example(
             title="basic",
@@ -104,12 +157,14 @@ def task2():
         ),
         Example(
             title="Customize tasks base on custom conditions",
-            text=f"""# You can batch customize the tasks programmatically,
-# for example to add a default argument to all tasks.
-# For example, you can append a custom tag to all tasks with a certain name pattern
-# Example below adds the tag "prod" to all tasks with "prod" in their name, marks them as important, as makes
-# them the listed in red.
-
+            desc="""
+You can batch customize the tasks programmatically,
+For example to add a default argument to all tasks.
+For example, you can append a custom tag to all tasks with a certain name pattern
+Example below adds the tag "prod" to all tasks with "prod" in their name, marks them as important, as makes
+them the listed in red.
+            """,
+            text=f"""
 from taskcli import Task, tt, task
 
 @task

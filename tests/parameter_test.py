@@ -1,10 +1,15 @@
-from typing import Annotated, get_args, get_origin
-from .tools import reset_context_before_each_test
-from . import tools
-from taskcli import arg
+from typing import Annotated, Any, get_args, get_origin
+
+import pytest
+from pkg_resources import require
+
+from taskcli import arg, task, tt
 from taskcli.parameter import Parameter
 from taskcli.parametertype import ParameterType
 from taskcli.task import Task
+
+from . import tools
+from .tools import reset_context_before_each_test
 
 
 def test_basic():
@@ -61,7 +66,6 @@ def test_basic_default_from_annotated():
     assert param.type.raw == str
     assert param.default == "from-annotated"
     assert param.has_default()
-
 
 
 def test_basic_default_from_param_and_annotated():
@@ -202,13 +206,10 @@ def test_is_bool2_explicit_with_default():
     assert param.type.is_bool()
     assert not param.type.is_union_list_none()
 
-from taskcli import task, tt
-from typing import Any
-
 
 def test_3_ways_of_passing_short_options():
     @task
-    def foo(*, param:int=0) -> int:
+    def foo(*, param: int = 0) -> int:
         return param
 
     t = tt.get_tasks()[0]
@@ -223,10 +224,11 @@ def test_3_ways_of_passing_short_options():
     assert t.dispatch(["-p1", "-p2"]) == 2, "Second one should take precedence"
 
 
-
 def test_automatic_short_param_names_work():
     @task
-    def foo(*, param0:int=0, param1:int=0, param2:int=0, foobar3:str="0", foobar4:str="0", bake:bool=False) -> list[Any]:
+    def foo(
+        *, param0: int = 0, param1: int = 0, param2: int = 0, foobar3: str = "0", foobar4: str = "0", bake: bool = False
+    ) -> list[Any]:
         return [param0, param1, param2, foobar3, foobar4, bake]
 
     t = tt.get_tasks()[0]
@@ -252,7 +254,7 @@ def test_automatic_short_param_names_work():
     res = t.dispatch(["-P1", "-b", "-p2"])
     assert res == [2, 1, 0, "0", "0", True]
 
-import pytest
+
 @pytest.mark.skip("Tricky to make it work, right now calling foo() fails")
 def test_possible_to_call_a_function_which_has_a_param_with_default_coming_from_annotation():
     """Ideally, if a default was defined via arg, this should be functionally equivallent to a default defined in the signature."""
@@ -267,3 +269,34 @@ def test_possible_to_call_a_function_which_has_a_param_with_default_coming_from_
     assert t.dispatch(["x"]) == ["x"]
 
     assert foo() == ["foo", "bar"]
+
+
+def test_nargs_as_int():
+    Paths = arg(list[str], nargs=2)
+
+    @task
+    def example(paths: Paths) -> list[str]:
+        return paths
+
+    t = tt.get_tasks()[0]
+
+    with pytest.raises(SystemExit):
+        t.dispatch(["x"])
+
+    with pytest.raises(SystemExit):
+        t.dispatch(["x", "x", "x"])
+
+    with pytest.raises(SystemExit):
+        t.dispatch()
+    t.dispatch(["1", "2"]) == ["1", "2"]
+
+
+def test_arg_ann_type_conversion():
+    Paths = arg(list[int], nargs=2)
+
+    @task
+    def example(paths: Paths) -> list[int]:
+        return paths
+
+    t = tt.get_tasks()[0]
+    assert t.dispatch(["1", "2"]) == [1, 2]
