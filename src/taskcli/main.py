@@ -61,7 +61,10 @@ def main() -> None:  # noqa: C901
 
         module_name = basename.replace(".py", "").replace("-", "_")
         log.debug(f"Importing module: {module_name}")
+        #with utils.change_dir(dir):
+        #print(os.getcwd(), module_name)
         imported_module = __import__(module_name)
+        #print(os.getcwd(), "done", module_name)
 
         nonlocal import_took
         import_took = time.time() - start_import
@@ -98,6 +101,9 @@ def main() -> None:  # noqa: C901
         filename = filename.strip()
         if os.path.exists(filename):
             include_from_file(filename)
+        else:
+            print_error(f"File not found: {filename}")
+            sys.exit(1)
 
     from taskcli import tt
 

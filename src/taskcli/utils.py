@@ -59,6 +59,18 @@ def change_dir(path: str) -> typing.Iterator[None]:
         os.chdir(old_dir)
 
 
+@contextlib.contextmanager
+def change_env(env: dict[str, str]) -> typing.Iterator[None]:
+    """Context manager to change the current working directory."""
+    raise NotImplementedError()
+    old_env = os.environ.copy()
+    try:
+        yield
+    finally:
+        os.environ.clear()
+        os.environ.update(old_env)
+
+
 def strip_escape_codes(s: str) -> str:
     """Remove ANSI escape codes from a string. So, removes colors, underlines, etc."""
     out = re.sub(r"\033\[[0-9;]*m", "", s).replace(ENDC, "").replace(UNDERLINE, "")
@@ -239,3 +251,43 @@ def assert_no_dup_by_name(container: list[typing.Any]) -> None:
     for item in container:
         assert item.name not in seen
         seen.append(item.name)
+
+
+from contextlib import contextmanager
+import shutil
+import string
+import random
+
+
+@contextmanager
+def randomize_filename(filepath):
+    random_lowercase = "".join(random.choices(string.ascii_lowercase, k=10))
+    dirname = os.path.dirname(filepath)
+
+    final_filepath = f"{dirname}/{random_lowercase}.py"
+    if os.path.exists(final_filepath):
+        msg = f"File already exists: {final_filepath}"
+        raise Exception(msg)
+
+    try:
+        shutil.copy(filepath, final_filepath)
+        yield final_filepath
+    finally:
+        os.remove(final_filepath)
+
+
+def import_module_from_filepath(filepath) -> object:
+    """Import a module from a filepath."""
+
+    dirname = os.path.dirname(filepath)
+    remove_later = dirname in sys.path
+    try:
+        sys.path.append(os.path.dirname(filepath))
+        filename = os.path.basename(filepath)
+        assert "-" not in filename, f"Invalid filename: {filename}"
+        module_name = filename.replace(".py", "")
+        module = __import__(module_name)
+    finally:
+        if remove_later:
+            sys.path.remove(dirname)
+    return module

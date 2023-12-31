@@ -1,17 +1,13 @@
-from argh import aliases
+"""A demo tasks.py file for the docsgenerator project.
+
+It's used to generate screenshots for the main docs page.
+"""
+
 from taskcli import task, tt, run
 import requests
 
-tt.config.include_extra_tasks = True
 tt.config.extra_tasks_filter = lambda t: t.important or t.name in ["pc", "print-cwd"]
 
-
-@task()
-def eweather_here3():
-    """auto-determine the current city, and check weather there."""
-    city = requests.get("https://ipinfo.io").json()["city"]
-    weather_in(city) # call the other task
-    run("pwd")
 
 with tt.Group("Weather"):
     @task(aliases="here")
@@ -25,11 +21,6 @@ with tt.Group("Weather"):
     def weather_in(city):
         """Curl wttr.in to check the weather in the given city. Mandatory argument."""
         run(f"curl wttr.in/{city}")
-
-    @task
-    def test():
-        """Conflicting name""" # TODO: remove me
-        run("Hello, tst")
 
     for city in ["Boston", "Sydney", "London", "Yokohama"]:
         @task(hidden=True, name=f"weather-{city.lower()}", desc=f"Check weather in {city}.")

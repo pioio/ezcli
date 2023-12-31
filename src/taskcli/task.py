@@ -477,7 +477,7 @@ def _get_wrapper(  # noqa: C901
 
         breadcrumbs = tasktools.get_task_breadcrumbs()
         try:
-            if tt.config.task_start_message:
+            if tt.config.print_task_start_message:
                 width = 80
                 if os.isatty(sys.stderr.fileno()):
                     width = os.get_terminal_size().columns
@@ -490,10 +490,10 @@ def _get_wrapper(  # noqa: C901
             else:
                 return func(*args, **kwargs)
         finally:
-            if tt.config.task_start_message:
+            if tt.config.print_task_start_message:
                 black = configuration.colors.dark_gray
                 clear = configuration.colors.end
-                msg = f"{black}-- taskcli [finished: {breadcrumbs}]{clear}"
+                msg = f"{black}--"
                 utils.print_to_stderr(msg, color="")
             tt.get_runtime().current_tasks.pop()
 

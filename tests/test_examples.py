@@ -1,38 +1,53 @@
 """Tests the baked in code examples."""
 
 
+import pytest
 import taskcli
+from taskcli.examples import Example, RunCommand
+import subprocess
+
+# examples = taskcli.examples.get_examples()
 
 
-def test_all_examples():
-    """Test that examples listed with --examples do not have any obvious typos/errors in them.
-
-    This does NOT test if the examples actually do what they promised.
-    """
-    examples = taskcli.examples.get_examples()
-
-    for example in examples:
-        print("Testing example:", example.title)
-        assert example.title
-        assert example.text
-
-        shared_headers = """
-from taskcli import task, include, group, dispatch, tt
-"""
-        shared_footers = """
-if __name__ == "__main__":
-    dispatch()
-"""
-
-        filename = "/tmp/taskcli-example-unit-test.py"
-        with open(filename, "w") as f:
-            code = taskcli.examples.format_text_strip_colors(example)
-            content = shared_headers + code + shared_footers
-            f.write(content)
-            # chmod
-        taskcli.run(f"chmod +x {filename}")
-        taskcli.run(f"python {filename}")
+def test_loading_examples():
+    res = taskcli.examples.load_examples("examples/")
+    assert len(res) > 0
 
 
-def test_print_examples():
-    taskcli.examples.print_examples()
+import os
+
+
+@pytest.mark.parametrize("example", taskcli.examples.load_examples("examples/"), ids=lambda e: e.title)
+def test_one_example(example: Example):
+
+    print("Testing example:", example.title)
+    taskcli.examples.run_example(example, RunCommand(desc="list tasks", cmd="taskcli -f " + example.filepath))
+
+    runcommands = taskcli.examples.get_run_commands(example, filename=example.filepath)
+    for runcmd in runcommands:
+        taskcli.examples.run_example(example, runcmd=runcmd)
+
+
+# def test_broken_example_raises():
+#     example = taskcli.examples.Example(
+#         title="broken",
+#         text="""
+# @task
+# def ok():
+#    assert True
+
+# @task
+# def bad_assert():
+#     assert False
+# """,
+#     )
+#     taskcli.examples.run_example(example, argv=[])
+#     taskcli.examples.run_example(example, argv=["ok"])
+
+#     with pytest.raises(subprocess.CalledProcessError):
+#         taskcli.examples.run_example(example, argv=["bad_assert"])
+#     with pytest.raises(subprocess.CalledProcessError):
+#         taskcli.examples.run_example(example, argv=["nonexisting-task"])
+
+# def test_print_examples():
+#     taskcli.examples.print_examples()

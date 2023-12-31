@@ -125,9 +125,6 @@ def _dispatch_unsafe(argv: list[str] | None = None, tasks_found: bool = True) ->
     if config.list or config.list_all:
         print_listed_tasks(tasks, render_settings=render_settings)
         return
-    if config.examples:
-        examples.print_examples()
-        return
 
     def _dispatch(task: Task) -> Any:
         kwargs = {}
@@ -361,7 +358,9 @@ def build_parser(tasks: list[Task]) -> argparse.ArgumentParser:  # noqa: C901
     return root_parser
 
 
-def _add_param_to_subparser(args: list[str], param: Parameter, subparser: argparse.ArgumentParser) -> None:  # noqa: C901
+def _add_param_to_subparser(
+    args: list[str], param: Parameter, subparser: argparse.ArgumentParser
+) -> None:  # noqa: C901
     kwargs: dict[str, Any] = {}
 
     help_default = None

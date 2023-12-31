@@ -1,7 +1,17 @@
 
-
-
+- [ ] add --color yes/no
+- [ ] print (tt.config) not working
+- [ ]
+- [ ] t shows hidden tasks
+- [ ] BUG: dynamic task creation with  'x=x, person_name=person_name' does not allow to set person name from the CLI
+- [ ] wrap right column text, for screenshots
+- [ ] use "import_module" instead of "include" ?
+- [ ] __init__.py is needed in top project to be bale to import docsgenerator/tasks.py which imports generator ... not perfect
+  - [ ] I might need a wrapper for remote-import whcih switches dir and imports the module
+- [ ] need more unit tests for imports in various file dir sructures
+-
 - [ ] test foo (x:int)   does not have a long flag
+- [ ] consider starting any local tasks_X.py file, or at least allow using it for that
 - [ ] test sys.exit results in proper code being passed to the shell- write out a .py file and run it.
 - [ ] move building from taskfile to tasks.py
 - [ ] test nargs=4 works
@@ -75,6 +85,7 @@
 
 
 # Long-term TODOs
+- [ ] Run doc generation in the doceker container (this will allow showing merged/extra task examples)
 - [ ] def lint(paths: Paths), with Paths having a default -- Cannot call from CLI without the path
   - [ ] Should a default be added to the function?
 - [ ] consider 'f' as entrypoint

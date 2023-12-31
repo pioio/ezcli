@@ -1,8 +1,0 @@
-ruff
-nox
-isort
-mypy==1.8.0
-pytest
-pytest-clarity  # better pytest output
-pytest-randomly # randomize test order
-pytest-cov      # coverage

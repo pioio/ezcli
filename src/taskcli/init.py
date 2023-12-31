@@ -13,7 +13,9 @@ def create_tasks_file(filepath: str = "tasks.py") -> None:
     if filepath == "tasks.py":
         print(f"Created file {filepath}, now run 'taskcli' or 'tt' to list task in it.")  # noqa: T201
     else:
-        print(f"Created file {filepath}, now run 'taskcli -f {filepath}' or 'tt -f {filepath}' to list task in it.")  # noqa: T201
+        print(
+            f"Created file {filepath}, now run 'taskcli -f {filepath}' or 'tt -f {filepath}' to list task in it."
+        )  # noqa: T201
 
 
 content = """#!/usr/bin/env python

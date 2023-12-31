@@ -35,33 +35,74 @@ def generate_settings() -> str:
     return out
 
 
-PAGE_EXAMPLES_TEXT = """Best way to learn is by example. Here are some examples of how to use `taskcli`.
 
-You can also view them by running `taskcli --examples` on the terminal.
+
+PAGE_EXAMPLES_TEXT = """
+Best way to learn is by example. Here are some ways of how to use `taskcli` along with the command output.
+
+To run a specific example from the `examples/` dir yourself
+```
+cd examples/
+t -f filename.py [args]
+```
+
+Also, [go here for the cheat sheet](cheatsheet.md) -- it's a more concise version of some of the examples below.
+
 """
 
+from taskcli.examples import Example, get_run_commands
 
 def generate_example() -> str:
     """Generate the page with examples."""
-    examples = taskcli.examples.get_examples()
+    examples:list[Example] = taskcli.examples.load_examples("../examples/")
+
     out = "# Usage Examples\n"
     out += autogen_header()
     out += PAGE_EXAMPLES_TEXT
 
     for example in examples:
         out += f"### {example.title}\n"
-        if example.desc:
-            for line in example.desc.split("\n"):
-                out += f"{line}{BR}\n"
 
-
+        # TODO remove docstring
         out += "```python\n"
-        out += taskcli.examples.format_text_to_markdown(example)
+        out += example.file_content
         if out[-1] != "\n":
             out += "\n"
         out += "```\n"
+
+        for runcmd in get_run_commands(example, filename=example.filepath):
+
+            simple_filename = os.path.basename(example.filepath)
+            fake_cmd_line = runcmd.cmd_orig.replace("FILENAME", simple_filename)
+            out += f"Example `$ {fake_cmd_line}`\n"
+
+            out += f"{runcmd.desc}{BR}\n"
+            output = taskcli.examples.run_example(example, runcmd)
+
+
+            _assert_output_sane(output)
+
+
+            out += f"```\n{output}\n```\n"
     return out
 
+_forbidden_strings = [
+    "Traceback",
+    "/Users/",
+    "/home/",
+    "/tmp",
+    "/etc",
+]
+
+
+def _assert_output_sane(output:str) -> None:
+    """To make sure nothing went wrong when running the example."""
+
+    for string in _forbidden_strings:
+        for line in output.split("\n"):
+            if string in line:
+                msg = f"Output contains a path: {string}, line: {line}"
+                raise Exception(msg)
 
 def write_file(path: str, content: str) -> None:
     assert path.startswith("../docs/")
@@ -70,3 +111,18 @@ def write_file(path: str, content: str) -> None:
         f.write(content)
 
     log.info(f"Written file: {abs_path}")
+
+def sanitize_svg(filepath:str) -> None:
+    """Sanitize the SVG file to make it renderable by GitHub."""
+
+    content = open(filepath).read()
+
+    for string in _forbidden_strings:
+        if string in content:
+            msg = f"SVG contains forbidden string {string}"
+            raise Exception(msg)
+
+    # Change the image header -- The credits to ansitoimg tool lib are in README.md
+    content = content.replace("AnsiToImg (courtesy of Rich)", "Terminal")
+
+    open(filepath, "w").write(content)

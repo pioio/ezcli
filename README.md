@@ -9,25 +9,39 @@ Navigate & use your task with ease, also in large projects:
 
 Manage and automate task of any project (not only Python)!
 
-## Quickstack
-`pip install taskcli`
+
+## Documentation Overview
+- Overview -- You're reading it.
+- [Introduction](docs/introduction.md) - More detailed introduction to using
+- [Examples](docs/examples.md) - Complete executable examples from the `examples/` dir, along with sample output.
+- [Cheat sheet](docs/cheatsheet.md) - Code snippets -- quick reference of the most important features.
+- [Settings](docs/settings.md) - List of all the settings that can be customized via env vars or CLI.
+- [Troubleshooting](docs/troubleshooting.md) - Tips and trick for troubleshooting common issues.
+- [TODOs](docs/todo.md) - List of ideas for future work, known issues, etc.
+- [Developer documentation](docs/dev.md) - nitty gritty implementation details for contributors.
+
+
+
+## Quickstack example
+First, install it `pip install taskcli`
 
 Then, all you need is a `tasks.py` file with a single simple function:
-```
+```python
 $ cat tasks.py
 from taskcli import task
 @task
-def hello(name="Bob"):
-    print(f"Hello, {name}!")
+def hello(name="Bob", *, count=1):
+    for i in count:
+        print(f"Hello, {name}!")
 ```
-And you can run it: `t hello` or `t hello -n Alice` or `t hello --name Alice`
+Now can run it: `t hello` or `t hello Alice` or `t hello Alice` or `t hello --count 10`, or `t hello -c 10 Alice`, etc.
 
-
-
+(The `t` and `taskcli` commands are equivalent)
 
 ## Key features
 - Automatic generation of CLI interfaces from signatures of simple Python functions.
 - You can group, highlight, tag, hide, list, regex-search your tasks.
+- Write tasks by hand, programmatically, or both.
 - See at a glance which tasks can be simply run, which require additional env vars, and which require specifying mandatory arguments.
 - Import and reuse(!) tasks from other modules/dirs  (`tt.include(module_name)`). Directories will be switched automatically if needed.
 - Less noise -- auto hide tasks which are not ready to be run (e.g. due to missing env vars) (`tt.config.hide_not_ready = True`)
@@ -37,11 +51,20 @@ And you can run it: `t hello` or `t hello -n Alice` or `t hello --name Alice`
 - Automatically switch directories when running tasks imported from other directories (can be disabled).
 - Easier collaboration with others - customize the behavior and the look and feel of `taskcli` using env vars. Make it work for you.
 
+## Basic usage quickstart
+- `pip install taskcli` - install it
+- `t --init` creates a blank `tasks.py` file in the current directory with example content.
+- `t` list all the tasks defined by the `tasks.py` located in current directory (or in parent directory - auto discovery).
+- `t <task-name> [args]` run a task (tool will automatically switch directories if needed), `[args]` are passed directly to the task function.
+- `t <group-name>` list all the tasks in a group of tasks (also the hidden ones).
+- `t -s <search-term>` list all the tasks matching the regex search term.
+- `t -t tags` list all the tasks with the given tags.
+- `t -t imp` list all tags marked as important.
+- `t -H` list all the tasks, even the ones marked as hidden and the onces in hidden group.
+
+
 ## Screenshot
 TODO
-
-## Documentation
-- [For more detailed docs, see here](docs/)
 
 ## Another example:
 ```
@@ -52,10 +75,8 @@ from taskcli import task, run
 def bake(frosting: str = "chocolate", *, eat: bool = True):
     run(f"bake-my-care --cake {frosting} && eat")
     if eat:
-        consume()
-@task
-def eat():
-    print("Yum yum!")
+        print("Yummy!")
+
 
 ```
 And run it, e.g.: `t bake` or `t bake --frosting cream` or `t b` or `t b -f vanilla --no-eat`, etc.
@@ -63,18 +84,9 @@ And run it, e.g.: `t bake` or `t bake --frosting cream` or `t b` or `t b -f vani
 That's it! All the flags are generated automatically, including the `--no-*` bool variants.
 
 
-## Basic usage
-- `t --init` creates a blank `tasks.py` file in the current directory with example content.
-- `t` list all the tasks defined by the `tasks.py` located in current directory (or in parent directory - auto discovery).
-- `t <task_name> [args]` run a task (tool will automatically switch directories if needed), `[args]` are passed directly to the task function.
-- `t <group_name>` list all the tasks in a group of tasks (also the hidden ones).
-- `t -s <search_term>` list all the tasks matching the regex search term.
-- `t -t tags` list all the tasks with the given tags.
-- `t -t imp` list all tags marked as important.
-- `t -H` list all the tasks, even the ones marked as hidden and the onces in hidden group.
-
 The overall CLI format is:
 `t <taskcli-options> task-name <task-specific-options>`
+
 
 ## What is it for?
 `taskcli` is designed for automating tasks. Any tasks.
@@ -124,8 +136,6 @@ If you need a more mature, less rapidly changing solution, consider using [pyinv
 - including files via HTTP
 - config file support
 
-
-
 ## Prior art and comparison
 ### pyinvoke
 `taskcli` is very similar to pyinvoke, and builds on many of its ideas.
@@ -155,3 +165,4 @@ Unlike `argh`, `taskcli` is designed for creating and interfacing with more comp
 - The idea for `taskcli` was inspired by Taskfile.dev and `Justfile` projects.
 - This library builds on many ideas from the excellent `argh` project. If you like the idea of building CLI interfaces from python function signatures, and don't need the advanced task management features of `taskcli`, you should check `argh` out.
 - `taskcli` library uses `argparse` and `argcomplete` (argcomplete is an optional dependency for tab completion).
+- markdown screenshots generated using  `ansitoimg` and `termtosvg`.

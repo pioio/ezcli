@@ -261,7 +261,9 @@ foobar2b
         lines
         == """# groupB
 foobar2a
-foobar2b""".split("\n")
+foobar2b""".split(
+            "\n"
+        )
     )
 
     with tools.simple_list_format():
@@ -274,7 +276,9 @@ foobar2b""".split("\n")
     assert (
         lines
         == """# groupA
-foobar""".split("\n")
+foobar""".split(
+            "\n"
+        )
     )
 
 

@@ -49,6 +49,7 @@ colors = Colors()
 
 
 ENABLE_COLORS = sys.stdout.isatty()
+#ENABLE_COLORS = True
 if not ENABLE_COLORS:
     for key, _ in colors.__dict__.items():
         if key.startswith("__"):

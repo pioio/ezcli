@@ -62,7 +62,9 @@ def run(cmd: str, check: bool = True) -> RunResult:
             ENDC = "\033[0m"
             sys.stdout.flush()
             sys.stderr.flush()
-            print(f"{RED}Command failed with exit code {exit_code}{ENDC} {location}", flush=True, file=stderr)  # noqa: T201
+            print(
+                f"{RED}Command failed with exit code {exit_code}{ENDC} {location}", flush=True, file=stderr
+            )  # noqa: T201
             msg = f"Command failed with exit code {exit_code}"
             raise RunError(msg, exit_code=exit_code)
 

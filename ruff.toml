@@ -58,6 +58,13 @@ unfixable = [
     "T201",   # print
 ]
 
+"examples/**.py" = [
+    "D401",   # Don't require imperative mood
+    "D404",   # Don't prevent 'This' as first wrod
+    "INP001", # Don't complain about missing __init__.py
+    "T201",   # Don't complain about print being used.
+]
+
 "tests/**.py" = [
     "D",      # Don't require docstrings for unit tests.
     "SLF001", # Don't complain about acessing private fields.

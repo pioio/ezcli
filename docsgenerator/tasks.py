@@ -11,6 +11,15 @@ def generate_all_docs():
     run("pwd")
     page_settings()
 
+@task(aliases=["sc"])
+def take_main_screenshot(path = "screenshots/main-page", output = "/tmp/taskcli-screenshot.svg"):
+    tmp_ansi = "/tmp/taskcli-screenshot.ansi"
+    run(f"echo '~/project $ t' > {tmp_ansi}")
+    run(f"taskcli --color=yes -f tasks.py >> {tmp_ansi}")
+    run(f"ansitoimg {tmp_ansi} {output}")
+    generator.sanitize_svg(output)
+    print(f"Final screenshot: file:///{output}")
+
 @task(aliases=["ps"])
 def page_settings():
     page = generator.generate_settings()

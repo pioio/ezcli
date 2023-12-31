@@ -1,182 +1,191 @@
-"""Contains all the taskcli code examples.
+"""Code for working with taskcli code examples.
 
-Code examples are defined as classes.
+Examples are fully-functional python files in the 'examples/' directory of this repo.
+All example files are tested as part of unit tests -- they are executed with
+  the "Run" commands defined in the docstring of the file.
+Taskcli doc generation then takes the examples and generates parts of documenation using them.
 
-- code of each example is integration tested for basic functionality (written to a tasks.py, and ran).
-  (this might also adds some common headers/footers to the code to make it runnable, to keep the example short)
-- the documentation
-- the `taskcli --examples` output
-
-
+TODO: consider moving this files outside of the taskcli package.
 """
 
-import dataclasses
-from codecs import replace_errors
+
 from dataclasses import dataclass
-from os import replace
+import subprocess
 
-from . import configuration
+import os
+from .logging import get_logger
+import taskcli
 
-SEPARATOR = "### "
-
-
-def _border(text: str) -> str:
-    import os
-
-    columns = 120 if not os.isatty(1) else os.get_terminal_size().columns
-    terminal_width = min(columns, 120)
-    text = f"{SEPARATOR}{text}         ".ljust(terminal_width - 1, " ")
-    return f"{configuration.colors.green}{configuration.colors.underline}{text} {configuration.colors.end}"
+from . import utils
 
 
-def print_examples() -> None:
-    """Print all examples to stdout."""
-    lines = ""
-    for example in get_examples():
-        lines += _border(example.title) + "\n"
-
-        if example.desc:
-            for line in example.desc.split("\n"):
-                lines += "# " + line + "\n"
-        lines += example.text + "\n"
-
-    color = configuration.colors
-    colorized = []
-    for line in lines.split("\n"):
-        if line.startswith("@task"):
-            line = color.white + line + color.end
-        if line == "    pass":
-            line = color.dark_gray + line + color.end
-        if line.startswith("#"):
-            line = color.green + line + color.end
-        colorized.append(line)
-
-    text = "\n".join(colorized)
-    print(text)  # noqa: T201
+log = get_logger(__name__)
 
 
 @dataclass
 class Example:
-    """Example of a tasks.py."""
+    """Example of a tasks.py files.
+
+    Represents a example loaded from the 'examples/' directory of this repo.
+
+    Used to generate docs/examples.md.
+    """
 
     title: str
-    text: str
+    file_content: str
     desc: str = ""
+    filepath: str = ""
+
+    module: object = None
+
+    @property
+    def dirpath(self):
+        return os.path.dirname(self.filepath)
 
 
-PINK = "@@PINK@@"
-BLUE = "@@BLUE@@"
-HL = "@@HL@@"
-END = "@@END@@"
+
+@dataclass
+class RunCommand:
+    """A command to run on an example."""
+
+    desc: str
+    cmd: str
+    cmd_orig: str = ""
 
 
-def format_text_to_console(example: Example) -> str:
-    """Format the text to console."""
-    return _replace_colors(_get_terminal_colors(), example.text)
+def get_run_commands(example: Example, filename: str) -> list[RunCommand]:
+    """Extract the commands to run th example with from the docstring of the file containing the example."""
+    entries: list[str] = []
+    in_run_section = False
+    for line in example.desc.split("\n"):
+        if line.lower().startswith("run:"):
+            in_run_section = True
+            continue
+        if line.strip() == "":  # End of section
+            in_run_section = False
+            continue
+        if in_run_section:
+            if line.lstrip().startswith("- "):
+                cmd = line[1:].strip()
+                entries.append(cmd)
 
-def format_text_strip_colors(example: Example) -> str:
-    no_colors = _get_terminal_colors()
-    no_colors = {k: "" for k in no_colors}
-    return _replace_colors(no_colors, example.text)
+    out: list[RunCommand] = []
+    for entry in entries:
+        if "#" in entry:
+            cmd, desc = entry.split("#")
+        else:
+            cmd = entry
+            desc = ""
+
+        assert "FILENAME" in cmd
+        cmd_orig = cmd
+        cmd = cmd.replace("FILENAME", filename)
+        out.append(RunCommand(desc=desc.strip(), cmd=cmd.strip(), cmd_orig=cmd_orig.strip()))
+
+    return out
 
 
-def format_text_to_markdown(example: Example) -> str:
-    return format_text_strip_colors(example)
+def load_examples(dirpath: str) -> list[Example]:
+    """Discover python files in the given directory, and load them as examples."""
+    assert os.path.isdir(dirpath), f"cwd: {os.getcwd()}"
+
+    out: list[Example] = []
+    for filename in os.listdir(dirpath):
+        filepath = os.path.join(dirpath, filename)
+        filepath = os.path.abspath(filepath)
+        log.debug("Checking %s", filepath)
+        if not os.path.isfile(filepath):
+            log.debug("  Not a file")
+            continue
+        if not filepath.endswith(".py"):
+            log.debug("  Not a python file")
+            continue
+        log.debug("Found example: %s", filepath)
+        out += [load_example(filepath)]
+
+    if not out:
+        msg = f"No examples found in {dirpath}"
+        raise ValueError(msg)
+    return out
 
 
-def _get_terminal_colors():
-    terminal_colormap = {
-        PINK: configuration.colors.pink,
-        BLUE: configuration.colors.blue,
-        HL: configuration.colors.yellow + configuration.colors.underline,
-        END: configuration.colors.end,
-    }
-    return terminal_colormap
+
+def load_example(filepath: str) -> Example:
+    """Load a single example from a python file by importing the module and inspecting it."""
+    assert filepath.startswith("/")
+
+    example_name = filepath_to_title(filepath)
+
+    source = open(filepath).read()
+    with utils.randomize_filename(filepath) as new_filepath:  # to get a ranadom module name
+        module = utils.import_module_from_filepath(new_filepath)
+
+    e = Example(
+        title=example_name,
+        file_content=source,
+        desc=module.__doc__,
+        filepath=filepath,
+        module=module,
+    )
+    return e
 
 
-def _replace_colors(colormap: dict[str, str], text: str) -> str:
-    """Replace colors in text."""
-    for m in colormap:
-        text = text.replace(m, colormap[m])
-        text = text.replace(m.lower(), colormap[m])
-    return text
+def filepath_to_title(filepath: str) -> str:
+    """Convert a filepath to a title."""
+    return os.path.basename(filepath).replace(".py", "").replace("_", " ").title()
+
+
+#########################
+
+
+def run_example(example: Example, runcmd: RunCommand) -> str:
+    """Run a single example. Return merged stdout and stderr.
+
+    Tries to do it in a clean environment, to avoid
+    poluting the output with settings from the local environment.
+    - cleans TASKCLI_ env vars
+    - changes to the example dir
+    - disabled mer
+    """
+    oldcwd = os.getcwd()
+    oldenv = os.environ.copy()
+    try:
+        # change to example dir to avoid risking poluting the context with the local environment
+        os.chdir(example.dirpath)
+        # TOD: clean TASKCLI env
+
+        # remove any taskcli env vars that might be set right now from the dev env
+        # TODO: run in docker container instead
+        for k in list(os.environ.keys()):
+            if k.startswith("TASKCLI_"):
+                del os.environ[k]
+
+        # Prevent loading extra tasks in the rare case the example file
+        # sets the tt.config property to load the extra tasks and list them
+        # otherwise irrelevant tasks could be included in the output
+        # TODO: We should simply run this in a docker container instead.
+        os.environ[taskcli.envvars.TASKCLI_EXTRA_TASKS_PY_FILENAMES.name] = "___do_not_load_extra_tasks___"
+
+        res = subprocess.run(f"{runcmd.cmd}", shell=True, check=False, stderr=subprocess.STDOUT, stdout=subprocess.PIPE)
+
+        if res.returncode != 0:
+            print(f"Error running example: {example.title}")
+            print(f"  cmd: {runcmd.cmd}")
+            print(f"  desc: {runcmd.desc}")
+            PINK = "\033[0;35m"
+            CLEAR = "\033[0m"
+            print(f"  stdout and stderr: \n{PINK}{res.stdout.decode('utf-8')}{CLEAR}")
+            print(f"  returncode: {res.returncode}")
+            raise ValueError("Error running example")
+        stdout = res.stdout.decode("utf-8")
+    finally:
+        os.chdir(oldcwd)
+        # Restore env
+        os.environ.clear()
+        os.environ.update(oldenv)
+
+    return stdout
 
 
 def get_examples() -> list[Example]:
-    """Get all examples.
-
-    All examples are unit tested for basic functionality.
-
-    """
-    return [
-        Example(
-            title="basic",
-            text=f'''# To define a task, simply add the @task decorator to a function,
-# and then run `taskcli foo <args>` to run that function
-# The first line of docstring is used as the description of the task when you run `taskcli`.
-from taskcli import task
-
-{HL}@task{END}
-def foo():
-    """This lines ends up as the list output.
-
-    This line is not shown in the list outpu
-    """
-    print(a + b)
-''',
-        ),
-        Example(
-            title="arguments",
-            text=f'''#
-
-@task
-def task1({BLUE}age{END}: int, {BLUE}name{END}: str = "alice"):
-    """This task has two {BLUE}positional{END} arguments, one of them optional."""
-    pass
-
-@task
-def hello2({BLUE}height{END}: int=42, {HL}*{END}, {PINK}person{END}: str = "john"):
-    """This task has one {BLUE}positional{END}, and one {PINK}optional{END} argument.
-    Args after the "{HL}*{END}" are named only.
-    call with: taskcli hello2 {BLUE}25{END} {PINK}--name person{END}"""
-    pass
-    ''',
-        ),
-        Example(
-            title="aliases",
-            text=f"""# Aliases can be defined as strings, or iterable of strings
-
-@task({HL}aliases="t1"{END})
-def task1():
-    pass
-
-@task({HL}aliases=("t2","foobar"){END})
-def task2():
-    pass
-""",
-        ),
-        Example(
-            title="Customize tasks base on custom conditions",
-            desc="""
-You can batch customize the tasks programmatically,
-For example to add a default argument to all tasks.
-For example, you can append a custom tag to all tasks with a certain name pattern
-Example below adds the tag "prod" to all tasks with "prod" in their name, marks them as important, as makes
-them the listed in red.
-            """,
-            text=f"""
-from taskcli import Task, tt, task
-
-@task
-def {PINK}deploy_to_prod{END}():
-    pass
-
-tasks:list[Task] = {HL}tt.get_tasks(){END}
-for t in tasks:
-    if "prod" in {PINK}t.name{END}:
-        t.important = True
-        t.tags += ["prod"]
-        t.name_format = "{{red}}{{name}}{{clear}}"
-""",
-        ),
-    ]
+    return load_examples("examples/")

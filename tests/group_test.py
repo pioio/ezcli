@@ -30,7 +30,9 @@ def test_groups_basic():
 foobar1
 
 # magical tasks
-magic""" in "\n".join(lines)
+magic""" in "\n".join(
+        lines
+    )
 
 
 def test_group_context_manager():

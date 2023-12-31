@@ -8,17 +8,17 @@ import testing
 from docsgenerator import tasks as docgentasks
 
 # with tt.Group("Weather", desc="child import test"):
-from examples.screenshots import tasks as weather_tasks
+#from examples.screenshots import tasks as weather_tasks
 from taskcli import run, task, tt
 
 important = tt.Group("Important", desc="Development tasks")
 
 tt.config.default_options = ["--no-go-task"]
 tt.config.default_options_tt = ["--no-go-task"]
-tt.config.task_start_message = True
+tt.config.print_task_start_message = True
 tt.config.run_show_location = True
 
-tt.include(weather_tasks.weather_here)
+#tt.include(weather_tasks.weather_here)
 
 
 with tt.Group("dev", desc="Development tasks"):

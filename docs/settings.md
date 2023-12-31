@@ -16,6 +16,10 @@ TASKCLI_CFG_EXTRA_TASKS_NAME_NAMESPACE
 What string to prefix to task aliases when merging tasks with a different tasks.py. See also: TASKCLI_EXTRA_TASKS_PY_FILENAMES  
 TASKCLI_CFG_EXTRA_TASKS_ALIAS_NAMESPACE  
 
+### color
+What string to prefix to task aliases when merging tasks with a different tasks.py. See also: TASKCLI_EXTRA_TASKS_PY_FILENAMES  
+(no env var)  
+
 ### show_hidden
 Show all tasks and groups, even the hidden ones.  
 TASKCLI_CFG_SHOW_HIDDEN  
@@ -52,9 +56,9 @@ TASKCLI_CFG_SHOW_OPTIONAL_ARGS
 Listing will show default values of any arguments that are shown. Use with --show-optional-args to also show values of the optional arguments.  
 TASKCLI_CFG_SHOW_DEFAULT_VALUES  
 
-### task_start_message
+### print_task_start_message
 Whether to print a log.info log message to stderr whenever a task starts.  
-TASKCLI_CFG_TASK_START_MESSAGE  
+TASKCLI_CFG_PRINT_TASK_START_MESSAGE  
 
 ### show_ready_info
 Listing tasks will show detailed info about the task's readiness to be run. For example, it will list any required but missing environment variables.   

@@ -152,7 +152,9 @@ def test_parent_with_all_hidden_children2():
 
     expected = f"""# default
 task-in-child3
-Also 3 hidden groups, with 3 tasks in them, {constants.HELP_TEXT_USE_H_TO_SHOW_HIDDEN}""".split("\n")
+Also 3 hidden groups, with 3 tasks in them, {constants.HELP_TEXT_USE_H_TO_SHOW_HIDDEN}""".split(
+        "\n"
+    )
 
     assert lines == expected
 
@@ -191,7 +193,9 @@ def test_parent_with_all_hidden_children3():
 
 # default
 task-in-child3
-Also 2 hidden groups, with 2 tasks in them, {constants.HELP_TEXT_USE_H_TO_SHOW_HIDDEN}""".split("\n")
+Also 2 hidden groups, with 2 tasks in them, {constants.HELP_TEXT_USE_H_TO_SHOW_HIDDEN}""".split(
+        "\n"
+    )
 
     assert lines == expected
 
@@ -219,6 +223,8 @@ def test_visible_group_with_only_hidden_child_should_be_shown_and_list_num_hidde
 1 hidden
 
 # default
-task-in-child2""".split("\n")
+task-in-child2""".split(
+        "\n"
+    )
 
     assert lines == expected

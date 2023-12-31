@@ -57,6 +57,7 @@ class ConfigField:
         action: str = "",
         nargs: str = "",
         metavar: str = "",
+        choices: list[str] | None = None,
     ):
         self.default = default
         self.name = name
@@ -69,6 +70,7 @@ class ConfigField:
         self.env_var_name = env_var_name.upper() or "TASKCLI_CFG_" + name.upper()
         self.action = action
         self.nargs = nargs
+        self.choices = choices
 
 
 class TaskCLIConfig:
@@ -170,6 +172,18 @@ class TaskCLIConfig:
         )
         self.extra_tasks_alias_namespace: str = self._add_str(self.field_extra_tasks_alias_namespace)
 
+        self.field_color = ConfigField(
+            "",
+            "color",
+            choices=["auto", "always", "never"],
+            env=False,
+            desc=(
+                "What string to prefix to task aliases when merging tasks with a different tasks.py. "
+                "See also: " + envvars.TASKCLI_EXTRA_TASKS_PY_FILENAMES.name
+            ),
+        )
+        self.color: str = self._add_str(self.field_color)
+
         default_show_hidden = False
 
         self.field_show_hidden: ConfigField = ConfigField(
@@ -198,9 +212,6 @@ class TaskCLIConfig:
             action="store_true",
         )
         self.no_go_task: bool = self._add_bool(self.field_no_go_task)
-
-        self.field_examples = ConfigField(False, "examples", desc="Print code examples of how to use taskcli.")
-        self.examples: bool = self._add_bool(self.field_examples)
 
         self.field_show_hidden_groups = ConfigField(
             False, "show_hidden_groups", desc="Listing will show groups that were marked with hidden=True"
@@ -231,12 +242,12 @@ class TaskCLIConfig:
         )
         self.show_default_values: bool = self._add_bool(self.field_show_default_values)
 
-        self.field_task_start_message = ConfigField(
+        self.field_print_task_start_message = ConfigField(
             False,
-            "task_start_message",
+            "print_task_start_message",
             desc=("Whether to print a log.info log message to stderr whenever a task starts."),
         )
-        self.task_start_message: bool = self._add_bool(self.field_task_start_message)
+        self.print_task_start_message: bool = self._add_bool(self.field_print_task_start_message)
         """Whether to print a log.info log message to stderr whenever a task starts."""
 
         self.field_show_ready_info = ConfigField(
