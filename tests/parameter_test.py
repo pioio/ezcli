@@ -63,6 +63,7 @@ def test_basic_default_from_annotated():
     assert param.has_default()
 
 
+
 def test_basic_default_from_param_and_annotated():
     xxx = arg(str, default="from-annotated")
 
@@ -250,3 +251,19 @@ def test_automatic_short_param_names_work():
 
     res = t.dispatch(["-P1", "-b", "-p2"])
     assert res == [2, 1, 0, "0", "0", True]
+
+import pytest
+@pytest.mark.skip("Tricky to make it work, right now calling foo() fails")
+def test_possible_to_call_a_function_which_has_a_param_with_default_coming_from_annotation():
+    """Ideally, if a default was defined via arg, this should be functionally equivallent to a default defined in the signature."""
+    Paths = arg(list[str], default=["foo", "bar"])
+
+    @task
+    def foo(paths: Paths) -> list[str]:
+        return paths
+
+    t = tt.get_tasks()[0]
+    assert t.dispatch() == ["foo", "bar"]
+    assert t.dispatch(["x"]) == ["x"]
+
+    assert foo() == ["foo", "bar"]

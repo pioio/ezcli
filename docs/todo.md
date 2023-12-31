@@ -4,6 +4,7 @@
 - [ ] test foo (x:int)   does not have a long flag
 - [ ] test sys.exit results in proper code being passed to the shell- write out a .py file and run it.
 - [ ] move building from taskfile to tasks.py
+- [ ] test nargs=4 works
 - [ ] code location of merged module is wrong @ coverage report (/Users/p/code/mygithub/taskcli/taskcli_import_dribzrel.py:36)
 - [ ] loading ./tasks.py from dir above, merging them with the local one.
   - [ ] unit tests for merging tasks
