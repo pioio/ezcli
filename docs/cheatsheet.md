@@ -2,12 +2,12 @@
 
 This document contains short minimal snippets.
 
-If you're looking for larger, executable, examples, see the [examples](examples.md) document.
+If you're looking for larger, executable, standalone examples, see the [examples](examples.md) document.
 
 ## Basic usage
 ```python
-# The recommended way to import taskcli is this
-# Use it for all the subsequent examples in this page.
+# The recommended way to import taskcli is the following.
+# It's implicitly used by all subsequent snippets in this page.
 from taskcli import task, tt, run
 
 # --------------------------------------------------------------------------
