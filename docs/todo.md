@@ -1,8 +1,8 @@
 
 
-- [ ] def lint(paths: Paths): Cannot call from CLI without the path
-- [ ] consider 'f' as entrypoint
-- [ ] test shortened args
+
+- [ ] test foo (x:int)   does not have a long flag
+- [ ] test sys.exit results in proper code being passed to the shell- write out a .py file and run it.
 - [ ] move building from taskfile to tasks.py
 - [ ] code location of merged module is wrong @ coverage report (/Users/p/code/mygithub/taskcli/taskcli_import_dribzrel.py:36)
 - [ ] loading ./tasks.py from dir above, merging them with the local one.
@@ -73,6 +73,9 @@
 
 
 # Long-term TODOs
+- [ ] def lint(paths: Paths), with Paths having a default -- Cannot call from CLI without the path
+  - [ ] Should a default be added to the function?
+- [ ] consider 'f' as entrypoint
 - [ ] Settings page - highlight important switches
 - [ ] argparse add_argument_group
 - [ ] print warning if TASKCLI env var is set which is not known

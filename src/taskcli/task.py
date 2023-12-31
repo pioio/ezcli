@@ -368,10 +368,11 @@ class Task:
         if isinstance(args, str):
             args = [args]
 
+        module = utils.get_callers_module()
         if args:
-            res = dispatch([name, *args], sysexit_on_user_error=sysexit_on_user_error)
+            res = dispatch([name, *args], sysexit_on_user_error=sysexit_on_user_error, module=module)
         else:
-            res = dispatch([name], sysexit_on_user_error=sysexit_on_user_error)
+            res = dispatch([name], sysexit_on_user_error=sysexit_on_user_error, module=module)
         return res
 
     def get_top_level_group(self) -> Group | None:
@@ -560,6 +561,8 @@ def get_validation_errors(task: Task) -> list[ValidationResult]:
                 msg += "Either add a default value to this parameter, or change the type to a supported type."
                 fatal = True
             out += [ValidationResult(msg, fatal=fatal)]
+
+
 
     return out
 

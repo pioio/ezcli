@@ -1,5 +1,6 @@
 from typing import Annotated, get_args, get_origin
-
+from .tools import reset_context_before_each_test
+from . import tools
 from taskcli import arg
 from taskcli.parameter import Parameter
 from taskcli.parametertype import ParameterType
@@ -199,3 +200,53 @@ def test_is_bool2_explicit_with_default():
     assert not param.type.is_list()
     assert param.type.is_bool()
     assert not param.type.is_union_list_none()
+
+from taskcli import task, tt
+from typing import Any
+
+
+def test_3_ways_of_passing_short_options():
+    @task
+    def foo(*, param:int=0) -> int:
+        return param
+
+    t = tt.get_tasks()[0]
+
+    assert t.dispatch(["--param", "1"]) == 1
+    assert t.dispatch(["--param=1"]) == 1
+
+    assert t.dispatch(["-p", "1"]) == 1
+    assert t.dispatch(["-p=1"]) == 1
+    assert t.dispatch(["-p1"]) == 1
+
+    assert t.dispatch(["-p1", "-p2"]) == 2, "Second one should take precedence"
+
+
+
+def test_automatic_short_param_names_work():
+    @task
+    def foo(*, param0:int=0, param1:int=0, param2:int=0, foobar3:str="0", foobar4:str="0", bake:bool=False) -> list[Any]:
+        return [param0, param1, param2, foobar3, foobar4, bake]
+
+    t = tt.get_tasks()[0]
+
+    res = t.dispatch(["--param0", "1", "--param1", "1", "--param2", "1", "--foobar3", "1", "--foobar4", "1"])
+    assert res == [1, 1, 1, "1", "1", False]
+
+    res = t.dispatch(["-p1"])
+    assert res == [1, 0, 0, "0", "0", False]
+
+    res = t.dispatch(["-p", "1"])
+    assert res == [1, 0, 0, "0", "0", False]
+
+    res = t.dispatch(["-p=1"])
+    assert res == [1, 0, 0, "0", "0", False]
+
+    res = t.dispatch(["-P1"])
+    assert res == [0, 1, 0, "0", "0", False]
+
+    res = t.dispatch(["-P1", "-F1"])
+    assert res == [0, 1, 0, "0", "1", False]
+
+    res = t.dispatch(["-P1", "-b", "-p2"])
+    assert res == [2, 1, 0, "0", "0", True]
