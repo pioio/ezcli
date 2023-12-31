@@ -90,7 +90,7 @@ def generate_example() -> str:
 
             _assert_output_sane(output)
 
-            markdown_highlight_type = "sh"
+            markdown_highlight_type = "python"
             assert output.endswith("\n")
             out += f"```{markdown_highlight_type}\n{shell_command}\n{output}```\n\n"
 
