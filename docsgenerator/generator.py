@@ -90,9 +90,9 @@ def generate_example() -> str:
 
             _assert_output_sane(output)
 
-
+            markdown_highlight_type = "console"
             assert output.endswith("\n")
-            out += f"```sh\n{shell_command}\n{output}```\n\n"
+            out += f"```{markdown_highlight_type}\n{shell_command}\n{output}```\n\n"
 
 
         out += "---\n"# horizontal line
