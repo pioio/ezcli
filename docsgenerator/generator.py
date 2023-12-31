@@ -89,7 +89,7 @@ def generate_example() -> str:
 
 
             assert output.endswith("\n")
-            out += f"```\n{shell_command}\n{output}```\n\n"
+            out += f"```bash\n{shell_command}\n{output}```\n\n"
 
 
         out += "---\n"# horizontal line
