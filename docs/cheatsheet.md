@@ -1,5 +1,9 @@
 # Cheat sheet
 
+This document contains short snippets, for quick refereance.
+
+If you're looking for larger, executable, examples, see the [examples](examples.md) document.
+
 ## Basic usage
 ```python
 # The recommended way to import taskcli is this
@@ -22,7 +26,7 @@ def foobar(aliases=["f", "foo"]): # also accepts a string:  aliases='f'
 # --------------------------------------------------------------------------
 # Mark task as important, with aliases
 # Important tasks float to the top of the list, and can have special formatting
-@task(important=True])
+@task(important=True)
 def foobar():
     ...
 
