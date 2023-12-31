@@ -1,5 +1,6 @@
 from taskcli import task, run, tt
-from . import generator
+import taskcli
+import generator
 
 import logging
 logging.basicConfig(level=logging.INFO)
@@ -14,11 +15,12 @@ def generate_all_docs():
 @task(aliases=["sc"])
 def take_main_screenshot(path = "screenshots/main-page", output = "/tmp/taskcli-screenshot.svg"):
     tmp_ansi = "/tmp/taskcli-screenshot.ansi"
-    run(f"echo '~/project $ t' > {tmp_ansi}")
-    run(f"taskcli --color=yes -f tasks.py >> {tmp_ansi}")
-    run(f"ansitoimg {tmp_ansi} {output}")
-    generator.sanitize_svg(output)
-    print(f"Final screenshot: file:///{output}")
+    with taskcli.utils.change_dir(path):
+        run(f"echo '~/project $ t' > {tmp_ansi}")
+        run(f"taskcli --color=yes -f tasks.py >> {tmp_ansi}")
+        run(f"ansitoimg {tmp_ansi} {output}")
+        generator.sanitize_svg(output)
+        print(f"Final screenshot: file:///{output}")
 
 @task(aliases=["ps"])
 def page_settings():

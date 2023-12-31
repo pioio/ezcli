@@ -5,7 +5,7 @@
 import os
 
 import testing
-from docsgenerator import tasks as docgentasks
+#from docsgenerator import tasks as docgentasks
 
 # with tt.Group("Weather", desc="child import test"):
 #from examples.screenshots import tasks as weather_tasks
@@ -151,9 +151,6 @@ def rufftwice():
     ruff()
     ruff()
 
-
-with tt.Group("included tasks"):
-    tt.include(docgentasks, namespace="docs", alias_namespace="doc.")
 
 
 @task

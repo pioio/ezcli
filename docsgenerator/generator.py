@@ -139,6 +139,6 @@ def sanitize_svg(filepath:str) -> None:
             raise Exception(msg)
 
     # Change the image header -- The credits to ansitoimg tool lib are in README.md
-    content = content.replace("AnsiToImg (courtesy of Rich)", "Terminal")
+    #content = content.replace("AnsiToImg&#160;(courtesy&#160;of&#160;Rich)", "Terminal")
 
     open(filepath, "w").write(content)
