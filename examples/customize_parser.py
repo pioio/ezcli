@@ -3,9 +3,8 @@
 Tags: basic
 
 Run:
-- t -f FILENAME                 # list tasks
-- t -f FILENAME foobar --help          # show help output
-- t -f FILENAME foobar  --custom-arg 123   # use the custom argument we added
+- t -f FILENAME foobar --help              # show available arguments
+- t -f FILENAME foobar --custom-arg 123    # use the custom argument we added
 
 """
 

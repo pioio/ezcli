@@ -179,7 +179,6 @@ The "*" in the function signature is the Python syntax for denoting keyword (i.e
 Tags: basic
 
 Run:
-- taskcli -f FILENAME                     # list tasks
 - taskcli -f FILENAME  -lll               # list, detailed view
 - taskcli -f FILENAME  task1  --help      # Show help output
 - taskcli -f FILENAME  task2  --help      # Show help output
@@ -209,14 +208,6 @@ def task2(height: int = 42, *, name: str = "alice"):
     print(f"Hello from task2: {height=} {name=}")
 ```
 ##### Output of the above:
-```sh
-### list tasks
-# taskcli -f basic_using_arguments.py
-default               Default tasks
-task1   AGE           This task has two positional arguments, one of them is optional.
-task2                 This task has one positional, and one named optional argument.
-```
-
 ```sh
 ### list, detailed view
 # taskcli -f basic_using_arguments.py  -lll
@@ -351,9 +342,8 @@ Hello from the hidden task!
 Tags: basic
 
 Run:
-- t -f FILENAME                 # list tasks
-- t -f FILENAME foobar --help          # show help output
-- t -f FILENAME foobar  --custom-arg 123   # use the custom argument we added
+- t -f FILENAME foobar --help              # show available arguments
+- t -f FILENAME foobar --custom-arg 123    # use the custom argument we added
 
 """
 
@@ -379,14 +369,7 @@ def foobar(name:str="Alice") -> None:
 ```
 ##### Output of the above:
 ```sh
-### list tasks
-# t -f customize_parser.py
-default               Default tasks
-foobar                Task which customizes the parser.
-```
-
-```sh
-### show help output
+### show available arguments
 # t -f customize_parser.py foobar --help
 usage: t foobar [-h] [--custom-arg CUSTOM_ARG] [name]
 
@@ -401,7 +384,7 @@ options:
 
 ```sh
 ### use the custom argument we added
-# t -f customize_parser.py foobar  --custom-arg 123
+# t -f customize_parser.py foobar --custom-arg 123
 Hello, name='Alice'!
 Value of custom-arg (set with --custom-arg <value>): 123
 ```

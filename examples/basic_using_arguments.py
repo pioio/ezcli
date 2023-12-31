@@ -6,7 +6,6 @@ The "*" in the function signature is the Python syntax for denoting keyword (i.e
 Tags: basic
 
 Run:
-- taskcli -f FILENAME                     # list tasks
 - taskcli -f FILENAME  -lll               # list, detailed view
 - taskcli -f FILENAME  task1  --help      # Show help output
 - taskcli -f FILENAME  task2  --help      # Show help output
