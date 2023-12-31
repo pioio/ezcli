@@ -13,7 +13,6 @@ t -f filename.py [optional-args]
 
 Also, [go here for a cheat sheet](cheatsheet.md) -- it's a more concise version of some of the examples below.
 
-
 ### Basic Customize Settings
 `examples/basic_customize_settings.py`  
 ```python
@@ -53,7 +52,7 @@ def say_hello(name="alice"):
     """
     print(f"Hello from task2, {name=}", flush=True)
 ```
-##### Output of the above`:
+##### Output of the above:
 ```sh
 ### list tasks
 # taskcli -f basic_customize_settings.py
@@ -132,7 +131,7 @@ def call_all_dynamic_foobars():
         if task.name.startswith("foobar"):
             task.func()
 ```
-##### Output of the above`:
+##### Output of the above:
 ```sh
 ### list tasks
 # taskcli -f dynamic_task_creation.py
@@ -203,7 +202,7 @@ def task2(height: int = 42, *, name: str = "alice"):
     """
     print(f"Hello from task2: {height=} {name=}")
 ```
-##### Output of the above`:
+##### Output of the above:
 ```sh
 ### list tasks
 # taskcli -f basic_using_arguments.py
@@ -272,7 +271,7 @@ def hello_hidden():
     """
     print("Hello from the hidden task!")
 ```
-##### Output of the above`:
+##### Output of the above:
 ```sh
 ### list tasks
 # t -f basic.py

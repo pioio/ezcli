@@ -50,7 +50,6 @@ t -f filename.py [optional-args]
 
 Also, [go here for a cheat sheet](cheatsheet.md) -- it's a more concise version of some of the examples below.
 
-
 """
 
 from taskcli.examples import Example, get_run_commands
@@ -76,7 +75,7 @@ def generate_example() -> str:
 
         runcmds = get_run_commands(example, filename=example.filepath)
         if runcmds:
-            out += "##### Output of the above`:\n"
+            out += "##### Output of the above:\n"
         for runcmd in runcmds:
 
             simple_filename = os.path.basename(example.filepath)
