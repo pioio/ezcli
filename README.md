@@ -12,7 +12,7 @@ Manage and automate task of any project (not only Python)!
 
 ## Documentation Overview
 - Overview -- You're reading it.
-- [Introduction](docs/introduction.md) - More detailed introduction to using
+- [Introduction](docs/introduction.md) - How to use `taskcli` for your projects.
 - [Examples](docs/examples.md) - Complete executable examples from the `examples/` dir, along with sample output.
 - [Cheat sheet](docs/cheatsheet.md) - Code snippets -- quick reference of the most important features.
 - [Settings](docs/settings.md) - List of all the settings that can be customized via env vars or CLI.

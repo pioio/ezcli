@@ -131,22 +131,33 @@ with tt.group("My Group"):
 ## Advanced Examples
 ```python
 # --------------------------------------------------------------------------
-# programatically modify all tasks
+# programatically modify selected all tasks
 
 @task
-def foobar():
+def task1_do_this():
     ...
 
-@task
+(...)
+
+@task(tags=["prod"])
+def task30_do_something_else():
+    ...
+
+for task in tt.get_tasks():
+    if 'prod' in task.tags:
+        task.important = True
+    else:
+        task.tags.add("dev")
 
 
 # --------------------------------------------------------------------------
-# programatically create 10 tasks
+# Programatically create 10 tasks
+# See an example on this in the 'examples/' dir for a
+# much more detailed implementaion
 for x in range(10):
-    task_name = f"foobar-{x}"
-    @task(name=task_name)
-    def foobar(n):
-        print(f"Hello, World! {n=}")
+    @task(name=f"foobar-{x}")
+    def foobar(x=x): # x=x is needed to bind the loop variable (important!)
+        print(f"Hello, World! {x=}")
 
 
 ```
