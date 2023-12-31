@@ -161,6 +161,10 @@ class Task:
         self.soft_validate_task()
         self.included_from: Module | None = included_from
 
+    def __call__(self, *args: list[Any], **kwargs: dict[str, Any]) -> Any:
+        """Call the task."""
+        return self.func(*args, **kwargs)
+
     @property
     def name(self) -> str:
         """Return the name of the task, including all task namespaces and group namespace."""
