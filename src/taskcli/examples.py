@@ -9,15 +9,14 @@ TODO: consider moving this files outside of the taskcli package.
 """
 
 
-from dataclasses import dataclass
-import subprocess
-
 import os
-from .logging import get_logger
+import subprocess
+from dataclasses import dataclass
+
 import taskcli
 
 from . import utils
-
+from .logging import get_logger
 
 log = get_logger(__name__)
 
@@ -41,10 +40,10 @@ class Example:
     @property
     def dirpath(self):
         return os.path.dirname(self.filepath)
+
     @property
     def filename(self):
         return os.path.basename(self.filepath)
-
 
 
 @dataclass
@@ -110,7 +109,6 @@ def load_examples(dirpath: str) -> list[Example]:
         msg = f"No examples found in {dirpath}"
         raise ValueError(msg)
     return out
-
 
 
 def load_example(filepath: str) -> Example:

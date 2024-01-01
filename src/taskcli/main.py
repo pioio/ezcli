@@ -1,27 +1,32 @@
-"""Entrypoint for the 'taskcli' command."""
+"""Main entrypoint for executing tasks command.
 
+Overview:
+- do basic early CLI parsing,
+- locate the main and the parent taskfiles,
+- import and include tasks from them.
 
-from dataclasses import dataclass
+Much more details in comments further below.
+"""
+import argparse
 import os
 import sys
-import time
-
-from requests import get
+from contextlib import contextmanager
+from dataclasses import dataclass, field
 
 import taskcli.include
 
 from . import envvars, taskfiledev, utils
 from .logging import get_logger
-from .parser import build_initial_parser
 from .task import Task, UserError
-from .utils import print_error, print_to_stderr
-
+from .timer import Timer
 from .types import Module
+from .utils import print_error
 
 log = get_logger(__name__)
 
+
 def main() -> None:
-    """Entrypoint for taskfiles that are meant to be ran via `./mytasks.py` or `python mytasks.py` .
+    """Entrypoint for taskfiles that are meant to be ran via `./tasks.py` or `python tasks.py` .
 
     Note that you typically should invoke tasks via `t`, `tt`, `taskcli` commands.
 
@@ -33,13 +38,212 @@ def main() -> None:
         def foobar():
             print("Hello!")
             run("ls -la")
-i
+
         if __name__ == "__main__":
             tt.main()
     ```
     """
     module = sys.modules["__main__"]
-    main_internal(done=True, from_module=module)
+    main_internal(from_module=module)
+
+
+def main_internal(from_module: Module | None = None) -> None:
+    """Entrypoint for the `taskcli`, `tt`, and `t` commands."""
+    with Timer(_main_internal.__name__):
+        _main_internal(module_with_imported_tasks=from_module)
+
+
+########################################################################################################################
+# This is the main function of this module
+
+
+def _main_internal(module_with_imported_tasks: Module | None = None) -> None:
+    """Make sure the tasks have been loaded, and then call dispatch() for further exection.
+
+    Args:
+        module_with_imported_tasks: An optional python module containing already imported the tasks.
+
+    In details:
+      - Create a simple parser to parse the initial flags like "-f" and "-p"
+      - Then, either:
+          a) find, import, and include the main taskfiles (if invoke by `t|tt|taskfile`), or
+          b) include already imported tasks from the `from_module` (if invoked by `./taskfile.py` or `python ...`)
+      - Check if loading tasks from a parent taskfile was requested, and if so, find it, import it, and include them.
+      - At this point all the tasks that will ever be needed have been both imported and included.
+        - But they have not been loaded to the main runtime yet (happens later)
+      - We call dispatch() to load the tasks and continue parsing the CLI to decide what to do (e.g. list or run them)
+
+    We always look for the main file, and optionally for the parent file
+    In this function we don't abort if we fail to locate any tasks. This happens only later on.
+    """
+    log.separator("Starting main_internal()")
+    _assert_taskcli_is_installed()
+    _debug_environment(from_module=module_with_imported_tasks)
+    early_config: _EarlyConfig = _init_early_config()
+
+    if not module_with_imported_tasks:
+        # Allow to specify many files, include from many
+        main_taskfiles_paths: list[str] = []
+
+        ################################################################################################################
+        with _section("Searching for the main taskfile"):
+            # The 'main taskfile' is either specified with -f, is in the current dir, or a few dirs up
+            main_taskfiles_paths.extend(
+                _locate_main_taskfiles(
+                    early_config, default_files=envvars.TASKCLI_TASKS_PY_FILENAMES.value.split(",")
+                )
+            )
+
+        ################################################################################################################
+        with _section("Importing and including the main taskfile"):
+            # This function does Python import of the tasks.
+            # The import also initializes `tt.config`` with any custom settings defined in the tasks.py
+            #  - this might impact whether or not we should look for the parent further down
+            # After this initial include, it's safe to use tt.config.
+            _import_and_include_main_taskfile(main_taskfiles_paths)
+
+        ################################################################################################################
+        with _section("Searching for the parent taskfile"):
+            from taskcli import tt
+            INCLUSION_OF_PARENT_TASKFILE_WAS_REQUESTED = early_config.parent or tt.config.parent
+            if not INCLUSION_OF_PARENT_TASKFILE_WAS_REQUESTED:
+                log.debug("No parent taskfile was requested by the user, not looking for it")
+                parent_path = ""
+            else:
+                log.debug(f"Parent taskfile was request via {early_config.parent=} or/and {tt.config.parent=}")
+                parent_path = _get_parent_taskfile_path(early_config, main_taskfiles_paths)
+
+        ################################################################################################################
+        if parent_path:
+            with _section("Importing and including the parent taskfile"):
+                _include_parent_taskfile(parent_path)
+
+    ################################################################################################################
+    with _section("Finished importing and including the taskfile(s), calling dispatch()"):
+        module_with_imported_tasks = _determine_module_containing_the_tasks(from_module=module_with_imported_tasks)
+        taskcli.dispatch(argv=sys.argv[1:], module=module_with_imported_tasks)
+
+    log.debug("Finished main_internal()")
+
+########################################################################################################################
+# Private classes
+@dataclass
+class _EarlyConfig:
+    """Typesafe wrapper of the argpase.Namespace object using during the initial start."""
+
+    parent: str
+    file: str
+
+
+########################################################################################################################
+# Private helper functions
+
+@contextmanager
+def _section(name: str):
+    """Start a section with a timer. Logs will have runtime of the section, and a separator line will be printed."""
+    with Timer(name):
+        log.separator(name)
+        yield
+        log.debug("---")
+
+
+def _determine_module_containing_the_tasks(from_module: Module | None = None) -> Module:
+    """Return the module containing the tasks.
+
+    If no module was specified by the call to main, we use THIS module.
+
+    This means that the function doing the tt.include of the initial taskfile must also be in this module.
+    """
+    if from_module is None:
+        from_module = sys.modules[__name__]
+    return from_module
+
+
+def _init_early_config(argv: list[str] | None = None) -> _EarlyConfig:
+    """Create a temporary config objects that wrap around the results of initial parsing."""
+    argv = argv or sys.argv[1:]
+    parser = _build_initial_parser()
+    argconfig, _ = parser.parse_known_args(argv)
+    return _EarlyConfig(file=argconfig.file, parent=argconfig.parent)
+
+
+def _import_and_include_main_taskfile(filepaths_to_include: list[str]) -> list[Task]:
+    from taskcli import tt
+
+    included: list[Task] = []
+    for filepath in filepaths_to_include:
+        filepath = filepath.strip()
+        absolute_filepath = os.path.abspath(filepath)
+        if os.path.exists(absolute_filepath):
+            # TODO: rename to "preserve groups?"
+
+            # tt.include(str) imports the python modules
+            included.extend(tt.include(filepath, skip_include_info=True))
+        else:
+            print_error(f"File not found: {filepath}")
+            sys.exit(1)
+    return included
+
+
+def _include_parent_taskfile(parent_path: str) -> None:
+    """Includes a specified taskfile, and marks all tasks from it as obtained "from parent".
+
+    This marking can later be used for filtering or formatting
+    """
+    from taskcli import tt
+
+    log.debug(f"main: {parent_path=}")
+    tasks_from_parent = tt.include(parent_path, skip_include_info=True)
+    for task in tasks_from_parent:
+        task.group.from_parent = True
+        task.from_parent = True
+
+
+def _locate_main_taskfiles(early_config: _EarlyConfig, default_files: list[str]) -> list[str]:
+    out: list[str] = []
+    if early_config.file:
+        log.debug(f"main: -f was specified: {early_config.file=}")
+        for path in early_config.file.split(","):
+            # for path in early_config.file:
+            abspath = os.path.abspath(path)
+            if not os.path.exists(path):
+                print_error(f"Specified file not found: {path} (absolute: {abspath})")
+                sys.exit(1)
+            out.append(abspath)
+    else:
+        log.debug(
+            f"main: '-f <filename>' was not specified explicitly; looking for default files to include. {os.getcwd()=}"
+        )
+        log.debug("  The candidate default files to include are: " + str(default_files))
+        log.debug("  Will try to include the first one encountered.")
+        dirs_to_check = ["./", "../", "../../", "../../../", "../../../../", "../../../../../"]
+        log.debug("  Will now look for them in the following dirs: " + str(dirs_to_check))
+
+        out.extend(_find_default_file_in_dirs(default_files=default_files, dirs=dirs_to_check))
+    if not out:
+        log.debug("No taskfiles found")
+    return out
+
+
+def _get_parent_taskfile_path(early_config: _EarlyConfig, filepaths_to_include: list[str]) -> str:
+    """Return the first found parent taskfile."""
+    default_files = envvars.TASKCLI_TASKS_PY_FILENAMES.value.split(",")
+    log.debug(f"main: -p was specified: {early_config.parent=}")
+    dirs_to_check = ["../", "../../", "../../../", "../../../../", "../../../../../"]
+    parents = _find_default_file_in_dirs(default_files=default_files, dirs=dirs_to_check, ignore=filepaths_to_include)
+
+    out = ""
+    if parents:
+        out = parents[0]
+        log.debug(f"Found parent taskfiles: {parents}, returning {out}")
+    else:
+        log.debug("No parent taskfiles found")
+
+    if parents:
+        return parents[0]
+    else:
+        return ""
+
 
 def _assert_taskcli_is_installed() -> None:
     try:
@@ -49,154 +253,41 @@ def _assert_taskcli_is_installed() -> None:
         utils.print_error(err)
         sys.exit(1)
 
-def _debug_environment(from_module:Module|None=None):
-    log.debug("Note: you can use -v, -vv, -vvv to show more verbose log output. "
-              "See troubleshooting docs in case of problems.")
+
+def _debug_environment(from_module: Module | None = None):
+    """Print various debug info about the environment."""
+    log.debug(
+        "Note that you can use -vv and -vvv to show even more verbose log output. "
+        "See the 'troubleshooting' docs page for more info."
+    )
+
     log.debug("Current working directory: " + os.getcwd())
+
     log.debug(f"{sys.argv=}")
+
     if from_module:
         log.debug(f"main: {from_module=} {id(from_module)=}")
 
-# @dataclass
-# class Profiler:
-#     import_took:float
-
-# @dataclass
-# class StartupContext:
+    envvars.print_set_taskcli_env_vars(log.debug)
 
 
-def main_internal(done:bool=False, from_module:Module|None=None) -> None: # noqa: C901
-    """Entrypoint for the `taskcli`, `tt`, and `t` commands.
+def _build_initial_parser() -> argparse.ArgumentParser:
+    """Build small parser containing only the flags needed early in the execution.
 
-    If you're calling from a script, use `main()` instead.
+    This is needed to parse flags like "-f" to load the initial taskfile.
+    After that is done, later on, the full parser is constructed
     """
-    start = time.time()
-    INVALID_TIME = -1.0
-
-    log.separator("Starting main_internal()")
-    _assert_taskcli_is_installed()
-    _debug_environment(from_module=from_module)
-
-    parser = build_initial_parser()
+    root_parser = argparse.ArgumentParser(add_help=False)
 
     from taskcli import tt
 
-    argv = sys.argv[1:]
-    argconfig, _ = parser.parse_known_args(argv)
-
-    import_took = INVALID_TIME
-    include_took = INVALID_TIME
-
-    # allow to specify many files, include from many
-    filepaths_to_include:list[str] = []
-    default_files =  envvars.TASKCLI_TASKS_PY_FILENAMES.value.split(",")
-
-    if not done:
-        # If file, or files, were explicitly specified, they must exist
-        if argconfig.file:
-            log.debug(f"main: -f was specified: {argconfig.file=}")
-            for path in argconfig.file.split(","):
-                abspath = os.path.abspath(path)
-                if not os.path.exists(path):
-                    print_error(f"Specified file not found: {path} (absolute: {abspath})")
-                    sys.exit(1)
-                filepaths_to_include.append(abspath)
-        else:
-            log.debug(f"main: '-f <filename>' was not specified explicitly; looking for default files to include. {os.getcwd()=}")
-            log.debug("  The candidate default files to include are: " + str(default_files))
-            log.debug("  Will try to include the first one encountered.")
-            dirs_to_check = ["./", "../", "../../", "../../../", "../../../../", "../../../../../"]
-            log.debug("  Will now look for them in the following dirs: " + str(dirs_to_check))
+    config = tt.config
+    config.configure_early_parser(root_parser)
+    return root_parser
 
 
-            filepaths_to_include.extend(_find_default_file_in_dirs(default_files=default_files, dirs=dirs_to_check))
-
-    def get_parent_path() -> str:
-        log.debug(f"main: -p was specified: {argconfig.parent=}")
-        dirs_to_check = ["../", "../../", "../../../", "../../../../", "../../../../../"]
-        parents = _find_default_file_in_dirs(default_files=default_files, dirs=dirs_to_check, ignore=filepaths_to_include)
-        log.debug("Found parents: " + str(parents))
-
-        if parents:
-            return parents[0]
-        else:
-            return ""
-
-    for path in filepaths_to_include:
-        assert os.path.exists(path), f"File not found: {path}"
-
-    def include_from_filepaths(filepaths_to_include:list[str]) -> list[Task]:
-        for filepath in filepaths_to_include:
-            filepath = filepath.strip()
-            absolute_filepath = os.path.abspath(filepath)
-            if os.path.exists(absolute_filepath):
-                # TODO: rename to "preserve groups?"
-                return tt.include(filepath, skip_include_info=True)
-            else:
-                print_error(f"File not found: {filepath}")
-                sys.exit(1)
-        return []
-
-    if not done:
-        log.separator("Initial include")
-        log.debug(f"Initial include: {filepaths_to_include=}")
-
-        # This does Python import, initializing tt.config with settings defined in the tasks.py
-        # so, after this initial include, it's safe to use tt.config in this function
-        include_from_filepaths(filepaths_to_include)
-
-        if argconfig.parent or tt.config.parent:
-            log.debug(f"main: parent was specified: via {argconfig.parent=} or {tt.config.parent=}")
-            if parent_path := get_parent_path():
-                log.debug(f"Parent include: {filepaths_to_include=}")
-                log.debug(f"main: {parent_path=}")
-                tasks_from_parent = tt.include(parent_path, skip_include_info=True)
-                for task in tasks_from_parent:
-                    task.group.from_parent = True
-                    task.from_parent = True
-
-
-
-    log.separator("Finished include and imports")
-
-
-    taskfile_took = INVALID_TIME
-
-    dispatch_took = INVALID_TIME
-    try:
-        start_dispatch = time.time()
-        log.separator("Dispatching tasks")
-
-        if from_module is None:
-            from_module = sys.modules[__name__]
-
-        log.debug(f"About to call dispatch, , {from_module=} {id(from_module)=}")
-        taskcli.dispatch(argv=argv, module=from_module)
-        dispatch_took = time.time() - start_dispatch
-    finally:
-        if envvars.TASKCLI_ADV_PRINT_RUNTIME.is_true():
-            took = time.time() - start
-            utils.print_stderr(f"Runtime: {took:.3f}s")
-            if import_took != INVALID_TIME:
-                utils.print_stderr(f"    Import: {import_took:.3f}s")
-
-            if include_took != INVALID_TIME:
-                utils.print_stderr(f"   Include: {include_took:.3f}s")
-
-            if dispatch_took != INVALID_TIME:
-                utils.print_stderr(f"  Dispatch: {dispatch_took:.3f}s")
-
-            if taskfile_took != INVALID_TIME:
-                utils.print_stderr(
-                    f"  Taskfile: {taskfile_took:.3f}s (time to run the 'task' binary, "
-                    f"{envvars.TASKCLI_GOTASK_TASK_BINARY_FILEPATH})"
-                )
-
-
-
-
-def _find_default_file_in_dirs(default_files:list[str], dirs:list[str], ignore:list[str]|None=None) -> list[str]:
-    out:list[str] = []
+def _find_default_file_in_dirs(default_files: list[str], dirs: list[str], ignore: list[str] | None = None) -> list[str]:
+    out: list[str] = []
 
     log.debug(f"{ignore=}")
     found = False
@@ -217,7 +308,6 @@ def _find_default_file_in_dirs(default_files:list[str], dirs:list[str], ignore:l
 
                 log.debug(f"  Found default file: {path=}  (absolute path is {abspath}), not searching further")
                 out.append(abspath)
-                found= True
+                found = True
                 break
     return out
-

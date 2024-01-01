@@ -1,9 +1,13 @@
 import contextlib
 import logging
 import os
+import random
 import re
+import shutil
+import string
 import sys
 import typing
+from contextlib import contextmanager
 
 import taskcli
 
@@ -67,7 +71,7 @@ def change_dir(path: str) -> typing.Iterator[None]:
 @contextlib.contextmanager
 def change_env(env: dict[str, str]) -> typing.Iterator[None]:
     """Context manager to change the current working directory."""
-    raise NotImplementedError()
+    raise NotImplementedError
     old_env = os.environ.copy()
     try:
         yield
@@ -258,12 +262,6 @@ def assert_no_dup_by_name(container: list[typing.Any]) -> None:
         seen.append(item.name)
 
 
-from contextlib import contextmanager
-import shutil
-import string
-import random
-
-
 @contextmanager
 def randomize_filename(filepath):
     random_lowercase = "".join(random.choices(string.ascii_lowercase, k=10))
@@ -283,7 +281,6 @@ def randomize_filename(filepath):
 
 def import_module_from_filepath(filepath) -> object:
     """Import a module from a filepath."""
-
     dirname = os.path.dirname(filepath)
     remove_later = dirname in sys.path
     try:
@@ -296,5 +293,3 @@ def import_module_from_filepath(filepath) -> object:
         if remove_later:
             sys.path.remove(dirname)
     return module
-
-

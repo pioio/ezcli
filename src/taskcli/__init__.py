@@ -4,9 +4,7 @@ from typing import Annotated, Any, Iterable, Sequence, TypeVar
 import taskcli
 import taskcli.core
 
-
-
-from . import configuration, examples, include, listing, taskcliconfig, utils, envvars
+from . import configuration, envvars, examples, include, listing, taskcliconfig, utils
 from .annotations import Arg
 from .arg import arg
 from .configuration import config

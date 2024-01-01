@@ -2,10 +2,10 @@ import argparse
 import inspect
 import logging
 import os
-from re import U
 import sys
 from ast import arg
 from json import load
+from re import U
 from typing import Any, Iterable
 
 import taskcli
@@ -51,7 +51,17 @@ def dispatch(
     module: Module | None = None,
     sysexit_on_user_error: bool = True,
 ) -> Any:
-    """Dispatch the command line arguments to the correct function."""
+    """Dispatch the command line arguments to the correct function.
+
+    This function takes over once `module` has imported/created all the tasks.
+
+    In this wrapper function:
+    - we load the Tasks from the `module` to the runtime context
+    - we continue with the execution in the subsequent function
+
+    TODO: break this apart into two functions, but unit tests would need a refactor, they use 'dispatch'.
+
+    """
     # Initial parser, only used to find the tasks file
     log.debug("Dispatching with argv=%s", argv)
     if not argv:
@@ -60,9 +70,12 @@ def dispatch(
     if module is None:
         module = utils.get_callers_module()
 
+    log.separator(f"Loading the included tasks (from {module.__name__} into the runetime ")
+    log.trace(f"Module: {module=}, {id(module)=}")
     load_tasks_from_module_to_runtime(module)
 
     try:
+        log.separator("Dispatching tasks.")
         return _dispatch_unsafe(argv)
     except UserError as e:
         utils.print_error(f"{e}")
@@ -103,7 +116,7 @@ def _dispatch_unsafe(argv: list[str] | None = None) -> Any:  # noqa: C901
 
     taskcli.core.get_runtime().parsed_args = argconfig
 
-    if config.verbose >=2:
+    if config.verbose >= 2:
         count = 0
         for env in os.environ:
             if env.startswith("TASKCLI_"):
@@ -120,16 +133,15 @@ def _dispatch_unsafe(argv: list[str] | None = None) -> Any:  # noqa: C901
         envvars.show_env(verbose=True, extra_vars=config.get_env_vars())
         return
 
-
     ########################################################################################
     # This is the first place where we check if we found any tasks
     from taskcli import tt
+
     if tt.get_runtime().tasks == []:
         cwd = os.getcwd()
         msg = f"taskcli: No files to include in '{cwd}'. Run 'taskcli --init' to create a new 'tasks.py', or specify one with -f ."
         print_to_stderr(msg, color="")
         sys.exit(1)
-
 
     ########################################################################################
     if config.print_debug is True:
@@ -143,12 +155,9 @@ def _dispatch_unsafe(argv: list[str] | None = None) -> Any:  # noqa: C901
             utils.print_error(f"Task {argconfig.task} not found")
         return
 
-
-
     # >  if argconfig.version:
     # >      print("version info...")
     # >      sys.exit(0)
-
 
     import taskcli.taskrendersettings as rendersettings
 
@@ -212,7 +221,7 @@ def _dispatch_unsafe(argv: list[str] | None = None) -> Any:  # noqa: C901
                     render_settings.show_hidden_groups = True
                     render_settings.show_hidden_tasks = True
                     print_listed_tasks(all_children_tasks, render_settings=render_settings)
-                    #sys.exit(1)
+                    # sys.exit(1)
             # should never happen
             sys.exit(9)
         else:
@@ -291,36 +300,24 @@ def print_listed_tasks(tasks: list[Task], render_settings: TaskRenderSettings) -
 DEFAULT_TASK_PY = envvars.TASKCLI_TASKS_PY_FILENAMES.value
 
 
-def build_initial_parser() -> argparse.ArgumentParser:
-    """Build small parser containing only the flags needed early in the execution."""
-    root_parser = argparse.ArgumentParser(add_help=False)
-    _add_initial_tasks_to_parser(root_parser)
-
-    from taskcli import tt
-    config = tt.config
-    config.configure_early_parser(root_parser)
-
-    return root_parser
-
-
-def _add_initial_tasks_to_parser(parser: argparse.ArgumentParser) -> None:
-    parser.add_argument(
-        "-f",
-        "--file",
-        required=False,
-        default="",
-        help=f"Which tasks file(s) to use, comma separate, first one found is used. default is '{DEFAULT_TASK_PY}'",
-    )
-    from taskcli import tt
+# def _add_initial_tasks_to_parser(parser: argparse.ArgumentParser) -> None:
+#     parser.add_argument(
+#         "-f",
+#         "--file",
+#         required=False,
+#         default="",
+#         help=f"Which tasks file(s) to use, comma separate, first one found is used. default is '{DEFAULT_TASK_PY}'",
+#     )
+#     from taskcli import tt
 
 
-    # parser.add_argument( # TODO: deduplicate
-    #     tt.config.field_parent.short,
-    #     tt.config.field_parent.cli_arg_flag,
-    #     required=False,
-    #     default=tt.config.field_parent.default,
-    #     help = tt.config.field_parent.desc,
-    # )
+# parser.add_argument( # TODO: deduplicate
+#     tt.config.field_parent.short,
+#     tt.config.field_parent.cli_arg_flag,
+#     required=False,
+#     default=tt.config.field_parent.default,
+#     help = tt.config.field_parent.desc,
+# )
 
 
 def build_parser(tasks: list[Task]) -> argparse.ArgumentParser:  # noqa: C901
@@ -331,7 +328,7 @@ def build_parser(tasks: list[Task]) -> argparse.ArgumentParser:  # noqa: C901
 
     root_parser = argparse.ArgumentParser()
 
-    _add_initial_tasks_to_parser(root_parser)
+    # _add_initial_tasks_to_parser(root_parser)
 
     subparsers = root_parser.add_subparsers(help="Task to run")
 
@@ -345,7 +342,8 @@ def build_parser(tasks: list[Task]) -> argparse.ArgumentParser:  # noqa: C901
 
         # add group names
         from taskcli import Group
-        #groups_visited: set[Group] = set()
+
+        # groups_visited: set[Group] = set()
         for group in task.groups:
             group_name = group.name.replace(" ", "-").lower()
             parser_name = group_name + GROUP_SUFFIX
@@ -415,9 +413,7 @@ def build_parser(tasks: list[Task]) -> argparse.ArgumentParser:  # noqa: C901
     return root_parser
 
 
-def _add_param_to_subparser(
-    args: list[str], param: Parameter, subparser: argparse.ArgumentParser
-) -> None:  # noqa: C901
+def _add_param_to_subparser(args: list[str], param: Parameter, subparser: argparse.ArgumentParser) -> None:  # noqa: C901
     kwargs: dict[str, Any] = {}
 
     help_default = None
@@ -597,12 +593,11 @@ def print_debug_info_all_tasks():
     for task in runtime.tasks:
         print_debug_info_one_task(task)
 
+
 def print_debug_info_one_task(task: Task):
     fun = print
     fun(f"### Task: {task.name}")
     task.debug(fun)
-
-
 
 
 def get_argv() -> list[str]:

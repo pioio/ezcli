@@ -1,6 +1,7 @@
 # TODOs for `taskcli`
 
 ## Short-term TODOs:
+- [ ] unit test for when there's a local main file, but is with no tasks.
 - [ ] taskfile.py
 - [x] try to make  _common_test_list("./tasks.py --show-hidden")   work just like 't'
 - [ ] Docs: example with tt -a  # to force including parent via tt
@@ -17,6 +18,8 @@
 - [ ] don't add '.' to namespace
 - [ ] unit test for decorating same name function twice in the same module
 - [ ] print (tt.config) not working
+- [ ] test specifying many files
+- [ ] TODO: early parse should parse env vars (make it a member function of Field? .get_current_value)
 - [ ] add task.__call__  unit tests
 - [ ] Remove old 'extra tasks' fields
 - [x] tt.include("../../tasks.py", filter=lambda task: task.important) -- relative paths in include should be anchored to the file! Disallow them for now?

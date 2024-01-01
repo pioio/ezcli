@@ -206,7 +206,6 @@ def render_group(
     num_tasks = group.render_num_shown_hidden_tasks()
     format = config.render_format_of_group_name if not group.hidden else config.render_format_of_group_name_hidden
 
-
     if group.name == "default":
         # hack: there's only ever one default group, merging taskfile containing default groups results in items landing
         # sharing the group. So, there's never really a parent group from the parent. Only itesm from the parent.
@@ -281,7 +280,7 @@ def smart_task_lines(task: Task, settings: TaskRenderSettings) -> list[str]:  # 
     name = task.name
     name = format_colors(task.name_format, name=name)
 
-    COLORS_ACTIVE = configuration.colors.blue # just any color is not a empty string
+    COLORS_ACTIVE = configuration.colors.blue  # just any color is not a empty string
     blue_arrow = f"{colors.blue}⬆{colors.end} " if task.from_parent and COLORS_ACTIVE else ""
     name = f"{blue_arrow}{name}"
 

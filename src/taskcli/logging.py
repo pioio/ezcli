@@ -31,11 +31,14 @@ class Logger(logging.Logger):
             self.debug(msg, *args, **kwargs)
 
     def separator(self, msg: str = "") -> None:
-        """Print a separator line to the log."""
-        green = "\033[92m"
-        clear = "\033[0m"
+        """Print a separator line to the debug log. Helps make sense of the startup process when using -v or -vv."""
+        from . import configuration
 
-        self.debug(f"{green}=====================[{msg}]========================{clear}")
+        green = configuration.colors.green
+        clear = configuration.colors.end
+        # make it at least 80 chars
+        num_equals = max(80 - len(msg), 0)
+        self.debug(f"{green}===[{msg}]{'='*num_equals}{clear}")
 
 
 def get_logger(name: str) -> Logger:

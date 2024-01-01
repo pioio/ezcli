@@ -10,7 +10,10 @@ set not only via the environment, but also via other means (e.g. CLI arguments).
 These are the options which are more likely to be changed by the user.
 """
 import logging
+import re
 import sys
+from itertools import count
+from typing import Any, Callable
 
 from taskcli import configuration
 
@@ -72,11 +75,6 @@ TASKCLI_ADV_OVERRIDE_FORMATTING = EnvVar(
     ),
 )
 
-TASKCLI_ADV_PRINT_RUNTIME = EnvVar(
-    default_value="false",
-    desc=("If set to true, prints the total exection time the tool (not including the ython interpreter startup). "),
-)
-
 TASKCLI_TAG_FOR_IMPORTANT_TASKS = EnvVar(
     default_value="imp",
     desc=(
@@ -94,6 +92,27 @@ def _set_names() -> None:
     for name, value in globals().items():
         if isinstance(value, EnvVar):
             value.name = name
+
+
+def print_set_taskcli_env_vars(fun: Callable[[Any], Any]) -> int:
+    import os
+
+    total = 0
+
+    found: dict[str, str] = {}
+    for k, v in os.environ.items():
+        if k.startswith("TASKCLI_"):
+            total += 1
+            found[k] = v
+
+    if len(found) == 0:
+        fun("No TASKCLI_ environment variables set.")
+    else:
+        fun(f"TASKCLI_* environment variables set ({total=}):")
+        for k, v in found.items():
+            fun(f"  {k}={v}")
+
+    return total
 
 
 def show_env(verbose: int, extra_vars: list[EnvVar] | None = None) -> None:

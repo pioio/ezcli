@@ -14,6 +14,9 @@ source venv/bin/activate
 pip install -e .[dev,docs]
 ```
 
+### IDE settings
+- 120 chars line length
+
 ### Use `taskcli` to build `taskcli` itself
 Run `t` in the root of the project to list all the available tasks.
 
@@ -29,6 +32,16 @@ Run `t` in the `docsgenerator/` folder to see the tasks available for generating
 Some of those doc-related tasks are imported to the root `tasks.py` file, so you can run them from there as well.
 
 ## Implementation details
+### Entrypoint and startup
+- The main entrypoint is the `main_internal` function.
+- most config (cli/env) options are defined in a config object in one of the files.
+- we use this config object build a small initial `argparse` parser to parse flags like `-f`
+- we use that to initialize the runtime
+- include the main taskfile (one or more), merging them
+- include any parent taskfile
+- `main_internal` call `dispatch` to proceed with execution.
+
+
 ### Task and Groups
 Task needs to have unique `task.name`.
 

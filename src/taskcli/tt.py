@@ -23,10 +23,10 @@ Example:
 
 from . import core
 from .arg import arg
-from .main import main
 from .core import get_extra_args, get_extra_args_list, get_runtime
 from .group import Group
 from .include import include, include_function, include_module
+from .main import main
 from .parameter import Parameter
 from .parser import dispatch
 from .runcommand import run

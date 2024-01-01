@@ -150,7 +150,7 @@ class Task:
         self.customize_parser = customize_parser
         self.is_go_task: bool = is_go_task
         self.suppress_warnings: bool = suppress_warnings
-        self.distance: int = 0 # Distance (number of includes) away from the root tasks.py file. 0==root tasks.py
+        self.distance: int = 0  # Distance (number of includes) away from the root tasks.py file. 0==root tasks.py
 
         self.group: Group = group or DEFAULT_GROUP
 
@@ -432,7 +432,7 @@ class Task:
             if field == "params":
                 fun(f"  {field}:")
                 for param in value:
-                    param:Parameter = param
+                    param: Parameter = param
                     fun(f"  param '{param.name}'")
                     fun(f"    {param.metadata=}")
                     fun(f"    {param.arg_annotation=}")
@@ -441,8 +441,8 @@ class Task:
                     fun(f"    {param.default=}")
             elif field == "func":
                 fun(f"  {field}:")
-                fun(f'     {value=}')
-                fun(f'     {value.__name__}')
+                fun(f"     {value=}")
+                fun(f"     {value.__name__}")
 
             else:
                 fun(f"  {field}: {value}")
@@ -531,8 +531,6 @@ def _get_wrapper(  # noqa: C901
 
     task: Task = Task(wrapper_for_changing_directory, env=env, group=group, aliases=aliases, **kwargs)
 
-
-
     if not hasattr(module_which_defines_task, "decorated_functions"):
         module_which_defines_task.decorated_functions = []  # type: ignore[attr-defined]
 
@@ -542,16 +540,15 @@ def _get_wrapper(  # noqa: C901
             msg = f"Function {func} is already decorated as a task"
             raise ValueError(msg)
 
-
-
     # Ensure no task with this name already exist
     for atask in module_which_defines_task.decorated_functions:
         if atask.name == task.name:
-            msg = (f"A task with this name {task.name} already exists in this module."
-             "You might be seeing this due to a circular import, if so, try moving any tt.include(module) calls to "
-             "after any @task declarations.")
+            msg = (
+                f"A task with this name {task.name} already exists in this module."
+                "You might be seeing this due to a circular import, if so, try moving any tt.include(module) calls to "
+                "after any @task declarations."
+            )
             raise ValueError(msg)
-
 
     module_which_defines_task.decorated_functions.append(task)
 

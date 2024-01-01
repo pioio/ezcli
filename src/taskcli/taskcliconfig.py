@@ -127,21 +127,37 @@ class TaskCLIConfig:
         )
         self.init: bool = self._add_bool(self.field_init)
 
-        self.tags: list[str] = self._add_list(
-            [], "tags", "-t", nargs="+", help="Only show tasks matching any of these tags"
+        self.field_file: ConfigField = ConfigField(
+            # We should keep this one comma separated as otherwise it takes precedennce over the optional taskname.
+            # But maybe there is a way to make argparse prefer to treat last argument as a tasknme.
+            "",
+            "file",
+            "-f",
+            needed_early=True,
+            desc=(
+                "Which taskfiles to use by default, you can specify multiple (comma separated), they will be merged."
+                f"default is '{envvars.TASKCLI_TASKS_PY_FILENAMES.value}'"
+            ),
         )
+        self.file: str = self._add_str(self.field_file)
+
+        self.field_tags: ConfigField = ConfigField(
+            [], "tags", "-t", nargs="+", desc="Only show tasks matching any of these tags"
+        )
+        self.tags: list[str] = self._add_list(self.field_tags)
 
         # The order of groups of tasks when list
         # All tasks are by default in the "default" group unless task(group="foo") is used
         # Any group not listed here will be shown last, in the order they were defined.
 
-        self.group_order: list[str] = self._add_list(
+        self.field_group_order: ConfigField = ConfigField(
             ["default"],
             "group_order",
             nargs="*",
-            help="Regex re.match patterns of the order in which top-level groups are shown. "
+            desc="Regex re.match patterns of the order in which top-level groups are shown. "
             "Any top-level group the name of which matches any of the patterns will be listed first.",
         )
+        self.group_order: list[str] = self._add_list(self.field_group_order)
 
         self.field_search: ConfigField = ConfigField(
             "",
@@ -166,11 +182,13 @@ class TaskCLIConfig:
         self.extra_tasks_name_namespace = self._add_str(self.field_extra_tasks_name_namespace)
 
         self.field_parent = ConfigField(
-            False, "parent", "-p", desc="Whether to also include tasks from the closest parent's directory's tasks.py",
+            False,
+            "parent",
+            "-p",
+            desc="Whether to also include tasks from the closest parent's directory's tasks.py",
             needed_early=True,
         )
         self.parent: bool = self._add_bool(self.field_parent)
-
 
         self.field_extra_tasks_alias_namespace = ConfigField(
             "",
@@ -326,7 +344,11 @@ class TaskCLIConfig:
         self.default_options: list[str] = []
         self.default_options_tt: list[str] = []
 
-        self.field_print_debug = ConfigField(False, "print_debug", desc="Import the tasks and print detailed debug information. Use with, or without, specifying a task name.")
+        self.field_print_debug = ConfigField(
+            False,
+            "print_debug",
+            desc="Import the tasks and print detailed debug information. Use with, or without, specifying a task name.",
+        )
         self.print_debug: bool = self._add_bool(self.field_print_debug)
 
     def _store_name(self, name: str) -> None:
@@ -441,47 +463,41 @@ class TaskCLIConfig:
         assert isinstance(field.default, str)
         return field.default
 
-    def _add_list(
-        self, default: list[str], name: str, short: str = "", /, *, nargs: str = "*", help: str, env: bool = True
-    ) -> list[str]:
+    def _add_list(self, field: ConfigField) -> list[str]:
         """Add a list of string to the parser."""
-        assert nargs in ["*", "+", "?", ""], f"Invalid nargs: {nargs}"
-        self._store_name(name)
-        if env:
-            self._store_env_var(name=name, default_value=default, help=help)
-        args = self._get_args(name, short)
+        assert field.nargs in ["*", "+", "?", ""], f"Invalid nargs: {field.nargs=}"
+        args = self._shared_init_field(field)
 
-        new_default = default
         set_from = ""
 
         def add_argument(parser: argparse.ArgumentParser) -> None:
-            nonlocal help
-            help += f" (default: {new_default}{set_from})"
-            parser.add_argument(*args, nargs=nargs, default=None, help=help)
+            help = field.desc
+            help += f" (default: {field.default}{set_from})"
+            parser.add_argument(*args, nargs=field.nargs, default=None, help=field.desc)
 
         def read_argument(config: TaskCLIConfig, args: argparse.Namespace) -> None:
-            value = getattr(args, name)
+            value = getattr(args, field.name)
             if value is not None:
-                setattr(config, name, value)
+                setattr(config, field.name, value)
 
         def read_from_env(config: TaskCLIConfig) -> None:
-            env_var_name = self._to_env_var_name(name)
+            env_var_name = self._to_env_var_name(field.name)
             if env_var_name in os.environ:
-                new_default = EnvVar(default_value=str(default), desc=help, name=env_var_name)
+                new_default = EnvVar(default_value=str(field.default), desc=field.desc, name=env_var_name)
                 new_default_list = new_default.value.split(",")
                 new_default_list = [x.strip() for x in new_default_list]
-                setattr(config, name, new_default_list)
+                setattr(config, field.name, new_default_list)
 
-        # TODO if field.cli:
-        self._configure_parser.append(add_argument)
-        self._read_parsed_args.append(read_argument)
-        if env:
+        if field.cli:
+            self._configure_parser.append(add_argument)
+            self._read_parsed_args.append(read_argument)
+        if field.env:
             self._read_from_env.append(read_from_env)
-        # TODO
-        # if field.needed_early:
-         #    self._configure_early_parser.append(add_argument)
+        if field.needed_early:
+            self._configure_early_parser.append(add_argument)
 
-        return default
+        assert isinstance(field.default, list), f"{field.name=} {field.default=}"
+        return field.default
 
     def _add_int(  # noqa: C901
         self, default: int, name: str, short: str = "", /, *, help: str, action: str = "", env: bool = True
