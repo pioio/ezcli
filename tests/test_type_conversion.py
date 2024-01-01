@@ -5,9 +5,10 @@ import pytest
 
 import taskcli
 import taskcli.core
-from taskcli import dispatch, task, tt
+from taskcli.dispatching import dispatch
+from taskcli import task, tt
 from taskcli.group import Group
-from taskcli.parser import _extract_extra_args
+from taskcli.dispatching import _extract_extra_args
 from taskcli.task import Task
 from taskcli.taskcli import TaskCLI
 

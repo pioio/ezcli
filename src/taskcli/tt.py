@@ -28,7 +28,7 @@ from .group import Group
 from .include import include, include_function, include_module
 from .main import main
 from .parameter import Parameter
-from .parser import dispatch
+from .dispatching import dispatch
 from .runcommand import run
 from .task import Task
 from .task import task_decorator as task

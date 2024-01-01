@@ -4,7 +4,8 @@ import os
 import pytest
 
 import taskcli
-from taskcli import Task, dispatch, task
+from taskcli import Task, task
+from taskcli import dispatch
 from taskcli.include import TaskExistsError, include
 from taskcli.task import UserError
 from tests import tools
@@ -127,7 +128,7 @@ def test_including_not_decorated_function():
 
     include(somefun22)
 
-    taskcli.dispatch(["somefun22"])
+    dispatch(["somefun22"])
     assert done == 42
 
 
@@ -142,7 +143,7 @@ def test_including_not_decorated_function_name_change():
 
     include(somefun, name="xxx")
 
-    taskcli.dispatch(["xxx"])
+    dispatch(["xxx"])
     assert done == 42
 
 @pytest.mark.include()
@@ -159,7 +160,7 @@ def test_including_decorated_function():
 
     include(somefun, name_namespace="foo")
 
-    taskcli.dispatch(["foo.somefun"])
+    dispatch(["foo.somefun"])
     assert done == 42
 
 @pytest.mark.include()

@@ -1,10 +1,10 @@
 import re
 from json import tool
 
-from argh import dispatch
 
 import taskcli
 from taskcli import Group, Task, arg, constants, listing, task, tt
+from taskcli.dispatching import dispatch
 from taskcli.listing import list_tasks
 from taskcli.taskcliconfig import TaskCLIConfig
 from taskcli.taskrendersettings import TaskRenderSettings, new_settings
@@ -94,7 +94,7 @@ def test_list_everything_works(capsys):
     include_tasks()
 
     with tools.simple_list_format():
-        taskcli.dispatch(["-L"])
+        dispatch(["-L"])
 
     stdout = capsys.readouterr().out
     clean_stdout(stdout)

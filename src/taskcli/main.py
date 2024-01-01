@@ -1,7 +1,7 @@
-"""Main entrypoint for executing tasks command.
+"""Main entrypoint for executing `taskcli` Tasks.
 
-Overview:
-- do basic early CLI parsing,
+In a nutshell, the code here does the following
+- basic early CLI parsing (e.g. -f)
 - locate the main and the parent taskfiles,
 - import and include tasks from them.
 
@@ -129,7 +129,7 @@ def _main_internal(module_with_imported_tasks: Module | None = None) -> None:
     ####################################################################################################################
     with _section("Finished importing and including Tasks, calling dispatch()"):
         module_with_imported_tasks = _determine_module_containing_the_tasks(from_module=module_with_imported_tasks)
-        taskcli.dispatch(argv=sys.argv[1:], module=module_with_imported_tasks)
+        taskcli.dispatching.dispatch(argv=sys.argv[1:], module=module_with_imported_tasks)
 
     log.debug("Finished main_internal()")
 

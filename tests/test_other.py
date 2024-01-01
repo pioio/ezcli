@@ -13,6 +13,7 @@ import pytest
 
 import taskcli
 import taskcli.core
+from taskcli.dispatching import dispatch
 from taskcli import Group, arg, task
 from taskcli.listing import list_tasks
 from taskcli.task import Task
@@ -51,7 +52,7 @@ def test_run_default_args_str():
 
     tools.include_tasks()
 
-    taskcli.dispatch(argv=["foobar"])
+    dispatch(argv=["foobar"])
     assert done == "xxx"
 
 
@@ -69,7 +70,7 @@ def test_run_default_args(default_arg):
     tools.include_tasks()
 
     try:
-        taskcli.dispatch(argv=["foobar"])
+        dispatch(argv=["foobar"])
     except SystemExit:
         pytest.fail("SystemExit should not be raised")
     assert done == default_arg

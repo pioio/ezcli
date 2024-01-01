@@ -369,7 +369,7 @@ class Task:
     def dispatch(self, args: list[str] | str | None = None, sysexit_on_user_error: bool = True) -> Any:
         """Dispatch the task. A helper for unit tests."""
         name = self._get_full_task_name()
-        from .parser import dispatch
+        from .dispatching import dispatch
 
         if isinstance(args, str):
             args = [args]
