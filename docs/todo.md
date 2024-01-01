@@ -1,6 +1,7 @@
 # TODOs for `taskcli`
 
 ## Short-term TODOs:
+- [ ] unit tests for main
 - [ ] unit test for when there's a local main file, but is with no tasks.
 - [ ] taskfile.py
 - [x] try to make  _common_test_list("./tasks.py --show-hidden")   work just like 't'

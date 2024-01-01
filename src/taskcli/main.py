@@ -81,7 +81,12 @@ def _main_internal(module_with_imported_tasks: Module | None = None) -> None:
     _debug_environment(from_module=module_with_imported_tasks)
     early_config: _EarlyConfig = _init_early_config()
 
-    if not module_with_imported_tasks:
+    if module_with_imported_tasks:
+        # No need to search for, or load any files.
+        # The tasks (if any) have been imported and included to this module already.
+        # We just need to load them into the runtime later
+        pass
+    else:
         # Allow to specify many files, include from many
         main_taskfiles_paths: list[str] = []
 
@@ -95,12 +100,13 @@ def _main_internal(module_with_imported_tasks: Module | None = None) -> None:
             )
 
         ################################################################################################################
-        with _section("Importing and including the main taskfile"):
-            # This function does Python import of the tasks.
-            # The import also initializes `tt.config`` with any custom settings defined in the tasks.py
-            #  - this might impact whether or not we should look for the parent further down
-            # After this initial include, it's safe to use tt.config.
-            _import_and_include_main_taskfile(main_taskfiles_paths)
+        if main_taskfiles_paths:
+            with _section("Importing and including the main taskfile"):
+                # This function does Python import of the tasks.
+                # The import also initializes `tt.config`` with any custom settings defined in the tasks.py
+                #  - this might impact whether or not we should look for the parent further down
+                # After this initial include, it's safe to use tt.config.
+                _import_and_include_main_taskfile(main_taskfiles_paths)
 
         ################################################################################################################
         with _section("Searching for the parent taskfile"):
@@ -111,15 +117,15 @@ def _main_internal(module_with_imported_tasks: Module | None = None) -> None:
                 parent_path = ""
             else:
                 log.debug(f"Parent taskfile was request via {early_config.parent=} or/and {tt.config.parent=}")
-                parent_path = _get_parent_taskfile_path(early_config, main_taskfiles_paths)
+                parent_path = _get_parent_taskfile_path(early_config, paths_to_ignore=main_taskfiles_paths)
 
         ################################################################################################################
         if parent_path:
             with _section("Importing and including the parent taskfile"):
                 _include_parent_taskfile(parent_path)
 
-    ################################################################################################################
-    with _section("Finished importing and including the taskfile(s), calling dispatch()"):
+    ###################################################################################################################
+    with _section("Finished importing and including Tasks, calling dispatch()"):
         module_with_imported_tasks = _determine_module_containing_the_tasks(from_module=module_with_imported_tasks)
         taskcli.dispatch(argv=sys.argv[1:], module=module_with_imported_tasks)
 
@@ -225,12 +231,12 @@ def _locate_main_taskfiles(early_config: _EarlyConfig, default_files: list[str])
     return out
 
 
-def _get_parent_taskfile_path(early_config: _EarlyConfig, filepaths_to_include: list[str]) -> str:
+def _get_parent_taskfile_path(early_config: _EarlyConfig, paths_to_ignore: list[str]) -> str:
     """Return the first found parent taskfile."""
     default_files = envvars.TASKCLI_TASKS_PY_FILENAMES.value.split(",")
     log.debug(f"main: -p was specified: {early_config.parent=}")
     dirs_to_check = ["../", "../../", "../../../", "../../../../", "../../../../../"]
-    parents = _find_default_file_in_dirs(default_files=default_files, dirs=dirs_to_check, ignore=filepaths_to_include)
+    parents = _find_default_file_in_dirs(default_files=default_files, dirs=dirs_to_check, ignore=paths_to_ignore)
 
     out = ""
     if parents:
