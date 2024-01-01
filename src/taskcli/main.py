@@ -87,6 +87,8 @@ def _main_internal(module_with_imported_tasks: Module | None = None) -> None:
         # We just need to load them into the runtime later
         pass
     else:
+        # The branch attemps to import the tasks and include them into THIS module.
+
         # Allow to specify many files, include from many
         main_taskfiles_paths: list[str] = []
 
