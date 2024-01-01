@@ -57,7 +57,6 @@
           included...docs.generate-all-docs ^ i.dgd
           included...docs.test-documentation ^ i.dt
   - [ ] add unit tests
-  - [ ] fix time keeping in main()
   - [ ] add unit test that it changes to the parent dir of merged in parent file
   - [ ] marke the ones from the parent, sort separtely to first?
     - [ ] add separator between them?

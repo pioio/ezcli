@@ -26,7 +26,7 @@ log = get_logger(__name__)
 
 
 def main() -> None:
-    """Entrypoint for taskfiles that are meant to be ran via `./tasks.py` or `python tasks.py` .
+    """Entrypoint for taskfiles that were ran via `./tasks.py` or `python tasks.py` .
 
     Note that you typically should invoke tasks via `t`, `tt`, `taskcli` commands.
 
@@ -82,9 +82,10 @@ def _main_internal(module_with_imported_tasks: Module | None = None) -> None:
     early_config: _EarlyConfig = _init_early_config()
 
     if module_with_imported_tasks:
-        # No need to search for, or load any files.
+        # No need to search for, or load, any files.
         # The tasks (if any) have been imported and included to this module already.
-        # We just need to load them into the runtime later
+        # We just need to load them into the runtime.
+        # This will happen later
         pass
     else:
         # The if/else branch attemps to import the tasks and include them into THIS module.
@@ -144,7 +145,7 @@ class _EarlyConfig:
 
 
 ########################################################################################################################
-# Private helper functions
+# Less-important private helper functions
 
 
 @contextmanager

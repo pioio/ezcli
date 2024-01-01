@@ -238,8 +238,10 @@ def _run_subcommands_and_maybe_finish(config: TaskCLIConfig) -> bool:
 def _if_no_tasks_were_loaded_raise_sys_exit(tasks: list[Task]) -> None:
     if not tasks:
         cwd = os.getcwd()
-        msg = (f"taskcli: No files to include in '{cwd}'. Run 'taskcli --init' to create a new 'tasks.py', "
-               "or specify one with -f .")
+        msg = (
+            f"taskcli: No files to include in '{cwd}'. Run 'taskcli --init' to create a new 'tasks.py', "
+            "or specify one with -f ."
+        )
         print_to_stderr(msg, color="")
         sys.exit(1)
 

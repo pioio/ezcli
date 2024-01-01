@@ -95,6 +95,10 @@ def _set_names() -> None:
 
 
 def print_set_taskcli_env_vars(fun: Callable[[Any], Any]) -> int:
+    """Print all set TASKCLI_ environment variables set.
+
+    Used for debugging.
+    """
     import os
 
     total = 0

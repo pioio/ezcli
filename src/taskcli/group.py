@@ -39,6 +39,7 @@ class Group:
             sort_important_first: If true, important tasks are sorted as first (before all other tasks)
             namespace: namespaces prepended to all tasks added to this group
             alias_namespace: namespace prepended to all aliases of tasks added to this group
+            from_parent: If true, this group was included from a taskfile loaded from above/parent directory
         """
         self.name = name
         self.desc = desc

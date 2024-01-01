@@ -68,18 +68,6 @@ def change_dir(path: str) -> typing.Iterator[None]:
         os.chdir(old_dir)
 
 
-@contextlib.contextmanager
-def change_env(env: dict[str, str]) -> typing.Iterator[None]:
-    """Context manager to change the current working directory."""
-    raise NotImplementedError
-    old_env = os.environ.copy()
-    try:
-        yield
-    finally:
-        os.environ.clear()
-        os.environ.update(old_env)
-
-
 def strip_escape_codes(s: str) -> str:
     """Remove ANSI escape codes from a string. So, removes colors, underlines, etc."""
     out = re.sub(r"\033\[[0-9;]*m", "", s).replace(ENDC, "").replace(UNDERLINE, "")

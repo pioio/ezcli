@@ -110,7 +110,8 @@ def include(
             to_module_dirpath = os.path.dirname(to_module_file)
             new_path = os.path.abspath(os.path.join(to_module_dirpath, path))
             log.trace(
-                f"include(str): Turned relative import path {path} (relative to the module) into an absolute path:l {new_path}"
+                f"include(str): Turned relative import path {path} (relative to "
+                f"the module) into an absolute path:l {new_path}"
             )
             path = new_path
 
@@ -181,13 +182,6 @@ def include_module(
     if not hasattr(to_module, "decorated_functions"):
         to_module.decorated_functions = []  # type: ignore[attr-defined]
 
-    # assert from_module is not None
-    # from_module_path = os.path.abspath(from_module.__file__)
-    # if from_module_path in _included_module_paths:
-    #     log.debug(f"Module {from_module_path} has already been included.")
-    #     raise UserError(msg)
-    # _i
-
     # make a copy, as we will the original list in _include_task if from_module==to_module,
     tasks = from_module.decorated_functions[:]
     out: list[Task] = []
@@ -206,9 +200,10 @@ def include_module(
                 namespace=name_namespace,
                 alias_namespace=alias_namespace,
             )
-        except TaskExistsError as e:
+        except TaskExistsError as _:
             log.debug(
-                f"XXX include_module: Task {task.name} already exists in module {to_module.__name__} {id(to_module)=}, skipping"
+                f"XXX include_module: Task {task.name} already exists "
+                f" in module {to_module.__name__} {id(to_module)=}, skipping"
             )
             continue
 
@@ -308,7 +303,10 @@ def _include_task(
 
     existing_tasks = [t for t in to_module.decorated_functions if t.name == copy.name]
     if existing_tasks:
-        msg = f"Task '{copy.name}' included from {from_module.__file__} already exists in module {to_module.__file__}. Cannot include it again under the same. Consider using a namespace."
+        msg = (
+            f"Task '{copy.name}' included from {from_module.__file__} already exists in "
+            f"module {to_module.__file__}. Cannot include it again under the same. Consider using a namespace."
+        )
         raise TaskExistsError(msg)
 
     to_module.decorated_functions.append(copy)
@@ -337,7 +335,7 @@ def load_tasks_from_module_to_runtime(module: Module) -> None:
 
 
 @contextmanager
-def add_to_sys_path(path):
+def _add_to_sys_path(path):
     old_sys_path = sys.path.copy()
     sys.path.append(path)
     try:
@@ -347,6 +345,7 @@ def add_to_sys_path(path):
 
 
 class TaskImportError(Exception):
+    """Raised when a task cannot be imported."""
     pass
 
 
@@ -371,7 +370,7 @@ def import_module_from_path(module_name, path) -> Module:
 
     if os.path.isdir(path):
         log.trace(f"{prefix}: path is a dir: {path}, looking for taskspy")
-        valid_taskspy = find_valid_taskspy_in_dir(path)
+        valid_taskspy = _find_valid_taskspy_in_dir(path)
         to_import = valid_taskspy
         if not valid_taskspy:
             msg = f"{prefix}: Could not find a valid tasks.py file in {path}"
@@ -392,7 +391,7 @@ def import_module_from_path(module_name, path) -> Module:
         log.debug(f"{prefix}: module {abspath} already imported, skipping")
         return sys.modules[abspath]
 
-    with add_to_sys_path(module_dir):
+    with _add_to_sys_path(module_dir):
         spec = importlib.util.spec_from_file_location(abspath, to_import)
         module = importlib.util.module_from_spec(spec)
         sys.modules[abspath] = module
@@ -401,7 +400,7 @@ def import_module_from_path(module_name, path) -> Module:
     return module
 
 
-def get_valid_taskspy_filenames() -> list[str]:
+def _get_valid_taskspy_filenames() -> list[str]:
     """Return a list of valid filenames for the tasks.py file."""
     from . import envvars
 
@@ -409,9 +408,8 @@ def get_valid_taskspy_filenames() -> list[str]:
     return out
 
 
-def find_valid_taskspy_in_dir(dirpath) -> str:
-    """Returns absolute filepath"""
-    valid_filenames = get_valid_taskspy_filenames()
+def _find_valid_taskspy_in_dir(dirpath) -> str:
+    valid_filenames = _get_valid_taskspy_filenames()
     for filename in os.listdir(dirpath):
         if filename in valid_filenames and os.path.isfile(filename):
             return os.path.join(dirpath, filename)

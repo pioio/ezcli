@@ -123,7 +123,6 @@ def load_example(filepath: str) -> Example:
     with utils.randomize_filename(filepath) as new_filepath:  # to get a ranadom module name
         module = utils.import_module_from_filepath(new_filepath)
 
-
     doc = module.__doc__ or ""
 
     e = Example(
@@ -175,13 +174,13 @@ def run_example(example: Example, runcmd: RunCommand) -> str:
         res = subprocess.run(f"{runcmd.cmd}", shell=True, check=False, stderr=subprocess.STDOUT, stdout=subprocess.PIPE)
 
         if res.returncode != 0:
-            print(f"Error running example: {example.title}") # noqa: T201
-            print(f"  cmd: {runcmd.cmd}") # noqa: T201
-            print(f"  desc: {runcmd.desc}") # noqa: T201
+            print(f"Error running example: {example.title}")  # noqa: T201
+            print(f"  cmd: {runcmd.cmd}")  # noqa: T201
+            print(f"  desc: {runcmd.desc}")  # noqa: T201
             PINK = "\033[0;35m"
             CLEAR = "\033[0m"
-            print(f"  stdout and stderr: \n{PINK}{res.stdout.decode('utf-8')}{CLEAR}") # noqa: T201
-            print(f"  returncode: {res.returncode}") # noqa: T201
+            print(f"  stdout and stderr: \n{PINK}{res.stdout.decode('utf-8')}{CLEAR}")  # noqa: T201
+            print(f"  returncode: {res.returncode}")  # noqa: T201
             msg = "Error running example"
             raise Exception(msg)
         stdout = res.stdout.decode("utf-8")
