@@ -9,6 +9,7 @@ from .annotations import Arg
 from .arg import arg
 from .configuration import config
 from .core import get_extra_args, get_extra_args_list, get_runtime
+from .dispatching import dispatch
 from .group import Group
 from .logging import configure_logging
 from .parameter import Parameter
@@ -16,7 +17,6 @@ from .parametertype import ParameterType
 from .runcommand import run
 from .task import Task
 from .task import task_decorator as task
-from .dispatching import dispatch
 
 from typing import Annotated as ann  # noqa: N813 # isort: skip
 

@@ -8,9 +8,8 @@ from typing import Any, Iterable
 import taskcli
 import taskcli.core
 from taskcli.task import UserError
-from .taskcliconfig import TaskCLIConfig
 
-from . import  envvars, taskfiledev, utils
+from . import envvars, taskfiledev, utils
 from .constants import GROUP_SUFFIX
 from .envvar import EnvVar
 from .group import get_all_groups_from_tasks
@@ -19,16 +18,15 @@ from .init import create_tasks_file
 from .listing import list_tasks
 from .logging import get_logger
 from .parameter import Parameter
+from .parser import build_parser, convert_types_from_str_to_function_type, extract_extra_args
 from .task import Task
 from .taskcli import TaskCLI
+from .taskcliconfig import TaskCLIConfig
 from .taskrendersettings import TaskRenderSettings
 from .types import AnyFunction, Module
 from .utils import param_to_cli_option, print_to_stderr
 
-from .parser import convert_types_from_str_to_function_type, build_parser, extract_extra_args
-
 log = get_logger(__name__)
-
 
 
 def dispatch(
@@ -60,7 +58,6 @@ def dispatch(
     log.trace(f"Module: {module=}, {id(module)=}")
     load_tasks_from_module_to_runtime(module)
 
-
     ###########################################################################################
     try:
         log.separator("Dispatching tasks.")
@@ -76,6 +73,7 @@ def dispatch(
 
 ########################################################################################################################
 # Private functions
+
 
 def _dispatch(argv: list[str] | None = None) -> Any:
     """Given the CLI args provided, decide what to do (e.g. list tasks or run a task)."""
@@ -132,8 +130,11 @@ def _dispatch(argv: list[str] | None = None) -> Any:
         return _process_task_action(config, tasks, argconfig, render_settings)
 
 
-def _process_task_action(config: TaskCLIConfig, tasks: list[Task], argconfig, render_settings: TaskRenderSettings) -> Any:
+def _process_task_action(
+    config: TaskCLIConfig, tasks: list[Task], argconfig, render_settings: TaskRenderSettings
+) -> Any:
     from .group import get_all_tasks_in_group
+
     if config.task.endswith(GROUP_SUFFIX):
         groups = get_all_groups_from_tasks(tasks)
         for group in groups:
@@ -172,7 +173,6 @@ def _process_task_action(config: TaskCLIConfig, tasks: list[Task], argconfig, re
 
         print(f"Task {argconfig.task} not found")  # noqa: T201
         sys.exit(1)
-
 
 
 def _dispatch_task(task: Task, argconfig) -> Any:
@@ -214,14 +214,14 @@ def _dispatch_task(task: Task, argconfig) -> Any:
         ret_value = task.func(**kwargs)
 
     from taskcli import tt
+
     config = tt.config
     if config.print_return_value:
         print(ret_value)  # noqa: T201
     return ret_value
 
 
-
-def _run_subcommands_and_maybe_finish(config:TaskCLIConfig) -> bool:
+def _run_subcommands_and_maybe_finish(config: TaskCLIConfig) -> bool:
     """Return True if the called should exit."""
     if config.init is True:
         create_tasks_file()
@@ -235,13 +235,14 @@ def _run_subcommands_and_maybe_finish(config:TaskCLIConfig) -> bool:
     return False
 
 
-
 def _if_no_tasks_were_loaded_raise_sys_exit(tasks: list[Task]) -> None:
     if not tasks:
         cwd = os.getcwd()
-        msg = f"taskcli: No files to include in '{cwd}'. Run 'taskcli --init' to create a new 'tasks.py', or specify one with -f ."
+        msg = (f"taskcli: No files to include in '{cwd}'. Run 'taskcli --init' to create a new 'tasks.py', "
+               "or specify one with -f .")
         print_to_stderr(msg, color="")
         sys.exit(1)
+
 
 def _print_list_tasks(tasks: list[Task], render_settings: TaskRenderSettings) -> None:
     """Print the listed tasks."""
@@ -262,7 +263,7 @@ def _print_debug_info_one_task(task: Task):
     task.debug(fun)
 
 
-def _print_debug_info_tasks(config: TaskCLIConfig,  tasks: list[Task]):
+def _print_debug_info_tasks(config: TaskCLIConfig, tasks: list[Task]):
     if config.print_debug is True:
         if not config.task:
             _print_debug_info_all_tasks()
@@ -273,6 +274,7 @@ def _print_debug_info_tasks(config: TaskCLIConfig,  tasks: list[Task]):
                     return
             utils.print_error(f"Task {config.task} not found")
         return
+
 
 def _get_argv() -> list[str]:
     """Return the command line arguments prefixed with default options if needed.
@@ -300,13 +302,16 @@ def _get_argv() -> list[str]:
             log.debug(f"Using custom default options (taskcli): {tt.config.default_options}")
     return argv
 
+
 def _do_argcomplete_and_exit(parser: argparse.ArgumentParser) -> None:
     magical_env = "_ARGCOMPLETE"
     if magical_env in os.environ:
         try:
             import argcomplete
         except ImportError:
-            utils.print_error(f"`argcomplete` package not installed (but {magical_env=} is set), skipping tab completion")
+            utils.print_error(
+                f"`argcomplete` package not installed (but {magical_env=} is set), skipping tab completion"
+            )
             return
 
         # NOTE: this it will immediately exit if it's a completion request,

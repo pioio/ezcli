@@ -96,9 +96,7 @@ def _main_internal(module_with_imported_tasks: Module | None = None) -> None:
         with _section("Searching for the main taskfile"):
             # The 'main taskfile' is either specified with -f, is in the current dir, or a few dirs up
             main_taskfiles_paths.extend(
-                _locate_main_taskfiles(
-                    early_config, default_files=envvars.TASKCLI_TASKS_PY_FILENAMES.value.split(",")
-                )
+                _locate_main_taskfiles(early_config, default_files=envvars.TASKCLI_TASKS_PY_FILENAMES.value.split(","))
             )
 
         ################################################################################################################
@@ -113,6 +111,7 @@ def _main_internal(module_with_imported_tasks: Module | None = None) -> None:
         ################################################################################################################
         with _section("Searching for the parent taskfile"):
             from taskcli import tt
+
             INCLUSION_OF_PARENT_TASKFILE_WAS_REQUESTED = early_config.parent or tt.config.parent
             if not INCLUSION_OF_PARENT_TASKFILE_WAS_REQUESTED:
                 log.debug("No parent taskfile was requested by the user, not looking for it")
@@ -133,6 +132,7 @@ def _main_internal(module_with_imported_tasks: Module | None = None) -> None:
 
     log.debug("Finished main_internal()")
 
+
 ########################################################################################################################
 # Private classes
 @dataclass
@@ -145,6 +145,7 @@ class _EarlyConfig:
 
 ########################################################################################################################
 # Private helper functions
+
 
 @contextmanager
 def _section(name: str):

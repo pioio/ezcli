@@ -28,6 +28,8 @@ from .types import AnyFunction, Module
 from .utils import param_to_cli_option, print_to_stderr, print_warning
 
 log = get_logger(__name__)
+
+
 def extract_extra_args(argv: list[str], task_cli: TaskCLI) -> list[str]:
     """Extract extra args (those after --) from argv list."""
     first_double_hyphen = argv.index("--") if "--" in argv else -1
@@ -36,7 +38,6 @@ def extract_extra_args(argv: list[str], task_cli: TaskCLI) -> list[str]:
     else:
         task_cli.extra_args_list = argv[first_double_hyphen + 1 :]
         return argv[:first_double_hyphen]
-
 
 
 def build_parser(tasks: list[Task]) -> argparse.ArgumentParser:  # noqa: C901
@@ -303,5 +304,3 @@ def _build_parser_default(param: inspect.Parameter) -> str | None:
     else:
         assert isinstance(param.default, str) or param.default is None
         return param.default
-
-

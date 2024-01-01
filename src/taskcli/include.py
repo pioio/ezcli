@@ -275,7 +275,6 @@ class TaskExistsError(Exception):
     """Raised iff a task already exists in a module and thus cannot be added to it."""
 
 
-
 def _include_task(
     task: Task,
     from_module: Module,

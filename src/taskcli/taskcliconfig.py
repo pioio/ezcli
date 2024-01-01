@@ -111,7 +111,7 @@ class TaskCLIConfig:
         """
         self.load_from_env = load_from_env
 
-        self.task:str = ""
+        self.task: str = ""
 
         # Accumulate functions used to configure the parser
         self._configure_parser: list[Callable[[argparse.ArgumentParser], None]] = []
