@@ -87,7 +87,7 @@ def _main_internal(module_with_imported_tasks: Module | None = None) -> None:
         # We just need to load them into the runtime later
         pass
     else:
-        # The branch attemps to import the tasks and include them into THIS module.
+        # The if/else branch attemps to import the tasks and include them into THIS module.
 
         # Allow to specify many files, include from many
         main_taskfiles_paths: list[str] = []
@@ -126,7 +126,7 @@ def _main_internal(module_with_imported_tasks: Module | None = None) -> None:
             with _section("Importing and including the parent taskfile"):
                 _include_parent_taskfile(parent_path)
 
-    ###################################################################################################################
+    ####################################################################################################################
     with _section("Finished importing and including Tasks, calling dispatch()"):
         module_with_imported_tasks = _determine_module_containing_the_tasks(from_module=module_with_imported_tasks)
         taskcli.dispatch(argv=sys.argv[1:], module=module_with_imported_tasks)

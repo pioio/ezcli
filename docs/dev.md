@@ -48,6 +48,9 @@ Task needs to have unique `task.name`.
 Groups do not have to have unique names. When doing `taskcli group` of a group that a duplicate, we simply print content of both.
 This make merging parent to the current context easier, as we don't have to merge parent's group into local ones.
 
+### Logging
+Standard Python logging is used, with the exception of extending the `logging.Logger` with a `log.trace()`.
+The output of `log.trace` is logged in `-vv` and `-vvv` modes.
 
 ### Task creation and .include()
 Using the @task decorator causes the decorated function to be turned into a `Task` object.
