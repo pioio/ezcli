@@ -12,6 +12,10 @@ TASKCLI_CFG_SEARCH
 What task namespace to prefix to tasks when merging tasks from a upper directory level tasks.py. See also: TASKCLI_EXTRA_TASKS_PY_FILENAMES  
 TASKCLI_CFG_EXTRA_TASKS_NAME_NAMESPACE  
 
+### parent
+Whether to also include tasks from the closest parent's directory's tasks.py  
+TASKCLI_CFG_PARENT  
+
 ### extra_tasks_alias_namespace
 What string to prefix to task aliases when merging tasks with a different tasks.py. See also: TASKCLI_EXTRA_TASKS_PY_FILENAMES  
 TASKCLI_CFG_EXTRA_TASKS_ALIAS_NAMESPACE  
@@ -79,4 +83,8 @@ TASKCLI_CFG_PRINT_RETURN_VALUE
 ### list_all
 Listing tasks shows all possible infomation. Extremely very verbose output.  
 TASKCLI_CFG_LIST_ALL  
+
+### print_debug
+Import the tasks and print detailed debug information. Use with, or without, specifying a task name.  
+TASKCLI_CFG_PRINT_DEBUG  
 

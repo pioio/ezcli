@@ -318,7 +318,7 @@ hello                 This line will become the summary for the task list output
 # tt -f basic.py
 default               Default tasks
 hello                 This line will become the summary for the task list output.
-hello-hidden          This task is hidden by default.
+1 hidden
 ```
 
 ```sh
