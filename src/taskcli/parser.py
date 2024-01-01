@@ -55,7 +55,6 @@ def dispatch(
     # Initial parser, only used to find the tasks file
     log.debug("Dispatching with argv=%s", argv)
     if not argv:
-        from taskcli.main import get_argv
         argv = get_argv()
 
     if module is None:
@@ -603,3 +602,31 @@ def print_debug_info_one_task(task: Task):
     fun(f"### Task: {task.name}")
     task.debug(fun)
 
+
+
+
+def get_argv() -> list[str]:
+    """Return the command line arguments prefixed with default options if needed.
+
+    There's a different set of default options for 't|taskcli' and 'tt' commands
+    """
+    from taskcli import tt
+
+    if utils.is_basename_tt():
+        # when calling with "tt"
+
+        # Let's always add --show-hidden - more consistent behavior to users who forget to specify it
+        # when customizing options.
+        builtin_tt_options = ["--show-hidden"]
+        argv = ["--show-hidden"] + tt.config.default_options_tt + sys.argv[1:]
+        if tt.config.default_options_tt:
+            log.debug(
+                f"Using custom default options (tt): {tt.config.default_options_tt}, "
+                f"plus the built-in options: {builtin_tt_options}"
+            )
+    else:
+        # when calling with "t" or "taskcli"
+        argv = tt.config.default_options + sys.argv[1:]
+        if tt.config.default_options:
+            log.debug(f"Using custom default options (taskcli): {tt.config.default_options}")
+    return argv

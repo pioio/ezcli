@@ -1,6 +1,7 @@
 """Entrypoint for the 'taskcli' command."""
 
 
+from dataclasses import dataclass
 import os
 import sys
 import time
@@ -20,14 +21,19 @@ from .types import Module
 log = get_logger(__name__)
 
 def main() -> None:
-    """Entrypoint for taskfiles that are meant to be ran via `./tasks.py` .
+    """Entrypoint for taskfiles that are meant to be ran via `./mytasks.py` or `python mytasks.py` .
+
+    Note that you typically should invoke tasks via `t`, `tt`, `taskcli` commands.
 
     Example:
     ```
+        from taskfile import tt, task, run
+
         @task
         def foobar():
             print("Hello!")
-
+            run("ls -la")
+i
         if __name__ == "__main__":
             tt.main()
     ```
@@ -35,28 +41,49 @@ def main() -> None:
     module = sys.modules["__main__"]
     main_internal(done=True, from_module=module)
 
+def _assert_taskcli_is_installed() -> None:
+    try:
+        import taskcli
+    except ImportError as e:
+        err = f"'taskcli' prackage is not installed, please install it with 'pip install taskcli: {e}'"
+        utils.print_error(err)
+        sys.exit(1)
 
-def main_internal(done:bool=False, from_module:Module|None=None) -> None: # noqa: C901
-    """Entrypoint for the 'taskcli' command."""
-    start = time.time()
-    INVALID_TIME = -1.0
-
-    from taskcli import task, tt
-    log.separator("Starting main")
+def _debug_environment(from_module:Module|None=None):
+    log.debug("Note: you can use -v, -vv, -vvv to show more verbose log output. "
+              "See troubleshooting docs in case of problems.")
+    log.debug("Current working directory: " + os.getcwd())
+    log.debug(f"{sys.argv=}")
     if from_module:
         log.debug(f"main: {from_module=} {id(from_module)=}")
 
-    try:
-        import taskcli
-    except ImportError:
-        print("'taskcli' is not installed, please install it with 'pip install taskcli'")  # noqa: T201
-        sys.exit(1)
+# @dataclass
+# class Profiler:
+#     import_took:float
+
+# @dataclass
+# class StartupContext:
+
+
+def main_internal(done:bool=False, from_module:Module|None=None) -> None: # noqa: C901
+    """Entrypoint for the `taskcli`, `tt`, and `t` commands.
+
+    If you're calling from a script, use `main()` instead.
+    """
+    start = time.time()
+    INVALID_TIME = -1.0
+
+    log.separator("Starting main_internal()")
+    _assert_taskcli_is_installed()
+    _debug_environment(from_module=from_module)
 
     parser = build_initial_parser()
-    argv = sys.argv[1:]
-    argconfig, _ = parser.parse_known_args(argv or sys.argv[1:])
 
-    tasks_found = False
+    from taskcli import tt
+
+    argv = sys.argv[1:]
+    argconfig, _ = parser.parse_known_args(argv)
+
     import_took = INVALID_TIME
     include_took = INVALID_TIME
 
@@ -95,16 +122,10 @@ def main_internal(done:bool=False, from_module:Module|None=None) -> None: # noqa
         else:
             return ""
 
-    #if not done and (argconfig.parent or tt.config.parent):
     for path in filepaths_to_include:
         assert os.path.exists(path), f"File not found: {path}"
 
     def include_from_filepaths(filepaths_to_include:list[str]) -> list[Task]:
-        # if not filepaths_to_include:
-        #     cwd = os.getcwd()
-        #     msg = f"taskcli: No files to include in '{cwd}'. Run 'taskcli --init' to create a new 'tasks.py', or specify one with -f ."
-        #     print_to_stderr(msg, color="")
-        #     sys.exit(1)
         for filepath in filepaths_to_include:
             filepath = filepath.strip()
             absolute_filepath = os.path.abspath(filepath)
@@ -174,36 +195,8 @@ def main_internal(done:bool=False, from_module:Module|None=None) -> None: # noqa
 
 
 
-def get_argv() -> list[str]:
-    """Return the command line arguments. Prefixed with default options if needed.
-
-    There's a different set of default options for 't|taskcli' and 'tt' commands
-    """
-    from taskcli import tt
-
-    if utils.is_basename_tt():
-        # when calling with "tt"
-
-        # Let's always add --show-hidden - more consistent behavior to users who forget to specify it
-        # when customizing options.
-        builtin_tt_options = ["--show-hidden"]
-        argv = ["--show-hidden"] + tt.config.default_options_tt + sys.argv[1:]
-        if tt.config.default_options_tt:
-            log.debug(
-                f"Using custom default options (tt): {tt.config.default_options_tt}, "
-                f"plus the built-in options: {builtin_tt_options}"
-            )
-    else:
-        # when calling with "t" or "taskcli"
-        argv = tt.config.default_options + sys.argv[1:]
-        if tt.config.default_options:
-            log.debug(f"Using custom default options (taskcli): {tt.config.default_options}")
-    return argv
-
-LS = list[str]
-
-def _find_default_file_in_dirs(default_files:LS, dirs:LS, ignore:LS|None=None) -> LS:
-    out:LS = []
+def _find_default_file_in_dirs(default_files:list[str], dirs:list[str], ignore:list[str]|None=None) -> list[str]:
+    out:list[str] = []
 
     log.debug(f"{ignore=}")
     found = False
@@ -228,7 +221,3 @@ def _find_default_file_in_dirs(default_files:LS, dirs:LS, ignore:LS|None=None) -
                 break
     return out
 
-
-def _get_parent_path(path:str) -> str:
-    """Return the parent dir of the given path."""
-    return os.path.abspath(os.path.join(path, os.pardir))
