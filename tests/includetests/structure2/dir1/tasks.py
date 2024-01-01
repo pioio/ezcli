@@ -1,13 +1,9 @@
 #!/usr/bin/env python3
-import os
+
 import taskcli
 
 from taskcli import task, tt
 
-import importlib.util
-import sys
-
-from contextlib import contextmanager
 
 from foobar import foo
 
