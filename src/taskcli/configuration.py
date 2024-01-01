@@ -91,8 +91,8 @@ class Config:
     # Prefix with "\n" to separate group names with a newline
     # use {NAME} instead of {name} to print group name in uppercase
 
-    render_format_of_group_name: str = "{bold}{name:<22}{desc:<40}{clear}"
-    render_format_of_group_name_hidden: str = "{dark_gray}{bold}{name:<22}{desc:<40}{clear}"
+    render_format_of_group_name: str = "{bold}{icon}{name:<22}{desc:<40}{clear}"
+    render_format_of_group_name_hidden: str = "{icon}{dark_gray}{bold}{name:<22}{desc:<40}{clear}"
 
     render_format_num_hidden_tasks: str = "{dark_gray}({num_hidden_tasks} hidden){clear}"
 

@@ -29,6 +29,13 @@ Run `t` in the `docsgenerator/` folder to see the tasks available for generating
 Some of those doc-related tasks are imported to the root `tasks.py` file, so you can run them from there as well.
 
 ## Implementation details
+### Task and Groups
+Task needs to have unique `task.name`.
+
+Groups do not have to have unique names. When doing `taskcli group` of a group that a duplicate, we simply print content of both.
+This make merging parent to the current context easier, as we don't have to merge parent's group into local ones.
+
+
 ### Task creation and .include()
 Using the @task decorator causes the decorated function to be turned into a `Task` object.
 As part of executing the decorator, the new `Task` object gets stored in a special `taskcli`-specific field

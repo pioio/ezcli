@@ -34,6 +34,7 @@ def test_broken_example_raises():
         title="broken",
         filepath=filepath,
         file_content="""
+from taskcli import task
 @task
 def ok():
    assert True
@@ -50,8 +51,10 @@ def bad_assert():
     taskcli.examples.run_example(example, runcmd)
     taskcli.examples.run_example(example, runcmd)
 
-    with pytest.raises(subprocess.CalledProcessError):
-        runcmd = taskcli.examples.RunCommand(desc="run ok", cmd="taskcli -f " + example.filepath + " bad-assert")
-    with pytest.raises(subprocess.CalledProcessError):
-        runcmd = taskcli.examples.RunCommand(desc="run ok", cmd="taskcli -f " + example.filepath + " non-existing-task")
+    runcmd = taskcli.examples.RunCommand(desc="run ok", cmd="taskcli -f " + example.filepath + " bad-assert")
+    with pytest.raises(Exception, match="Error running"):
+        taskcli.examples.run_example(example, runcmd)
 
+    runcmd = taskcli.examples.RunCommand(desc="run ok", cmd="taskcli -f " + example.filepath + " non-existing-task")
+    with pytest.raises(Exception, match="Error running"):
+        taskcli.examples.run_example(example, runcmd)

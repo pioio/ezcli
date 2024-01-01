@@ -27,6 +27,7 @@ class Group:
         sort_important_first: bool = True,
         namespace: str = "",
         alias_namespace: str = "",
+        from_parent: bool = False,
     ):
         """Create a new group of tasks.
 
@@ -49,6 +50,8 @@ class Group:
 
         self.sort_important_first = sort_important_first
         self.sort_hidden_last = sort_hidden_last
+
+        self.from_parent = from_parent
 
         global created
         # TODO: this will fail if moduls define groups of same names

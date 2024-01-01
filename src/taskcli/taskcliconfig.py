@@ -12,7 +12,8 @@ Config load order
 - built-in defaults    -> during import
 - global config file   -> during import  (TODO)
 - user config file     -> during import  (TODO)
-- tasks.py settings    -> taskcli.config.show_hidden = True  (from ./tasks.py)
+- tasks.py settings    -> taskcli.tt.config.show_hidden = True  (from ./tasks.py)
+    runs during import, therefore already available in taskcli's main() function
     How to prevent imported modules from changing the defaults? taskcli.config.reset()
 - env vars             -> run during dispatch
 - CLI arguments        -> during dispatch
@@ -58,6 +59,7 @@ class ConfigField:
         nargs: str = "",
         metavar: str = "",
         choices: list[str] | None = None,
+        needed_early: bool = False,
     ):
         self.default = default
         self.name = name
@@ -71,6 +73,7 @@ class ConfigField:
         self.action = action
         self.nargs = nargs
         self.choices = choices
+        self.needed_early = needed_early
 
 
 class TaskCLIConfig:
@@ -110,6 +113,7 @@ class TaskCLIConfig:
 
         # Accumulate functions used to configure the parser
         self._configure_parser: list[Callable[[argparse.ArgumentParser], None]] = []
+        self._configure_early_parser: list[Callable[[argparse.ArgumentParser], None]] = []
         self._read_parsed_args: list[Callable[[TaskCLIConfig, argparse.Namespace], None]] = []
         self._read_from_env: list[Callable[[TaskCLIConfig], None]] = []
         self._addded_names: set[str] = set()
@@ -151,7 +155,7 @@ class TaskCLIConfig:
         self.extra_tasks_filter: Callable[["Task"], bool] | None = None
 
         self.field_extra_tasks_name_namespace = ConfigField(
-            "p",
+            "X",
             "extra_tasks_name_namespace",
             cli=False,
             desc=(
@@ -160,6 +164,13 @@ class TaskCLIConfig:
             ),
         )
         self.extra_tasks_name_namespace = self._add_str(self.field_extra_tasks_name_namespace)
+
+        self.field_parent = ConfigField(
+            False, "parent", "-p", desc="Whether to also include tasks from the closest parent's directory's tasks.py",
+            needed_early=True,
+        )
+        self.parent: bool = self._add_bool(self.field_parent)
+
 
         self.field_extra_tasks_alias_namespace = ConfigField(
             "",
@@ -315,6 +326,9 @@ class TaskCLIConfig:
         self.default_options: list[str] = []
         self.default_options_tt: list[str] = []
 
+        self.field_print_debug = ConfigField(False, "print_debug", desc="Import the tasks and print detailed debug information. Use with, or without, specifying a task name.")
+        self.print_debug: bool = self._add_bool(self.field_print_debug)
+
     def _store_name(self, name: str) -> None:
         """To prevent adding the same name twice."""
         assert name not in self._addded_names
@@ -378,6 +392,8 @@ class TaskCLIConfig:
         if field.cli:
             self._configure_parser.append(add_argument)
             self._read_parsed_args.append(read_argument)
+        if field.needed_early:
+            self._configure_early_parser.append(add_argument)
         if field.env:
             self._read_from_env.append(read_from_env)
 
@@ -417,6 +433,8 @@ class TaskCLIConfig:
         if field.cli:
             self._configure_parser.append(add_argument)
             self._read_parsed_args.append(read_argument)
+        if field.needed_early:
+            self._configure_early_parser.append(add_argument)
         if field.env:
             self._read_from_env.append(read_from_env)
 
@@ -459,6 +477,9 @@ class TaskCLIConfig:
         self._read_parsed_args.append(read_argument)
         if env:
             self._read_from_env.append(read_from_env)
+        # TODO
+        # if field.needed_early:
+         #    self._configure_early_parser.append(add_argument)
 
         return default
 
@@ -515,6 +536,11 @@ class TaskCLIConfig:
     def configure_parser(self, parser: argparse.ArgumentParser) -> None:
         """Configure the parser."""
         for f in self._configure_parser:
+            f(parser)
+
+    def configure_early_parser(self, parser: argparse.ArgumentParser) -> None:
+        """Configure the early parser (used before dispatching)."""
+        for f in self._configure_early_parser:
             f(parser)
 
     def read_parsed_arguments(self, args: argparse.Namespace) -> None:

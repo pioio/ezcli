@@ -2,6 +2,7 @@ import argparse
 import inspect
 import logging
 import os
+from re import U
 import sys
 from ast import arg
 from json import load
@@ -24,7 +25,7 @@ from .task import Task
 from .taskcli import TaskCLI
 from .taskrendersettings import TaskRenderSettings
 from .types import AnyFunction, Module
-from .utils import param_to_cli_option, print_warning
+from .utils import param_to_cli_option, print_to_stderr, print_warning
 
 """"
 TODO:
@@ -48,12 +49,14 @@ def dispatch(
     argv: list[str] | None = None,
     *,
     module: Module | None = None,
-    tasks_found: bool = True,
     sysexit_on_user_error: bool = True,
 ) -> Any:
     """Dispatch the command line arguments to the correct function."""
     # Initial parser, only used to find the tasks file
     log.debug("Dispatching with argv=%s", argv)
+    if not argv:
+        from taskcli.main import get_argv
+        argv = get_argv()
 
     if module is None:
         module = utils.get_callers_module()
@@ -61,7 +64,7 @@ def dispatch(
     load_tasks_from_module_to_runtime(module)
 
     try:
-        return _dispatch_unsafe(argv, tasks_found)
+        return _dispatch_unsafe(argv)
     except UserError as e:
         utils.print_error(f"{e}")
         if sysexit_on_user_error:
@@ -71,8 +74,9 @@ def dispatch(
             raise
 
 
-def _dispatch_unsafe(argv: list[str] | None = None, tasks_found: bool = True) -> Any:  # noqa: C901
+def _dispatch_unsafe(argv: list[str] | None = None) -> Any:  # noqa: C901
     tasks: list[Task] = taskcli.core.get_runtime().tasks
+    # only check for tasks later
 
     parser = build_parser(tasks)
 
@@ -100,6 +104,13 @@ def _dispatch_unsafe(argv: list[str] | None = None, tasks_found: bool = True) ->
 
     taskcli.core.get_runtime().parsed_args = argconfig
 
+    if config.verbose >=2:
+        count = 0
+        for env in os.environ:
+            if env.startswith("TASKCLI_"):
+                print_to_stderr(f"{env}={os.environ[env]}")
+                count += 1
+        log.debug(f"Found {count} TASKCLI_ env vars")
     if config.init is True:
         create_tasks_file()
         return
@@ -110,13 +121,35 @@ def _dispatch_unsafe(argv: list[str] | None = None, tasks_found: bool = True) ->
         envvars.show_env(verbose=True, extra_vars=config.get_env_vars())
         return
 
+
+    ########################################################################################
+    # This is the first place where we check if we found any tasks
+    from taskcli import tt
+    if tt.get_runtime().tasks == []:
+        cwd = os.getcwd()
+        msg = f"taskcli: No files to include in '{cwd}'. Run 'taskcli --init' to create a new 'tasks.py', or specify one with -f ."
+        print_to_stderr(msg, color="")
+        sys.exit(1)
+
+
+    ########################################################################################
+    if config.print_debug is True:
+        if not hasattr(argconfig, "task"):
+            print_debug_info_all_tasks()
+        else:
+            for task in tasks:
+                if task.name == argconfig.task:
+                    print_debug_info_one_task(task)
+                    return
+            utils.print_error(f"Task {argconfig.task} not found")
+        return
+
+
+
     # >  if argconfig.version:
     # >      print("version info...")
     # >      sys.exit(0)
 
-    if not tasks_found:
-        print_task_not_found_error(argv)
-        sys.exit(1)
 
     import taskcli.taskrendersettings as rendersettings
 
@@ -180,7 +213,7 @@ def _dispatch_unsafe(argv: list[str] | None = None, tasks_found: bool = True) ->
                     render_settings.show_hidden_groups = True
                     render_settings.show_hidden_tasks = True
                     print_listed_tasks(all_children_tasks, render_settings=render_settings)
-                    sys.exit(1)
+                    #sys.exit(1)
             # should never happen
             sys.exit(9)
         else:
@@ -216,6 +249,7 @@ def _dispatch_unsafe(argv: list[str] | None = None, tasks_found: bool = True) ->
 def print_task_not_found_error(argv: list[str]) -> None:
     """Print the error message when no tasks are found."""
     # TODO, check upper dirs
+    raise NotImplementedError("TODO")
     print(  # noqa: T201
         "taskcli: No tasks file found in current directory, "
         f"looked for: {envvars.TASKCLI_TASKS_PY_FILENAMES.value}. "
@@ -259,9 +293,14 @@ DEFAULT_TASK_PY = envvars.TASKCLI_TASKS_PY_FILENAMES.value
 
 
 def build_initial_parser() -> argparse.ArgumentParser:
-    """Build the parser."""
+    """Build small parser containing only the flags needed early in the execution."""
     root_parser = argparse.ArgumentParser(add_help=False)
     _add_initial_tasks_to_parser(root_parser)
+
+    from taskcli import tt
+    config = tt.config
+    config.configure_early_parser(root_parser)
+
     return root_parser
 
 
@@ -270,9 +309,19 @@ def _add_initial_tasks_to_parser(parser: argparse.ArgumentParser) -> None:
         "-f",
         "--file",
         required=False,
-        default=DEFAULT_TASK_PY,
+        default="",
         help=f"Which tasks file(s) to use, comma separate, first one found is used. default is '{DEFAULT_TASK_PY}'",
     )
+    from taskcli import tt
+
+
+    # parser.add_argument( # TODO: deduplicate
+    #     tt.config.field_parent.short,
+    #     tt.config.field_parent.cli_arg_flag,
+    #     required=False,
+    #     default=tt.config.field_parent.default,
+    #     help = tt.config.field_parent.desc,
+    # )
 
 
 def build_parser(tasks: list[Task]) -> argparse.ArgumentParser:  # noqa: C901
@@ -296,13 +345,22 @@ def build_parser(tasks: list[Task]) -> argparse.ArgumentParser:  # noqa: C901
             raise UserError(msg)
 
         # add group names
+        from taskcli import Group
+        #groups_visited: set[Group] = set()
         for group in task.groups:
             group_name = group.name.replace(" ", "-").lower()
+            parser_name = group_name + GROUP_SUFFIX
+
+            if parser_name in added_subparsers:
+                # two groups with the same name, that's ok, ...
+                continue
+
             if group not in groups:
                 groups.append(group)
-                subparser = subparsers.add_parser(group_name + GROUP_SUFFIX)
-                subparser.set_defaults(task=group_name + GROUP_SUFFIX)
-                added_subparsers += [group_name + GROUP_SUFFIX]
+
+                subparser = subparsers.add_parser(parser_name)
+                subparser.set_defaults(task=parser_name)
+                added_subparsers += [parser_name]
 
         all_names_of_task = task.get_all_task_names()
 
@@ -533,3 +591,15 @@ def _build_parser_default(param: inspect.Parameter) -> str | None:
     else:
         assert isinstance(param.default, str) or param.default is None
         return param.default
+
+
+def print_debug_info_all_tasks():
+    runtime = taskcli.core.get_runtime()
+    for task in runtime.tasks:
+        print_debug_info_one_task(task)
+
+def print_debug_info_one_task(task: Task):
+    fun = print
+    fun(f"### Task: {task.name}")
+    task.debug(fun)
+

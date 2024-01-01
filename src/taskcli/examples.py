@@ -179,7 +179,8 @@ def run_example(example: Example, runcmd: RunCommand) -> str:
             CLEAR = "\033[0m"
             print(f"  stdout and stderr: \n{PINK}{res.stdout.decode('utf-8')}{CLEAR}")
             print(f"  returncode: {res.returncode}")
-            raise ValueError("Error running example")
+            msg = "Error running example"
+            raise Exception(msg)
         stdout = res.stdout.decode("utf-8")
     finally:
         os.chdir(oldcwd)

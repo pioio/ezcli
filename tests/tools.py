@@ -135,7 +135,7 @@ def _changed_config(fun, **kwargs):
         setattr(old_config, k, v)
 
 
-def run_tasks(cmd: str) -> tuple[str, str]:
+def run_tasks(cmd: str, check=False) -> tuple[str, str]:
     print(f"run_tasks: {cmd}")
     process = subprocess.Popen(
         [cmd],
@@ -145,6 +145,10 @@ def run_tasks(cmd: str) -> tuple[str, str]:
         shell=True,
     )
     stdout, stderr = process.communicate()
+
+    if check:
+        assert process.returncode == 0, f"command failed:\ncmd: {cmd}\n---stdout: {stdout.decode()}\n--- stderr: {stderr.decode()}"
+
     return stdout.decode(), stderr.decode()
 
 

@@ -1,13 +1,11 @@
 """Entrypoint for the 'taskcli' command."""
 
 
-import importlib.util
 import os
-import random
-import string
 import sys
 import time
-from typing import Callable
+
+from requests import get
 
 import taskcli.include
 
@@ -16,14 +14,25 @@ from .logging import get_logger
 from .parser import build_initial_parser
 from .task import Task, UserError
 from .utils import print_error, print_to_stderr
+from taskcli import task, tt
+from .types import Module
 
 log = get_logger(__name__)
 
+def main() -> None:
+    """Call this from your tasks.py if you want to be able to run it via './tasks.py' directly."""
+    module = sys.modules["__main__"]
+    main_internal(done=True, from_module=module)
 
-def main() -> None:  # noqa: C901
+
+def main_internal(done:bool=False, from_module:Module|None=None) -> None: # noqa: C901
     """Entrypoint for the 'taskcli' command."""
     start = time.time()
     INVALID_TIME = -1.0
+
+    log.separator("Starting main")
+    if from_module:
+        log.debug(f"main: {from_module=} {id(from_module)=}")
 
     try:
         import taskcli
@@ -39,139 +48,97 @@ def main() -> None:  # noqa: C901
     import_took = INVALID_TIME
     include_took = INVALID_TIME
 
-    already_loaded = set()
+    # allow to specify many files, include from many
+    filepaths_to_include:list[str] = []
+    default_files =  envvars.TASKCLI_TASKS_PY_FILENAMES.value.split(",")
 
-    def include_from_file(
-        filename: str,
-        name_namespace: str = "",
-        alias_namespace: str = "",
-        mark_them: bool = False,
-        filter: Callable[[Task], bool] | None = None,
-    ) -> None:
-        log.separator(f"Importing objects from {filename}")
-        log.debug("Current working dir: " + os.getcwd())
-        absolute_filepath = os.path.abspath(filename)
-        log.debug(f"Absolute filepath: {absolute_filepath}")
-
-        dir = os.path.dirname(absolute_filepath)
-        sys.path.append(dir)
-        # import module by name
-        basename = os.path.basename(absolute_filepath)
-        start_import = time.time()
-
-        module_name = basename.replace(".py", "").replace("-", "_")
-        log.debug(f"Importing module: {module_name}")
-        #with utils.change_dir(dir):
-        #print(os.getcwd(), module_name)
-        imported_module = __import__(module_name)
-        #print(os.getcwd(), "done", module_name)
-
-        nonlocal import_took
-        import_took = time.time() - start_import
-
-        log.separator(f"Including tasks from {filename}")
-        already_loaded.add(filename)
-
-        start_include = time.time()  # FIXME: called for extra includes
-
-        # This includes the tasks from 'sometasks' into THIS module (main)
-
-        tasks = taskcli.include.include(
-            imported_module,
-            skip_include_info=True,
-            name_namespace=name_namespace,
-            alias_namespace=alias_namespace,
-            filter=filter,
-        )
-
-        # TODO: fixme, this is needed for sortin those tasks to top. but right now they get duplicated
-        # >>> for task in tasks:
-        # >>>     task.from_above = True
-        if mark_them:
-            for task in tasks:
-                task.name_format = f">{task.name_format}"
-                blue = "\033[34m"
-                task.name_format = blue + "⬆ {green}{name}{clear}"
-
-        nonlocal include_took, tasks_found
-        include_took = time.time() - start_include
-        tasks_found = True
-
-    for filename in argconfig.file.split(","):
-        filename = filename.strip()
-        if os.path.exists(filename):
-            include_from_file(filename)
+    if not done:
+        # If file, or files, were explicitly specified, they must exist
+        if argconfig.file:
+            log.debug(f"main: -f was specified: {argconfig.file=}")
+            for path in argconfig.file.split(","):
+                abspath = os.path.abspath(path)
+                if not os.path.exists(path):
+                    print_error(f"Specified file not found: {path} (absolute: {abspath})")
+                    sys.exit(1)
+                filepaths_to_include.append(abspath)
         else:
-            print_error(f"File not found: {filename}")
-            sys.exit(1)
+            log.debug(f"main: '-f <filename>' was not specified explicitly; looking for default files to include. {os.getcwd()=}")
+            log.debug("  The candidate default files to include are: " + str(default_files))
+            log.debug("  Will try to include the first one encountered.")
+            dirs_to_check = ["./", "../", "../../", "../../../", "../../../../", "../../../../../"]
+            log.debug("  Will now look for them in the following dirs: " + str(dirs_to_check))
 
-    from taskcli import tt
 
-    if tasks_found and tt.config.include_extra_tasks or not tasks_found:
-        for filename in envvars.TASKCLI_EXTRA_TASKS_PY_FILENAMES.value.split(","):
-            filename = filename.strip()
-            if os.path.exists(filename):
-                random_lowercase = "".join(random.choices(string.ascii_lowercase, k=8))
+            filepaths_to_include.extend(_find_default_file_in_dirs(default_files=default_files, dirs=dirs_to_check))
 
-                random_lowercase = "taskcli_import_" + random_lowercase
-                abs_filepath = os.path.abspath(filename)
-                dir_filepath = os.path.dirname(abs_filepath)
-                import shutil
+    def get_parent_path() -> str:
+        log.debug(f"main: -p was specified: {argconfig.parent=}")
+        dirs_to_check = ["../", "../../", "../../../", "../../../../", "../../../../../"]
+        parents = _find_default_file_in_dirs(default_files=default_files, dirs=dirs_to_check, ignore=filepaths_to_include)
+        log.debug("Found parents: " + str(parents))
+        #return parents[0]
+        if parents:
+            return parents[0]
+        else:
+            return ""
 
-                log.debug(f"Copying {abs_filepath} to {dir_filepath}/{random_lowercase}.py")
-                target_filepath = f"{dir_filepath}/{random_lowercase}.py"
-                try:
-                    shutil.copy(abs_filepath, target_filepath)
+    #if not done and (argconfig.parent or tt.config.parent):
+    for path in filepaths_to_include:
+        assert os.path.exists(path), f"File not found: {path}"
 
-                    if not tasks_found:  # not local tasks.py, it's not merging, so no namespace
-                        include_from_file(target_filepath, mark_them=False)
-                    else:
-                        # might have
-                        filterfun = tt.config.extra_tasks_filter
-                        alias_namespace: str = tt.config.extra_tasks_alias_namespace
-                        name_namespace: str = tt.config.extra_tasks_name_namespace
-                        # By default no
+    def include_from_filepaths(filepaths_to_include:list[str]) -> list[Task]:
+        # if not filepaths_to_include:
+        #     cwd = os.getcwd()
+        #     msg = f"taskcli: No files to include in '{cwd}'. Run 'taskcli --init' to create a new 'tasks.py', or specify one with -f ."
+        #     print_to_stderr(msg, color="")
+        #     sys.exit(1)
+        for filepath in filepaths_to_include:
+            filepath = filepath.strip()
+            absolute_filepath = os.path.abspath(filepath)
+            if os.path.exists(absolute_filepath):
+                # TODO: rename to "preserve groups?"
+                return tt.include(filepath, skip_include_info=True)
+            else:
+                print_error(f"File not found: {filepath}")
+                sys.exit(1)
+        return []
 
-                        include_from_file(
-                            target_filepath,
-                            name_namespace=name_namespace,
-                            alias_namespace=alias_namespace,
-                            mark_them=True,
-                            filter=filterfun,
-                        )
-                finally:
-                    try:
-                        log.debug(f"Done! Now removing {target_filepath}.")
-                        os.remove(f"{dir_filepath}/{random_lowercase}.py")
-                    except UserError as e:
-                        msg = f"Failed to remove temporary file {target_filepath}: {e}"
-                        raise Exception(msg) from e
+    if not done:
+        log.separator("Initial include")
+        log.debug(f"Initial include: {filepaths_to_include=}")
 
-                log.debug("Done!")
-                break  # for now only ones
+        # This does Python import, initializing tt.config with settings defined in the tasks.py
+        # so, after this initial include, it's safe to use tt.config in this function
+        include_from_filepaths(filepaths_to_include)
+
+        if argconfig.parent or tt.config.parent:
+            log.debug(f"main: parent was specified: via {argconfig.parent=} or {tt.config.parent=}")
+            if parent_path := get_parent_path():
+                log.debug(f"Parent include: {filepaths_to_include=}")
+                log.debug(f"main: {parent_path=}")
+                tasks_from_parent = tt.include(parent_path, skip_include_info=True)
+                for task in tasks_from_parent:
+                    task.group.from_parent = True
+                    task.from_parent = True
+
+
 
     log.separator("Finished include and imports")
-    # This part be right after importing the default ./task.p and before anything else
-    # this way we allow ./tasks.py to change the default config, which in turn
-    # might impact the output of get_argv()   (the default argument)
-    argv = get_argv()
 
-    this_module = sys.modules[__name__]
+
     taskfile_took = INVALID_TIME
-
-    if taskfiledev.should_include_taskfile_dev(argv=argv):
-        log.separator("Initializing go-task")
-        start_taskfile = time.time()
-        tasks_were_included = taskfiledev.include_tasks(to_module=this_module)
-        if tasks_were_included:
-            tasks_found = True
-        taskfile_took = time.time() - start_taskfile
 
     dispatch_took = INVALID_TIME
     try:
         start_dispatch = time.time()
         log.separator("Dispatching tasks")
-        taskcli.dispatch(argv=argv, tasks_found=tasks_found)
+
+        if from_module is None:
+            from_module = sys.modules[__name__]
+
+        log.debug(f"About to call dispatch, , {from_module=} {id(from_module)=}")
+        taskcli.dispatch(argv=argv, module=from_module)
         dispatch_took = time.time() - start_dispatch
     finally:
         if envvars.TASKCLI_ADV_PRINT_RUNTIME.is_true():
@@ -191,6 +158,8 @@ def main() -> None:  # noqa: C901
                     f"  Taskfile: {taskfile_took:.3f}s (time to run the 'task' binary, "
                     f"{envvars.TASKCLI_GOTASK_TASK_BINARY_FILEPATH})"
                 )
+
+
 
 
 def get_argv() -> list[str]:
@@ -218,3 +187,36 @@ def get_argv() -> list[str]:
         if tt.config.default_options:
             log.debug(f"Using custom default options (taskcli): {tt.config.default_options}")
     return argv
+
+LS = list[str]
+
+def _find_default_file_in_dirs(default_files:LS, dirs:LS, ignore:LS|None=None) -> LS:
+    out:LS = []
+
+    log.debug(f"{ignore=}")
+    found = False
+    for dir in dirs:
+        if found:
+            break
+        for path in default_files:
+            if not os.path.isabs(path):
+                path = os.path.join(dir, path)
+
+            path = path.strip()
+            log.debug(f"  Checking if {path=} exists")
+            if os.path.exists(path):
+                abspath = os.path.abspath(path)
+                if ignore and abspath in ignore:
+                    log.debug(f"  Ignoring {abspath=} because its in the ignore list: {ignore=}")
+                    continue
+
+                log.debug(f"  Found default file: {path=}  (absolute path is {abspath}), not searching further")
+                out.append(abspath)
+                found= True
+                break
+    return out
+
+
+def _get_parent_path(path:str) -> str:
+    """Return the parent dir of the given path."""
+    return os.path.abspath(os.path.join(path, os.pardir))

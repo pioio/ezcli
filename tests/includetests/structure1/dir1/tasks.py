@@ -10,7 +10,7 @@ from contextlib import contextmanager
 
 tasks_d2 = tt.include("../dir2/sometasks.py")
 tasks_d3 = tt.include("../dir3/sometasks.py")
-tasks_d4 = tt.include("../../../../tasks.py")
+tasks_d4 = tt.include("../../../../tasks.py") # include the top-level tasks.py
 
 @task
 def t1():

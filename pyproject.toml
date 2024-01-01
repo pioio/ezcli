@@ -8,9 +8,9 @@ version="0.0.5"
 name="taskcli"
 
 [project.scripts]
-taskcli = "taskcli.main:main"
-t = "taskcli.main:main"
-tt = "taskcli.main:main"
+taskcli = "taskcli.main:main_internal"
+t = "taskcli.main:main_internal"
+tt = "taskcli.main:main_internal"
 
 [project.optional-dependencies]
 dev = [
@@ -28,4 +28,10 @@ dev = [
 docs = [
     "ansitoimg",
     "termtosvg",
+]
+
+
+[tool.pytest.ini_options]
+markers = [
+    "include: test combining tasks across many tasks.py files",
 ]

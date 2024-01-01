@@ -4,12 +4,12 @@ from os import name
 import pytest
 
 from taskcli import task, tt
-from taskcli.include import include
+from taskcli.include import TaskExistsError, include
 from taskcli.task import UserError
 
 from .tools import reset_context_before_each_test
 
-
+@pytest.mark.include()
 def test_include_module_via_groups_with_aliases():
     """Test including a module."""
     # TODO: remove this unit test? replaced with other tests below
@@ -27,7 +27,7 @@ def test_include_module_via_groups_with_aliases():
 
     assert "nsA.nsB.taskc" in full_names, f"Full names: {full_names}"
 
-
+@pytest.mark.include()
 def test_include_module_via_groups_with_aliases_and_import_namespaces():
     # TODO: remove this unit test? replaced with other tests below
     from tests.includesandliases2 import modulea
@@ -44,7 +44,7 @@ def test_include_module_via_groups_with_aliases_and_import_namespaces():
 
     assert len(full_names) == 3
 
-
+@pytest.mark.include()
 def test_simple_include_with_aliases():
     # TODO: remove this unit test? replaced with other tests below
     @task
@@ -71,7 +71,7 @@ def test_simple_include_with_aliases():
     sometask_.add_namespace_from_group(group1)
     assert sometask_._get_full_task_name() == "group1.sometask"
 
-
+@pytest.mark.include()
 def test_simple_include_with_aliases_from_a_group():
     """Import to a namespaced group via namespaced include, from a namespaces group"""
 
@@ -92,7 +92,7 @@ def test_simple_include_with_aliases_from_a_group():
     group1task0 = tasksdict["group1.namespace1.task0"]
     assert "g1ns1t0" in group1task0.aliases
 
-
+@pytest.mark.include()
 def test_include_from_same_module_with_namespace():
     """Important for unit tests"""
 
@@ -110,7 +110,7 @@ def test_include_from_same_module_with_namespace():
     assert len(tasks) == 2, f"tasks: {tasks}"
     t = tasks["ns1.foobar"]
 
-
+@pytest.mark.include()
 def test_include_from_same_module_no_namespace():
     """Important for unit tests"""
 
@@ -118,10 +118,11 @@ def test_include_from_same_module_no_namespace():
     def foobar():
         pass
 
-    with pytest.raises(UserError, match="already exists in"):
+    with pytest.raises(TaskExistsError, match="foobar.* already exists in module"):
         tt.include(foobar)
 
 
+@pytest.mark.include()
 def test_include_from_same_module_groups_no_namespace():
     """Important for unit tests"""
 
@@ -132,14 +133,15 @@ def test_include_from_same_module_groups_no_namespace():
             pass
 
     with tt.Group("group2") as group2:
-        with pytest.raises(UserError, match="already exists in"):
+        with pytest.raises(TaskExistsError, match="foobar.* already exists in module"):
             tt.include(foobar)
+
 
     with tt.Group("group3", namespace="g3") as group3:
         tt.include(foobar)
         tt.get_tasks_dict()["g3.foobar"]
 
-
+@pytest.mark.include()
 def test_include_from_same_module_no_namespace_but_to_a_group():
     """Important for unit tests"""
 
@@ -152,7 +154,7 @@ def test_include_from_same_module_no_namespace_but_to_a_group():
         t = tt.get_tasks_dict()["group.foobar"]
         assert len(t.aliases) == 0
 
-
+@pytest.mark.include()
 def test_include_from_a_group_via_group():
     """If this works within the same module, it will make unit testing incuding easier"""
 
@@ -166,7 +168,7 @@ def test_include_from_a_group_via_group():
         tt.include(foobar)
         t = tt.get_tasks_dict()["group2.group1.foobar"]
 
-
+@pytest.mark.include()
 def test_include_from_a_group_via_group_with_include_namesapce():
     """If this works within the same module, it will make unit testing incuding easier"""
 
@@ -181,9 +183,14 @@ def test_include_from_a_group_via_group_with_include_namesapce():
         t = tt.get_tasks_dict()["group2.include1.group1.foobar"]
         assert ["g2i1g1f"] == t.aliases
 
+@pytest.mark.include()
+def test_include_module_from_same_module_returns_zero_tasks():
+    """The tasks were included into the current module via @task.
 
-def test_include_module_from_same_module_raises_without_namespace():
-    """Important for unit tests"""
+    Running include(module) on top of that should silently skip them.
+    Silently, because this is use for managing networks of includes where one
+    file includes other modules, which might include other modules, duplicating some task names.
+    """
 
     @task
     def foobar1():
@@ -195,12 +202,13 @@ def test_include_module_from_same_module_raises_without_namespace():
 
     this_module = sys.modules[__name__]
 
-    with pytest.raises(UserError, match="already exists in"):
-        tt.include(this_module)
+    #with pytest.raises(TaskExistsError, match="already exists in"):
+    res = tt.include(this_module)
+    assert len(res) == 0
 
 
+@pytest.mark.include()
 def test_include_module_from_same_module_works_with_include_namespace():
-    """Important for unit tests"""
 
     @task
     def foobar1():
@@ -214,7 +222,7 @@ def test_include_module_from_same_module_works_with_include_namespace():
 
     tt.include(this_module, name_namespace="ns")
 
-
+@pytest.mark.include()
 def test_include_task():
     """Ability to include task is important for unit tests - allows us to chain include calls"""
 
@@ -235,7 +243,7 @@ def test_include_task():
     assert t1 is not t2
     assert id(t1) != id(t2)
 
-
+@pytest.mark.include()
 def test_include_task_long_chain():
     @task
     def foobar():
@@ -253,7 +261,7 @@ def test_include_task_long_chain():
         tt.include(thetask)
         t = tt.get_tasks_dict()["group.ns2.ns1.foobar"]
 
-
+@pytest.mark.include()
 def test_include_by_default_skips_hidden_tasks():
     @task(hidden=True)
     def foobar1():
@@ -272,7 +280,7 @@ def test_include_by_default_skips_hidden_tasks():
     assert "ns1.foobar1" not in tasks  #
     assert "ns1.foobar2" in tasks  # include
 
-
+@pytest.mark.include()
 def test_include_via_custom_filter():
     @task(important=True)
     def foobar1():

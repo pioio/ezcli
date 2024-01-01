@@ -3,6 +3,7 @@
 from genericpath import isdir
 import inspect
 import logging
+from posixpath import isabs
 import sys
 from typing import Callable
 from unicodedata import name
@@ -17,6 +18,8 @@ from .types import Any, AnyFunction, Module
 
 log = get_logger(__name__)
 
+# Global list of all included modules, used to prevent circular includes
+_included_module_paths = []
 
 def include(
     object: Module | AnyFunction | "Task"| str,
@@ -29,10 +32,19 @@ def include(
 ) -> list["Task"]:
     """Include Tasks from the specified object into the module which is calling this function. Returns included Tasks.
 
+    WHen including a module, functions already present will be automatically skipped
+    When including a function or Task, if the task of that name exists, an error will be raised.
+
     This function is meant to be called directly from a ./tasks.py file.
     This function is a convenience wrapper around `include_module()` and `include_function()`.
 
     For more control, call the lower level `include_module()` or `include_function()` directly.
+
+    NOTE: if "object" is a relative path, that path will be interpreted as
+          relative to the module to which we're including. Not as relative to the current working dir.
+          This resembles how python imports work, and is required to make "t -f foo/tasks.py" to
+          properly include "foo/subsubdir/tasks.py" when the "foo/tasks.py" calls "tt.include("subsubdir/tasks.py").
+
 
     Example:
     ```
@@ -60,6 +72,8 @@ def include(
     """
     if to_module is None:
         to_module = utils.get_callers_module()
+    log.debug(f"include(): start: {object=} {to_module=} {id(to_module)=}")
+
 
     from .tt import Task
 
@@ -79,8 +93,25 @@ def include(
             )
         ]
     elif isinstance(object, str):
-        from_module = import_module_from_path(object, object)
-        log.debug(f"include(str): now including tasks from imported module.")
+        # Turne relative include path into an absolute path RELATIVE to the module to which we're including
+        # otherwise doing relative imports after `task -f somedir/tasks.py` will not work as the imports will
+        # be relative to the current working directory, not the tasks.py file.
+        path = object
+        if os.path.isabs(path):
+            log.trace(f"include(str): Path {path=} is already absolute, not changing it.")
+            # already is abs
+            pass
+        else:
+            to_module_file = to_module.__file__
+            assert to_module_file is not None
+            to_module_dirpath = os.path.dirname(to_module_file)
+            new_path = os.path.abspath(os.path.join(to_module_dirpath, path))
+            log.trace(f"include(str): Turned relative import path {path} (relative to the module) into an absolute path:l {new_path}")
+            path = new_path
+
+
+        from_module = import_module_from_path(path, path)
+        log.debug(f"include(str): now including tasks from imported module to module {to_module.__name__} {id(to_module)=}.")
         tasks = include_module(
             from_module, to_module=to_module, name_namespace=name_namespace, alias_namespace=alias_namespace, **kwargs
         )
@@ -104,9 +135,9 @@ def include(
         msg = f"include(): Unsupported type: {type(object)}"
         raise Exception(msg)
 
-    log.debug(f"include(): included {len(tasks)} tasks from {object} to module {to_module.__file__}")
+    log.debug(f"include() end: included {len(tasks)} tasks from {object} to module {to_module.__name__} ({id(to_module)=})")
     for task in tasks:
-        log.debug(f"  include(): {task.name=}")
+        log.debug(f"  include() end: {task.name=}")
     return tasks
 
 def include_module(
@@ -142,6 +173,13 @@ def include_module(
     if not hasattr(to_module, "decorated_functions"):
         to_module.decorated_functions = []  # type: ignore[attr-defined]
 
+    # assert from_module is not None
+    # from_module_path = os.path.abspath(from_module.__file__)
+    # if from_module_path in _included_module_paths:
+    #     log.debug(f"Module {from_module_path} has already been included.")
+    #     raise UserError(msg)
+    # _i
+
     # make a copy, as we will the original list in _include_task if from_module==to_module,
     tasks = from_module.decorated_functions[:]
     out: list[Task] = []
@@ -149,16 +187,23 @@ def include_module(
         # if not skip_include_info:  # otherwise we will filter out the ones included from root module
         if filter and not filter(task):
             continue
+
         # copy the task to the current module
+        try:
+            added_task =  _include_task(
+                    task=task,
+                    from_module=from_module,
+                    to_module=to_module,
+                    skip_include_info=skip_include_info,
+                    namespace=name_namespace,
+                    alias_namespace=alias_namespace,
+                )
+        except TaskExistsError as e:
+            log.debug(f"XXX include_module: Task {task.name} already exists in module {to_module.__name__} {id(to_module)=}, skipping")
+            continue
+
         out.append(
-            _include_task(
-                task=task,
-                from_module=from_module,
-                to_module=to_module,
-                skip_include_info=skip_include_info,
-                namespace=name_namespace,
-                alias_namespace=alias_namespace,
-            )
+            added_task
         )
     return out
 
@@ -216,7 +261,9 @@ def include_function(
         alias_namespace=alias_namespace,
         **kwargs,
     )
-
+class TaskExistsError(Exception):
+    """Raised iff a task already exists in a module and thus cannot be added to it."""
+    pass
 
 def _include_task(
     task: Task,
@@ -240,17 +287,23 @@ def _include_task(
         copy = task.copy(group=group, included_from=from_module)
         copy.add_namespace_from_group(task.group)
         copy.included_from = from_module  # ensure is set
+        copy.distance = task.distance + 1
     else:
         # We're including the root module, preserve the group info, otherwise we would move all tasks to 'default'
-        copy = task  # dont copy at all, just ues the group
+        copy = task  # dont copy at all
+        # but at
 
     if namespace:
         copy.add_namespace(namespace, alias_namespace=alias_namespace)
 
+
+
     existing_tasks = [t for t in to_module.decorated_functions if t.name == copy.name]
     if existing_tasks:
-        msg = f"Task '{copy.name}' included from {from_module.__file__} already exists in module {to_module.__file__}."
-        raise UserError(msg)
+        msg = f"Task '{copy.name}' included from {from_module.__file__} already exists in module {to_module.__file__}. Cannot include it again under the same. Consider using a namespace."
+        raise TaskExistsError(msg)
+
+
 
     to_module.decorated_functions.append(copy)
 
@@ -273,7 +326,7 @@ def load_tasks_from_module_to_runtime(module: Module) -> None:
         return
 
     for task in module.decorated_functions:
-        log.trace(f"load_tasks_from_module_to_runtime(): including task {task.name} from {module} to runtime")
+        log.debug(f"load_tasks_from_module_to_runtime(): including task {task.name} from {module.__name__} {id(module)} to runtime")
         runtime.tasks.append(task)
 
 from contextlib import contextmanager
@@ -292,34 +345,53 @@ def add_to_sys_path(path):
 class TaskImportError(Exception):
     pass
 
+
+def task_already_present(task: Task, module: Module) -> bool:
+    """Check if a task is already present in a module."""
+
+    if not hasattr(module, "decorated_functions"):
+        module.decorated_functions = [] # type: ignore[attr-defined]
+
+    for t in module.decorated_functions:
+        if t.name == task.name:
+            return True
+    return False
+
 # Define a function to import a module from a given path
 def import_module_from_path(module_name, path) -> Module:
     prefix = "import_module_from_path(): "
     abspath = os.path.abspath(path)
-    log.debug(f"{prefix}: {module_name=} {path=} {abspath=}")
+    assert os.path.isabs(path)
+    log.trace(f"{prefix}: start: {module_name=} {path=}")
     path = abspath
 
-    module_dir = os.path.dirname(path)
-    if os.path.isdir(module_dir):
-        log.debug(f"{prefix}: path is a dir: {path}, looking for taskspy")
-        valid_taskspy = find_valid_taskspy_in_dir(module_dir)
+    if os.path.isdir(path):
+        log.trace(f"{prefix}: path is a dir: {path}, looking for taskspy")
+        valid_taskspy = find_valid_taskspy_in_dir(path)
         to_import = valid_taskspy
         if not valid_taskspy:
-            msg = f"{prefix}: Could not find a valid tasks.py file in {module_dir}"
+            msg = f"{prefix}: Could not find a valid tasks.py file in {path}"
             raise TaskImportError(msg)
         else:
             log.debug(f"{prefix}: Found valid tasks.py file: {valid_taskspy}")
-            path = os.path.join(module_dir, valid_taskspy)
+            path = os.path.join(path, valid_taskspy)
 
     else:
-        log.debug(f"{prefix}: path is a file: {path}")
+        log.trace(f"{prefix}: path is a file: {path}")
         to_import = path
 
-    log.debug(f"{prefix}, proceeding with import")
+    module_dir = os.path.dirname(path)
+
+    log.trace(f"{prefix}, proceeding with import")
+
+    if abspath in sys.modules:
+        log.debug(f"{prefix}: module {abspath} already imported, skipping")
+        return sys.modules[abspath]
+
     with add_to_sys_path(module_dir):
-        spec = importlib.util.spec_from_file_location(module_name, to_import)
+        spec = importlib.util.spec_from_file_location(abspath, to_import)
         module = importlib.util.module_from_spec(spec)
-        sys.modules[module_name] = module
+        sys.modules[abspath] = module
         spec.loader.exec_module(module)
     log.debug(f"{prefix}: import of {path} complete")
     return module

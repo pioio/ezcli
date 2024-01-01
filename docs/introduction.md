@@ -39,6 +39,16 @@ Install it with `pip install taskcli`.
 - `t` and `taskcli` command are equivalent - by default they show all tasks which are not marked hidden (more on that later).
 - `tt` is equivalent to running `taskcli --show-hidden`. Like above, but also shows any hidden tasks and groups of tasks. You can customize this command on per-project to show even more info than only the hidden tasks (e.g. show default values of optional arguments).
 
+### Running tasks files directly
+You can also execute your tasks.py directly via `./tasks.py` (include the sheband) or via `python tasks2.py` (filename does not matter, could as well be `./foobar.py`).
+But for running directly to wotk, you will also need to include the following at the end of the file:
+
+```python
+if __name__ == "__main__":
+    tt.dispatch()
+```
+
+
 ### Create your first `tasks.py` file.
 - Run `t --init` to create a starter `tasks.py` file in the current directory.
 - edit it to your liking, more on that later

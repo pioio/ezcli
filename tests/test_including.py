@@ -5,7 +5,7 @@ import pytest
 
 import taskcli
 from taskcli import Task, dispatch, task
-from taskcli.include import include
+from taskcli.include import TaskExistsError, include
 from taskcli.task import UserError
 from tests import tools
 
@@ -57,7 +57,7 @@ parent-sibling"""
 # - task can be called directly via task cli, or via the taskfile of the parent which includes it
 #   in both cases if @task decorator is there, we want to change the dir if change_dir=True (the default)
 
-
+@pytest.mark.include()
 def test_that_running_a_task_in_subdir_changes_to_that_dir():
     """Typical usecase, we should change"""
     stdout, _ = run_tasks("tests/includetest1/parent_test_1.py parent")
@@ -68,7 +68,7 @@ def test_that_running_a_task_in_subdir_changes_to_that_dir():
     assert stdout.strip().endswith("tests/includetest1")
     # this test is ran from above "tests/includetest1", parent1 task should change dir to "tests/includetest1"
 
-
+@pytest.mark.include()
 def test_that_running_a_task_in_subdir_do_not_changes_to_that_dir_if_task_has___change_dir___set_to_false():
     """The task we're calling has change_dir=false, so we should not change the dir"""
     cwd = os.getcwd()
@@ -76,18 +76,19 @@ def test_that_running_a_task_in_subdir_do_not_changes_to_that_dir_if_task_has___
     stdout = clean_stdout(stdout)
     assert stdout.strip().endswith(cwd)
 
-
+@pytest.mark.include()
 def test_include_cwd_change_child1():
     stdout, _ = run_tasks("tests/includetest1/parent_test_1.py child1")
     assert stdout.strip().endswith("tests/includetest1/subdir"), "should have changed dir"
 
-
+@pytest.mark.include()
 def test_include_cwd_change_child1_via_parent():
     stdout, _ = run_tasks("tests/includetest1/parent_test_1.py child1-via-parent")
     assert stdout.strip().endswith("tests/includetest1/subdir"), "should have changed dir"
 
 
 # child2 does not change dir upon entering the task
+@pytest.mark.include()
 def test_include_cwd_change_child2():
     import os
 
@@ -97,7 +98,7 @@ def test_include_cwd_change_child2():
         stdout.strip() == f"child2: {cwd}"
     ), "should be whatever is the current directory, as child2 tasks did not change the dir"
 
-
+@pytest.mark.include()
 def test_include_cwd_change_child2_via_parent():
     stdout, _ = run_tasks("tests/includetest1/parent_test_1.py child2-via-parent")
     assert stdout.strip().endswith(
@@ -106,6 +107,7 @@ def test_include_cwd_change_child2_via_parent():
 
 
 ########################################################################################################################
+@pytest.mark.include()
 def test_include_from_subsubdir_works():
     """Test that including a task from a sub-subdir, which is not a python module, works."""
     with tools.simple_list_format():
@@ -115,6 +117,7 @@ def test_include_from_subsubdir_works():
 
 
 @pytest.mark.skip()
+@pytest.mark.include()
 def test_including_not_decorated_function():
     done = 0
 
@@ -129,6 +132,7 @@ def test_including_not_decorated_function():
 
 
 @pytest.mark.skip()
+@pytest.mark.include()
 def test_including_not_decorated_function_name_change():
     done = 0
 
@@ -141,7 +145,7 @@ def test_including_not_decorated_function_name_change():
     taskcli.dispatch(["xxx"])
     assert done == 42
 
-
+@pytest.mark.include()
 def test_including_decorated_function():
     done = 0
 
@@ -150,7 +154,7 @@ def test_including_decorated_function():
         nonlocal done
         done = 42
 
-    with pytest.raises(UserError, match="already exists in"):
+    with pytest.raises(TaskExistsError, match="already exists in"):
         include(somefun)
 
     include(somefun, name_namespace="foo")
@@ -158,7 +162,7 @@ def test_including_decorated_function():
     taskcli.dispatch(["foo.somefun"])
     assert done == 42
 
-
+@pytest.mark.include()
 def test_double_task_decorator_failes():
     done = 0
 

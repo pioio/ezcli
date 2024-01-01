@@ -1,23 +1,31 @@
 # TODOs for `taskcli`
 
 ## Short-term TODOs:
+- [ ] taskfile.py
+- [x] try to make  _common_test_list("./tasks.py --show-hidden")   work just like 't'
+- [ ] Docs: example with tt -a  # to force including parent via tt
+- [x] auto including parents.
+  - [x] print arrows for included tasks
+- [ ] allow for   `t -f ../../`  and have it load tasks.py from parent if one is missing in that dir?
 - [ ] add unit tests for tests/includestests/structure* folders
   - [ ] fix unit tests
-- [ ] add unit tests for including a task from a above dir - mark with arrow
+- [ ] flag for printing profiling info - add it to troubleshooting info, run with 'time'
 - [ ]  add ability to include module while preserving group
   - [ ] Do I still need merging with parent? Probably not. Except for preserving groups.
 - [ ] add --color yes/no -- finish screenshot generation
 - [ ] rename tasks when including
+- [ ] unit test for decorating same name function twice in the same module
 - [ ] print (tt.config) not working
 - [ ] add task.__call__  unit tests
-- [ ] t shows hidden tasks
-- [ ] tt.include("../../tasks.py", filter=lambda task: task.important) -- relative paths in include should be anchored to the file! Disallow them for now?
+- [ ] Remove old 'extra tasks' fields
+- [x] tt.include("../../tasks.py", filter=lambda task: task.important) -- relative paths in include should be anchored to the file! Disallow them for now?
 - [ ] BUG: dynamic task creation with  'x=x, person_name=person_name' does not allow to set person name from the CLI
 - [ ] wrap right column text, for screenshots
 - [ ] use "import_module" instead of "include" ?
 - [ ] __init__.py is needed in top project to be bale to import docsgenerator/tasks.py which imports generator ... not perfect
   - [ ] I might need a wrapper for remote-import whcih switches dir and imports the module
 - [ ] need more unit tests for imports in various file dir sructures
+- [ ] Test for alias namespace conflicts - silently stripthem?
 -
 - [ ] test foo (x:int)   does not have a long flag
 - [ ] consider starting any local tasks_X.py file, or at least allow using it for that
@@ -27,10 +35,10 @@
 - [ ] example - standardize on t vs taskcli
 - [ ] code location of merged module is wrong @ coverage report (/Users/p/code/mygithub/taskcli/taskcli_import_dribzrel.py:36)
 - [ ] loading ./tasks.py from dir above, merging them with the local one.
-  - [ ] unit tests for merging tasks
+  - [x] unit tests for merging tasks
   - [ ] cleanup main
-  - [ ] circular imports, prevent duplicates gracefully
-  - [ ] How to handle A importing B, importing A?
+  - [x] circular imports, prevent duplicates gracefully
+  - [x] How to handle A importing B, importing A?
   - [ ] t .  # list only tasks from local dir
   - [ ] crashes if added 'dev' section in screenshots/tasks.py
   - [ ] # TODO: have task have internal sort key, combination of digit + name for easier sorting
