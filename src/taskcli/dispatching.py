@@ -11,6 +11,7 @@ from typing import Any, Iterable
 import taskcli
 import taskcli.core
 from taskcli.task import UserError
+from .taskcliconfig import TaskCLIConfig
 
 from . import configuration, envvars, examples, taskfiledev, utils
 from .constants import GROUP_SUFFIX
@@ -99,76 +100,70 @@ def _get_argv() -> list[str]:
             log.debug(f"Using custom default options (taskcli): {tt.config.default_options}")
     return argv
 
+def _do_argcomplete_and_exit(parser: argparse.ArgumentParser) -> None:
+    magical_env = "_ARGCOMPLETE"
+    if magical_env in os.environ:
+        try:
+            import argcomplete
+        except ImportError:
+            utils.print_error(f"`argcomplete` package not installed (but {magical_env=} is set), skipping tab completion")
+            return
 
-def _dispatch(argv: list[str] | None = None) -> Any:  # noqa: C901
-    tasks: list[Task] = taskcli.core.get_runtime().tasks
-    # only check for tasks later
-
-    parser = build_parser(tasks)
-
-    # Must happen before tab completion
-    from taskcli.tt import config
-
-    config.read_from_env()
-    config.configure_parser(parser)
-
-    if "_ARGCOMPLETE" in os.environ:
-        import argcomplete
-
-        print("Starting completion")  # for unit tests # noqa: T201
+#        print("Starting completion")  # we print this for unit tests, it does not interfere with the output  # noqa: T201
         argcomplete.autocomplete(parser)
-        # it will exit if it's a completion request
+        # it will immediately exit if it's a completion request, no stack unwinding(!)
 
-    argv = argv or sys.argv[1:]
-
-    argv = extract_extra_args(argv, taskcli.core.get_runtime())
-
-    log.debug(f"Parsing arguments: {argv}")
-    argconfig = parser.parse_args(argv)
-
-    config.read_parsed_arguments(argconfig)
-
-    taskcli.core.get_runtime().parsed_args = argconfig
-
-    if config.verbose >= 2:
-        count = 0
-        for env in os.environ:
-            if env.startswith("TASKCLI_"):
-                print_to_stderr(f"{env}={os.environ[env]}")
-                count += 1
-        log.debug(f"Found {count} TASKCLI_ env vars")
+def run_subcommands_and_maybe_finish(config:TaskCLIConfig) -> bool:
     if config.init is True:
         create_tasks_file()
-        return
+        return True
     if config.print_env:
         envvars.show_env(verbose=False, extra_vars=config.get_env_vars())
-        return
+        return True
     if config.print_env_detailed:
         envvars.show_env(verbose=True, extra_vars=config.get_env_vars())
-        return
+        return True
+    return False
 
-    ########################################################################################
-    # This is the first place where we check if we found any tasks
-    from taskcli import tt
-
-    if tt.get_runtime().tasks == []:
+def _sys_exit_if_no_tasks_were_loaded(tasks: list[Task]) -> None:
+    if not tasks:
         cwd = os.getcwd()
         msg = f"taskcli: No files to include in '{cwd}'. Run 'taskcli --init' to create a new 'tasks.py', or specify one with -f ."
         print_to_stderr(msg, color="")
         sys.exit(1)
 
-    ########################################################################################
-    if config.print_debug is True:
-        if not hasattr(argconfig, "task"):
-            _print_debug_info_all_tasks()
-        else:
-            for task in tasks:
-                if task.name == argconfig.task:
-                    _print_debug_info_one_task(task)
-                    return
-            utils.print_error(f"Task {argconfig.task} not found")
+def _dispatch(argv: list[str] | None = None) -> Any:  # noqa: C901
+    from taskcli.tt import config
+
+    tasks: list[Task] = taskcli.core.get_runtime().tasks
+    # only check for tasks later
+
+    parser = build_parser(tasks)
+    config.read_env_vars_into_config()
+    config.configure_parser(parser)
+
+    _do_argcomplete_and_exit(parser)
+
+    argv = argv or sys.argv[1:]
+    argv = extract_extra_args(argv, taskcli.core.get_runtime())
+
+    log.debug(f"Parsing arguments: {argv}")
+    argconfig = parser.parse_args(argv)
+    config.read_parsed_arguments(argconfig)
+    taskcli.core.get_runtime().parsed_args = argconfig
+
+    if run_subcommands_and_maybe_finish(config):
         return
 
+    ########################################################################################
+    # This is the first place where we check if we actually found any tasks
+    # in the files we opened. We can do this only after the parsing above
+    _sys_exit_if_no_tasks_were_loaded(tasks)
+
+    ########################################################################################
+    _print_debug_info_tasks(config, tasks)
+
+    # TODO
     # >  if argconfig.version:
     # >      print("version info...")
     # >      sys.exit(0)
@@ -288,4 +283,14 @@ def _print_debug_info_one_task(task: Task):
     fun(f"### Task: {task.name}")
     task.debug(fun)
 
-
+def _print_debug_info_tasks(config: TaskCLIConfig,  tasks: list[Task]):
+    if config.print_debug is True:
+        if not config.task:
+            _print_debug_info_all_tasks()
+        else:
+            for task in tasks:
+                if task.name == config.task:
+                    _print_debug_info_one_task(task)
+                    return
+            utils.print_error(f"Task {config.task} not found")
+        return

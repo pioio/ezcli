@@ -111,6 +111,8 @@ class TaskCLIConfig:
         """
         self.load_from_env = load_from_env
 
+        self.task:str = ""
+
         # Accumulate functions used to configure the parser
         self._configure_parser: list[Callable[[argparse.ArgumentParser], None]] = []
         self._configure_early_parser: list[Callable[[argparse.ArgumentParser], None]] = []
@@ -564,7 +566,12 @@ class TaskCLIConfig:
         for f in self._read_parsed_args:
             f(self, args)
 
-    def read_from_env(self) -> None:
+        if hasattr(args, "task"):
+            self.task = args.task
+        else:
+            self.task = ""
+
+    def read_env_vars_into_config(self) -> None:
         """Read the parsed arguments."""
         for f in self._read_from_env:
             f(self)
