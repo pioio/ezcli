@@ -426,6 +426,7 @@ class Task:
         return "ok"
 
     def debug(self, fun):
+        """Print detailed debug info about this object."""
         for field in self.__dict__:
             value = getattr(self, field)
 
@@ -521,7 +522,7 @@ def _get_wrapper(  # noqa: C901
             if tt.config.print_task_start_message:
                 black = configuration.colors.dark_gray
                 clear = configuration.colors.end
-                msg = f"{black}--"
+                msg = f"{black}--{clear}"
                 utils.print_to_stderr(msg, color="")
             tt.get_runtime().current_tasks.pop()
 

@@ -61,7 +61,6 @@ def build_parser(tasks: list[Task]) -> argparse.ArgumentParser:  # noqa: C901
         # add group names
         from taskcli import Group
 
-        # groups_visited: set[Group] = set()
         for group in task.groups:
             group_name = group.name.replace(" ", "-").lower()
             parser_name = group_name + GROUP_SUFFIX

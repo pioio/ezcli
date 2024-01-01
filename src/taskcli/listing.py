@@ -206,11 +206,6 @@ def render_group(
     num_tasks = group.render_num_shown_hidden_tasks()
     format = config.render_format_of_group_name if not group.hidden else config.render_format_of_group_name_hidden
 
-    if group.name == "default":
-        # hack: there's only ever one default group, merging taskfile containing default groups results in items landing
-        # sharing the group. So, there's never really a parent group from the parent. Only itesm from the parent.
-        blue_arrow = ""
-
     group_name_rendered = format_colors(
         format,
         name=group.name,

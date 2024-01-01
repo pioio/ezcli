@@ -39,10 +39,12 @@ class Example:
 
     @property
     def dirpath(self):
+        """Return the directory containing the example."""
         return os.path.dirname(self.filepath)
 
     @property
     def filename(self):
+        """Return the filename of the example."""
         return os.path.basename(self.filepath)
 
 
@@ -121,10 +123,13 @@ def load_example(filepath: str) -> Example:
     with utils.randomize_filename(filepath) as new_filepath:  # to get a ranadom module name
         module = utils.import_module_from_filepath(new_filepath)
 
+
+    doc = module.__doc__ or ""
+
     e = Example(
         title=example_name,
         file_content=source,
-        desc=module.__doc__,
+        desc=doc,
         filepath=filepath,
         module=module,
     )
@@ -170,13 +175,13 @@ def run_example(example: Example, runcmd: RunCommand) -> str:
         res = subprocess.run(f"{runcmd.cmd}", shell=True, check=False, stderr=subprocess.STDOUT, stdout=subprocess.PIPE)
 
         if res.returncode != 0:
-            print(f"Error running example: {example.title}")
-            print(f"  cmd: {runcmd.cmd}")
-            print(f"  desc: {runcmd.desc}")
+            print(f"Error running example: {example.title}") # noqa: T201
+            print(f"  cmd: {runcmd.cmd}") # noqa: T201
+            print(f"  desc: {runcmd.desc}") # noqa: T201
             PINK = "\033[0;35m"
             CLEAR = "\033[0m"
-            print(f"  stdout and stderr: \n{PINK}{res.stdout.decode('utf-8')}{CLEAR}")
-            print(f"  returncode: {res.returncode}")
+            print(f"  stdout and stderr: \n{PINK}{res.stdout.decode('utf-8')}{CLEAR}") # noqa: T201
+            print(f"  returncode: {res.returncode}") # noqa: T201
             msg = "Error running example"
             raise Exception(msg)
         stdout = res.stdout.decode("utf-8")
@@ -190,4 +195,5 @@ def run_example(example: Example, runcmd: RunCommand) -> str:
 
 
 def get_examples() -> list[Example]:
+    """Return all examples."""
     return load_examples("examples/")

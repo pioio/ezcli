@@ -146,7 +146,7 @@ def _process_task_action(
                 render_settings.show_hidden_groups = True
                 render_settings.show_hidden_tasks = True
                 _print_list_tasks(all_children_tasks, render_settings=render_settings)
-                # sys.exit(1)
+
         # should never happen
         sys.exit(9)
     else:
