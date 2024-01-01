@@ -24,4 +24,4 @@ with taskcli.utils.change_dir("/tmp"):
     tasks_d3 = tt.include("../dir3/tasks.py")
 
 if __name__ == "__main__":
-    taskcli.main()
+    tt.main()

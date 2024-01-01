@@ -19,4 +19,4 @@ def d3t1():
 tasks_d1 = tt.include("../dir1/tasks.py")
 
 if __name__ == "__main__":
-    taskcli.main()
+    tt.main()

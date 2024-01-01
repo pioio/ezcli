@@ -14,13 +14,24 @@ from .logging import get_logger
 from .parser import build_initial_parser
 from .task import Task, UserError
 from .utils import print_error, print_to_stderr
-from taskcli import task, tt
+
 from .types import Module
 
 log = get_logger(__name__)
 
 def main() -> None:
-    """Call this from your tasks.py if you want to be able to run it via './tasks.py' directly."""
+    """Entrypoint for taskfiles that are meant to be ran via `./tasks.py` .
+
+    Example:
+    ```
+        @task
+        def foobar():
+            print("Hello!")
+
+        if __name__ == "__main__":
+            tt.main()
+    ```
+    """
     module = sys.modules["__main__"]
     main_internal(done=True, from_module=module)
 
@@ -30,6 +41,7 @@ def main_internal(done:bool=False, from_module:Module|None=None) -> None: # noqa
     start = time.time()
     INVALID_TIME = -1.0
 
+    from taskcli import task, tt
     log.separator("Starting main")
     if from_module:
         log.debug(f"main: {from_module=} {id(from_module)=}")
@@ -77,7 +89,7 @@ def main_internal(done:bool=False, from_module:Module|None=None) -> None: # noqa
         dirs_to_check = ["../", "../../", "../../../", "../../../../", "../../../../../"]
         parents = _find_default_file_in_dirs(default_files=default_files, dirs=dirs_to_check, ignore=filepaths_to_include)
         log.debug("Found parents: " + str(parents))
-        #return parents[0]
+
         if parents:
             return parents[0]
         else:

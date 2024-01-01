@@ -14,6 +14,7 @@
   - [ ] Do I still need merging with parent? Probably not. Except for preserving groups.
 - [ ] add --color yes/no -- finish screenshot generation
 - [ ] rename tasks when including
+- [ ] don't add '.' to namespace
 - [ ] unit test for decorating same name function twice in the same module
 - [ ] print (tt.config) not working
 - [ ] add task.__call__  unit tests
@@ -78,7 +79,6 @@
 - [ ] using -f to specify file in other dir still make taskfile be loaded locally
 
 - [ ]
-  - [ ] per module task list
   - [ ] include(child_tasks.child1)
   - [ ] include to group
 

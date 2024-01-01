@@ -14,11 +14,11 @@ tt = "taskcli.main:main_internal"
 
 [project.optional-dependencies]
 dev = [
-    "ruff",
-    "nox",
-    "isort",
+    "ruff==0.1.9",
+    "nox==2023.4.22",
+    "isort==5.13.2",
     "mypy==1.8.0",
-    "pytest",
+    "pytest==7.4.3",
     "pytest-clarity",  # better pytest output
     "pytest-randomly", # randomize test order
     "pytest-cov",      # coverage
