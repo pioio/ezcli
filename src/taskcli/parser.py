@@ -28,7 +28,8 @@ from .types import AnyFunction, Module
 from .utils import param_to_cli_option, print_to_stderr, print_warning
 
 log = get_logger(__name__)
-def _extract_extra_args(argv: list[str], task_cli: TaskCLI) -> list[str]:
+def extract_extra_args(argv: list[str], task_cli: TaskCLI) -> list[str]:
+    """Extract extra args (those after --) from argv list."""
     first_double_hyphen = argv.index("--") if "--" in argv else -1
     if first_double_hyphen == -1:
         return argv
@@ -45,8 +46,6 @@ def build_parser(tasks: list[Task]) -> argparse.ArgumentParser:  # noqa: C901
         log.trace(f"  {task}")
 
     root_parser = argparse.ArgumentParser()
-
-    # _add_initial_tasks_to_parser(root_parser)
 
     subparsers = root_parser.add_subparsers(help="Task to run")
 
@@ -214,7 +213,7 @@ def _add_param_to_subparser(args: list[str], param: Parameter, subparser: argpar
     subparser.add_argument(*args, **kwargs)
 
 
-def _convert_types_from_str_to_function_type(param: Parameter, value: Any) -> Any:  # noqa: C901
+def convert_types_from_str_to_function_type(param: Parameter, value: Any) -> Any:  # noqa: C901
     """Convert values from argparse to the types defined in the task."""
     if param.type.raw is int:
         value = int(value)
@@ -274,7 +273,7 @@ def _convert_types_from_str_to_function_type(param: Parameter, value: Any) -> An
     return value
 
 
-def convert_elements_in_list_to_type(param: Parameter, value: Any) -> Any:
+def _convert_elements_in_list_to_type(param: Parameter, value: Any) -> Any:
     """Convert elements in a list."""
     out = []
     thetype = param.type.get_list_type_args()

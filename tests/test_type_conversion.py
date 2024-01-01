@@ -8,7 +8,7 @@ import taskcli.core
 from taskcli.dispatching import dispatch
 from taskcli import task, tt
 from taskcli.group import Group
-from taskcli.dispatching import _extract_extra_args
+from taskcli.dispatching import extract_extra_args
 from taskcli.task import Task
 from taskcli.taskcli import TaskCLI
 

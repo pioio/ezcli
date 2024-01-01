@@ -27,7 +27,7 @@ from .taskrendersettings import TaskRenderSettings
 from .types import AnyFunction, Module
 from .utils import param_to_cli_option, print_to_stderr, print_warning
 
-from .parser import _convert_types_from_str_to_function_type, build_parser, _extract_extra_args
+from .parser import convert_types_from_str_to_function_type, build_parser, extract_extra_args
 
 log = get_logger(__name__)
 
@@ -121,7 +121,7 @@ def _dispatch(argv: list[str] | None = None) -> Any:  # noqa: C901
 
     argv = argv or sys.argv[1:]
 
-    argv = _extract_extra_args(argv, taskcli.core.get_runtime())
+    argv = extract_extra_args(argv, taskcli.core.get_runtime())
 
     log.debug(f"Parsing arguments: {argv}")
     argconfig = parser.parse_args(argv)
@@ -160,11 +160,11 @@ def _dispatch(argv: list[str] | None = None) -> Any:  # noqa: C901
     ########################################################################################
     if config.print_debug is True:
         if not hasattr(argconfig, "task"):
-            print_debug_info_all_tasks()
+            _print_debug_info_all_tasks()
         else:
             for task in tasks:
                 if task.name == argconfig.task:
-                    print_debug_info_one_task(task)
+                    _print_debug_info_one_task(task)
                     return
             utils.print_error(f"Task {argconfig.task} not found")
         return
@@ -178,7 +178,7 @@ def _dispatch(argv: list[str] | None = None) -> Any:  # noqa: C901
     render_settings = rendersettings.new_settings(config=config)
 
     if config.list or config.list_all:
-        print_listed_tasks(tasks, render_settings=render_settings)
+        _print_listed_tasks(tasks, render_settings=render_settings)
         return
 
     def _dispatch(task: Task) -> Any:
@@ -211,7 +211,7 @@ def _dispatch(argv: list[str] | None = None) -> Any:  # noqa: C901
             if param.kind == inspect.Parameter.VAR_POSITIONAL:
                 variable_args = value
             else:
-                value = _convert_types_from_str_to_function_type(param, value)
+                value = convert_types_from_str_to_function_type(param, value)
                 kwargs[name] = value
         if variable_args is not None:
             ret_value = task.func(*variable_args, **kwargs)
@@ -234,7 +234,7 @@ def _dispatch(argv: list[str] | None = None) -> Any:  # noqa: C901
 
                     render_settings.show_hidden_groups = True
                     render_settings.show_hidden_tasks = True
-                    print_listed_tasks(all_children_tasks, render_settings=render_settings)
+                    _print_listed_tasks(all_children_tasks, render_settings=render_settings)
                     # sys.exit(1)
             # should never happen
             sys.exit(9)
@@ -257,33 +257,33 @@ def _dispatch(argv: list[str] | None = None) -> Any:  # noqa: C901
                     utils.assert_no_dup_by_name(all_children_tasks)
                     render_settings.show_hidden_groups = True
                     render_settings.show_hidden_tasks = True
-                    print_listed_tasks(all_children_tasks, render_settings=render_settings)
+                    _print_listed_tasks(all_children_tasks, render_settings=render_settings)
                     sys.exit(1)
 
             print(f"Task {argconfig.task} not found")  # noqa: T201
             sys.exit(1)
     else:
-        print_listed_tasks(tasks, render_settings=render_settings)
+        _print_listed_tasks(tasks, render_settings=render_settings)
 
     return None
 
 
 
 
-def print_listed_tasks(tasks: list[Task], render_settings: TaskRenderSettings) -> None:
+def _print_listed_tasks(tasks: list[Task], render_settings: TaskRenderSettings) -> None:
     """Print the listed tasks."""
     lines = list_tasks(tasks, settings=render_settings)
     for line in lines:
         print(line)  # noqa: T201
 
 
-def print_debug_info_all_tasks():
+def _print_debug_info_all_tasks():
     runtime = taskcli.core.get_runtime()
     for task in runtime.tasks:
-        print_debug_info_one_task(task)
+        _print_debug_info_one_task(task)
 
 
-def print_debug_info_one_task(task: Task):
+def _print_debug_info_one_task(task: Task):
     fun = print
     fun(f"### Task: {task.name}")
     task.debug(fun)

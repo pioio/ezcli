@@ -7,7 +7,7 @@ import taskcli
 import taskcli.core
 from taskcli import dispatch, task
 from taskcli.group import Group
-from taskcli.parser import _extract_extra_args
+from taskcli.parser import extract_extra_args
 from taskcli.task import Task
 from taskcli.taskcli import TaskCLI
 
@@ -60,7 +60,7 @@ def test_tab_completion():
 def test_extracting_double_hyphen_args():
     args = ["foo", "--", "--baz", "--bar"]
     task_cli = TaskCLI()
-    args = _extract_extra_args(args, task_cli)
+    args = extract_extra_args(args, task_cli)
     assert args == ["foo"]
     assert task_cli.extra_args_list == ["--baz", "--bar"]
 
