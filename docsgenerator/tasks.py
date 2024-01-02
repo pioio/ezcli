@@ -6,6 +6,8 @@ import logging
 logging.basicConfig(level=logging.INFO)
 DOCS_PATH = "../docs/"
 
+tt.config.parent = True
+
 @task(aliases=["all"])
 def generate_all_docs():
     print("Generating all docs (TODO)")

@@ -19,6 +19,7 @@ tt.config.print_task_start_message = True
 tt.config.run_show_location = True
 
 
+
 def clean_env_for_unit_tests():
     """Remove env vars that can mess with unit tests output."""
     os.environ.pop(taskcli.envvars.TASKCLI_GOTASK_TASK_BINARY_FILEPATH.name)

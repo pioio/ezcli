@@ -264,7 +264,6 @@ def _render_tags(tags: list[str]) -> str:
     """Return a string with all tags, formatted for the console."""
     endc = configuration.get_end_color()
     tags = [f"#{tag}" for tag in tags]
-
     return f"{configuration.colors.blue}{','.join(tags)}{endc}"
 
 
@@ -274,11 +273,14 @@ def smart_task_lines(task: Task, settings: TaskRenderSettings) -> list[str]:  # 
 
     param_line_prefix = "  "
     name = task.name
-    name = format_colors(task.name_format, name=name)
+    if task.from_parent:
+        name = format_colors(task.name_format, name=name)
+    else:
+        name = format_colors(task.name_format, name=name)
 
     COLORS_ACTIVE = configuration.colors.blue  # just any color is not a empty string
-    blue_arrow = f"{colors.blue}⬆{colors.end} " if task.from_parent and COLORS_ACTIVE else ""
-    name = f"{blue_arrow}{name}"
+    #blue_arrow = f"{colors.blue}⬆{colors.end} " if task.from_parent and COLORS_ACTIVE else ""
+    #name = f"{blue_arrow}{name}"
 
     included_from_line = []
     include_color = configuration.colors.blue
@@ -332,6 +334,8 @@ def smart_task_lines(task: Task, settings: TaskRenderSettings) -> list[str]:  # 
         format = config.render_format_important_tasks
     if task.is_go_task:
         format = config.render_format_included_taskfile_dev_task
+    if task.from_parent:
+        format = config.render_format_from_parent_tasks
 
     line = format_colors(format, name=name)
 

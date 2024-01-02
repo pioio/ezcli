@@ -1,6 +1,7 @@
 # TODOs for `taskcli`
 
 ## Short-term TODOs:
+- [ ] Make tt.config be on per module basis
 - [ ] don't add '.' to namespace
 - [ ] unit tests for listing items in group
 - [ ] unit test for decorating same name function twice in the same module
@@ -53,8 +54,18 @@
 
 
 
+## Smart formatting
+- [ ] consider auto including important from parent
+- [ ] consider ----[ parent/path/to/tasks.py ]----------------- in the separator to make it clear where it came from.
+- [ ] trim the summary if too wide
+- [ ] if no parent, but main task is above, also print a line
+  - [ ] -------[  (..)folder/parent/tasks.py         ]----
+  - [ ] -------[  (..)folder/parent/foo/foo/tasks.py ]----
+
 
 ## Long-term TODOs:
+- [ ] auto split columne
+- [ ] detect pipe to grep, and prefix lines with group name
 - [ ] pre/post hooks, also pre_if, post_if
 - [ ] Render first parent grouptask, then HR separatro, than normal groups?
 - [ ] add --color yes/no -- finish screenshot generation

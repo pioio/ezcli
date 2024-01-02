@@ -9,12 +9,14 @@ E.g.:
 
 import argparse
 import inspect
+from operator import is_
 import os
 import sys
 from json import load
-from typing import Any, Iterable
+from typing import Any, Callable, Iterable
 
 import taskcli
+from taskcli import configuration
 import taskcli.core
 from taskcli.types import UserError
 
@@ -125,14 +127,15 @@ def _dispatch(argv: list[str] | None = None) -> Any:
     render_settings = rendersettings.new_settings(config=config)
 
     if config.list or config.list_all:
-        _print_list_tasks(tasks, render_settings=render_settings)
+        _print_lines_smart(tasks, render_settings=render_settings)
         return
 
     #####################################################################################
     # Lastly,
     if not config.task:
         # no 'task' argment was specified, so we list all loaded tasks
-        _print_list_tasks(tasks, render_settings=render_settings)
+        #_print_list_tasks(tasks, render_settings=render_settings)
+        _print_lines_smart(tasks, render_settings=render_settings)
         return None
     else:
         # User specified a task to run, or a group to list
@@ -156,7 +159,7 @@ def _process_task_action(
 
                 render_settings.show_hidden_groups = True
                 render_settings.show_hidden_tasks = True
-                _print_list_tasks(all_children_tasks, render_settings=render_settings)
+                _print_list_tasks_in_one_column(all_children_tasks, render_settings=render_settings)
 
         # should never happen
         if not found:
@@ -183,7 +186,7 @@ def _process_task_action(
                 utils.assert_no_dup_by_name(all_children_tasks)
                 render_settings.show_hidden_groups = True
                 render_settings.show_hidden_tasks = True
-                _print_list_tasks(all_children_tasks, render_settings=render_settings)
+                _print_list_tasks_in_one_column(all_children_tasks, render_settings=render_settings)
         if not found:
             msg = f"Task {argconfig.task} not found"
             raise UserError(msg)
@@ -281,12 +284,112 @@ def _if_no_tasks_were_loaded_raise_sys_exit(tasks: list[Task]) -> None:
         sys.exit(1)
 
 
-def _print_list_tasks(tasks: list[Task], render_settings: TaskRenderSettings) -> None:
+def _print_list_tasks_in_one_column(tasks: list[Task], render_settings: TaskRenderSettings) -> None:
     """Print the listed tasks."""
     lines = list_tasks(tasks, settings=render_settings)
     for line in lines:
         print(line)  # noqa: T201
 
+
+def _print_lines_smart(tasks: list[Task], render_settings: TaskRenderSettings):
+    """Decides how to print the tasks, based on the terminal width."""
+    is_terminal = sys.stdout.isatty() and sys.stderr.isatty()
+
+    SIMPLE_FORMATTING_REQUESTED = envvars.TASKCLI_ADV_OVERRIDE_FORMATTING.is_true()
+    BE_SMART = is_terminal and not SIMPLE_FORMATTING_REQUESTED
+    if not BE_SMART:
+        _print_list_tasks_in_one_column(tasks, render_settings)
+    else:
+        import shutil
+        term_height = shutil.get_terminal_size().lines
+        term_width = shutil.get_terminal_size().columns
+        WIDE_ENOUGH = term_width > 160
+
+        lines = list_tasks(tasks, settings=render_settings)
+        if len(lines) > term_height and WIDE_ENOUGH:
+            _print_list_tasks_in_two_sections(tasks, render_settings, fun=_print_list_tasks_in_two_columns)
+        else:
+            _print_list_tasks_in_two_sections(tasks, render_settings, fun=_print_list_tasks_in_one_column)
+
+
+
+def _print_list_tasks_in_two_sections(tasks: list[Task],
+                                      render_settings: TaskRenderSettings,
+                                      fun:Callable[[list[Task],TaskRenderSettings], None]) -> None:
+
+    def print_hr():
+        import shutil
+        term_width =  shutil.get_terminal_size().columns
+        black = configuration.colors.dark_gray
+        clear = configuration.colors.end
+        print(black + "―" * term_width + clear)
+
+    parent_tasks = []
+    child_tasks = []
+    for task in tasks:
+        if task.from_parent:
+            parent_tasks.append(task)
+        else:
+            child_tasks.append(task)
+
+    if parent_tasks and child_tasks:
+        print_hr()
+    if len(parent_tasks):
+        fun(parent_tasks, render_settings)
+    if parent_tasks and child_tasks:
+        print_hr()
+
+    if len(child_tasks):
+        fun(child_tasks, render_settings)
+
+
+def _print_list_tasks_in_two_columns(tasks: list[Task], render_settings: TaskRenderSettings) -> None:
+    """Spit the tasks into two groups, one per each column of the screen.
+
+    then combine them by lines, and print. So that the resultingview would be two columns.
+
+    get the terminal width, divide by two, and that will give one columnt width.
+    """
+    import shutil
+    from itertools import zip_longest
+
+    from .utils import strip_escape_codes
+
+    # Get the full list of lines from tasks
+    # Get the full list of lines from tasks
+
+#    render_settings.
+    all_lines = list_tasks(tasks, settings=render_settings)
+
+    # Get terminal width and calculate column width
+    terminal_width = shutil.get_terminal_size().columns
+    column_width = (terminal_width // 2) - 2  # subtract 2 chars for border
+    if column_width > 80:
+        column_width = 80
+
+    # Strip escape codes and store both original and stripped lines
+    stripped_lines = [strip_escape_codes(line) for line in all_lines]
+    line_pairs = zip(all_lines, stripped_lines)
+
+    # Split the stripped lines into two halves
+    mid_index = len(stripped_lines) // 2
+    lines1 = stripped_lines[:mid_index]
+    lines2 = stripped_lines[mid_index:]
+
+    # Adjust lines to fit column width
+    adjusted_lines1 = []
+    adjusted_lines2 = []
+    for original_line, stripped_line in line_pairs:
+        escape_code_length = len(original_line) - len(stripped_line)
+        adjusted_line = original_line.ljust(column_width + escape_code_length)[:column_width + escape_code_length]
+        if len(adjusted_lines1) < mid_index:
+            adjusted_lines1.append(adjusted_line)
+        else:
+            adjusted_lines2.append(adjusted_line)
+
+    # Combine lines from both halves
+    for line1, line2 in zip_longest(adjusted_lines1, adjusted_lines2, fillvalue=' ' * column_width):
+        print(f"{line1} {line2}")
 
 def _print_debug_info_all_tasks():
     runtime = taskcli.core.get_runtime()
