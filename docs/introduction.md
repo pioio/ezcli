@@ -28,7 +28,10 @@ The tool was created of out frustration of how challenging it was to keep my col
 
 Hence, the need for `taskcli` was born.
 
-
+## Tips
+Recommendation
+- Use short lower group names
+- prefer one-letter aliases. `t unit-tests` becomes `t t`, if you then stack them via imports, you get two-letter aliases, still easy to type.
 
 ## Basic usage
 

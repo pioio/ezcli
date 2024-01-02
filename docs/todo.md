@@ -2,21 +2,9 @@
 
 ## Short-term TODOs:
 - [ ] don't add '.' to namespace
-- [ ] BUG in listing docs: show up twice
-    <taskcli.taskcliconfig.TaskCLIConfig object at 0x10104fed0>
-    docs
-    docs.generate-all-docs ^ dall
-    docs.page-settings ^ dps
-    docs.take-main-screenshot ^ dsc
-    generate-all-docs all
-    page-settings ps
-    take-main-screenshot sc
-
-
+- [ ] unit tests for listing items in group
 - [ ] unit test for decorating same name function twice in the same module
 - [ ] print (tt.config) not working -> unit test, troubleshootingdoc
-- [ ] Assert tt.config can be set via env var
-- [ ] test specifying many files
 - [ ] TODO: early parse should parse env vars (make it a member function of Field? .get_current_value)
 - [ ] FIXME: doing `t -f ../../tasks.py TAB` results in wrong tab completion
 
@@ -67,6 +55,8 @@
 
 
 ## Long-term TODOs:
+- [ ] pre/post hooks, also pre_if, post_if
+- [ ] Render first parent grouptask, then HR separatro, than normal groups?
 - [ ] add --color yes/no -- finish screenshot generation
 - [ ] Store config on per module level? Otherwise including a file which messes with the global config might reset our changes.
 - [ ] Allow auto-including taskfile via env vars, e.g. to share private tasks between projects
@@ -74,8 +64,9 @@
 - [ ] Logging which does not interfere with other librarie
 - [ ] central project.py which allow to share tt.config between subfolders?
 - [ ] add --mode|-m, which would permamently change options which are being shown, using tags
-- [ ] bug: t -f . -p   includes local as parent.
+  - [ ] t -m imp,users,infra
 - [ ] unit tests for main
+- [ ] unify how Tasks and Groups are stored. Groups are in `groups._stacks`. Tasks are in module.
 - [ ] allow to rename tasks when including
 - [ ] auto-load files with _tasks.py in them? define pattern via regex?
 - [ ] arg help from docstring
@@ -89,7 +80,6 @@
 - [ ] Settings page - highlight important switches
 - [ ] argparse add_argument_group
 - [ ] print warning if TASKCLI env var is set which is not known
-- [ ] pre/post hooks
 - [ ] t --env - print bash env of the project, e.g. tcd -> goes to project t --env
 - [ ] list of optional arg names to always mark as important?  add imperative, as Cookbook example.
 - [ ] hidden tasks: _foobar: use "named" decorator?
