@@ -1,11 +1,12 @@
 import sys
 from os import name
+from tempfile import NamedTemporaryFile
 
 import pytest
 
 from taskcli import task, tt
 from taskcli.include import TaskExistsError, include
-from taskcli.task import UserError
+from taskcli.types import UserError
 
 from .tools import reset_context_before_each_test
 
@@ -53,7 +54,7 @@ def test_simple_include_with_aliases():
 
     from tests.includesandliases2 import simpleinclude
 
-    with tt.Group("group1", namespace="group1", alias_namespace="g1") as group1:
+    with tt.Group("group1", name_namespace="group1", alias_namespace="g1") as group1:
         tt.include(simpleinclude)
 
     tasks = tt.get_tasks()
@@ -77,7 +78,7 @@ def test_simple_include_with_aliases_from_a_group():
 
     from tests.includesandliases2 import simpleinclude2
 
-    with tt.Group("group1", namespace="group1", alias_namespace="g1") as group1:
+    with tt.Group("group1", name_namespace="group1", alias_namespace="g1") as group1:
         tt.include(simpleinclude2, name_namespace="namespace1", alias_namespace="ns1")
 
     tasks = tt.get_tasks()
@@ -137,7 +138,7 @@ def test_include_from_same_module_groups_no_namespace():
             tt.include(foobar)
 
 
-    with tt.Group("group3", namespace="g3") as group3:
+    with tt.Group("group3", name_namespace="g3") as group3:
         tt.include(foobar)
         tt.get_tasks_dict()["g3.foobar"]
 
@@ -149,7 +150,7 @@ def test_include_from_same_module_no_namespace_but_to_a_group():
     def foobar():
         pass
 
-    with tt.Group("group", namespace="group", alias_namespace="g") as group:
+    with tt.Group("group", name_namespace="group", alias_namespace="g") as group:
         tt.include(foobar)
         t = tt.get_tasks_dict()["group.foobar"]
         assert len(t.aliases) == 0
@@ -158,13 +159,13 @@ def test_include_from_same_module_no_namespace_but_to_a_group():
 def test_include_from_a_group_via_group():
     """If this works within the same module, it will make unit testing incuding easier"""
 
-    with tt.Group("group1", namespace="group1", alias_namespace="g1") as group:
+    with tt.Group("group1", name_namespace="group1", alias_namespace="g1") as group:
 
         @task
         def foobar():
             pass
 
-    with tt.Group("group2", namespace="group2", alias_namespace="g2") as group:
+    with tt.Group("group2", name_namespace="group2", alias_namespace="g2") as group:
         tt.include(foobar)
         t = tt.get_tasks_dict()["group2.group1.foobar"]
 
@@ -172,13 +173,13 @@ def test_include_from_a_group_via_group():
 def test_include_from_a_group_via_group_with_include_namesapce():
     """If this works within the same module, it will make unit testing incuding easier"""
 
-    with tt.Group("group1", namespace="group1", alias_namespace="g1") as group:
+    with tt.Group("group1", name_namespace="group1", alias_namespace="g1") as group:
 
         @task(aliases=["f"])
         def foobar():
             pass
 
-    with tt.Group("group2", namespace="group2", alias_namespace="g2") as group:
+    with tt.Group("group2", name_namespace="group2", alias_namespace="g2") as group:
         tt.include(foobar, name_namespace="include1", alias_namespace="i1")
         t = tt.get_tasks_dict()["group2.include1.group1.foobar"]
         assert ["g2i1g1f"] == t.aliases
@@ -257,7 +258,7 @@ def test_include_task_long_chain():
     include(thetask, name_namespace="ns2")
     thetask = tt.get_tasks_dict()["ns2.ns1.foobar"]
 
-    with tt.Group("group", namespace="group") as group:
+    with tt.Group("group", name_namespace="group") as group:
         tt.include(thetask)
         t = tt.get_tasks_dict()["group.ns2.ns1.foobar"]
 
@@ -301,3 +302,32 @@ def test_include_via_custom_filter():
     assert "ns1.foobar1" in tasks  #
     assert "ns1.foobar2" not in tasks  # include
     assert tasks["ns1.foobar1"].included_from
+
+
+def test_include_path_requires_a_python_file():
+
+    with pytest.raises(UserError, match="is not a regular file"):
+        include("/tmp/")
+
+
+dummy_taskfile = """
+from taskcli import task
+
+@task
+def foobar(code:int):
+    sys.exit(code)
+"""
+
+def test_include_path_requires_python_suffix():
+
+    with NamedTemporaryFile("w") as f:
+
+        f.write(dummy_taskfile)
+        f.flush()
+
+        # I had issues with importing modules not ending with .py
+        # so, here we make sure this fail gracefully
+        with pytest.raises(UserError, match="end with .py"):
+            include(f.name)
+
+

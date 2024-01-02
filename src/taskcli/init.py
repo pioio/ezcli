@@ -1,12 +1,14 @@
 import os
 import sys
 
+from .types import UserError
+
 
 def create_tasks_file(filepath: str = "tasks.py") -> None:
     """Create a new baisc tasks.py file."""
     if os.path.exists(filepath):
-        print(f"File already exists: {filepath}")  # noqa: T201
-        sys.exit(1)
+        msg = f"File already exists: {filepath}"
+        raise UserError(msg)
     with open(filepath, "w") as f:
         f.write(content)
 
@@ -44,5 +46,5 @@ with tt.Group("mygroup"):
 if __name__ == "__main__":
     # This 'if' statements is optional.
     # It's here just in case you want to run this script directly via './tasks.py'
-    tt.dispatch()
+    tt.main()
 """

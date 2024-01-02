@@ -1,15 +1,15 @@
 import pytest
 
 from taskcli import task, utils
+from taskcli.types import UserError
 
 from . import tools
 from .tools import reset_context_before_each_test
 
 
 def test_get_tasks(capsys):
-    with pytest.raises(SystemExit):
+    with pytest.raises(UserError, match="No tasks found in the current module"):
         utils.get_tasks()
-    assert "No tasks found in the current module" in capsys.readouterr().err
 
     @task
     def foobar():
@@ -26,7 +26,7 @@ def test_get_tasks_with_current_module(capsys):
 
     this_module = sys.modules[__name__]
 
-    with pytest.raises(SystemExit):
+    with pytest.raises(UserError, match="No tasks found in the current module"):
         tasks = utils.get_tasks(this_module)
 
     @task

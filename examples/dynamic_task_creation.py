@@ -5,10 +5,10 @@ And to make it interesting, each task has a different default argument.
 Tags: basic
 
 Run:
-- taskcli -f FILENAME               # list tasks
-- taskcli -f FILENAME  foobar-1
-- taskcli -f FILENAME  foobar-5 --person-name Lex
-- taskcli -f FILENAME  call-all-dynamic-foobars
+- t -f FILENAME               # list tasks
+- t -f FILENAME  foobar-1
+- t -f FILENAME  foobar-5 --person-name Lex
+- t -f FILENAME  call-all-dynamic-foobars
 
 """
 

@@ -17,8 +17,8 @@ import taskcli
 from . import core, utils
 from .group import get_current_group
 from .logging import get_logger
-from .task import Task, UserError
-from .types import Any, AnyFunction, Module
+from .task import Task
+from .types import Any, AnyFunction, Module, UserError
 
 log = get_logger(__name__)
 
@@ -53,6 +53,9 @@ def include(
 
     Example:
     ```
+        # Most basic usage import and then include a module from a path
+        tt.include("../../path/to/tasks.py")
+
         # Most basic usage - include tasks defined in an external module
         import mysubmodule
         tt.include(mysubmodule)
@@ -115,6 +118,15 @@ def include(
             )
             path = new_path
 
+        if not os.path.isfile(path):
+            # TODO unit test
+            msg = f"include(): provided path {path=} is not a regular file"
+            raise UserError(msg)
+        if not path.endswith(".py"):
+            # TODO unit test
+            msg = f"include(): provided path {path=} does not end with .py"
+            raise UserError(msg)
+
         from_module = import_module_from_path(path, path)
         log.debug(
             f"include(str): now including tasks from imported module to module {to_module.__name__} {id(to_module)=}."
@@ -132,7 +144,7 @@ def include(
                 object,
                 from_module=from_module,
                 to_module=to_module,
-                namespace=name_namespace,
+                name_namespace=name_namespace,
                 alias_namespace=alias_namespace,
                 **kwargs,
             )
@@ -197,7 +209,7 @@ def include_module(
                 from_module=from_module,
                 to_module=to_module,
                 skip_include_info=skip_include_info,
-                namespace=name_namespace,
+                name_namespace=name_namespace,
                 alias_namespace=alias_namespace,
             )
         except TaskExistsError as _:
@@ -260,7 +272,7 @@ def include_function(
         from_module=module_of_fun,
         to_module=to_module,
         skip_include_info=skip_include_info,
-        namespace=namespace,
+        name_namespace=namespace,
         alias_namespace=alias_namespace,
         **kwargs,
     )
@@ -275,7 +287,7 @@ def _include_task(
     from_module: Module,
     to_module: Module,
     skip_include_info: bool = False,
-    namespace: str = "",
+    name_namespace: str = "",
     alias_namespace: str = "",
 ) -> Task:
     """Shared code for including a task from one module to another."""
@@ -288,8 +300,8 @@ def _include_task(
     assert isinstance(task, Task), f"Expected Task, got {type(task)}"
 
     if not skip_include_info:
-        group = get_current_group()
-        copy = task.copy(group=group, included_from=from_module)
+        target_group = get_current_group(to_module)
+        copy = task.copy(group=target_group, included_from=from_module)
         copy.add_namespace_from_group(task.group)
         copy.included_from = from_module  # ensure is set
         copy.distance = task.distance + 1
@@ -298,8 +310,8 @@ def _include_task(
         copy = task  # dont copy at all
         # but at
 
-    if namespace:
-        copy.add_namespace(namespace, alias_namespace=alias_namespace)
+    if name_namespace:
+        copy.add_namespace(name_namespace, alias_namespace=alias_namespace)
 
     existing_tasks = [t for t in to_module.decorated_functions if t.name == copy.name]
     if existing_tasks:

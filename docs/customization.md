@@ -15,3 +15,11 @@ In your tasks.py file:
 from taskcli import tt
 tt.config.default_options_tt = ["--show-optional-args"]
 ```
+
+Or, do this to also always show tasks from the first parent (one or more dirs up) taskfile.
+Effectively, this will force `t` to combine the content of the task file in the current directory (eg `/home/users/project/foo/bar/tasks.py`), with the first
+task file above it (eg `/home/user/project/tasks.py`).
+```python
+from taskcli import tt
+tt.config.default_options_tt = ["--show-optional-args", "-p"]
+```

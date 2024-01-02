@@ -3,7 +3,7 @@ import collections
 import dataclasses
 from dataclasses import dataclass
 
-from taskcli.task import UserError
+from taskcli.types import UserError
 
 from .task import Task
 from .taskrendersettings import TaskRenderSettings

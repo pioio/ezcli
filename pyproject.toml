@@ -22,6 +22,7 @@ dev = [
     "pytest-clarity",  # better pytest output
     "pytest-randomly", # randomize test order
     "pytest-cov",      # coverage
+    "pytest-xdist",    # run in parallel
 ]
 
 # For screenshots and terminal recording

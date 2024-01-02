@@ -7,6 +7,8 @@ from dataclasses import dataclass
 from sys import stderr
 from typing import Any
 
+from taskcli import configuration
+
 
 @dataclass
 class RunResult:
@@ -44,9 +46,10 @@ def run(cmd: str, check: bool = True) -> RunResult:
     from taskcli import tasktools, tt
 
     try:
-        GREEN = "\033[92m"
-        END = "\033[0m"
-        BLACK = "\033[30m"
+        GREEN = configuration.colors.green
+        END = configuration.get_end_color()
+        BLACK = configuration.colors.dark_gray
+
         if tt.config.run_show_location:
             location = f" {BLACK}({_get_location()}){END}"
         else:

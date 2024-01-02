@@ -1,9 +1,11 @@
+from xxlimited import foo
 from nox import param
 
 import taskcli
 import taskcli.core
 from taskcli import Group, Task, task
 
+import os
 from . import tools
 from .tools import reset_context_before_each_test
 
@@ -39,3 +41,23 @@ def test_argparse_names():
     assert para1.get_argparse_names({"-a"}) == ["--foo1", "-f"]
     assert para1.get_argparse_names({"-f"}) == ["--foo1", "-F"]
     assert para1.get_argparse_names({"-f", "-F"}) == ["--foo1"]
+
+
+def test___call___forwards_call_to_actual_function():
+
+    with tools.change_dir("/tmp"):
+        @task
+        def foobar(*, foo1):
+            return foo1 + 1
+
+        @task
+        def pwd():
+            return os.getcwd()
+
+        t1 = tools.include_tasks()[0]
+        t2 = tools.include_tasks()[1]
+        assert (isinstance(t1, Task))
+        assert t1(foo1=41) == 42
+
+        assert "/tmp" not in t2()
+        assert "taskcli/tests" in t2(), "even though we're in /tmp right now, cwd should be the local checkout"

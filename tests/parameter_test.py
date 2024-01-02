@@ -2,7 +2,7 @@ from typing import Annotated, Any, get_args, get_origin
 
 import pytest
 from pkg_resources import require
-
+from  taskcli.group import Group
 from taskcli import arg, task, tt
 from taskcli.parameter import Parameter
 from taskcli.parametertype import ParameterType
@@ -16,7 +16,7 @@ def test_basic():
     def foo(x):
         pass
 
-    task = Task(foo)
+    task = Task(foo, group=Group("foo"))
     param = task.params[0]
     assert param.name == "x"
     assert param.type.raw == ParameterType.Empty
@@ -26,7 +26,7 @@ def test_basic_types_from_signature():
     def foo(x: str) -> None:
         pass
 
-    param = Task(foo).params[0]
+    param = Task(foo, group=Group("foo")).params[0]
     assert param.name == "x"
     assert param.type.raw == str
     assert param.default == Parameter.Empty
@@ -37,7 +37,7 @@ def test_basic_types_from_annotated():
     def foo(x: Annotated[str, None]) -> None:
         pass
 
-    param = Task(foo).params[0]
+    param = Task(foo, group=Group("foo")).params[0]
     assert param.name == "x"
     assert param.type.raw == str
     assert param.default == Parameter.Empty
@@ -48,7 +48,7 @@ def test_basic_default_from_param():
     def foo(x: str = "foobar") -> None:
         pass
 
-    param = Task(foo).params[0]
+    param = Task(foo, group=Group("foo")).params[0]
     assert param.name == "x"
     assert param.type.raw == str
     assert param.default == "foobar"
@@ -61,7 +61,7 @@ def test_basic_default_from_annotated():
     def foo(x: xxx):  # type: ignore # noqa: PGH003
         pass
 
-    param = Task(foo).params[0]
+    param = Task(foo, group=Group("foo")).params[0]
     assert param.name == "x"
     assert param.type.raw == str
     assert param.default == "from-annotated"
@@ -77,7 +77,7 @@ def test_basic_default_from_param_and_annotated():
     ) -> None:
         pass
 
-    task = Task(foo)
+    task = Task(foo, group=Group("foo"))
     param1 = task.params[0]
     param2 = task.params[1]
 
@@ -98,7 +98,7 @@ def test_basic_no_default_but_annotated():
     def foo(x: xxx) -> None:  # type: ignore # noqa: PGH003
         pass
 
-    param = Task(foo).params[0]
+    param = Task(foo, group=Group("foo")).params[0]
     assert param.name == "x"
     assert param.type.raw == str
     assert param.default == Parameter.Empty
@@ -109,7 +109,7 @@ def test_list_type_1():
     def foo(x: list) -> None:
         pass
 
-    param = Task(foo).params[0]
+    param = Task(foo, group=Group("foo")).params[0]
     assert param.type.is_list()
     assert not param.type.is_union_list_none()
     assert not param.has_default()
@@ -120,7 +120,7 @@ def test_list_type_2():
     def foo(x: list = []) -> None:  # noqa: B006
         pass
 
-    param = Task(foo).params[0]
+    param = Task(foo, group=Group("foo")).params[0]
     assert param.type.is_list()
     assert not param.type.is_union_list_none()
     assert param.has_default()
@@ -131,7 +131,7 @@ def test_list_type_3():
     def foo(x: list[int]) -> None:
         pass
 
-    param = Task(foo).params[0]
+    param = Task(foo, group=Group("foo")).params[0]
     assert param.type.is_list()
     assert not param.type.is_union_list_none()
     assert not param.has_default()
@@ -143,7 +143,7 @@ def test_list_type_4():
     def foo(x: list[int] = []) -> None:  # noqa: B006
         pass
 
-    param = Task(foo).params[0]
+    param = Task(foo, group=Group("foo")).params[0]
     assert param.type.is_list()
     assert not param.type.is_union_list_none()
     assert param.has_default()
@@ -154,7 +154,7 @@ def test_union_list_none1():
     def foo(x: list | None) -> None:  # type: ignore # noqa: PGH003
         pass
 
-    param = Task(foo).params[0]
+    param = Task(foo, group=Group("foo")).params[0]
     assert not param.type.is_list()
     assert param.type.is_union_list_none()
 
@@ -163,7 +163,7 @@ def test_union_list_none2():
     def foo(x: list[int] | None) -> None:  # type: ignore # noqa: PGH003
         pass
 
-    param = Task(foo).params[0]
+    param = Task(foo, group=Group("foo")).params[0]
     assert not param.type.is_list()
     assert param.type.is_union_list_none()
 
@@ -172,7 +172,7 @@ def test_union_list_none3():
     def foo2(x: list | None | dict) -> None:  # type: ignore # noqa: PGH003
         pass
 
-    param = Task(foo2).params[0]
+    param = Task(foo2, group=Group("foo")).params[0]
     assert not param.type.is_list()
     assert not param.type.is_union_list_none()
 
@@ -181,7 +181,7 @@ def test_is_bool_explicit():
     def foo(x: bool) -> None:  # type: ignore # noqa: PGH003
         pass
 
-    param = Task(foo).params[0]
+    param = Task(foo, group=Group("foo")).params[0]
     assert not param.type.is_list()
     assert param.type.is_bool()
     assert not param.type.is_union_list_none()
@@ -191,7 +191,7 @@ def test_is_bool2_implicit():
     def foo(x=False) -> None:  # type: ignore # noqa: PGH003
         pass
 
-    param = Task(foo).params[0]
+    param = Task(foo, group=Group("foo")).params[0]
     assert not param.type.is_list()
     assert param.type.is_bool()
     assert not param.type.is_union_list_none()
@@ -201,7 +201,7 @@ def test_is_bool2_explicit_with_default():
     def foo(x: bool = False) -> None:  # type: ignore # noqa: PGH003
         pass
 
-    param = Task(foo).params[0]
+    param = Task(foo, group=Group("foo")).params[0]
     assert not param.type.is_list()
     assert param.type.is_bool()
     assert not param.type.is_union_list_none()

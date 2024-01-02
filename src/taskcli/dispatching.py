@@ -1,3 +1,12 @@
+"""Decide what to do based on the command line arguments.
+
+E.g.:
+- list tasks
+- list group
+- run task
+- print some other info
+"""
+
 import argparse
 import inspect
 import os
@@ -7,7 +16,7 @@ from typing import Any, Iterable
 
 import taskcli
 import taskcli.core
-from taskcli.task import UserError
+from taskcli.types import UserError
 
 from . import envvars, taskfiledev, utils
 from .constants import GROUP_SUFFIX
@@ -136,9 +145,11 @@ def _process_task_action(
     from .group import get_all_tasks_in_group
 
     if config.task.endswith(GROUP_SUFFIX):
+        found = False
         groups = get_all_groups_from_tasks(tasks)
         for group in groups:
             if group.get_name_for_cli() == argconfig.task[: -len(GROUP_SUFFIX)]:
+                found = True
                 all_children_tasks: list[Task] = []
                 get_all_tasks_in_group(group, all_children_tasks)
                 utils.assert_no_dup_by_name(all_children_tasks)
@@ -148,7 +159,9 @@ def _process_task_action(
                 _print_list_tasks(all_children_tasks, render_settings=render_settings)
 
         # should never happen
-        sys.exit(9)
+        if not found:
+            msg = f"Group {config.task} not found"
+            raise UserError(msg)
     else:
         for task in tasks:
             if task.name == argconfig.task:
@@ -161,18 +174,20 @@ def _process_task_action(
 
         # task not found, fallback to search group name without a suffix
         groups = get_all_groups_from_tasks(tasks)
+        found = True
         for group in groups:
             if group.get_name_for_cli() == argconfig.task:
+                found = True
                 all_children_tasks = []
                 get_all_tasks_in_group(group, all_children_tasks)
                 utils.assert_no_dup_by_name(all_children_tasks)
                 render_settings.show_hidden_groups = True
                 render_settings.show_hidden_tasks = True
                 _print_list_tasks(all_children_tasks, render_settings=render_settings)
-                sys.exit(1)
+        if not found:
+            msg = f"Task {argconfig.task} not found"
+            raise UserError(msg)
 
-        print(f"Task {argconfig.task} not found")  # noqa: T201
-        sys.exit(1)
 
 
 def _dispatch_task(task: Task, argconfig) -> Any:
@@ -236,12 +251,32 @@ def _run_subcommands_and_maybe_finish(config: TaskCLIConfig) -> bool:
 
 
 def _if_no_tasks_were_loaded_raise_sys_exit(tasks: list[Task]) -> None:
+    """Print a detailed and helpful error message."""
     if not tasks:
+        from taskcli import tt
+        included_files = tt.get_runtime().init_stats.inspected_files
+
         cwd = os.getcwd()
-        msg = (
-            f"taskcli: No files to include in '{cwd}'. Run 'taskcli --init' to create a new 'tasks.py', "
-            "or specify one with -f ."
-        )
+        run_to_create_msg = ("Run 't --init' to create a new 'tasks.py' file, "
+                                "or specify one with '-f' .")
+
+        if included_files:
+            # We found some files and tried to include tasks from them, but none were include
+            # It might because e.g. the files were empty, or the tasks were missing the @task decorator.
+            # Here we make the message a bit more verbose to help troubleshoot.
+            msg = (
+                "taskcli: No tasks found in the task files. "
+                f"Looked in: {', '.join(included_files)} . "
+                f"{run_to_create_msg} "
+            )
+        else:
+            # Happens when running `t` in a directory without a tasks.py file, and without and any parent tasks.py file.
+            # Here we want to keep the error message brief. This is a relatively common scenario.
+            msg = (
+                f"taskcli: No task files found in '{cwd}' nor the parent directories. "
+                f"{run_to_create_msg} "
+            )
+
         print_to_stderr(msg, color="")
         sys.exit(1)
 

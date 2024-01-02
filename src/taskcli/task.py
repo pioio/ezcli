@@ -13,14 +13,10 @@ from taskcli import configuration
 from . import utils
 from .configuration import config
 from .constants import NAMESPACE_SEPARATOR
-from .group import DEFAULT_GROUP, Group
+from .group import Group
 from .parameter import Parameter
 from .tags import TAG_IMPORTANT
 from .types import Any, AnyFunction, Module
-
-
-class UserError(Exception):
-    """Print nice error to the user."""
 
 
 @dataclass
@@ -99,9 +95,9 @@ class Task:
         self,
         # Args below can be copy-pasted to the `def task` decorator
         func: AnyFunction,
+        group: Group,
         name: str = "",
         desc: str = "",
-        group: Group | None = None,
         hidden: bool = False,
         aliases: Iterable[str] | str | None = None,
         important: bool = False,
@@ -121,10 +117,11 @@ class Task:
         hidden: If True, the task will not be listed in the help by default.
         important: If True, the task will be listed in the help in a way which stands out. See config for details.
         """
+
         self._name = name  # entirely optional
         self._desc = desc  # entirely optional
         self.func = func
-        self.namespaces: list[str] = []
+        self.name_namespaces: list[str] = []
         self._extra_summary: list[str] = []
         if isinstance(aliases, str):
             aliases = [aliases]
@@ -152,7 +149,8 @@ class Task:
         self.suppress_warnings: bool = suppress_warnings
         self.distance: int = 0  # Distance (number of includes) away from the root tasks.py file. 0==root tasks.py
 
-        self.group: Group = group or DEFAULT_GROUP
+        assert group
+        self.group: Group = group
 
         if self not in self.group.tasks:
             self.group.tasks.append(self)
@@ -163,7 +161,7 @@ class Task:
         self.soft_validate_task()
         self.included_from: Module | None = included_from
 
-    def __call__(self, *args: list[Any], **kwargs: dict[str, Any]) -> Any:
+    def __call__(self, *args: list[Any], **kwargs: Any) -> Any:
         """Call the task."""
         return self.func(*args, **kwargs)
 
@@ -255,11 +253,11 @@ class Task:
         """Return the full name of the task, including any namespace of the group the task is in right now."""
         out = self.get_base_name()
 
-        if self.namespaces:
-            out = NAMESPACE_SEPARATOR.join(self.namespaces) + NAMESPACE_SEPARATOR + out
+        if self.name_namespaces:
+            out = NAMESPACE_SEPARATOR.join(self.name_namespaces) + NAMESPACE_SEPARATOR + out
 
-        if self.group.namespace:
-            out = self.group.namespace + NAMESPACE_SEPARATOR + out
+        if self.group.name_namespace:
+            out = self.group.name_namespace + NAMESPACE_SEPARATOR + out
 
         return out
 
@@ -268,8 +266,8 @@ class Task:
 
         Used for copied tasks to preservs namespace of the old group)
         """
-        if group.namespace:
-            self.namespaces = [group.namespace, *self.namespaces]
+        if group.name_namespace:
+            self.name_namespaces = [group.name_namespace, *self.name_namespaces]
         if group.alias_namespace:
             new_aliases = []
             for alias in self._aliases:
@@ -279,7 +277,7 @@ class Task:
     def add_namespace(self, namespace: str = "", alias_namespace: str = "") -> None:
         """Add a namespace to the task."""
         if namespace:
-            self.namespaces = [namespace, *self.namespaces]
+            self.name_namespaces = [namespace, *self.name_namespaces]
 
         new_aliases = []
         for alias in self._aliases:
@@ -425,8 +423,11 @@ class Task:
         """
         return "ok"
 
-    def debug(self, fun):
+    def debug(self, fun:Callable[[Any],Any]|None=None):
         """Print detailed debug info about this object."""
+        if not fun:
+            fun = print
+
         for field in self.__dict__:
             value = getattr(self, field)
 
@@ -442,7 +443,6 @@ class Task:
                     fun(f"    {param.default=}")
             elif field == "func":
                 fun(f"  {field}:")
-                fun(f"     {value=}")
                 fun(f"     {value.__name__}")
 
             else:
@@ -490,7 +490,7 @@ def _get_wrapper(  # noqa: C901
     from .group import get_current_group
 
     if group is None:
-        group = get_current_group()
+        group = get_current_group(module_which_defines_task)
     assert isinstance(group, Group), f"Expected group to be a Group, got {group!r}"
 
     if isinstance(aliases, str):
@@ -545,7 +545,8 @@ def _get_wrapper(  # noqa: C901
     for atask in module_which_defines_task.decorated_functions:
         if atask.name == task.name:
             msg = (
-                f"A task with this name {task.name} already exists in this module."
+                f"A task with this name {task.name} already exists in this module "
+                f"{module_which_defines_task.__name__=} {module_which_defines_task.__file__=}."
                 "You might be seeing this due to a circular import, if so, try moving any tt.include(module) calls to "
                 "after any @task declarations."
             )

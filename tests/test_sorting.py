@@ -1,13 +1,14 @@
 from taskcli import Task
 from taskcli.listing import ORDER_TYPE_ALPHA, _sort_tasks
+from taskcli import Group
 
-i1 = Task(lambda: None, "aimportant1", important=True)
-i2 = Task(lambda: None, "zimportant2", important=True)
-n1 = Task(lambda: None, "anormal1")
-n2 = Task(lambda: None, "znormal2")
+i1 = Task(lambda: None, group=Group("foo"), name="aimportant1",  important=True)
+i2 = Task(lambda: None, group=Group("foo"), name="zimportant2", important=True)
+n1 = Task(lambda: None, group=Group("foo"), name="anormal1")
+n2 = Task(lambda: None, group=Group("foo"), name="znormal2")
 
-h1 = Task(lambda: None, "ahidden1", hidden=True)
-h2 = Task(lambda: None, "zhidden2", hidden=True)
+h2 = Task(lambda: None, group=Group("foo"), name="zhidden2", hidden=True)
+h1 = Task(lambda: None, group=Group("foo"), name="ahidden1", hidden=True)
 
 
 def test_basic():

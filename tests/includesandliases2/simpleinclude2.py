@@ -6,7 +6,7 @@ def task0() -> str:
     return "0"
 
 
-with tt.Group("groupS", namespace="groupS", alias_namespace="gS"):
+with tt.Group("groupS", name_namespace="groupS", alias_namespace="gS"):
 
     @task(aliases="t1")
     def task1() -> str:

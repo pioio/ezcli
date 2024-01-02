@@ -1,10 +1,14 @@
 """Various tools for unit tests."""
 import contextlib
 import inspect
+from multiprocessing import context
 import os
 import random
 import subprocess
 import sys
+from tempfile import TemporaryDirectory
+from typing import Generator
+from isort import file
 
 import pytest
 
@@ -13,6 +17,7 @@ import taskcli.core
 from taskcli import Task, task, tt
 from taskcli.types import Module
 
+from taskcli.utils import change_dir
 ########################################################################################################################
 # pytest Fixtures
 #
@@ -156,3 +161,19 @@ def run_tasks(cmd: str, check=False) -> tuple[str, str]:
 def dummy_task_from_tools() -> None:
     """Dummy task, used for testing"""
     print("Hello from inside taskcli")
+
+
+import contextlib
+
+@contextlib.contextmanager
+def create_taskfile(content) -> Generator[str, None, None]:
+    """Create a taskfile in tmp dir with the given content, and return the path to the taskfile.
+
+    Used for integration tests that want to run entire taskfile
+    """
+    with TemporaryDirectory() as tmpdir:
+        with change_dir(tmpdir):
+            with open("task.py", "w") as f:
+                f.write(content)
+            filepath = os.path.join(tmpdir, "task.py")
+            yield filepath

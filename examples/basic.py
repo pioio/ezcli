@@ -4,6 +4,7 @@ Tags: basic
 
 Run:
 - t -f FILENAME                 # list tasks
+- taskcli -f FILENAME           # list tasks, equivalent to 't'
 - tt -f FILENAME                # list tasks, including hidden ones
 - t -f FILENAME hello           # run the hello taask
 - t -f FILENAME hello-hidden    # run the hidden task

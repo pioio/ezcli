@@ -4,10 +4,10 @@ import os
 import pytest
 
 import taskcli
-from taskcli import Task, task
+from taskcli import Task, task, Group
 from taskcli import dispatch
 from taskcli.include import TaskExistsError, include
-from taskcli.task import UserError
+from taskcli.types import UserError
 from tests import tools
 
 from .tools import reset_context_before_each_test, run_tasks
@@ -18,7 +18,7 @@ def test_get_taskfile_dir():
     def foob() -> None:
         pass
 
-    t = Task(foob)
+    t = Task(foob, group=Group("foo"))
     dirpath = t.get_taskfile_dir()
     assert dirpath.startswith("/")
     assert dirpath.endswith("/tests")

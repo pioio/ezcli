@@ -6,13 +6,14 @@ from venv import logger
 
 import taskcli
 import taskcli.core
+from .types import UserError
 
 from . import configuration, constants, utils
 from .configuration import colors, config
 from .constants import GROUP_SUFFIX, HELP_TEXT_USE_H_TO_SHOW_HIDDEN
 from .group import Group
 from .logging import get_logger
-from .task import Task, UserError
+from .task import Task
 from .taskrendersettings import TaskRenderSettings
 from .tasktools import FilterResult, filter_before_listing
 from .utils import param_to_cli_option

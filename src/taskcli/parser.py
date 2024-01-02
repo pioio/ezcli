@@ -10,7 +10,7 @@ from typing import Any, Iterable
 
 import taskcli
 import taskcli.core
-from taskcli.task import UserError
+from taskcli.types import UserError
 
 from . import configuration, envvars, examples, taskfiledev, utils
 from .constants import GROUP_SUFFIX

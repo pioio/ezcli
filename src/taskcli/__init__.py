@@ -23,11 +23,6 @@ from typing import Annotated as ann  # noqa: N813 # isort: skip
 configure_logging()
 
 
-def hide_group(group: str) -> None:
-    """Hide a group from the help message."""
-    taskcli.core.get_runtime().hidden_groups.append(group)
-
-
 __all__: Sequence[str] = [
     "task",
     "include",

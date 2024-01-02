@@ -6,7 +6,9 @@ Since that module is that main module, it has to be excplicitly included in each
 """
 
 import re
+import subprocess
 import sys
+from tempfile import NamedTemporaryFile
 from typing import Annotated
 
 import pytest
@@ -74,3 +76,20 @@ def test_run_default_args(default_arg):
     except SystemExit:
         pytest.fail("SystemExit should not be raised")
     assert done == default_arg
+
+def test_that_sys_exit_codes_are_passed_back_to_the_shell():
+    content = """
+from taskcli import task
+import sys
+@task
+def foobar(code:int):
+    sys.exit(code)
+"""
+    with NamedTemporaryFile("w", suffix=".py") as f:
+        f.write(content)
+        f.flush()
+        cmd = ["t", "-f", f.name, "foobar", "42"]
+        print (" ".join(cmd))
+
+        res = subprocess.run(cmd, check=False)
+        assert res.returncode == 42

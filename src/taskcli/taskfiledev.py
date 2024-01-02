@@ -1,16 +1,21 @@
-"""Code for opening and importing http://taskfile.dev files."""
+"""Code for opening and importing http://taskfile.dev files.
+
+Kudos to taskfile.dev community for making a great tool, and for making it easy to integrate with it!
+
+In short, if the path to the go-binary is specified, then we run it to discover tasks whenever we run 't'.
+We then report those tasks in a separate group.
+
+"""
 import json
-import logging
 import os
 import subprocess
 import sys
-from re import sub
 
 import taskcli
 import taskcli.include
 from taskcli import task
 
-from . import envvars, parser, utils
+from . import envvars, utils
 from .logging import get_logger
 from .types import Module
 
@@ -20,7 +25,7 @@ go_task_project_name = "Taskfile.dev"
 
 
 def should_include_taskfile_dev(argv: list[str]) -> bool:
-    """Check if env vars are set to look for a Taskfile.dev file."""
+    """Check the entire env to see if we should run the 'task' binary to discover third-party tasks."""
     INCLUDE_TASKFILE_YAML: bool = bool(
         envvars.TASKCLI_GOTASK_TASK_BINARY_FILEPATH.value and envvars.TASKCLI_GOTASK_TASKFILE_FILENAMES.value
     )
@@ -36,23 +41,32 @@ def should_include_taskfile_dev(argv: list[str]) -> bool:
 
 
 def include_tasks(to_module: Module, path: str = ".") -> bool:
-    """Include tasks from a Taskfile.dev file. Returns True if tasks were included, False otherwise."""
-    assert envvars.TASKCLI_GOTASK_TASK_BINARY_FILEPATH.value
+    """Include tasks from a Taskfile.dev file. Returns True if tasks were included, False otherwise.
 
+    It First creates the new tasks in THIS module, and then later include them into the 'to_module'.
+    At some point we could modify the code to creat them directly in the to_module, but it's not worth it right now.
+    """
+    assert envvars.TASKCLI_GOTASK_TASK_BINARY_FILEPATH.value
+    if os.path.isfile(path):
+        path = os.path.dirname(path)
     try:
         with utils.change_dir(path):
-            taskfile_filepath = has_taskfile_dev(path)
-            if not taskfile_filepath:
-                return False
+            # Only lookg if taskfile yaml exists in the local dir
+            # > taskfile_filepath = has_taskfile_dev(path)
+            # > if not taskfile_filepath:
+            # >     return False
 
-            log.debug(f"Found {go_task_project_name} file, including tasks from it. {taskfile_filepath}")
-            taskfiledev = envvars.TASKCLI_GOTASK_TASK_BINARY_FILEPATH.value
-            cmd = [taskfiledev, "--list-all", "--json"]
+            log.debug(f"{envvars.TASKCLI_GOTASK_TASK_BINARY_FILEPATH.pretty()} was set. "
+                      "Running the go-task binary to discover local Taskfiles.")
+            taskfiledev_binary = envvars.TASKCLI_GOTASK_TASK_BINARY_FILEPATH.value
+            cmd = [taskfiledev_binary, "--list-all", "--json"]
             if path != ".":
                 cmd += ["--dir", path]
             try:
                 output = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
                 if output.returncode != 0:
+                    log.debug("Error running the task binary")
+                    log.debug(f"stdout:\n {output.stdout.decode('utf-8')}")
                     raise subprocess.CalledProcessError(output.returncode, cmd, output=output.stdout)
             except subprocess.CalledProcessError as e:
                 lines_list = e.output.decode("utf-8").split("\n")
@@ -90,6 +104,7 @@ class TaskfileDevError(Exception):
 
 
 def _include_tasks_json(cmd: str, json_string: str, dir: str = ".") -> bool:
+
     try:
         tasks = json.loads(json_string)
     except json.decoder.JSONDecodeError as e:
@@ -135,7 +150,7 @@ def _include_tasks_json(cmd: str, json_string: str, dir: str = ".") -> bool:
     return tasks_were_included
 
 
-def has_taskfile_dev(path: str = ".") -> str:
+def _has_taskfile_dev(path: str = ".") -> str:
     """Check if local directory has a Taskfile.dev file."""
     for filename in envvars.TASKCLI_GOTASK_TASKFILE_FILENAMES.value.split(","):
         filename = filename.strip()

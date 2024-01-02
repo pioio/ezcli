@@ -156,15 +156,16 @@ Running a task will SSH to that system to invoke the task.
 ## Merging multiple `tasks.py` files
 TODO( needs work)
 - After finding `tasks.py` , the tool imports it.
-- If that file contains `tt.config.include_extra_tasks = True`, The tool will continue traversing up the directory tree, and if it encounters another `tasks.py` files it merge the tasks from it, with the current one.
-- You can use `tt.config.merge_parent_filter = my_filter_function` to customize which tasks are merged in.
+- if `-p` was used,
+
+- You can use `tt.config.parent_task_filter = my_filter_function` to customize which tasks are merged in.
 ```python
 from taskcli import tt
 
 def my_filter_function(task):
     return task.name.startswith("deploy") or "prod" in task.tags
 
-tt.config.merge_parent_filter = my_filter_function
+tt.config.parent_task_filter = my_filter_function
 ```
 
 

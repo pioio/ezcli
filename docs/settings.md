@@ -4,6 +4,14 @@
 Create a new tasks.py file in the current directory  
 (no env var)  
 
+### tags
+Only show tasks matching any of these tags  
+TASKCLI_CFG_TAGS  
+
+### group_order
+Regex re.match patterns of the order in which top-level groups are shown. Any top-level group the name of which matches any of the patterns will be listed first.  
+TASKCLI_CFG_GROUP_ORDER  
+
 ### search
 Only show tasks whose name or description is matching this python regex seach pattern.  
 TASKCLI_CFG_SEARCH  
@@ -15,6 +23,10 @@ TASKCLI_CFG_EXTRA_TASKS_NAME_NAMESPACE
 ### parent
 Whether to also include tasks from the closest parent's directory's tasks.py  
 TASKCLI_CFG_PARENT  
+
+### parent_task_filter
+Custom python function to filter which tasks to include from a parent taskfile. Set in your main taskfile via 'tt.config' field.  
+(no env var)  
 
 ### extra_tasks_alias_namespace
 What string to prefix to task aliases when merging tasks with a different tasks.py. See also: TASKCLI_EXTRA_TASKS_PY_FILENAMES  
@@ -76,6 +88,14 @@ List the supported env vars
 Like --print-env, but also include descriptions.  
 (no env var)  
 
+### verbose
+Verbose output, show debug level logs.  
+TASKCLI_CFG_VERBOSE  
+
+### list
+List tasks. Use -ll and -lll for a more detailed listing.  
+(no env var)  
+
 ### print_return_value
 Advanced: print return value of the task function to stdout. Useful when the task is a regular function which by itself does not print, and only returns a value.  
 TASKCLI_CFG_PRINT_RETURN_VALUE  
@@ -87,4 +107,8 @@ TASKCLI_CFG_LIST_ALL
 ### print_debug
 Import the tasks and print detailed debug information. Use with, or without, specifying a task name.  
 TASKCLI_CFG_PRINT_DEBUG  
+
+### file
+Which taskfiles to use by default, you can specify multiple (comma separated), they will be merged.default is 'tasks.py'  
+TASKCLI_CFG_FILE  
 

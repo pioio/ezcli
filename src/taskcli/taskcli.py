@@ -1,9 +1,19 @@
 import typing
 
+#from .types import Module2
+
 if typing.TYPE_CHECKING:
     import argparse
 
     from .task import Task
+
+from dataclasses import dataclass, field
+@dataclass
+class InitStats:
+    """Summary of what happened during initialization of the runtime."""
+    inspected_files: list[str] = field(default_factory=list)
+
+
 
 
 class TaskCLI:
@@ -20,6 +30,10 @@ class TaskCLI:
         self.overview: str = ""
 
         self.current_tasks: list[Task] = []
+
+        self.init_stats = InitStats()
+
+#        self.modules: dict[str,Module2] = {}
 
     # Any extra arguments passed to the script after a "--"
     # They can be retrieved later to easily inject them to commands being run.

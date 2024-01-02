@@ -3,7 +3,7 @@
 
 # iterate over all functions
 import os
-
+import taskcli
 #import testing
 #from docsgenerator import tasks as docgentasks
 
@@ -18,8 +18,10 @@ tt.config.default_options_tt = ["--no-go-task"]
 tt.config.print_task_start_message = True
 tt.config.run_show_location = True
 
-#tt.include(weather_tasks.weather_here)
 
+def clean_env_for_unit_tests():
+    """Remove env vars that can mess with unit tests output."""
+    os.environ.pop(taskcli.envvars.TASKCLI_GOTASK_TASK_BINARY_FILEPATH.name)
 
 with tt.Group("dev", desc="Development tasks"):
 
@@ -39,10 +41,17 @@ with tt.Group("dev", desc="Development tasks"):
         report_path = os.path.join(cwd, "htmlcov", "index.html")
         print(f"file://{report_path}")
 
-    @task(aliases="t", env=["FOOBAR"], important=True)
+    @task(env=["FOOBAR"], important=True, aliases="tt")
     def test(extraargs: str = ""):
         """Run unit tests."""
-        run(f"pytest {extraargs} tests/ -vvv {tt.get_extra_args()} ")
+        clean_env_for_unit_tests()
+        run(f"pytest {extraargs} tests/ -vvv -n 4 {tt.get_extra_args()} ")
+
+    @task(aliases="t", important=True)
+    def test_fast(extraargs: str = ""):
+        """Run fast unit tests."""
+        clean_env_for_unit_tests()
+        run(f"pytest {extraargs} tests/ -vvv -m 'not include' {tt.get_extra_args()} ")
 
     @task(important=True)
     def nox():
@@ -71,7 +80,6 @@ Paths = tt.arg(list[str], "The paths to lint", default=DEF_LINT_PATHS, important
 
 
 with tt.Group("Testing module"):
-    #tt.include(testing)
 
     @task
     def testing_foobar() -> int:
@@ -145,6 +153,25 @@ with tt.Group("lints", desc="Code cleanup tasks"):
         path_txt = " ".join(paths)
         run(f"isort {path_txt} --float-to-top")
 
+@task()
+def apis():
+    """Print the public API of each moduel."""
+    import taskcli
+    with taskcli.utils.change_dir("src"):
+        run("ack -o --python '^(def) [a-zA-Z][a-zA-Z0-9_]*\(' | sort | uniq")
+
+        run("ack -o --python '^(class) [a-zA-Z0-9_]*\(' | sort | uniq")
+
+@task()
+def cloc():
+    """Count lines of code."""
+    import taskcli
+    dirs = ["src", "tests", "examples"]
+    for dir in dirs:
+        run(f"cloc {dir}")
+    run(f"cloc {' '.join(dirs)}")
+
+
 
 @task
 def rufftwice():
@@ -152,7 +179,7 @@ def rufftwice():
     ruff()
 
 with tt.Group("docs"):
-    tt.include("docsgenerator/tasks.py", name_namespace="docs", alias_namespace="d.")
+    tt.include("docsgenerator/tasks.py", name_namespace="docs", alias_namespace="d")
 
 @task
 def argparse():
@@ -163,6 +190,7 @@ def argparse():
     print(parser.parse_args([]))
     print(parser.parse_args(["a", "b"]))
 
+from docsgenerator import tasks as docgentasks
 
 @task(aliases="pc", important=True)
 def pre_commit(*, do_lint: bool = True, do_test: bool = True):

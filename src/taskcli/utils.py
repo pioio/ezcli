@@ -1,4 +1,5 @@
 import contextlib
+from genericpath import isfile
 import logging
 import os
 import random
@@ -10,6 +11,8 @@ import typing
 from contextlib import contextmanager
 
 import taskcli
+from .taskcli import TaskCLI
+from .types import UserError
 
 from . import configuration, constants
 from .logging import get_logger
@@ -54,10 +57,30 @@ def print_warning(text: str) -> None:
     text = f"{YELLOW}taskcli: Warning: {text}{ENDC}"
     print(text, file=sys.stderr, flush=True)  # noqa: T201
 
+import os
+@contextlib.contextmanager
+def change_env(env:dict[str,str])-> typing.Iterator[None]:
+    """Context manager to change the environment variables."""
+    old_env = os.environ.copy()
+    os.environ.update(env)
+    try:
+        yield
+    finally:
+        os.environ.clear()
+        os.environ.update(old_env)
 
 @contextlib.contextmanager
 def change_dir(path: str) -> typing.Iterator[None]:
     """Context manager to change the current working directory."""
+
+    if path in ["."]: # no-op
+        yield
+        return
+
+    if os.path.isfile(path):
+        msg = f"change_dir(): {path} is a file, not a directory."
+        raise Exception(msg)
+
     old_dir = os.getcwd()
     log.debug(f"change_dir(): Changing to: {path}")
     os.chdir(path)
@@ -129,7 +152,7 @@ def get_task(name: str) -> "Task":
     module = get_callers_module()
     tasks = get_tasks(module=module)
     d = {t.name: t for t in tasks}
-    from .task import UserError
+    from .types import UserError
 
     if name not in d:
         msg = f"get_task(): Task '{name}' not found in module {module.__file__}"
@@ -188,17 +211,22 @@ def get_tasks(module: Module | None = None, also_included: bool = True) -> list[
             f"get_tasks(): No tasks found in the current module ({module_path}). "
             "Make sure to use the @task decorator first."
         )
-        sys.exit(1)
+        msg = "No tasks found in the current module."
+        raise UserError(msg)
 
 
 def reset_tasks() -> None:
-    """Clear the list of tasks and the entire context."""
+    """Clear the list of loaded tasks and the entire runtime context.
+
+    Executed in between unit tests.
+    """
     # clear included tasks
     from . import core
 
     core.get_runtime().tasks = []
-    taskcli.group.DEFAULT_GROUP.tasks = []
+    #taskcli.group.DEFAULT_GROUP.tasks = []
     taskcli.group.created.clear()
+    taskcli.group._stacks.clear()
 
     # Clear tasks in each module
     for module in sys.modules.values():
@@ -215,9 +243,15 @@ def reset_tasks() -> None:
     for key, value in new_config.__dict__.items():
         setattr(tt.config, key, value)
 
-    # # reset any logging configuration set by previous tests
+    # reset any logging configuration set by previous tests
     assert tt.config.verbose == 0
     from .logging import configure_logging
+
+    # Clear runtime
+    new_runtime = TaskCLI()
+    old_runtime = tt.get_runtime()
+    for key, value in new_runtime.__dict__.items():
+        setattr(old_runtime, key, value)
 
     configure_logging()
 
@@ -252,9 +286,9 @@ def assert_no_dup_by_name(container: list[typing.Any]) -> None:
 
 @contextmanager
 def randomize_filename(filepath):
-    random_lowercase = "".join(random.choices(string.ascii_lowercase, k=10))
+    sys_random = random.SystemRandom() # for better randomness when running tests in many threads
+    random_lowercase = "".join(sys_random.choices(string.ascii_lowercase, k=10))
     dirname = os.path.dirname(filepath)
-
     final_filepath = f"{dirname}/{random_lowercase}.py"
     if os.path.exists(final_filepath):
         msg = f"File already exists: {final_filepath}"

@@ -100,10 +100,10 @@ And to make it interesting, each task has a different default argument.
 Tags: basic
 
 Run:
-- taskcli -f FILENAME               # list tasks
-- taskcli -f FILENAME  foobar-1
-- taskcli -f FILENAME  foobar-5 --person-name Lex
-- taskcli -f FILENAME  call-all-dynamic-foobars
+- t -f FILENAME               # list tasks
+- t -f FILENAME  foobar-1
+- t -f FILENAME  foobar-5 --person-name Lex
+- t -f FILENAME  call-all-dynamic-foobars
 
 """
 
@@ -134,7 +134,7 @@ def call_all_dynamic_foobars():
 ##### Output of the above:
 ```sh
 ### list tasks
-# taskcli -f dynamic_task_creation.py
+# t -f dynamic_task_creation.py
 default               Default tasks
 call-all-dynamic-foobars Call all the dynamically created tasks.
 foobar-0              Task number 0
@@ -147,17 +147,17 @@ foobar-6              Task number 6
 ```
 
 ```sh
-# taskcli -f dynamic_task_creation.py  foobar-1
+# t -f dynamic_task_creation.py  foobar-1
 Hello, Bob!         (x=1)
 ```
 
 ```sh
-# taskcli -f dynamic_task_creation.py  foobar-5 --person-name Lex
+# t -f dynamic_task_creation.py  foobar-5 --person-name Lex
 Hello, Lex!         (x=5)
 ```
 
 ```sh
-# taskcli -f dynamic_task_creation.py  call-all-dynamic-foobars
+# t -f dynamic_task_creation.py  call-all-dynamic-foobars
 Hello, Alice!       (x=0)
 Hello, Bob!         (x=1)
 Hello, Charlie!     (x=2)
@@ -179,14 +179,14 @@ The "*" in the function signature is the Python syntax for denoting keyword (i.e
 Tags: basic
 
 Run:
-- taskcli -f FILENAME  -lll               # list, detailed view
-- taskcli -f FILENAME  task1  --help      # Show help output
-- taskcli -f FILENAME  task2  --help      # Show help output
-- taskcli -f FILENAME  task1  100         # task1 requires the first argument, but second one is optional
-- taskcli -f FILENAME  task1  100  bruno  # task1 requires the first argument, but second one is optional
-- taskcli -f FILENAME  task2              # task2 does not require any args, both are optional
-- taskcli -f FILENAME  task2  --name bob
-- taskcli -f FILENAME  task2  --name bob 193
+- t -f FILENAME  -lll               # list, detailed view
+- t -f FILENAME  task1  --help      # Show help output
+- t -f FILENAME  task2  --help      # Show help output
+- t -f FILENAME  task1  100         # task1 requires the first argument, but second one is optional
+- t -f FILENAME  task1  100  bruno  # task1 requires the first argument, but second one is optional
+- t -f FILENAME  task2              # task2 does not require any args, both are optional
+- t -f FILENAME  task2  --name bob
+- t -f FILENAME  task2  --name bob 193
 
 """
 from taskcli import task, tt
@@ -210,7 +210,7 @@ def task2(height: int = 42, *, name: str = "alice"):
 ##### Output of the above:
 ```sh
 ### list, detailed view
-# taskcli -f basic_using_arguments.py  -lll
+# t -f basic_using_arguments.py  -lll
 default               Default tasks
 task1                 This task has two positional arguments, one of them is optional.
   AGE, NAME=alice
@@ -220,8 +220,8 @@ task2                 This task has one positional, and one named optional argum
 
 ```sh
 ### Show help output
-# taskcli -f basic_using_arguments.py  task1  --help
-usage: taskcli task1 [-h] age [name]
+# t -f basic_using_arguments.py  task1  --help
+usage: t task1 [-h] age [name]
 
 positional arguments:
   age
@@ -233,8 +233,8 @@ options:
 
 ```sh
 ### Show help output
-# taskcli -f basic_using_arguments.py  task2  --help
-usage: taskcli task2 [-h] [--name NAME] [height]
+# t -f basic_using_arguments.py  task2  --help
+usage: t task2 [-h] [--name NAME] [height]
 
 positional arguments:
   height
@@ -246,30 +246,125 @@ options:
 
 ```sh
 ### task1 requires the first argument, but second one is optional
-# taskcli -f basic_using_arguments.py  task1  100
+# t -f basic_using_arguments.py  task1  100
 Hello from task1: age=100 name='alice'
 ```
 
 ```sh
 ### task1 requires the first argument, but second one is optional
-# taskcli -f basic_using_arguments.py  task1  100  bruno
+# t -f basic_using_arguments.py  task1  100  bruno
 Hello from task1: age=100 name='bruno'
 ```
 
 ```sh
 ### task2 does not require any args, both are optional
-# taskcli -f basic_using_arguments.py  task2
+# t -f basic_using_arguments.py  task2
 Hello from task2: height=42 name='alice'
 ```
 
 ```sh
-# taskcli -f basic_using_arguments.py  task2  --name bob
+# t -f basic_using_arguments.py  task2  --name bob
 Hello from task2: height=42 name='bob'
 ```
 
 ```sh
-# taskcli -f basic_using_arguments.py  task2  --name bob 193
+# t -f basic_using_arguments.py  task2  --name bob 193
 Hello from task2: height=193 name='bob'
+```
+
+---
+### Debugging
+`examples/debugging.py`  
+```python
+"""Examples how to troubleshoot taskcli.
+
+Run:
+- t -f FILENAME debug-a-task
+- t -f FILENAME list-tasks
+- t -f FILENAME debug-config | head -10   # print the first 10 lines of the config fields
+"""
+
+from taskcli import tt, task
+
+# This will pretty print the all settings current config AFTER your
+# custom env vars and cli args have been applied.
+# I.e. this is typically what you want to use
+@task
+def debug_config():
+    """Print all settings of current config."""
+    tt.config.debug() # you can pass it a function which you want to use to print
+
+@task
+def debug_a_task():
+    """Print detailed info about a specific task.
+
+    Can also be used for tasks included from other file.
+    """
+    thetask = tt.get_task("debug-a-task")
+    thetask.debug()
+
+@task
+def list_tasks():
+    """List all available tasks."""
+    for t in tt.get_tasks():
+        print(f"{t.name=}, {t.hidden=}")
+
+
+# Alternatively, calling tt.config.debug() in the global scope
+# will pretty print all setting of current config BEFORE env vars
+# and cli args have been applied.
+# Example:
+# tt.config.debug()
+
+# Finally, you can always run with  "-v", "-vv", or "-vvv" to get more debug info.
+```
+##### Output of the above:
+```sh
+# t -f debugging.py debug-a-task
+  _name: 
+  _desc: 
+  func:
+     debug_a_task
+  name_namespaces: []
+  _extra_summary: []
+  _aliases: []
+  tags: []
+  env: []
+  hidden: False
+  important: False
+  from_above: False
+  from_parent: False
+  params:
+  name_format: {name}
+  customize_parser: None
+  is_go_task: False
+  suppress_warnings: False
+  distance: 0
+  group: Group(default, hidden=False)
+  code_location: unknown:1
+  included_from: None
+```
+
+```sh
+# t -f debugging.py list-tasks
+t.name='debug-config', t.hidden=False
+t.name='debug-a-task', t.hidden=False
+t.name='list-tasks', t.hidden=False
+```
+
+```sh
+### print the first 10 lines of the config fields
+# t -f debugging.py debug-config | head -10
+init=False
+tags=[]
+group_order=['default']
+search=
+extra_tasks_name_namespace=X
+parent=False
+extra_tasks_alias_namespace=
+color=
+show_hidden=False
+run_show_location=False
 ```
 
 ---
@@ -282,6 +377,7 @@ Tags: basic
 
 Run:
 - t -f FILENAME                 # list tasks
+- taskcli -f FILENAME           # list tasks, equivalent to 't'
 - tt -f FILENAME                # list tasks, including hidden ones
 - t -f FILENAME hello           # run the hello taask
 - t -f FILENAME hello-hidden    # run the hidden task
@@ -308,6 +404,14 @@ def hello_hidden():
 ```sh
 ### list tasks
 # t -f basic.py
+default               Default tasks
+hello                 This line will become the summary for the task list output.
+1 hidden
+```
+
+```sh
+### list tasks, equivalent to 't'
+# taskcli -f basic.py
 default               Default tasks
 hello                 This line will become the summary for the task list output.
 1 hidden
@@ -387,6 +491,80 @@ options:
 # t -f customize_parser.py foobar --custom-arg 123
 Hello, name='Alice'!
 Value of custom-arg (set with --custom-arg <value>): 123
+```
+
+---
+### Extra Arguments
+`examples/extra_arguments.py`  
+```python
+"""How to pass arbitrary arguments to tasks.
+
+Tags: basic
+
+Run:
+- t -f FILENAME hash-it -- -sha256                                   # only extra args
+- t -f FILENAME hash-it "Hello, Alice!"                                   # only positional arg
+- t -f FILENAME hash-it "Hello, Bob!" -- -sha256 -hmac "secret"         # positional and extra args,
+- t -f FILENAME hash-it "Hello, Charlie!" -r 3 -- -sha256 -hmac "secret"    # positional, options, and extra args
+
+"""
+import re
+from taskcli import task, tt, run
+
+
+@task
+def hash_it(text="Hello, Foobar!", *, repeat:int=1):
+    """Run a ping command and pass all extra args to it."""
+    # Get the arguments as a list
+    for arg in tt.get_extra_args_list():
+        print("Extra arg: " + arg, flush=True)
+
+    # Or, get them as a string, ready to be passed to a command
+    # string will be empty if none were passed
+    extra_args = tt.get_extra_args() or "-md5"
+
+    for _ in range(repeat):
+        run(f'echo -n "{text}" | openssl dgst {extra_args}')
+
+```
+##### Output of the above:
+```sh
+### only extra args
+# t -f extra_arguments.py hash-it -- -sha256
+Extra arg: -sha256
+@@ echo -n "Hello, Foobar!" | openssl dgst -sha256
+SHA2-256(stdin)= 735a1dafb02dc26d56476612ebf3c4ccd9cced34bd215c8a74e7095040a9953d
+```
+
+```sh
+### only positional arg
+# t -f extra_arguments.py hash-it "Hello, Alice!"
+@@ echo -n "Hello, Alice!" | openssl dgst -md5
+MD5(stdin)= ceff6e399c3c8cfcf7f5a5e1321329a6
+```
+
+```sh
+### positional and extra args,
+# t -f extra_arguments.py hash-it "Hello, Bob!" -- -sha256 -hmac "secret"
+Extra arg: -sha256
+Extra arg: -hmac
+Extra arg: secret
+@@ echo -n "Hello, Bob!" | openssl dgst -sha256 -hmac secret
+SHA2-256(stdin)= d3bfb033501ca62eef75f4d3bb4bad57c06de76f4e36f0e15cd43b2af557a609
+```
+
+```sh
+### positional, options, and extra args
+# t -f extra_arguments.py hash-it "Hello, Charlie!" -r 3 -- -sha256 -hmac "secret"
+Extra arg: -sha256
+Extra arg: -hmac
+Extra arg: secret
+@@ echo -n "Hello, Charlie!" | openssl dgst -sha256 -hmac secret
+SHA2-256(stdin)= 185044d80fe25d3bb89358a86bdf6b98027bfb9902991667e474bfba5bf97598
+@@ echo -n "Hello, Charlie!" | openssl dgst -sha256 -hmac secret
+SHA2-256(stdin)= 185044d80fe25d3bb89358a86bdf6b98027bfb9902991667e474bfba5bf97598
+@@ echo -n "Hello, Charlie!" | openssl dgst -sha256 -hmac secret
+SHA2-256(stdin)= 185044d80fe25d3bb89358a86bdf6b98027bfb9902991667e474bfba5bf97598
 ```
 
 ---

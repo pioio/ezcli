@@ -52,6 +52,11 @@ This make merging parent to the current context easier, as we don't have to merg
 Standard Python logging is used, with the exception of extending the `logging.Logger` with a `log.trace()`.
 The output of `log.trace` is logged in `-vv` and `-vvv` modes.
 
+### Unit tests and Integration tests:
+Using pytest.
+`tests/<name>_test.py`  -- tests a specific module (unit)
+`test/test_<name>.py` -- tests a collection of modules (integeration)
+
 ### Task creation and .include()
 Using the @task decorator causes the decorated function to be turned into a `Task` object.
 As part of executing the decorator, the new `Task` object gets stored in a special `taskcli`-specific field

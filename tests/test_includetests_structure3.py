@@ -138,3 +138,28 @@ def run_tasks(command):
     with tools.simple_list_format():
             stdout, _ = tools.run_tasks(command, check=True)
     return stdout.strip()
+
+
+@pytest.mark.include()
+@pytest.mark.parametrize("dir", [DIR5])
+def test_including_parent_uses_modules_location_and_not_users_cwd(dir):
+    """dir5/tasks.py sets tt.config.parent = True, so it should load dir3/tasks.py (as default)"""
+
+    # we see 'g3and5' twice, as one is from dir3 one from dir5 (right now same groups are not merged, this might change)
+    expected = """# g5
+task5
+
+# g3and5
+task5shared
+
+# g3
+task3
+
+# g3and5
+task3shared"""
+    with change_dir("tests/includetests/structure3/dir1/dir2"):
+        print("dir=", os.getcwd())
+        with tools.simple_list_format():
+            stdout, stderr =  tools.run_tasks("t -vv -f dir3/dir4/dir5/tasks.py -p ", check=True)
+        assert stdout.strip() == expected, \
+            f"CWD is dir2. Expecting to see tasks from dir5/tasks.py and its parent dir3/tasks.py\n{stderr}"

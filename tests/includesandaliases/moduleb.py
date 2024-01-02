@@ -3,7 +3,7 @@ from taskcli import task, tt
 
 from . import modulec
 
-with tt.Group("groupB", namespace="nsB"):
+with tt.Group("groupB", name_namespace="nsB"):
 
     @task
     def taskb() -> str:

@@ -298,3 +298,17 @@ def test_default_group_always_first():
         settings = new_settings(config=TaskCLIConfig())
         lines = list_tasks(tools.include_tasks(), settings=settings)
         assert lines[0] == "# default"
+
+def test_hidden_tasks_show_up_during_search():
+    @task
+    def foobar(*, hidden=True) -> None:
+        pass
+
+    with tools.simple_list_format():
+        config = TaskCLIConfig()
+        config.search = "oo"
+        settings = new_settings(config=TaskCLIConfig())
+        with tools.simple_list_format():
+            lines = list_tasks(tools.include_tasks())
+        assert lines[0] == "# default"
+        assert lines[1] == "foobar"

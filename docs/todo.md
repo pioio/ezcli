@@ -1,105 +1,65 @@
 # TODOs for `taskcli`
 
 ## Short-term TODOs:
-- [ ] unit tests for main
-- [ ] unit test for when there's a local main file, but is with no tasks.
-- [ ] taskfile.py
-- [x] try to make  _common_test_list("./tasks.py --show-hidden")   work just like 't'
-- [ ] Docs: example with tt -a  # to force including parent via tt
-- [x] auto including parents.
-  - [x] print arrows for included tasks
-- [ ] allow for   `t -f ../../`  and have it load tasks.py from parent if one is missing in that dir?
-- [ ] add unit tests for tests/includestests/structure* folders
-  - [ ] fix unit tests
-- [ ] flag for printing profiling info - add it to troubleshooting info, run with 'time'
-- [ ]  add ability to include module while preserving group
-  - [ ] Do I still need merging with parent? Probably not. Except for preserving groups.
-- [ ] add --color yes/no -- finish screenshot generation
-- [ ] rename tasks when including
 - [ ] don't add '.' to namespace
+- [ ] BUG in listing docs: show up twice
+    <taskcli.taskcliconfig.TaskCLIConfig object at 0x10104fed0>
+    docs
+    docs.generate-all-docs ^ dall
+    docs.page-settings ^ dps
+    docs.take-main-screenshot ^ dsc
+    generate-all-docs all
+    page-settings ps
+    take-main-screenshot sc
+
+
 - [ ] unit test for decorating same name function twice in the same module
-- [ ] print (tt.config) not working
+- [ ] print (tt.config) not working -> unit test, troubleshootingdoc
+- [ ] Assert tt.config can be set via env var
 - [ ] test specifying many files
 - [ ] TODO: early parse should parse env vars (make it a member function of Field? .get_current_value)
-- [ ] add task.__call__  unit tests
+- [ ] FIXME: doing `t -f ../../tasks.py TAB` results in wrong tab completion
+
+- [x] add task.__call__  unit tests
+
 - [ ] Remove old 'extra tasks' fields
+- [ ] parent_task_filter unit tests
+- [ ] Make empty taskfile work for including parents via filter
 - [x] tt.include("../../tasks.py", filter=lambda task: task.important) -- relative paths in include should be anchored to the file! Disallow them for now?
+- [ ] move building package from taskfile to tasks.py
+- [ ] using -f to specify file in other dir still make taskfile be loaded locally, it should skip opening taskfile
 - [ ] BUG: dynamic task creation with  'x=x, person_name=person_name' does not allow to set person name from the CLI
-- [ ] wrap right column text, for screenshots
-- [ ] use "import_module" instead of "include" ?
 - [ ] __init__.py is needed in top project to be bale to import docsgenerator/tasks.py which imports generator ... not perfect
   - [ ] I might need a wrapper for remote-import whcih switches dir and imports the module
-- [ ] need more unit tests for imports in various file dir sructures
 - [ ] Test for alias namespace conflicts - silently stripthem?
--
 - [ ] test foo (x:int)   does not have a long flag
 - [ ] consider starting any local tasks_X.py file, or at least allow using it for that
-- [ ] test sys.exit results in proper code being passed to the shell- write out a .py file and run it.
-- [ ] move building from taskfile to tasks.py
-- [ ] test nargs=4 works
-- [ ] example - standardize on t vs taskcli
-- [ ] code location of merged module is wrong @ coverage report (/Users/p/code/mygithub/taskcli/taskcli_import_dribzrel.py:36)
+- [x] test sys.exit results in proper code being passed to the shell- write out a .py file and run it.
 - [ ] loading ./tasks.py from dir above, merging them with the local one.
-  - [x] unit tests for merging tasks
-  - [ ] cleanup main
-  - [x] circular imports, prevent duplicates gracefully
-  - [x] How to handle A importing B, importing A?
-  - [ ] t .  # list only tasks from local dir
   - [ ] crashes if added 'dev' section in screenshots/tasks.py
-  - [ ] # TODO: have task have internal sort key, combination of digit + name for easier sorting
-  - [ ] rename 'filter' to filterfun?
   - [ ] unit-test clash of aliases when merging - do not import aliases in such case
-  - [ ] t .. # list only one level (not dir) up
-  - [ ] would have to use importlib, tried it once, but is tricky. Maybe not worth it
   - [ ] allow preventing merging with the one from above? Or make it explcii?  tt.config.merge_with_parent = False
   - [ ] Namespace added in wrong place: that's `t` in examples/screenshot
     - [ ] included tasks
           included...docs.generate-all-docs ^ i.dgd
           included...docs.test-documentation ^ i.dt
-  - [ ] add unit tests
   - [ ] add unit test that it changes to the parent dir of merged in parent file
-  - [ ] marke the ones from the parent, sort separtely to first?
-    - [ ] add separator between them?
-    - [ ] tt.config.merge_parent_filter = lambda task: task.name.startswith("parent_")
 
-
-- [ ] hide_not_ready unit test
-- [ ] --init still not working - add unit test
-- [ ] unit test hide-not-read
-- [ ] Module - add custom class to represent module, with my custom per-module fields
-- [ ] unit test: searching by tag should show hidden tasks, samel ike showing a group - unit
-- [ ] unit test- broken get hidden
-
-- [ ] unit test for searching when some matching tasks are hidden
+- [ ] unit test hide-not-ready
 - [ ] unit test for error if no tasks detected
+- [ ] Module - add custom class to represent module, with my custom per-module fields
 - [ ] combine listing with specifying a task
 - [ ] unit test for  @task(important=True, format="{name} {clear}{red}(PROD!)")
-- [ ] allow one task to be in more than one group - add unit tests
+
 - [ ] run task binary regardless of taskfile being found or not
-- [ ] auto-load files with _tasks.py in them? define pattern via regex?
 
 - [x] groups and tasks with tags  task -t op, also --show-tags
-- [ ] using -f to specify file in other dir still make taskfile be loaded locally
 
 - [ ]
-  - [ ] include(child_tasks.child1)
-  - [ ] include to group
-
-  - [ ] add warning if function name overwridden
-  - [ ] include(group, newgroupname)
-  - [ ] include(group.task, new-task-name-in-current-group)
-  - [ ] include not decorated function
-  - [ ] A includes B, B includes A
-  - [ ] detect duplicates
-  - [ ] include in tasks.py still broken
-    - [ ] def xxx():
-            pass
-
-        include(xxx)
+  - [ ] detect duplicates when including
 - [ ] Stop adding '.' to namespace?
-- [ ] rename namespace to namenamespace
+- [x] rename namespace to namenamespace
 - [ ] FIXME: optional flags are not gray (disk usage example)
-- [ ] FIXME: doing `t -f ../../tasks.py TAB` results in wrong tab completion
 - [ ] unit test for duplicate task names
 - [x] nesting groups should simply create an indent
 
@@ -107,6 +67,21 @@
 
 
 ## Long-term TODOs:
+- [ ] add --color yes/no -- finish screenshot generation
+- [ ] Store config on per module level? Otherwise including a file which messes with the global config might reset our changes.
+- [ ] Allow auto-including taskfile via env vars, e.g. to share private tasks between projects
+- [ ] ability to include modules while preserving group info (merge=True)
+- [ ] Logging which does not interfere with other librarie
+- [ ] central project.py which allow to share tt.config between subfolders?
+- [ ] add --mode|-m, which would permamently change options which are being shown, using tags
+- [ ] bug: t -f . -p   includes local as parent.
+- [ ] unit tests for main
+- [ ] allow to rename tasks when including
+- [ ] auto-load files with _tasks.py in them? define pattern via regex?
+- [ ] arg help from docstring
+- [ ] docs: mark prop field as important, to create a separate docs section with them
+- [ ] wrap right column text, for screenshots
+  - [ ] # TODO: have task have internal sort key, combination of digit + name for easier sorting
 - [ ] Run doc generation in the doceker container (this will allow showing merged/extra task examples)
 - [ ] def lint(paths: Paths), with Paths having a default -- Cannot call from CLI without the path
   - [ ] Should a default be added to the function?
@@ -135,9 +110,17 @@
 - [ ] ability to exclude certain arguments from parser (task(exclude)), the arg must have a default)
 - [ ] tt.set_overview for the entire taskfile. This will require storing overview on per-module basis (or storing it only for current one), and loading
 - [ ] JSON output format
+- [ ] allow one task to be in more than one group - add unit tests
+- [ ] ctx manager for changing env
 - [x] Include Taskfile
 - Improve config system - use field's doctstring to fill out the help field in ConfigField, and then run _add_boola utomatically
     self.field_hide_not_ready = ConfigField(False, "hide_not_ready",  help=f"Tasks which are not ready to run (e.g. due to missing env vars) will be automatically marked as hidden.")
     self.hide_not_ready: bool = False
     """Docstring"""
     ...
+
+----------
+keep track of current group on per module level.
+
+
+

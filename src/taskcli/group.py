@@ -25,7 +25,7 @@ class Group:
         hidden: bool = False,
         sort_hidden_last: bool = True,
         sort_important_first: bool = True,
-        namespace: str = "",
+        name_namespace: str = "",
         alias_namespace: str = "",
         from_parent: bool = False,
     ):
@@ -46,7 +46,7 @@ class Group:
         self.hidden = hidden
         self.tasks: list["Task"] = []
 
-        self.namespace: str = namespace
+        self.name_namespace: str = name_namespace
         self.alias_namespace: str = alias_namespace
 
         self.sort_important_first = sort_important_first
@@ -69,13 +69,17 @@ class Group:
     # Make it a context managet
     def __enter__(self) -> "Group":
         global _stack
+        parent_module = get_callers_module()
+
+        if parent_module not in _stacks:
+            _stacks[parent_module] = [Group("default", desc="Default tasks")]
 
         # nested groups
-        if len(_stack) > 1:  # one (default) is always there
-            self.parent = _stack[-1]
+        if len(_stacks[parent_module]) > 1:  # one (default) is always there
+            self.parent = _stacks[parent_module][-1]
             self.parent.children.append(self)
 
-        _stack.append(self)
+        _stacks[parent_module].append(self)
 
         return self
 
@@ -84,7 +88,8 @@ class Group:
 
     def __exit__(self, *args: object) -> None:
         global _stack
-        _stack.pop()
+        parent_module = get_callers_module()
+        _stacks[parent_module].pop()
 
     def get_name_for_cli(self) -> str:
         """Return the name of the group suitable for CLI completion."""
@@ -114,17 +119,21 @@ class Group:
 
 
 # Default group for new tasks
-NULL_GROUP = Group("null-group")
+#NULL_GROUP = Group("null-group")
 
-DEFAULT_GROUP = Group("default", desc="Default tasks")
+#DEFAULT_GROUP = Group("default", desc="Default tasks")
 
-_stack: list["Group"] = [DEFAULT_GROUP]
+#_stack: list["Group"] = [DEFAULT_GROUP]
+_stacks: dict[typing.Any, list["Group"]] = {}
 
-
-def get_current_group() -> "Group":
+def get_current_group(module) -> "Group":
     """Return the current group."""
-    assert len(_stack) > 0
-    return _stack[-1]
+
+    if module not in _stacks:
+        _stacks[module] = [Group("default", desc="Default tasks")]
+
+    assert len(_stacks[module]) > 0
+    return _stacks[module][-1]
 
 
 def get_all_groups_from_tasks(tasks: list["Task"]) -> list["Group"]:

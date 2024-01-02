@@ -1,7 +1,7 @@
 import pytest
 
 from taskcli import task, tt
-from taskcli.task import UserError
+from taskcli.types import UserError
 
 from . import tools
 from .tools import reset_context_before_each_test
@@ -120,7 +120,7 @@ def test_keyword_lists_default_in_annotation_does_not_require_passing_anything_i
     assert t.dispatch(["--sizes", "1"]) == [1]
     assert t.dispatch(["--sizes", "1", "2"]) == [1, 2]
 
-    from taskcli.task import UserError
+    from taskcli.types import UserError
 
     with pytest.raises(UserError, match="Could not convert 'foobar' to <class 'int'>"):
         t.dispatch(["--sizes", "foobar"], sysexit_on_user_error=False)

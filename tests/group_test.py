@@ -73,7 +73,7 @@ def test_group_namespace_but_no_alias_names():
     def tasknogroup():
         pass
 
-    with Group("bar", namespace="bar") as group:
+    with Group("bar", name_namespace="bar") as group:
 
         @task(aliases=["a1", "a2"])
         def foobar():
@@ -102,7 +102,7 @@ def test_group_namespace_with_alias_names():
     def tasknogroup():
         pass
 
-    with Group("bar", namespace="bar", alias_namespace="b") as group:
+    with Group("bar", name_namespace="bar", alias_namespace="b") as group:
 
         @task(aliases=["a1", "a2"])
         def foobar():

@@ -121,3 +121,4 @@ def test_from_other_dir___run(dir, task):
         prefix = f"includetests/structure2/{dir}/"
         assert tools.run_tasks(f"t -f {prefix}tasks.py {task}", check=True)[0] == f"""Hello from {task}\nHello from foo()\n"""
 
+
