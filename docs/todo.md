@@ -61,10 +61,13 @@
 - [ ] if no parent, but main task is above, also print a line
   - [ ] -------[  (..)folder/parent/tasks.py         ]----
   - [ ] -------[  (..)folder/parent/foo/foo/tasks.py ]----
-
+- [ ] section to group on per tag basis
+- [ ] section_filter
 
 ## Long-term TODOs:
 - [ ] auto split columne
+- [ ] parent tasks.py to push certain tasks to all subdirs below
+- [ ] --oh - only hidden tasks
 - [ ] detect pipe to grep, and prefix lines with group name
 - [ ] pre/post hooks, also pre_if, post_if
 - [ ] Render first parent grouptask, then HR separatro, than normal groups?

@@ -510,7 +510,7 @@ def _get_wrapper(  # noqa: C901
                 width = 80
                 if os.isatty(sys.stderr.fileno()):
                     width = os.get_terminal_size().columns
-                msg = f"-- taskcli [{breadcrumbs}] -----------".ljust(width, "-")
+                msg = f"―― taskcli [{breadcrumbs}] ―――――――――――".ljust(width, "―")
                 utils.print_to_stderr(msg)
 
             if change_dir:
@@ -522,7 +522,7 @@ def _get_wrapper(  # noqa: C901
             if tt.config.print_task_start_message:
                 black = configuration.colors.dark_gray
                 clear = configuration.colors.end
-                msg = f"{black}--{clear}"
+                msg = f"{black}――{clear}"
                 utils.print_to_stderr(msg, color="")
             tt.get_runtime().current_tasks.pop()
 

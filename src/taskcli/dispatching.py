@@ -297,6 +297,7 @@ def _print_lines_smart(tasks: list[Task], render_settings: TaskRenderSettings):
 
     SIMPLE_FORMATTING_REQUESTED = envvars.TASKCLI_ADV_OVERRIDE_FORMATTING.is_true()
     BE_SMART = is_terminal and not SIMPLE_FORMATTING_REQUESTED
+
     if not BE_SMART:
         _print_list_tasks_in_one_column(tasks, render_settings)
     else:
@@ -306,10 +307,13 @@ def _print_lines_smart(tasks: list[Task], render_settings: TaskRenderSettings):
         WIDE_ENOUGH = term_width > 160
 
         lines = list_tasks(tasks, settings=render_settings)
-        if len(lines) > term_height and WIDE_ENOUGH:
-            _print_list_tasks_in_two_sections(tasks, render_settings, fun=_print_list_tasks_in_two_columns)
-        else:
+
+        # NOT_TA
+        # if num(lines) < 50 and WIDE_ENOUGH
+        if not WIDE_ENOUGH or len(lines) < 40:
             _print_list_tasks_in_two_sections(tasks, render_settings, fun=_print_list_tasks_in_one_column)
+        else:
+            _print_list_tasks_in_two_sections(tasks, render_settings, fun=_print_list_tasks_in_two_columns)
 
 
 
