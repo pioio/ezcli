@@ -11,8 +11,8 @@ import taskcli.core
 from taskcli import configuration
 
 from . import utils
-from .configuration import config
-from .constants import NAMESPACE_SEPARATOR
+from .configuration import adv_config
+
 from .group import Group
 from .parameter import Parameter
 from .tags import TAG_IMPORTANT
@@ -252,8 +252,9 @@ class Task:
     def _get_full_task_name(self) -> str:
         """Return the full name of the task, including any namespace of the group the task is in right now."""
         out = self.get_base_name()
-
+        NAMESPACE_SEPARATOR = configuration.adv_config.name_namespace_separator
         if self.name_namespaces:
+
             out = NAMESPACE_SEPARATOR.join(self.name_namespaces) + NAMESPACE_SEPARATOR + out
 
         if self.group.name_namespace:
@@ -280,8 +281,9 @@ class Task:
             self.name_namespaces = [namespace, *self.name_namespaces]
 
         new_aliases = []
+        alias_namespace_separator = configuration.adv_config.alias_namespace_separator
         for alias in self._aliases:
-            new_aliases.append(alias_namespace + alias)
+            new_aliases.append(alias_namespace + alias_namespace_separator + alias)
         self._aliases = new_aliases
 
     def get_all_task_names(self) -> list[str]:
@@ -470,7 +472,7 @@ def _get_wrapper(  # noqa: C901
     aliases = aliases or []
     env = env or []
 
-    if config.adv_auto_hide_private_tasks and (func.__name__.startswith("_") and not hidden):
+    if adv_config.auto_hide_private_tasks and (func.__name__.startswith("_") and not hidden):
         func.__name__ = func.__name__.lstrip("_")
         hidden = True
     if prefix:
@@ -508,7 +510,7 @@ def _get_wrapper(  # noqa: C901
         try:
             if tt.config.print_task_start_message:
                 width = 80
-                if os.isatty(sys.stderr.fileno()):
+                if os.isatty(sys.stderr.fileno()) and os.isatty(sys.stdout.fileno()):
                     width = os.get_terminal_size().columns
                 msg = f"―― taskcli [{breadcrumbs}] ―――――――――――".ljust(width, "―")
                 utils.print_to_stderr(msg)

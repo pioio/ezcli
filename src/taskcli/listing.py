@@ -9,7 +9,7 @@ import taskcli.core
 from .types import UserError
 
 from . import configuration, constants, utils
-from .configuration import colors, config
+from .configuration import colors, adv_config
 from .constants import GROUP_SUFFIX, HELP_TEXT_USE_H_TO_SHOW_HIDDEN
 from .group import Group
 from .logging import get_logger
@@ -25,7 +25,85 @@ ORDER_TYPE_DEFAULT = ORDER_TYPE_ALPHA
 ENDC = configuration.get_end_color()
 
 
-class SafeFormatDict(dict[str, str]):
+log = get_logger(__name__)
+
+
+def list_tasks(tasks: list[Task], settings: TaskRenderSettings | None = None) -> list[str]:  # noqa: C901
+    """Return a list of lines to be printed to the console.
+
+    In a nutshell this works like this:
+    - First, filter tasks based on the settings.
+        (this removes e.g. hidden tasks, or tasks in hidden group, or tasks not matching search criteria)
+    - whatever tasks list, print them and their corresponding groups
+    """
+    assert len(tasks) > 0, "No tasks found"
+
+    if not tasks:
+        return ["No tasks to be listed"]
+
+    settings = settings or TaskRenderSettings()
+
+    filter_result = filter_before_listing(tasks=tasks, settings=settings)
+    filtered_tasks = filter_result.tasks
+    if not filtered_tasks:
+        raise UserError("\n".join([f"{colors.red}No tasks found!{colors.end}", *filter_result.progress]))
+
+    # Get the list TOP-LEVEL groups from the remaining tasks (after filtering)
+    top_groups = _create_groups(tasks=tasks)
+    top_groups = _sort_groups_before_listing(top_groups, order=settings.group_order)
+
+    for line in filter_result.progress:
+        log.debug(line)
+
+    # Prepare the output buffer.
+    # Note that a tasks can result in more than one line.
+    lines: list[str] = []
+
+    for idx, group in enumerate(top_groups):
+        before = len(lines)
+        _render_group(
+            group=group,
+            filtered_tasks=filtered_tasks,
+            lines=lines,
+            filter_result=filter_result,
+            settings=settings,
+            indent=0,
+        )
+
+        if len(lines) > before and idx < len(top_groups) - 1:
+            # blan line between top level group, but only between top-level groups
+            lines.append("")
+
+    lines = [line.rstrip() for line in lines]
+
+    FIRST_LINE_STARTS_WITH_NEW_LINE = lines and lines[0] and lines[0][0] == "\n"
+    if FIRST_LINE_STARTS_WITH_NEW_LINE:
+        # This can happen if user prefixes the custom group format with a "\n" to separate groups with whitesapce
+        lines[0] = lines[0][1:]
+
+    num_hidden_groups = len(filter_result.hidden_groups)
+    num_hidden_tasks = filter_result.num_total_hidden_in_hidden_groups
+    final_line = []
+    if num_hidden_groups or num_hidden_tasks:
+        if num_hidden_groups:
+            final_line.append(f"Also {num_hidden_groups} hidden groups")
+        if num_hidden_tasks:
+            final_line.append(f"with {num_hidden_tasks} tasks in them")
+        final_line.append(HELP_TEXT_USE_H_TO_SHOW_HIDDEN)
+    if final_line:
+        line = f"{configuration.colors.dark_gray}{', '.join(final_line)}{configuration.colors.end}"
+        lines.append(line)
+
+    # remove any last empety line
+    if lines:
+        if lines[-1] == "":
+            lines = lines[:-1]
+    return lines
+
+
+########################################################################################################################
+# Private functions
+class _SafeFormatDict(dict[str, str]):
     """Makes placeholders in a string optional.
 
     e.g. "Hello {name}" will be rendered as "Hello {name}" if name is not in the dict.
@@ -35,12 +113,12 @@ class SafeFormatDict(dict[str, str]):
         return "{" + key + "}"  # Return the key as is
 
 
-def format_colors(template: str, **kwargs: Any) -> str:
+def _format_colors(template: str, **kwargs: Any) -> str:
     """Apply colors to a template string of e.g. '{red}foobar{pink}bar."""
     if "name" in kwargs:
         kwargs["NAME"] = kwargs["name"].upper()
 
-    format = SafeFormatDict(clear=configuration.colors.end, **kwargs)
+    format = _SafeFormatDict(clear=configuration.colors.end, **kwargs)
     colors = {color: value for color, value in configuration.colors.__dict__.items() if isinstance(value, str)}
     format.update(colors)
     return template.format(**format)
@@ -94,86 +172,10 @@ def _sort_tasks(  # noqa: C901
     return out
 
 
-log = get_logger(__name__)
+_indent_increase = 2
 
 
-def list_tasks(tasks: list[Task], settings: TaskRenderSettings | None = None) -> list[str]:  # noqa: C901
-    """Return a list of lines to be printed to the console.
-
-    In a nutshell this works like this:
-    - First, filter tasks based on the settings.
-        (this removes e.g. hidden tasks, or tasks in hidden group, or tasks not matching search criteria)
-    - whatever tasks list, print them and their corresponding groups
-    """
-    assert len(tasks) > 0, "No tasks found"
-
-    if not tasks:
-        return ["No tasks to be listed"]
-
-    settings = settings or TaskRenderSettings()
-
-    filter_result = filter_before_listing(tasks=tasks, settings=settings)
-    filtered_tasks = filter_result.tasks
-    if not filtered_tasks:
-        raise UserError("\n".join([f"{colors.red}No tasks found!{colors.end}", *filter_result.progress]))
-
-    # Get the list TOP-LEVEL groups from the remaining tasks (after filtering)
-    top_groups = create_groups(tasks=tasks)
-    top_groups = sort_groups_before_listing(top_groups, order=settings.group_order)
-
-    for line in filter_result.progress:
-        log.debug(line)
-
-    # Prepare the output buffer.
-    # Note that a tasks can result in more than one line.
-    lines: list[str] = []
-
-    for idx, group in enumerate(top_groups):
-        before = len(lines)
-        render_group(
-            group=group,
-            filtered_tasks=filtered_tasks,
-            lines=lines,
-            filter_result=filter_result,
-            settings=settings,
-            indent=0,
-        )
-
-        if len(lines) > before and idx < len(top_groups) - 1:
-            # blan line between top level group, but only between top-level groups
-            lines.append("")
-
-    lines = [line.rstrip() for line in lines]
-
-    FIRST_LINE_STARTS_WITH_NEW_LINE = lines and lines[0] and lines[0][0] == "\n"
-    if FIRST_LINE_STARTS_WITH_NEW_LINE:
-        # This can happen if user prefixes the custom group format with a "\n" to separate groups with whitesapce
-        lines[0] = lines[0][1:]
-
-    num_hidden_groups = len(filter_result.hidden_groups)
-    num_hidden_tasks = filter_result.num_total_hidden_in_hidden_groups
-    final_line = []
-    if num_hidden_groups or num_hidden_tasks:
-        if num_hidden_groups:
-            final_line.append(f"Also {num_hidden_groups} hidden groups")
-        if num_hidden_tasks:
-            final_line.append(f"with {num_hidden_tasks} tasks in them")
-        final_line.append(HELP_TEXT_USE_H_TO_SHOW_HIDDEN)
-    if final_line:
-        line = f"{configuration.colors.dark_gray}{', '.join(final_line)}{configuration.colors.end}"
-        lines.append(line)
-
-    # remove any last empety line
-    if lines:
-        if lines[-1] == "":
-            lines = lines[:-1]
-    return lines
-
-
-indent_increase = 2
-
-
-def render_group(
+def _render_group(
     group: Group,
     lines: list[str],
     filtered_tasks: list[Task],
@@ -200,14 +202,14 @@ def render_group(
 
         # group mightnot have any tasks, but it might have children group
         for child in group.children:
-            render_group(child, lines, filtered_tasks, filter_result, settings, indent + indent_increase)
+            _render_group(child, lines, filtered_tasks, filter_result, settings, indent + _indent_increase)
         return
 
     # print the group header
     num_tasks = group.render_num_shown_hidden_tasks()
-    format = config.render_format_of_group_name if not group.hidden else config.render_format_of_group_name_hidden
+    format = adv_config.render_format_of_group_name if not group.hidden else adv_config.render_format_of_group_name_hidden
 
-    group_name_rendered = format_colors(
+    group_name_rendered = _format_colors(
         format,
         name=group.name,
         icon="",
@@ -222,7 +224,7 @@ def render_group(
 
     tasks_directly_in_group_to_show = _sort_tasks(
         tasks_directly_in_group_to_show,
-        sort=config.sort,
+        sort=adv_config.sort,
         sort_important_first=group.sort_important_first,
         sort_hidden_last=group.sort_hidden_last,
     )
@@ -231,7 +233,7 @@ def render_group(
     # TODO: have task have internal sort key, combination of digit + name
 
     for task in tasks_directly_in_group_to_show:
-        task_lines = smart_task_lines(task, settings=settings)
+        task_lines = _smart_task_lines(task, settings=settings)
 
         line_indent = indent_str
         for tl in task_lines:
@@ -240,7 +242,7 @@ def render_group(
         lines += [indent_str + f"{colors.dark_gray}{num_hidden_in_this_group} hidden{colors.end}"]
 
     for child in group.children:
-        render_group(child, lines, filtered_tasks, filter_result, settings, indent + indent_increase)
+        _render_group(child, lines, filtered_tasks, filter_result, settings, indent + _indent_increase)
 
 
 def _render_summary_line(filter_result: FilterResult) -> str:
@@ -267,16 +269,16 @@ def _render_tags(tags: list[str]) -> str:
     return f"{configuration.colors.blue}{','.join(tags)}{endc}"
 
 
-def smart_task_lines(task: Task, settings: TaskRenderSettings) -> list[str]:  # noqa: C901
+def _smart_task_lines(task: Task, settings: TaskRenderSettings) -> list[str]:  # noqa: C901
     """Render a single task into a list of lines, scale formatting to the amount of content."""
     lines: list[str] = []
 
-    param_line_prefix = "  "
+    param_line_prefix = configuration.adv_config.render_extra_line_indent
     name = task.name
     if task.from_parent:
-        name = format_colors(task.name_format, name=name)
+        name = _format_colors(task.name_format, name=name)
     else:
-        name = format_colors(task.name_format, name=name)
+        name = _format_colors(task.name_format, name=name)
 
     COLORS_ACTIVE = configuration.colors.blue  # just any color is not a empty string
     #blue_arrow = f"{colors.blue}⬆{colors.end} " if task.from_parent and COLORS_ACTIVE else ""
@@ -322,24 +324,23 @@ def smart_task_lines(task: Task, settings: TaskRenderSettings) -> list[str]:  # 
     if not task.is_valid():
         summary = "(DISABLED) " + summary
 
-    max_left = taskcli.config.render_max_left_column_width
+    max_left = taskcli.adv_config.render_max_left_column_width
     if not summary:
         max_left_if_no_summary = 130
         max_left = max_left_if_no_summary
 
-    format = config.render_task_name
+    format = adv_config.render_format_regular_task_name
     if task.hidden:
-        format = config.render_format_hidden_tasks
+        format = adv_config.render_format_hidden_tasks
     if task.important:
-        format = config.render_format_important_tasks
+        format = adv_config.render_format_important_tasks
     if task.is_go_task:
-        format = config.render_format_included_taskfile_dev_task
-    if task.from_parent:
-        format = config.render_format_from_parent_tasks
+        format = adv_config.render_format_included_taskfile_dev_task
 
-    line = format_colors(format, name=name)
 
-    one_line_params = build_pretty_param_string(
+    line = _format_colors(format, name=name)
+
+    one_line_params = _build_pretty_param_string(
         task, include_optional=settings.show_optional_args, include_defaults=settings.show_default_values
     )
 
@@ -362,7 +363,7 @@ def smart_task_lines(task: Task, settings: TaskRenderSettings) -> list[str]:  # 
         line = potential_line
         one_line_params = ""  # clear, to avoid adding it again later
 
-    min_left = taskcli.config.render_min_left_column_width
+    min_left = taskcli.adv_config.render_min_left_column_width
     line_len = len(utils.strip_escape_codes(line))
     if line_len < min_left:  # add padding before the summary
         line += " " * (min_left - line_len)
@@ -376,13 +377,13 @@ def smart_task_lines(task: Task, settings: TaskRenderSettings) -> list[str]:  # 
 
     if one_line_params:
         num_params = len(
-            build_pretty_param_list(
+            _build_pretty_param_list(
                 task, include_optional=settings.show_optional_args, include_defaults=settings.show_default_values
             )
         )
 
-        if len(utils.strip_escape_codes(one_line_params)) > 80 or num_params > config.render_max_params_per_line:
-            param_list = build_pretty_param_list(
+        if len(utils.strip_escape_codes(one_line_params)) > 80 or num_params > adv_config.render_max_params_per_line:
+            param_list = _build_pretty_param_list(
                 task, include_optional=settings.show_optional_args, include_defaults=settings.show_default_values
             )
             for param in param_list:
@@ -395,7 +396,7 @@ def smart_task_lines(task: Task, settings: TaskRenderSettings) -> list[str]:  # 
     return lines
 
 
-def create_groups(tasks: list[Task]) -> list[Group]:
+def _create_groups(tasks: list[Task]) -> list[Group]:
     """Return a dict of group_name -> list of tasks, ordered per group_order, group not listed there will be last."""
     top_level_groups = []
     for task in tasks:
@@ -406,7 +407,7 @@ def create_groups(tasks: list[Task]) -> list[Group]:
     return top_level_groups
 
 
-def sort_groups_before_listing(groups: list[Group], order: list[str]) -> list[Group]:
+def _sort_groups_before_listing(groups: list[Group], order: list[str]) -> list[Group]:
     """Return a list of groups, sorted according to the order list."""
     out = []
 
@@ -438,14 +439,14 @@ def sort_groups_before_listing(groups: list[Group], order: list[str]) -> list[Gr
     # > return [group for group in groups if not group.parent]
 
 
-def build_pretty_param_string(task: Task, include_optional: bool = True, include_defaults: bool = True) -> str:
+def _build_pretty_param_string(task: Task, include_optional: bool = True, include_defaults: bool = True) -> str:
     """Return a string with all params, formatted for the console."""
     endc = configuration.get_end_color()
-    pretty_params = build_pretty_param_list(task, include_optional=include_optional, include_defaults=include_defaults)
-    return f"{config.render_color_summary}, {endc}".join(pretty_params)
+    pretty_params = _build_pretty_param_list(task, include_optional=include_optional, include_defaults=include_defaults)
+    return f"{adv_config.render_color_summary}, {endc}".join(pretty_params)
 
 
-def build_pretty_param_list(  # noqa: C901
+def _build_pretty_param_list(  # noqa: C901
     task: Task, include_optional: bool = True, include_defaults: bool = True, truncate_long: bool = True
 ) -> list[str]:
     """Return a list of params, each element a string formatted for the console."""
@@ -458,7 +459,7 @@ def build_pretty_param_list(  # noqa: C901
             # skip args which have a default value specified
             continue
 
-        if param.has_default() and param.name in config.render_hide_optional_args:
+        if param.has_default() and param.name in adv_config.render_hide_optional_args:
             continue
         rendered = param.name
 
@@ -469,11 +470,11 @@ def build_pretty_param_list(  # noqa: C901
 
         if param.has_default():
             if param.important:
-                rendered = f"{config.render_color_optional_and_important_arg}{rendered}{end_color}"
+                rendered = f"{adv_config.render_color_optional_and_important_arg}{rendered}{end_color}"
             else:
-                rendered = f"{config.render_color_optional_arg}{rendered}{end_color}"
+                rendered = f"{adv_config.render_color_optional_arg}{rendered}{end_color}"
         else:
-            rendered = f"{config.render_color_mandatory_arg}{rendered}{end_color}"
+            rendered = f"{adv_config.render_color_mandatory_arg}{rendered}{end_color}"
 
         if param.kind in [inspect.Parameter.POSITIONAL_ONLY, inspect.Parameter.POSITIONAL_OR_KEYWORD]:
             rendered = rendered
@@ -492,12 +493,12 @@ def build_pretty_param_list(  # noqa: C901
                 # Shorten default value
                 default_value: Any = param.default
                 if truncate_long:
-                    if len(str(default_value)) > config.render_max_default_arg_width:
-                        default_value = str(default_value)[: config.render_max_default_arg_width] + "..."
+                    if len(str(default_value)) > adv_config.render_max_default_arg_width:
+                        default_value = str(default_value)[: adv_config.render_max_default_arg_width] + "..."
 
                 rendered += (
-                    f"{config.render_color_optional_arg}={end_color}"
-                    f"{config.render_color_default_arg}{default_value}{end_color}"
+                    f"{adv_config.render_color_optional_arg}={end_color}"
+                    f"{adv_config.render_color_default_arg}{default_value}{end_color}"
                 )
             else:
                 rendered += ""

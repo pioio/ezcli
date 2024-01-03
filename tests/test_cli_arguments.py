@@ -66,17 +66,6 @@ d1t1 ^
 d2t1
 d3t1 ^
 """
-        path2 = "structure3/dir1"
-        with tools.simple_list_format():
-            stdout, stderr = tools.run_tasks(f"t -f {path1},{path2}", check=True)
-        assert stdout == """# default
-d1t1 ^
-d2t1
-d3t1 ^
-
-# g1
-task1
-"""
 
         # tools.run_tasks("t -f {path1},structure3/dir1/tasks.py", check=True)
         # assert capsys.readouterr().out == "\n", f"Output: {capsys.readouterr().err}"

@@ -41,7 +41,10 @@ def extract_extra_args(argv: list[str], task_cli: TaskCLI) -> list[str]:
 
 
 def build_parser(tasks: list[Task]) -> argparse.ArgumentParser:  # noqa: C901
-    """Build the parser."""
+    """Build the parser.
+
+    TODO: optimize
+    """
     log.trace("build_parser(): called for following tasks:")
     for task in tasks:
         log.trace(f"  {task}")

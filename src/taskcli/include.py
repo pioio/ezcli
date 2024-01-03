@@ -1,5 +1,6 @@
 """Logic for including Tasks from other modules."""
 
+from dataclasses import dataclass
 import importlib.util
 import inspect
 import logging
@@ -25,6 +26,20 @@ log = get_logger(__name__)
 # Global list of all included modules, used to prevent circular includes
 _included_module_paths = []
 
+from .modulesettings import get_module_settings
+
+
+
+def include_parent(filter:Callable[["Task"], Any]|None=None) -> None:
+    """Find a parent tasks.py and include it.
+
+    Runs only one time, once the main taskfile (and its includes) has been imported and included.
+    """
+    module = utils.get_callers_module()
+    settings = get_module_settings(module)
+    settings.include_parent = True
+    settings.parent_task_filter = filter
+
 
 def include(
     object: Module | AnyFunction | "Task" | str,
@@ -33,6 +48,7 @@ def include(
     to_module: Module | None = None,
     name_namespace: str = "",
     alias_namespace: str = "",
+    name_namespace_if_conflict: str = "",
     **kwargs: Any,
 ) -> list["Task"]:
     """Include Tasks from the specified object into the module which is calling this function. Returns included Tasks.
@@ -88,6 +104,8 @@ def include(
         msg = "include(): 'filter' parameter is only supported when including entire modules"
         raise Exception(msg)
 
+    #log.info("FILTER:" + str(kwargs.get("filter", None)))
+
     tasks: list[Task] = []
     if isinstance(object, Module):
         tasks = include_module(
@@ -132,7 +150,7 @@ def include(
             f"include(str): now including tasks from imported module to module {to_module.__name__} {id(to_module)=}."
         )
         tasks = include_module(
-            from_module, to_module=to_module, name_namespace=name_namespace, alias_namespace=alias_namespace, **kwargs
+            from_module, to_module=to_module, name_namespace=name_namespace,name_namespace_if_conflict=name_namespace_if_conflict, alias_namespace=alias_namespace, **kwargs
         )
 
     elif isinstance(object, Task):
@@ -168,6 +186,7 @@ def include_module(
     skip_include_info: bool = False,
     name_namespace: str = "",
     alias_namespace: str = "",
+    name_namespace_if_conflict: str = "",
     filter: Callable[[Task], bool] | None = None,
 ) -> list[Task]:
     """Include all tasks from the specified python module.
@@ -199,6 +218,7 @@ def include_module(
     out: list[Task] = []
     for task in tasks:
         # if not skip_include_info:  # otherwise we will filter out the ones included from root module
+        #if filter:
         if filter and not filter(task):
             continue
 
@@ -213,11 +233,29 @@ def include_module(
                 alias_namespace=alias_namespace,
             )
         except TaskExistsError as _:
-            log.debug(
-                f"XXX include_module: Task {task.name} already exists "
-                f" in module {to_module.__name__} {id(to_module)=}, skipping"
-            )
-            continue
+            if not name_namespace_if_conflict:
+                log.debug(
+                    f"include_module: Task {task.name} already exists "
+                    f" in module {to_module.__name__} {id(to_module)=}, no {name_namespace_if_conflict=} set, skipping"
+                )
+                utils.print_warning(f"Task {task.name} already exists, not including it")
+                continue
+            else:
+                try:
+                    added_task = _include_task(
+                        task=task,
+                        from_module=from_module,
+                        to_module=to_module,
+                        skip_include_info=skip_include_info,
+                        name_namespace=name_namespace_if_conflict + name_namespace,
+                        alias_namespace=alias_namespace,
+                    )
+                except TaskExistsError as _:
+                    log.debug(
+                        f"include_module: Task {task.name} already exists, skipping "
+                    )
+                    utils.print_warning(f"Task {task.name} already exists, not including it")
+                    continue
 
         out.append(added_task)
     return out
@@ -358,7 +396,6 @@ def _add_to_sys_path(path):
 
 class TaskImportError(Exception):
     """Raised when a task cannot be imported."""
-    pass
 
 
 def task_already_present(task: Task, module: Module) -> bool:
@@ -374,6 +411,7 @@ def task_already_present(task: Task, module: Module) -> bool:
 
 # Define a function to import a module from a given path
 def import_module_from_path(module_name, path) -> Module:
+    """Import a module from a given path."""
     prefix = "import_module_from_path(): "
     abspath = os.path.abspath(path)
     assert os.path.isabs(path)
@@ -407,7 +445,9 @@ def import_module_from_path(module_name, path) -> Module:
         spec = importlib.util.spec_from_file_location(abspath, to_import)
         module = importlib.util.module_from_spec(spec)
         sys.modules[abspath] = module
-        spec.loader.exec_module(module)
+        from .timer import Timer
+        with Timer(f"Loading module {abspath}"):
+            spec.loader.exec_module(module)
     log.debug(f"{prefix}: import of {path} complete")
     return module
 

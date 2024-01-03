@@ -6,7 +6,10 @@ import logging
 logging.basicConfig(level=logging.INFO)
 DOCS_PATH = "../docs/"
 
-tt.config.parent = True
+
+#tt.include_parent()
+
+#tt.get_config()
 
 @task(aliases=["all"])
 def generate_all_docs():
@@ -32,6 +35,10 @@ def page_settings():
 
     page = generator.generate_example()
     path = "../docs/examples.md"
+    generator.write_file(path, page)
+
+    page = generator.generate_advanced_config()
+    path = "../docs/advanced_config.md"
     generator.write_file(path, page)
 
 

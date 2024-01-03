@@ -35,6 +35,10 @@ from .task import task_decorator as task
 from .taskcliconfig import runtime_config as config
 from .types import Any, AnyFunction, Module
 from .utils import get_task, get_tasks, get_tasks_dict
+from .include import include_parent
+from .configuration import adv_config as adv_config
+get_task = get_task
+
 
 __all__ = ["config", "Task", "get_runtime"]
 

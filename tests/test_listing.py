@@ -55,7 +55,14 @@ def test_alphanumeric_order():
     def a_imporant1():
         pass
 
+
+
     tasks = include_tasks()
+
+    # force sorting important tasks first
+    tasks[0].group.sort_important_first = True
+    tasks[0].group.sort_hidden_last = True
+
     show_hidden_tasks = 3
     settings = TaskRenderSettings()
     settings.show_hidden_tasks = True
@@ -101,8 +108,8 @@ def test_list_everything_works(capsys):
     assert (
         stdout
         == """# default
-not-hidden-task
 hidden-task
+not-hidden-task
 
 # hidden-group HIDDEN
 task-in-hidden-group

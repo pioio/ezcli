@@ -48,7 +48,7 @@ def test_empty_taskfile_with_parent_scenario():
 
                 # Now try enabling looking for parent via the empty taskfile.
                 with open("tasks.py", "w") as f:
-                    f.write("from taskcli import tt\ntt.config.parent = True\n")
+                    f.write("from taskcli import tt\ntt.include_parent()\n")
 
                 with tools.simple_list_format():
                     stdout, stderr = tools.run_tasks("t", check=False)

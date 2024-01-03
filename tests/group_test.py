@@ -2,7 +2,7 @@ from operator import le
 
 import taskcli
 from taskcli import Group, task, tt
-from taskcli.listing import list_tasks, sort_groups_before_listing
+from taskcli.listing import list_tasks, _sort_groups_before_listing
 
 from . import tools
 from .tools import reset_context_before_each_test
@@ -153,6 +153,6 @@ def test_sort_groups():
     g3 = Group("group3")
     groups = [g1, g2, g3]
 
-    assert sort_groups_before_listing(groups, order=[]) == [g1, g2, g3]
-    assert sort_groups_before_listing(groups, ["group3"]) == [g3, g1, g2]
-    assert sort_groups_before_listing(groups, [".*2"]) == [g2, g1, g3]
+    assert _sort_groups_before_listing(groups, order=[]) == [g1, g2, g3]
+    assert _sort_groups_before_listing(groups, ["group3"]) == [g3, g1, g2]
+    assert _sort_groups_before_listing(groups, [".*2"]) == [g2, g1, g3]

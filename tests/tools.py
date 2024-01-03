@@ -130,7 +130,7 @@ def set_env(**kwargs):
 @contextlib.contextmanager
 def _changed_config(fun, **kwargs):
     """Context manager to set environment variables"""
-    old_config = taskcli.configuration.config
+    old_config = taskcli.configuration.adv_config
     old_settings = {k: v for k, v in old_config.__dict__.items() if k.startswith("render_")}
     taskcli.configuration.apply_simple_formatting()
 

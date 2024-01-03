@@ -4,20 +4,15 @@
 # iterate over all functions
 import os
 import taskcli
-#import testing
-#from docsgenerator import tasks as docgentasks
 
-# with tt.Group("Weather", desc="child import test"):
-#from examples.screenshots import tasks as weather_tasks
+
 from taskcli import run, task, tt
-
 important = tt.Group("Important", desc="Development tasks")
 
 tt.config.default_options = ["--no-go-task"]
 tt.config.default_options_tt = ["--no-go-task"]
 tt.config.print_task_start_message = True
 tt.config.run_show_location = True
-
 
 
 def clean_env_for_unit_tests():
@@ -42,37 +37,33 @@ with tt.Group("dev", desc="Development tasks"):
         report_path = os.path.join(cwd, "htmlcov", "index.html")
         print(f"file://{report_path}")
 
-    @task(env=["FOOBAR"], important=True, aliases="tt")
+    @task(aliases="tt", important=True)
     def test(extraargs: str = ""):
-        """Run unit tests."""
+        """Run all unit tests."""
         clean_env_for_unit_tests()
         run(f"pytest {extraargs} tests/ -vvv -n 4 {tt.get_extra_args()} ")
 
-    @task(aliases="t", important=True)
+    @task(aliases="lf", hidden=True)
+    def test_last_failed(extraargs: str = ""):
+        """Run pytest with --lf to rerun latest failed tests."""
+        clean_env_for_unit_tests()
+        run(f"pytest {extraargs} tests/ -vvv -n 4 {tt.get_extra_args()} --lf")
+
+    @task(aliases="t")
     def test_fast(extraargs: str = ""):
-        """Run fast unit tests."""
+        """Run fast unit tests (skip slow)."""
         clean_env_for_unit_tests()
         run(f"pytest {extraargs} tests/ -vvv -m 'not include' {tt.get_extra_args()} ")
 
-    @task(important=True)
+    @task()
     def nox():
         """Run extensive tests using nox."""
         run("nox")
 
     @task(hidden=True)
-    def nox_special():
-        """(test) Run specia tests using nox."""
+    def nox_hidden():
+        """Run extensive tests using nox."""
         run("nox")
-
-    @task(env=["foooo_username", "foooo_password"])
-    def nox_speciadddl2(arg: str):
-        del arg
-        """(test) Run even more special tests using nox."""
-        run("nox")
-
-    @task
-    def runcompletion():
-        run("_ARGCOMPLETE=1 ./tasks.py")
 
 
 # TODO: instead of important, use a not-important, and hide them explicitly instead

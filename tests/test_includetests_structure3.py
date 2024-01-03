@@ -73,7 +73,7 @@ task1"""
 @pytest.mark.include()
 @pytest.mark.parametrize("dir", [DIR3, DIR4])
 def test_including_parent_via_ttconfig(dir, capsys):
-    """dir5 tasks.py sets tt.config.parent = True, so it should load dir3/tasks.py (as default)"""
+    """dir5 tasks.py sets tt.include_parent(), so it should load dir3/tasks.py (as default)"""
     with change_dir(f"tests/includetests/structure3/{dir}"):
         print("dir=", os.getcwd())
         assert run_tasks("t -vv -p") == """# g3
@@ -96,8 +96,8 @@ def test_including_parent_with_the_same_group_name(dir, capsys):
     with change_dir(f"tests/includetests/structure3/{dir}"):
         print("dir=", os.getcwd())
 
-        # no need for -p here, as dir5/tasks.py sets tt.config.parent = True
-        assert "tt.config.parent = True" in open("tasks.py").read()
+        # no need for -p here, as dir5/tasks.py sets tt.include_parent()
+        assert "tt.include_parent()" in open("tasks.py").read()
         assert run_tasks("t -vv") == """# g5
 task5
 
@@ -143,7 +143,7 @@ def run_tasks(command):
 @pytest.mark.include()
 @pytest.mark.parametrize("dir", [DIR5])
 def test_including_parent_uses_modules_location_and_not_users_cwd(dir):
-    """dir5/tasks.py sets tt.config.parent = True, so it should load dir3/tasks.py (as default)"""
+    """dir5/tasks.py sets tt.include_parent(), so it should load dir3/tasks.py (as default)"""
 
     # we see 'g3and5' twice, as one is from dir3 one from dir5 (right now same groups are not merged, this might change)
     expected = """# g5

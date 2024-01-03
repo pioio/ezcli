@@ -7,7 +7,7 @@ import taskcli.core
 from . import configuration, dispatching, envvars, examples, include, listing, taskcliconfig, utils
 from .annotations import Arg
 from .arg import arg
-from .configuration import config
+from .configuration import adv_config
 from .core import get_extra_args, get_extra_args_list, get_runtime
 from .dispatching import dispatch
 from .group import Group
@@ -28,7 +28,7 @@ __all__: Sequence[str] = [
     "include",
     "utils",
     "configuration",
-    "config",
+    "adv_config",
     "get_extra_args",
     "get_extra_args_list",
     "Arg",

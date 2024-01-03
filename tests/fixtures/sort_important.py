@@ -5,7 +5,7 @@ from taskcli import dispatch, task
 
 # order is mixed, as we want to test sortking
 
-taskcli.config.sort = taskcli.listing.ORDER_TYPE_ALPHA
+taskcli.adv_config.sort = taskcli.listing.ORDER_TYPE_ALPHA
 
 
 @task

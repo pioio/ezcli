@@ -16,24 +16,12 @@ TASKCLI_CFG_GROUP_ORDER
 Only show tasks whose name or description is matching this python regex seach pattern.  
 TASKCLI_CFG_SEARCH  
 
-### extra_tasks_name_namespace
-What task namespace to prefix to tasks when merging tasks from a upper directory level tasks.py. See also: TASKCLI_EXTRA_TASKS_PY_FILENAMES  
-TASKCLI_CFG_EXTRA_TASKS_NAME_NAMESPACE  
-
 ### parent
 Whether to also include tasks from the closest parent's directory's tasks.py  
 TASKCLI_CFG_PARENT  
 
-### parent_task_filter
-Custom python function to filter which tasks to include from a parent taskfile. Set in your main taskfile via 'tt.config' field.  
-(no env var)  
-
-### extra_tasks_alias_namespace
-What string to prefix to task aliases when merging tasks with a different tasks.py. See also: TASKCLI_EXTRA_TASKS_PY_FILENAMES  
-TASKCLI_CFG_EXTRA_TASKS_ALIAS_NAMESPACE  
-
 ### color
-What string to prefix to task aliases when merging tasks with a different tasks.py. See also: TASKCLI_EXTRA_TASKS_PY_FILENAMES  
+Whether or not the output should be colored  
 (no env var)  
 
 ### show_hidden

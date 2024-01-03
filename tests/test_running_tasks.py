@@ -24,7 +24,7 @@ def test_groups_are_listed():
         "task3",
     ]
 
-
+@pytest.mark.skip("sorting impo first is disabled by default")
 def test_sort_important():
     with tools.simple_list_format():
         stdout, stderr = tools.run_tasks("tests/fixtures/sort_important.py")

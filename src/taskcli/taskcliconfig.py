@@ -22,6 +22,7 @@ Config load order
 import argparse
 import logging
 import os
+from re import T
 import typing
 from typing import Any, Callable
 from webbrowser import get
@@ -163,24 +164,6 @@ class TaskCLIConfig:
         self.search: str = self._add_str(self.field_search)
 
         ## -------------------------------------------------------------------------------------------------------------
-        self.include_extra_tasks: bool = False
-
-        ## -------------------------------------------------------------------------------------------------------------
-        self.extra_tasks_filter: Callable[["Task"], bool] | None = None
-
-        ## -------------------------------------------------------------------------------------------------------------
-        self.field_extra_tasks_name_namespace = ConfigField(
-            "X",
-            "extra_tasks_name_namespace",
-            cli=False,
-            desc=(
-                "What task namespace to prefix to tasks when merging tasks from a upper directory level tasks.py. "
-                "See also: " + envvars.TASKCLI_EXTRA_TASKS_PY_FILENAMES.name
-            ),
-        )
-        self.extra_tasks_name_namespace = self._add_str(self.field_extra_tasks_name_namespace)
-
-        ## -------------------------------------------------------------------------------------------------------------
         self.field_parent = ConfigField(
             False,
             "parent",
@@ -191,46 +174,21 @@ class TaskCLIConfig:
         self.parent: bool = self._add_bool(self.field_parent)
 
         ## -------------------------------------------------------------------------------------------------------------
-        self.field_parent_task_filter = ConfigField(
-            False,
-            "parent_task_filter",
-            "-p",
-            cli=False,
-            env=False,
-            desc="Custom python function to filter which tasks to include from a parent taskfile. Set in your main taskfile via 'tt.config' field.",
-            needed_early=True,
-        )
-        self.parent_task_filter: Callable[["Task"], bool] | None = None
-
-        ## -------------------------------------------------------------------------------------------------------------
-        self.field_extra_tasks_alias_namespace = ConfigField(
-            "",
-            "extra_tasks_alias_namespace",
-            cli=False,
-            desc=(
-                "What string to prefix to task aliases when merging tasks with a different tasks.py. "
-                "See also: " + envvars.TASKCLI_EXTRA_TASKS_PY_FILENAMES.name
-            ),
-        )
-        self.extra_tasks_alias_namespace: str = self._add_str(self.field_extra_tasks_alias_namespace)
-
-        ## -------------------------------------------------------------------------------------------------------------
         self.field_color = ConfigField(
             "",
             "color",
             choices=["auto", "always", "never"],
             env=False,
             desc=(
-                "What string to prefix to task aliases when merging tasks with a different tasks.py. "
-                "See also: " + envvars.TASKCLI_EXTRA_TASKS_PY_FILENAMES.name
+                "Whether or not the output should be colored"
             ),
         )
         self.color: str = self._add_str(self.field_color)
 
         ## -------------------------------------------------------------------------------------------------------------
-        default_show_hidden = False
 
         ## -------------------------------------------------------------------------------------------------------------
+        default_show_hidden = False
         self.field_show_hidden: ConfigField = ConfigField(
             default_show_hidden,
             "show_hidden",
@@ -281,6 +239,7 @@ class TaskCLIConfig:
             False, "show_optional_args", desc="Listing will show optional arguments of each task."
         )
         self.show_optional_args: bool = self._add_bool(self.field_show_optional_args)
+
 
         ## -------------------------------------------------------------------------------------------------------------
         self.field_show_default_values = ConfigField(
@@ -638,3 +597,12 @@ class TaskCLIConfig:
 
 
 runtime_config = TaskCLIConfig()  # modified with CLI arguments
+
+
+_configs:dict[Any,TaskCLIConfig] = {}
+
+def get_config() -> TaskCLIConfig:
+    parent = utils.get_callers_module()
+    if parent not in _configs:
+        _configs[parent] = TaskCLIConfig()
+    return _configs[parent]

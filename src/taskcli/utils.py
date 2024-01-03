@@ -224,7 +224,7 @@ def reset_tasks() -> None:
     from . import core
 
     core.get_runtime().tasks = []
-    #taskcli.group.DEFAULT_GROUP.tasks = []
+
     taskcli.group.created.clear()
     taskcli.group._stacks.clear()
 
@@ -234,6 +234,9 @@ def reset_tasks() -> None:
             module.decorated_functions = []  # type: ignore[attr-defined]
         if hasattr(module, "taskcli_top_level_groups"):
             module.taskcli_top_level_groups = []  # type: ignore[attr-defined]
+
+    from . import modulesettings
+    modulesettings.reset()
 
     # Clear global configuration (some tests might modify it)
     from taskcli import tt

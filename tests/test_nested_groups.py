@@ -1,5 +1,5 @@
 from taskcli import constants, task, tt
-from taskcli.listing import create_groups, list_tasks
+from taskcli.listing import _create_groups, list_tasks
 
 from . import tools
 from .tools import reset_context_before_each_test
@@ -68,7 +68,7 @@ def test_parent_with_children_but_no_tasks_of_its_own():
     tasks = tt.get_tasks()
     assert len(tasks) == 3
 
-    top_groups = create_groups(tasks)
+    top_groups = _create_groups(tasks)
     assert top_groups == [g1, g2]
 
     with tools.simple_list_format():

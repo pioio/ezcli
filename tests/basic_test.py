@@ -83,5 +83,5 @@ def test_create_groups():
     t2 = Task(x, group=group)
     t3 = Task(x, group=group2)
 
-    groups = taskcli.listing.create_groups([t1, t2, t3])
+    groups = taskcli.listing._create_groups([t1, t2, t3])
     assert (len(groups)) == 2

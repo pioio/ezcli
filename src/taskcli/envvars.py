@@ -66,7 +66,7 @@ TASKCLI_GOTASK_TASK_GROUP_NAME = EnvVar(
     default_value="Taskfile.dev", desc=("Name of the group to which tasks from 'task' binary should be added.")
 )
 
-# Various advanced settings. You typically don't need to change these.
+
 TASKCLI_ADV_OVERRIDE_FORMATTING = EnvVar(
     default_value="false",
     desc=(

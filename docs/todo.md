@@ -1,22 +1,14 @@
 # TODOs for `taskcli`
 
 ## Short-term TODOs:
-- [ ] Make tt.config be on per module basis
 - [ ] don't add '.' to namespace
 - [ ] unit tests for listing items in group
 - [ ] unit test for decorating same name function twice in the same module
-- [ ] print (tt.config) not working -> unit test, troubleshootingdoc
-- [ ] TODO: early parse should parse env vars (make it a member function of Field? .get_current_value)
-- [ ] FIXME: doing `t -f ../../tasks.py TAB` results in wrong tab completion
 
 - [x] add task.__call__  unit tests
 
-- [ ] Remove old 'extra tasks' fields
 - [ ] parent_task_filter unit tests
-- [ ] Make empty taskfile work for including parents via filter
-- [x] tt.include("../../tasks.py", filter=lambda task: task.important) -- relative paths in include should be anchored to the file! Disallow them for now?
 - [ ] move building package from taskfile to tasks.py
-- [ ] using -f to specify file in other dir still make taskfile be loaded locally, it should skip opening taskfile
 - [ ] BUG: dynamic task creation with  'x=x, person_name=person_name' does not allow to set person name from the CLI
 - [ ] __init__.py is needed in top project to be bale to import docsgenerator/tasks.py which imports generator ... not perfect
   - [ ] I might need a wrapper for remote-import whcih switches dir and imports the module
@@ -40,9 +32,6 @@
 - [ ] combine listing with specifying a task
 - [ ] unit test for  @task(important=True, format="{name} {clear}{red}(PROD!)")
 
-- [ ] run task binary regardless of taskfile being found or not
-
-- [x] groups and tasks with tags  task -t op, also --show-tags
 
 - [ ]
   - [ ] detect duplicates when including
@@ -50,13 +39,17 @@
 - [x] rename namespace to namenamespace
 - [ ] FIXME: optional flags are not gray (disk usage example)
 - [ ] unit test for duplicate task names
-- [x] nesting groups should simply create an indent
+- [ ] unit test set_module_init_function
+- [ ] docs about set_module_init_function
+- [ ] unittest parent_task_filter
+- [ ] unittest that p. added when conflict from parent
 
 
 
 ## Smart formatting
 - [ ] consider auto including important from parent
 - [ ] consider ----[ parent/path/to/tasks.py ]----------------- in the separator to make it clear where it came from.
+- [ ] early parse should parse env vars (make it a member function of Field? .get_current_value)
 - [ ] trim the summary if too wide
 - [ ] if no parent, but main task is above, also print a line
   - [ ] -------[  (..)folder/parent/tasks.py         ]----
@@ -65,7 +58,7 @@
 - [ ] section_filter
 
 ## Long-term TODOs:
-- [ ] auto split columne
+- [ ] tt.on_start(fun) - to be run only from the main module (i.e. not from included ones), to customize whatever's needed
 - [ ] parent tasks.py to push certain tasks to all subdirs below
 - [ ] --oh - only hidden tasks
 - [ ] detect pipe to grep, and prefix lines with group name

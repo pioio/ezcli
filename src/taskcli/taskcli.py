@@ -12,6 +12,7 @@ from dataclasses import dataclass, field
 class InitStats:
     """Summary of what happened during initialization of the runtime."""
     inspected_files: list[str] = field(default_factory=list)
+    parent_taskfile_path: str = ""
 
 
 

@@ -39,7 +39,7 @@ from .utils import param_to_cli_option, print_to_stderr
 
 log = get_logger(__name__)
 
-
+from .timer import Timer
 def dispatch(
     argv: list[str] | None = None,
     *,
@@ -67,12 +67,14 @@ def dispatch(
 
     log.separator(f"Loading the included tasks (from {module.__name__} into the runetime ")
     log.trace(f"Module: {module=}, {id(module)=}")
-    load_tasks_from_module_to_runtime(module)
+    with Timer("Loading tasks to runtime"):
+        load_tasks_from_module_to_runtime(module)
 
     ###########################################################################################
     try:
-        log.separator("Dispatching tasks.")
-        return _dispatch(argv)
+        with Timer("Running dispatch"):
+            log.separator("Dispatching tasks.")
+            return _dispatch(argv)
     except UserError as e:
         utils.print_error(f"{e}")
         if sysexit_on_user_error:
@@ -92,8 +94,10 @@ def _dispatch(argv: list[str] | None = None) -> Any:
 
     tasks: list[Task] = taskcli.core.get_runtime().tasks
     # only check for tasks later
+    with Timer("Building parser"):
+        parser = build_parser(tasks)
 
-    parser = build_parser(tasks)
+
     config.read_env_vars_into_config()
     config.configure_parser(parser)
 
@@ -127,15 +131,18 @@ def _dispatch(argv: list[str] | None = None) -> Any:
     render_settings = rendersettings.new_settings(config=config)
 
     if config.list or config.list_all:
-        _print_lines_smart(tasks, render_settings=render_settings)
+        with Timer("Listing tasks"):
+            _print_lines_smart(tasks, render_settings=render_settings)
         return
 
     #####################################################################################
     # Lastly,
+
     if not config.task:
         # no 'task' argment was specified, so we list all loaded tasks
         #_print_list_tasks(tasks, render_settings=render_settings)
-        _print_lines_smart(tasks, render_settings=render_settings)
+        with Timer("Listing tasks"):
+            _print_lines_smart(tasks, render_settings=render_settings)
         return None
     else:
         # User specified a task to run, or a group to list

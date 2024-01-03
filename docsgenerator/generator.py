@@ -1,7 +1,7 @@
 from math import e
-from taskcli import task, tt, taskcliconfig, examples
+
+from taskcli import configuration, taskcliconfig
 import taskcli
-from datetime import datetime
 import os
 import logging
 log =  logging.getLogger(__name__)
@@ -34,9 +34,44 @@ def generate_settings() -> str:
 
     return out
 
+def generate_advanced_config() -> str:
+    out = "# Advanced Configuration\n"
+    out += autogen_header()
+    out += """Summary of Advanced configuration options.
+You typically Won't ever need to change these, but you can.
+Most can be set either via a env var, or from within the tasks.py file.
+If you use those, make sure to pin the version you use, as the advanced config
+changes frequently.
+"""
+
+    out += "## For fields containing format strings, here are the supported colors\n"
+    colors = []
+    for color in configuration.Colors.__dict__.keys():
+        if color.startswith("_"):
+            continue
+        colors.append(color)
+    out += ", ".join(colors) + f"{BR}\n\n"
+
+    out += "## List of field\n"
 
 
+    for _ , field in vars(configuration.AdvConfig).items():
+        if isinstance(field, configuration._Field):
+            type = str(field.type.__name__)
+            out += f"### {field.name} (`{type}`){BR}\n"
+            if field.desc:
+                clean_desc = field.desc.replace('\n', f'{BR}\n')
+                out += f"{clean_desc} {BR}\n"
+            default_value = getattr(configuration.adv_config, field.name)
+            out += f"`{default_value=}`{BR}\n"
+            if field.env:
+                out += f"Env var: {field.get_env_name(configuration.adv_config)}{BR}\n"
+            else:
+                out += f"(Env not supported){BR}\n"
 
+            out += "\n"
+
+    return out
 PAGE_EXAMPLES_TEXT = """
 Best way to learn is by example. Here are some ways of how to use `taskcli` along with the command output.
 

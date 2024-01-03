@@ -64,29 +64,29 @@ task1                 This task has two positional arguments, one of them is opt
 ```sh
 ### will call second task several time
 # taskcli -f basic_customize_settings.py  task1
--- taskcli [task1] -------------------------------------------------------------
+―― taskcli [task1] ―――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――
 Starting the first task
--- taskcli [task1 > say-hello] -------------------------------------------------
+―― taskcli [task1 > say-hello] ―――――――――――――――――――――――――――――――――――――――――――――――――
 Hello from task2, name='alice'
---
--- taskcli [task1 > say-hello] -------------------------------------------------
+――
+―― taskcli [task1 > say-hello] ―――――――――――――――――――――――――――――――――――――――――――――――――
 Hello from task2, name='bob'
---
--- taskcli [task1 > say-hello] -------------------------------------------------
+――
+―― taskcli [task1 > say-hello] ―――――――――――――――――――――――――――――――――――――――――――――――――
 Hello from task2, name='charlie'
---
--- taskcli [task1 > say-hello] -------------------------------------------------
+――
+―― taskcli [task1 > say-hello] ―――――――――――――――――――――――――――――――――――――――――――――――――
 Hello from task2, name='dylan'
---
---
+――
+――
 ```
 
 ```sh
 ### call it directly
 # taskcli -f basic_customize_settings.py  say-hello yeti
--- taskcli [say-hello] ---------------------------------------------------------
+―― taskcli [say-hello] ―――――――――――――――――――――――――――――――――――――――――――――――――――――――――
 Hello from task2, name='yeti'
---
+――
 ```
 
 ---
@@ -359,12 +359,12 @@ init=False
 tags=[]
 group_order=['default']
 search=
-extra_tasks_name_namespace=X
 parent=False
-extra_tasks_alias_namespace=
 color=
 show_hidden=False
 run_show_location=False
+no_go_task=False
+show_hidden_groups=False
 ```
 
 ---

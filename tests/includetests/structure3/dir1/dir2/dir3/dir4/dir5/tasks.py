@@ -1,6 +1,6 @@
 from taskcli import task, tt
 
-tt.config.parent = True
+tt.include_parent()
 
 with tt.Group("g5"):
     @task

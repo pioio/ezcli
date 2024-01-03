@@ -6,5 +6,4 @@ def task3():
 def filterfunc(task):
     return task.name == "task3shared"
 
-tt.config.parent = True
-tt.config.parent_task_filter = filterfunc
+tt.include_parent(filter=filterfunc)
